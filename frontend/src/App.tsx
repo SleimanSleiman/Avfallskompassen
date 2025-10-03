@@ -5,7 +5,7 @@ function App() {
   const [message, setMessage] = useState('');
 
   const handleClick = async (value: number) => {
-    const res = await fetch(`http://localhost:8080/api/message?value=${value}`);
+    const res = await fetch(`http://localhost:8081/api/message?value=${value}`);
     const text = await res.text();
     setMessage(text);
   };

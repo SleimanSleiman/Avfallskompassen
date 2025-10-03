@@ -42,13 +42,13 @@
 	.\mvnw.cmd spring-boot:run
 	```
 	(On Mac/Linux: `./mvnw spring-boot:run`)
-5. The backend will be running at http://localhost:8080
+5. The backend will be running at http://localhost:8081
 
 ---
 
 ## Connecting Frontend and Backend
 
-- The frontend is configured to call the backend at `http://localhost:8080`.
+- The frontend is configured to call the backend at `http://localhost:8081`.
 - Make sure both servers are running for full functionality.
 
 ---
