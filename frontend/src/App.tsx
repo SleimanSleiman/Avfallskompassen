@@ -1,55 +1,29 @@
-import React, { useState } from 'react';
-import './App.css'
+import { Routes, Route, Navigate } from 'react-router-dom';
+import NavBar from './components/NavBar';
+import Footer from './components/Footer';
+import LoginPage from './pages/LoginPage';
 
-function App() {
-  const [message, setMessage] = useState('');
-
-  const handleClick = async (value: number) => {
-    const res = await fetch(`http://localhost:8081/api/message?value=${value}`);
-    const text = await res.text();
-    setMessage(text);
-  };
-
+function Dashboard() {
   return (
-    <div style={{ padding: '20px', fontFamily: 'Arial, sans-serif' }}>
-      <h1 style={{ color: '#333', textAlign: 'center' }}>Simple Test Page</h1>
-      
-      <div style={{ maxWidth: '600px', margin: '0 auto' }}>
-        <h2>Welcome to Avfallskompassen!</h2>
-        
-        <p>This is a simple test page.</p>
-        
-        <div style={{ 
-          background: '#e8f4f8', 
-          padding: '15px', 
-          borderRadius: '5px',
-          border: '1px solid #b3d9e8',
-          marginBottom: '20px'
-        }}>
-          <strong>Quick Test:</strong> Change the background color of this box by modifying the style above!
-        </div>
-
-        <div style={{ textAlign: 'center', marginBottom: '20px' }}>
-          <button onClick={() => handleClick(1)} style={{ marginRight: '10px' }}>Button 1</button>
-          <button onClick={() => handleClick(2)}>Button 2</button>
-        </div>
-
-        {message && (
-          <div style={{ textAlign: 'center', color: '#00796b', fontWeight: 'bold' }}>{message}</div>
-        )}
-        
-        <footer style={{ 
-          marginTop: '40px', 
-          textAlign: 'center', 
-          color: '#666',
-          borderTop: '1px solid #eee',
-          paddingTop: '20px'
-        }}>
-          <p>Edit src/App.tsx to modify this page</p>
-        </footer>
-      </div>
+    <div className="mx-auto max-w-7xl px-4 py-16">
+      <h1 className="h1">Välkommen!</h1>
+      <p className="mt-3 text-lg text-gray-700">Du är inloggad.</p>
     </div>
-  )
+  );
 }
 
-export default App
+export default function App() {
+  return (
+    <div className="min-h-screen flex flex-col">
+      <NavBar />
+      <div className="flex-1">
+        <Routes>
+          <Route path="/" element={<Navigate to="/login" replace />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+        </Routes>
+      </div>
+      <Footer />
+    </div>
+  );
+}
