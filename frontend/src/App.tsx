@@ -2,7 +2,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import NavBar from './components/NavBar';
 import Footer from './components/Footer';
 import LoginPage from './pages/LoginPage';
-import PlanningTool from './pages/PlanningTool';
+import PlanningTool from './pages/PlanningToolTestChangeForm';
 
 function Dashboard() {
   return (
