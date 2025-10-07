@@ -2,6 +2,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import NavBar from './components/NavBar';
 import Footer from './components/Footer';
 import LoginPage from './pages/LoginPage';
+import PlanningTool from './pages/PlanningTool';
 
 function Dashboard() {
   return (
@@ -21,6 +22,7 @@ export default function App() {
           <Route path="/" element={<Navigate to="/login" replace />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/planningTool" element={<PlanningTool />} />
         </Routes>
       </div>
       <Footer />

@@ -24,7 +24,7 @@ export default function NavBar() {
               <NavLink to="#" className="hover:text-white">Abonnemang</NavLink>
               <NavLink to="#" className="hover:text-white">Mitt konto</NavLink>
               <NavLink to="#" className="hover:text-white">Mina avfallsrum</NavLink>
-              <NavLink to="#" className="hover:text-white">Planeringsverktyg</NavLink>
+              <NavLink to="/planningTool" className="hover:text-white">Planeringsverktyg</NavLink>
               <div className="relative">
                 <input className="h-9 w-64 rounded-full border-0 bg-white/95 pl-4 pr-10 text-sm placeholder:text-gray-500 focus:ring-2 focus:ring-nsr-teal" placeholder="Vad letar du efter?" />
                 <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500">
@@ -44,7 +44,7 @@ export default function NavBar() {
             <NavLink to="#" className="text-nsr-ink">Abonnemang</NavLink>
             <NavLink to="#" className="text-nsr-ink">Mitt konto</NavLink>
             <NavLink to="#" className="text-nsr-ink">Mina avfallsrum</NavLink>
-            <NavLink to="#" className="text-nsr-ink">Planeringsverktyg</NavLink>
+            <NavLink to="/planningTool" className="text-nsr-ink">Planeringsverktyg</NavLink>
           </nav>
         </div>
       )}
