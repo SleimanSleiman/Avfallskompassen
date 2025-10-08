@@ -5,7 +5,11 @@ export type Property = {
   id: number;
   address: string;
   numberOfApartments: number;
-  lockType: string;
+  lockType: {
+      id: number;
+      name: string;
+      cost: number;
+      };
   accessPathLength: number;
   createdAt: string;
 };
@@ -13,7 +17,7 @@ export type Property = {
 export type PropertyRequest = {
   address: string;
   numberOfApartments: number;
-  lockType: string;
+  lockTypeId: number;
   accessPathLength: number;
 };
 

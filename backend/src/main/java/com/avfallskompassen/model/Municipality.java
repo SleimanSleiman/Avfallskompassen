@@ -9,7 +9,7 @@ public class Municipality {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long Id;
 
-    @Column(nullable = false)
+    @Column //Lägg till att den inte ska vara nullable.
     private String name;
 
     public long getId() {

@@ -18,7 +18,7 @@ public class PropertyRequest {
     @Min(value = 1, message = "Number of apartments must be at least 1")
     private Integer numberOfApartments;
     
-    @NotBlank(message = "Lock type is required")
+    @NotNull(message = "Lock type is required")
     private long lockTypeId;
     
     @NotNull(message = "Access path length is required")

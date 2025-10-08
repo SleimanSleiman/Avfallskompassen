@@ -30,14 +30,13 @@ public class Property {
     private Integer numberOfApartments;
     
     @JoinColumn(name = "lock_type_id", nullable = false)
-    @NotBlank(message = "Lock type is required")
+    @NotNull(message = "Lock type is required")
     @ManyToOne
     private LockType lockType;
 
-    @JoinColumn(name = "municipality_id", nullable = false)
-    @NotBlank(message = "Municipality option has to be picked")
+    @JoinColumn(name = "municipality_id") //Dessa ska sättas som nullable = false sen och @NotNull
     @ManyToOne
-    private Municipality Municipality;
+    private Municipality municipality;
 
     @Column(nullable = false)
     @NotNull(message = "Access path length is required")
@@ -70,11 +69,11 @@ public class Property {
     }
 
     public Municipality getMunicipality() {
-        return Municipality;
+        return municipality;
     }
 
     public void setMunicipality(Municipality municipality) {
-        Municipality = municipality;
+        municipality = municipality;
     }
 
     public User getCreatedBy() {
