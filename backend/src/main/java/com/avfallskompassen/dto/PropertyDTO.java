@@ -10,9 +10,9 @@ public class PropertyDTO {
     private Long id;
     private String address;
     private Integer numberOfApartments;
-    private String lockType;
     private Double accessPathLength;
     private LocalDateTime createdAt;
+    private LockTypeDto lockTypeDto;
     
     // Constructors
     public PropertyDTO() {}
@@ -21,7 +21,7 @@ public class PropertyDTO {
         this.id = property.getId();
         this.address = property.getAddress();
         this.numberOfApartments = property.getNumberOfApartments();
-        this.lockType = property.getLockType();
+        this.lockTypeDto = property.getLockType() != null? new LockTypeDto(property.getLockType()) : null;
         this.accessPathLength = property.getAccessPathLength();
         this.createdAt = property.getCreatedAt();
     }
@@ -35,10 +35,14 @@ public class PropertyDTO {
     
     public Integer getNumberOfApartments() { return numberOfApartments; }
     public void setNumberOfApartments(Integer numberOfApartments) { this.numberOfApartments = numberOfApartments; }
-    
-    public String getLockType() { return lockType; }
-    public void setLockType(String lockType) { this.lockType = lockType; }
-    
+
+    public LockTypeDto getLockTypeDto() {
+        return lockTypeDto;
+    }
+    public void setLockTypeDto(LockTypeDto lockTypeDto) {
+        this.lockTypeDto = lockTypeDto;
+    }
+
     public Double getAccessPathLength() { return accessPathLength; }
     public void setAccessPathLength(Double accessPathLength) { this.accessPathLength = accessPathLength; }
     

@@ -1,5 +1,6 @@
 package com.avfallskompassen.dto;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 /**
@@ -14,7 +15,8 @@ public class PropertyResponse {
     private Long propertyId;
     private String address;
     private Integer numberOfApartments;
-    private String lockType;
+    private String lockName;
+    private BigDecimal lockPrice;
     private Double accessPathLength;
     private LocalDateTime createdAt;
     
@@ -27,13 +29,13 @@ public class PropertyResponse {
     }
     
     public PropertyResponse(boolean success, String message, Long propertyId, String address, 
-                          Integer numberOfApartments, String lockType, Double accessPathLength, LocalDateTime createdAt) {
+                          Integer numberOfApartments, String lockName, Double accessPathLength, LocalDateTime createdAt) {
         this.success = success;
         this.message = message;
         this.propertyId = propertyId;
         this.address = address;
         this.numberOfApartments = numberOfApartments;
-        this.lockType = lockType;
+        this.lockName = lockName;
         this.accessPathLength = accessPathLength;
         this.createdAt = createdAt;
     }
@@ -78,14 +80,22 @@ public class PropertyResponse {
         this.numberOfApartments = numberOfApartments;
     }
     
-    public String getLockType() {
-        return lockType;
+    public String getLockName() {
+        return lockName;
     }
     
-    public void setLockType(String lockType) {
-        this.lockType = lockType;
+    public void setLockName(String lockType) {
+        this.lockName = lockType;
     }
-    
+
+    public BigDecimal getLockPrice() {
+        return lockPrice;
+    }
+
+    public void setLockPrice(BigDecimal lockPrice) {
+        this.lockPrice = lockPrice;
+    }
+
     public Double getAccessPathLength() {
         return accessPathLength;
     }

@@ -45,6 +45,7 @@ public class Property {
     private Double accessPathLength;
 
     @JoinColumn(name = "created_by_user_id", nullable = false)
+    @ManyToOne
     private User createdBy;
 
     @Column(name = "created_at", nullable = false, updatable = false)

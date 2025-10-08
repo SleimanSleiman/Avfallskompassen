@@ -19,7 +19,7 @@ public class PropertyRequest {
     private Integer numberOfApartments;
     
     @NotBlank(message = "Lock type is required")
-    private String lockType;
+    private long lockTypeId;
     
     @NotNull(message = "Access path length is required")
     @Min(value = 0, message = "Access path length cannot be negative")
@@ -28,10 +28,10 @@ public class PropertyRequest {
     // Constructors
     public PropertyRequest() {}
     
-    public PropertyRequest(String address, Integer numberOfApartments, String lockType, Double accessPathLength) {
+    public PropertyRequest(String address, Integer numberOfApartments, Long lockTypeId, Double accessPathLength) {
         this.address = address;
         this.numberOfApartments = numberOfApartments;
-        this.lockType = lockType;
+        this.lockTypeId = lockTypeId;
         this.accessPathLength = accessPathLength;
     }
     
@@ -52,12 +52,12 @@ public class PropertyRequest {
         this.numberOfApartments = numberOfApartments;
     }
     
-    public String getLockType() {
-        return lockType;
+    public Long getLockTypeId() {
+        return lockTypeId;
     }
     
-    public void setLockType(String lockType) {
-        this.lockType = lockType;
+    public void setLockTypeId(Long lockTypeId) {
+        this.lockTypeId = lockTypeId;
     }
     
     public Double getAccessPathLength() {
