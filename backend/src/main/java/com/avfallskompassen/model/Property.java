@@ -29,32 +29,37 @@ public class Property {
     @Min(value = 1, message = "Number of apartments must be at least 1")
     private Integer numberOfApartments;
     
-    @Column(nullable = false, length = 50)
+    @JoinColumn(name = "lock_type_id", nullable = false)
     @NotBlank(message = "Lock type is required")
-    private String lockType;
-    
+    @ManyToOne
+    private LockType lockType;
+
+    @JoinColumn(name = "municipality_id", nullable = false)
+    @NotBlank(message = "Municipality option has to be picked")
+    @ManyToOne
+    private Municipality Municipality;
+
     @Column(nullable = false)
     @NotNull(message = "Access path length is required")
     @Min(value = 0, message = "Access path length cannot be negative")
     private Double accessPathLength;
- 
-    @ManyToOne(fetch = FetchType.LAZY)
+
     @JoinColumn(name = "created_by_user_id", nullable = false)
     private User createdBy;
-    
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
-    
+
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
-    
+
     // Constructors
     public Property() {
         this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
     }
 
-    public Property(String address, Integer numberOfApartments, String lockType, Double accessPathLength, User createdBy) {
+    public Property(String address, Integer numberOfApartments, LockType lockType, Double accessPathLength, User createdBy) {
         this();
         this.address = address;
         this.numberOfApartments = numberOfApartments;
@@ -62,67 +67,75 @@ public class Property {
         this.accessPathLength = accessPathLength;
         this.createdBy = createdBy;
     }
-    
+
+    public Municipality getMunicipality() {
+        return Municipality;
+    }
+
+    public void setMunicipality(Municipality municipality) {
+        Municipality = municipality;
+    }
+
     public User getCreatedBy() {
         return createdBy;
     }
-    
+
     public void setCreatedBy(User createdBy) {
         this.createdBy = createdBy;
     }
-    
+
      public Long getId() {
         return id;
     }
-    
+
     public void setId(Long id) {
         this.id = id;
     }
-    
+
     public String getAddress() {
         return address;
     }
-    
+
     public void setAddress(String address) {
         this.address = address;
     }
-    
+
     public Integer getNumberOfApartments() {
         return numberOfApartments;
     }
-    
+
     public void setNumberOfApartments(Integer numberOfApartments) {
         this.numberOfApartments = numberOfApartments;
     }
-    
-    public String getLockType() {
+
+    public LockType getLockType() {
         return lockType;
     }
 
-    public void setLockType(String lockType) {
+    public void setLockType(LockType lockType) {
         this.lockType = lockType;
     }
-    
+
     public Double getAccessPathLength() {
         return accessPathLength;
     }
-    
+
     public void setAccessPathLength(Double accessPathLength) {
         this.accessPathLength = accessPathLength;
     }
-    
+
     public LocalDateTime getCreatedAt() {
         return createdAt;
     }
-    
+
     public LocalDateTime getUpdatedAt() {
         return updatedAt;
     }
-    
+
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
     }
-    
+
     @PreUpdate
     public void preUpdate() {
         this.updatedAt = LocalDateTime.now();
