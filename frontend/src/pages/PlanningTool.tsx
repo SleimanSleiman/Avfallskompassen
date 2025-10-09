@@ -202,7 +202,7 @@ export default function PlanningTool() {
                                 {serviceTypes.map((type) => (
                                     <motion.div key={type.name} layout>
                                         <button
-                                            onClick={() => setSelectedType(type.name)}
+                                            onClick={() => setSelectedType(prev => prev === type.name ? null : type.name)}
                                             className="w-full text-left p-2 border rounded bg-white hover:bg-blue-50 transition"
                                         >
                                             {type.name}
