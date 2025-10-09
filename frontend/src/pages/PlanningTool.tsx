@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Stage, Layer, Rect, Circle, Text, Line } from 'react-konva';
 import { motion, AnimatePresence } from 'framer-motion';
+import { fetchServiceTypes } from '../lib/serviceType';
 
 //Scale factor: 1 pixel = 0.05 meter in real life
 const SCALE = 0.05;
@@ -12,19 +13,6 @@ const STAGE_HEIGHT = 600;
 
 //Clamp function to restrict values within min and max bounds
 const clamp = (value: number, min: number, max: number) => Math.max(min, Math.min(value, max));
-
-//TODO: Replace with subscription types from database
-const abonTypes = [
-    'Restavfall',
-    'Matavfall',
-    'Tidningar',
-    'Pappersförpackningar',
-    'Plast',
-    'Metallförpackningar',
-    'Färgat glas',
-    'Ofärgat glas',
-    'Småelspaket'
-];
 
 //TODO: Replace with bins from database
 const binsPerType: Record<string, string[]> = {
@@ -57,6 +45,9 @@ export default function PlanningTool() {
 
     //State to track selected subscription type
     const [selectedType, setSelectedType] = useState<string | null>(null);
+
+    //State to hold fetched service types from backend
+    const [serviceTypes, setServiceTypes] = useState<{name: string}[]>([]);
 
     //Handles dragging of corners to resize the room dynamically
     const handleDragCorner = (index: number, pos: { x: number; y: number }) => {
@@ -108,6 +99,13 @@ export default function PlanningTool() {
     //Convert dimensions to meters for display (rounded to 2 decimal places)
     const widthMeters = (room.width * SCALE).toFixed(2);
     const heightMeters = (room.height * SCALE).toFixed(2);
+
+    //Fetch service types from backend
+    useEffect(() => {
+        fetchServiceTypes()
+          .then(data => setServiceTypes(data))
+          .catch(err => console.error('Error fetching service types:', err));
+      }, []);
 
     return (
         <div className="flex w-full h-full p-6">
@@ -201,17 +199,17 @@ export default function PlanningTool() {
                                 exit={{ opacity: 0, height: 0 }}
                                  className="mt-2 pl-4 space-y-2"
                             >
-                                {abonTypes.map((type) => (
-                                    <motion.div key={type} layout>
+                                {serviceTypes.map((type) => (
+                                    <motion.div key={type.name} layout>
                                         <button
-                                            onClick={() => setSelectedType(type)}
+                                            onClick={() => setSelectedType(type.name)}
                                             className="w-full text-left p-2 border rounded bg-white hover:bg-blue-50 transition"
                                         >
-                                            {type}
+                                            {type.name}
                                         </button>
 
                                         {/* List with bins */}
-                                        {selectedType === type && (
+                                        {selectedType === type.name && (
                                             <motion.div
                                                 layout
                                                 initial={{ opacity: 0, height: 0 }}
@@ -220,9 +218,10 @@ export default function PlanningTool() {
                                                 className="mt-2 pl-4 space-y-2"
                                             >
                                                 <ul className="space-y-2">
-                                                    {binsPerType[type].map((bin, i) => (
-                                                        <li key={i} className="p-2 border rounded bg-white">{bin}</li>
-                                                    ))}
+                                                   {binsPerType[type.name]?.map((bin, i) => (
+                                                     <li key={i} className="p-2 border rounded bg-white">{bin}</li>
+                                                   ))}
+
                                                 </ul>
                                             </motion.div>
                                         )}
