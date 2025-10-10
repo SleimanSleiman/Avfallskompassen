@@ -2,6 +2,8 @@ package com.avfallskompassen.controller;
 
 import com.avfallskompassen.dto.ServiceTypeDTO;
 import com.avfallskompassen.repository.ServiceTypeRepository;
+import com.avfallskompassen.services.ServiceTypeService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -16,11 +18,8 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/serviceTypes")
 public class ServiceTypeController {
 
-    private final ServiceTypeRepository serviceTypeRepository;
-
-    public ServiceTypeController(ServiceTypeRepository serviceTypeRepository) {
-        this.serviceTypeRepository = serviceTypeRepository;
-    }
+    @Autowired
+    private ServiceTypeService serviceTypeService;
 
     /**
      * Get all service types.
@@ -28,7 +27,7 @@ public class ServiceTypeController {
      */
     @GetMapping
     public List<ServiceTypeDTO> getAllServiceTypes() {
-        return serviceTypeRepository.findAll()
+        return serviceTypeService.getAllServiceTypes()
                 .stream()
                 .map(st -> new ServiceTypeDTO(st.getName()))
                 .collect(Collectors.toList());
