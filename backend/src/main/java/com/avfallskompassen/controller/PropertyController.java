@@ -3,7 +3,9 @@ package com.avfallskompassen.controller;
 import com.avfallskompassen.dto.PropertyRequest;
 import com.avfallskompassen.dto.PropertyResponse;
 import com.avfallskompassen.dto.PropertyDTO;
+import com.avfallskompassen.model.LockType;
 import com.avfallskompassen.model.Property;
+import com.avfallskompassen.services.LockTypeService;
 import com.avfallskompassen.services.PropertyService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -29,6 +31,8 @@ public class PropertyController {
     
     @Autowired
     private PropertyService propertyService;
+    @Autowired
+    private LockTypeService lockTypeService;
     
     /**
      * Create a new property for the current user.
@@ -44,13 +48,15 @@ public class PropertyController {
         }
         
         try {
-            Property property = propertyService.createProperty(request, username);
+            LockType lockType = lockTypeService.findLockTypeById(request.getLockTypeId());
+            Property property = propertyService.createProperty(request, username, lockType);
             
             PropertyResponse response = new PropertyResponse(true, "Property created successfully");
             response.setPropertyId(property.getId());
             response.setAddress(property.getAddress());
             response.setNumberOfApartments(property.getNumberOfApartments());
-            response.setLockType(property.getLockType());
+            response.setLockName(lockType.getName());
+            response.setLockPrice(lockType.getCost());
             response.setAccessPathLength(property.getAccessPathLength());
             response.setCreatedAt(property.getCreatedAt());
             
@@ -149,8 +155,8 @@ public class PropertyController {
      * Get properties by lock type - Returns DTOs to avoid proxy issues.
      */
     @GetMapping("/lock-type/{lockType}")
-    public ResponseEntity<List<PropertyDTO>> getPropertiesByLockType(@PathVariable String lockType) {
-        List<Property> properties = propertyService.findByLockType(lockType);
+    public ResponseEntity<List<PropertyDTO>> getPropertiesByLockType(@PathVariable Long lockTypeId) {
+        List<Property> properties = propertyService.findByLockType(lockTypeService.findLockTypeById(lockTypeId));
         
         List<PropertyDTO> propertyDTOs = properties.stream()
                 .map(PropertyDTO::new)

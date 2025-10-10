@@ -1,5 +1,6 @@
 package com.avfallskompassen.repository;
 
+import com.avfallskompassen.model.LockType;
 import com.avfallskompassen.model.Property;
 import com.avfallskompassen.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -36,7 +37,7 @@ public interface PropertyRepository extends JpaRepository<Property, Long> {
      * @param lockType the lock type
      * @return list of properties with the specified lock type
      */
-    List<Property> findByLockType(String lockType);
+    List<Property> findByLockType(LockType lockType);
     /**
      * 
      * Find properties created by a specific user.

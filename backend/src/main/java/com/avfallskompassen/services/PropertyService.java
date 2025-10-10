@@ -1,6 +1,7 @@
 package com.avfallskompassen.services;
 
 import com.avfallskompassen.dto.PropertyRequest;
+import com.avfallskompassen.model.LockType;
 import com.avfallskompassen.model.Property;
 import com.avfallskompassen.model.User;
 import com.avfallskompassen.repository.PropertyRepository;
@@ -33,7 +34,7 @@ public class PropertyService {
      * @return the created property
      * @throws RuntimeException if property with same address already exists
      */
-    public Property createProperty(PropertyRequest request, String username) {
+    public Property createProperty(PropertyRequest request, String username, LockType lockType) {
         Optional<User> userOptional = userService.findByUsername(username);
         if (userOptional.isEmpty()) {
             throw new RuntimeException("User not found: " + username);
@@ -49,7 +50,7 @@ public class PropertyService {
             Property property = new Property(
                 request.getAddress(),
                 request.getNumberOfApartments(),
-                request.getLockType(),
+                lockType,
                 request.getAccessPathLength(),
                 user  
             );
@@ -120,7 +121,7 @@ public class PropertyService {
      * @param lockType the lock type
      * @return list of properties with the specified lock type
      */
-    public List<Property> findByLockType(String lockType) {
+    public List<Property> findByLockType(LockType lockType) {
         return propertyRepository.findByLockType(lockType);
     }
     

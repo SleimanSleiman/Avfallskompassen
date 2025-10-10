@@ -15,7 +15,7 @@ export default function PropertyPage() {
   const [formData, setFormData] = useState<PropertyRequest>({
     address: '',
     numberOfApartments: 1,
-    lockType: 'Standard',
+    lockType: 3,
     accessPathLength: 0
   });
   
