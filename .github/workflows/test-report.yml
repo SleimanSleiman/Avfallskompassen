@@ -27,11 +27,17 @@ jobs:
           distribution: temurin
           java-version: 17
 
-      - name: Build and run tests with verify
-        run: mvn clean verify
+      - name: Build project
+        run: mvn clean compile
 
-      - name: Upload Surefire HTML report
+      - name: Run tests
+        run: mvn test
+
+      - name: Generate Surefire HTML report
+        run: mvn surefire-report:report-only
+
+      - name: Upload Surefire report
         uses: actions/upload-artifact@v4
         with:
           name: Surefire-HTML-Report
-          path: backend/target/site/
+          path: backend/target/surefire-html
