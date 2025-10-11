@@ -5,10 +5,11 @@ import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import PropertyPage from './pages/PropertyPage';
 import { currentUser } from './lib/auth';
+import PlanningTool from './pages/PlanningTool';
 
 function Dashboard() {
   const user = currentUser();
-  
+
   return (
     <div className="mx-auto max-w-7xl px-4 py-16">
       <h1 className="h1">Välkommen!</h1>
@@ -49,6 +50,8 @@ export default function App() {
               <PropertyPage />
             </ProtectedRoute>
           } />
+          <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/planningTool" element={<PlanningTool />} />
         </Routes>
       </div>
       <Footer />

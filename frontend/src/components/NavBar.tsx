@@ -32,10 +32,10 @@ export default function NavBar() {
                 <>
                   <NavLink to="/dashboard" className="hover:text-white">Dashboard</NavLink>
                   <NavLink to="/properties" className="hover:text-white">Mina fastigheter</NavLink>
-                  <NavLink to="#" className="hover:text-white">Planeringsverktyg</NavLink>
+                  <NavLink to="/planningTool" className="hover:text-white">Planeringsverktyg</NavLink>
                   <div className="flex items-center gap-3">
                     <span className="text-sm">Hej {user.username}!</span>
-                    <button 
+                    <button
                       onClick={handleLogout}
                       className="rounded-full bg-white/20 px-3 py-1 text-sm hover:bg-white/30"
                     >
@@ -69,7 +69,7 @@ export default function NavBar() {
               <>
                 <NavLink to="/dashboard" className="text-nsr-ink">Dashboard</NavLink>
                 <NavLink to="/properties" className="text-nsr-ink">Mina fastigheter</NavLink>
-                <NavLink to="#" className="text-nsr-ink">Planeringsverktyg</NavLink>
+                <NavLink to="/planningTool" className="text-nsr-ink">Planeringsverktyg</NavLink>
                 <button onClick={handleLogout} className="text-left text-nsr-ink">Logga ut</button>
               </>
             ) : (
