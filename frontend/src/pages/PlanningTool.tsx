@@ -70,8 +70,8 @@ export default function PlanningTool() {
 
     // TODO: Replace with real door types from database
     const doorTypes: Door[] = [
-        { id: 1, name: 'Standarddörr', width: 30, height: 10, x: 0, y: 0, rotation: 0},
-        { id: 2, name: 'Dubbel dörr', width: 50, height: 10, x: 0, y: 0, rotation: 0 },
+        { id: 1, name: 'Standarddörr', width: 24, height: 10, x: 0, y: 0, rotation: 0},
+        { id: 2, name: 'Dubbel dörr', width: 48, height: 10, x: 0, y: 0, rotation: 0 },
     ];
 
     type Door = {
