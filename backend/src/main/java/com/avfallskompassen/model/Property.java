@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
  * represents a property with its details.
  * 
  * @author Akmal Safi
+ * @author Sleiman Sleiman
  */
 
 @Entity
@@ -37,6 +38,11 @@ public class Property {
     @JoinColumn(name = "municipality_id") //Dessa ska sättas som nullable = false sen och @NotNull
     @ManyToOne
     private Municipality municipality;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "property_type", nullable = false)
+    @NotNull(message = "Property type is required")
+    private PropertyType propertyType;
 
     @Column(nullable = false)
     @NotNull(message = "Access path length is required")
@@ -66,6 +72,17 @@ public class Property {
         this.lockType = lockType;
         this.accessPathLength = accessPathLength;
         this.createdBy = createdBy;
+        this.propertyType = PropertyType.FLERBOSTADSHUS; // Default value
+    }
+
+    public Property(String address, Integer numberOfApartments, LockType lockType, PropertyType propertyType, Double accessPathLength, User createdBy) {
+        this();
+        this.address = address;
+        this.numberOfApartments = numberOfApartments;
+        this.lockType = lockType;
+        this.propertyType = propertyType;
+        this.accessPathLength = accessPathLength;
+        this.createdBy = createdBy;
     }
 
     public Municipality getMunicipality() {
@@ -73,7 +90,15 @@ public class Property {
     }
 
     public void setMunicipality(Municipality municipality) {
-        municipality = municipality;
+        this.municipality = municipality;
+    }
+
+    public PropertyType getPropertyType() {
+        return propertyType;
+    }
+
+    public void setPropertyType(PropertyType propertyType) {
+        this.propertyType = propertyType;
     }
 
     public User getCreatedBy() {

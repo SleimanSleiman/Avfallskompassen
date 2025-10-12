@@ -3,6 +3,7 @@ package com.avfallskompassen.services;
 import com.avfallskompassen.dto.PropertyRequest;
 import com.avfallskompassen.model.LockType;
 import com.avfallskompassen.model.Property;
+import com.avfallskompassen.model.PropertyType;
 import com.avfallskompassen.model.User;
 import com.avfallskompassen.repository.PropertyRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +18,7 @@ import java.util.Optional;
  * Service class for property-related operations.
  * 
  * @author Akmal Safi
+ * @author Sleiman Sleiman
  */
 @Service
 @Transactional
@@ -47,10 +49,21 @@ public class PropertyService {
         }
         
         try {
+            // Parse property type from request, default to FLERBOSTADSHUS if not provided
+            PropertyType propertyType = PropertyType.FLERBOSTADSHUS;
+            if (request.getPropertyType() != null && !request.getPropertyType().isEmpty()) {
+                try {
+                    propertyType = PropertyType.valueOf(request.getPropertyType().toUpperCase());
+                } catch (IllegalArgumentException e) {
+                    // Invalid property type, use default
+                }
+            }
+            
             Property property = new Property(
                 request.getAddress(),
                 request.getNumberOfApartments(),
                 lockType,
+                propertyType,
                 request.getAccessPathLength(),
                 user  
             );
