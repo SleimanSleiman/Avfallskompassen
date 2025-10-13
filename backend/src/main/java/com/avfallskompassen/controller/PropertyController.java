@@ -135,6 +135,42 @@ public class PropertyController {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Property not found or access denied");
         }
     }
+
+     @PutMapping("/{id}")
+    public ResponseEntity<PropertyResponse> updateProperty(
+            @PathVariable Long id,
+            @Valid @RequestBody PropertyRequest request,
+            @RequestHeader(value = "X-Username", required = false) String username) {
+
+        if (username == null || username.isEmpty()) {
+            PropertyResponse response = new PropertyResponse(false, "User authentication required");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+        }
+
+        if (!propertyService.isPropertyOwnedByUser(id, username)) {
+            PropertyResponse response = new PropertyResponse(false, "Property not found or access denied");
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
+        }
+        try {
+            LockType lockType = lockTypeService.findLockTypeById(request.getLockTypeId());
+            Property updated = propertyService.updateProperty(id, request, username, lockType);
+
+            PropertyResponse response = new PropertyResponse(true, "Property updated successfully");
+            response.setPropertyId(updated.getId());
+            response.setAddress(updated.getAddress());
+            response.setNumberOfApartments(updated.getNumberOfApartments());
+            response.setLockName(lockType != null ? lockType.getName() : null);
+            response.setLockPrice(lockType != null ? lockType.getCost() : null);
+            response.setAccessPathLength(updated.getAccessPathLength());
+            response.setCreatedAt(updated.getCreatedAt());
+
+            return ResponseEntity.ok(response);
+
+        } catch (RuntimeException e) {
+            PropertyResponse response = new PropertyResponse(false, e.getMessage());
+            return ResponseEntity.badRequest().body(response);
+        }
+    }
     
     /**
      * Get property by address - Returns DTO to avoid proxy issues.
