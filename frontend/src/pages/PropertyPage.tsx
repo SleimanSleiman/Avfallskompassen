@@ -12,12 +12,20 @@ export default function PropertyPage() {
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
 
-  
+  const lockMap: Record<string, number> = {
+      Standard: 1,
+      Electronic: 2,
+      SuperLock: 3
+      };
+  const lockMapReverse: Record<number, string> = Object.fromEntries(
+      Object.entries(lockMap).map(([k, v]) => [v, k])
+      );
+
   // Form state
   const [formData, setFormData] = useState<PropertyRequest>({
     address: '',
     numberOfApartments: 1,
-    lockType: 3,
+    lockTypeId: 0,
     accessPathLength: 0
   });
   
@@ -57,7 +65,7 @@ export default function PropertyPage() {
         setFormData({
           address: '',
           numberOfApartments: 1,
-          lockTypeId: "Standard",
+          lockTypeId: 1,
           accessPathLength: 0
         });
         setShowForm(false);
@@ -97,7 +105,7 @@ export default function PropertyPage() {
     setFormData({
       address: p.address,
       numberOfApartments: p.numberOfApartments,
-      lockTypeId: p.lockType?.id ?? "Standard",
+      lockTypeId: lockMap[p.lockName ?? 'Standard'],
       accessPathLength: p.accessPathLength ?? 0
     });
     setShowForm(true);
@@ -184,17 +192,17 @@ export default function PropertyPage() {
                   Typ av lås för miljörum *
                 </label>
                 <select
-                  id="lockType"
+                  id="lockTypeId"
                   required
                   className="w-full rounded-xl border-gray-300 shadow-sm focus:border-nsr-teal focus:ring-nsr-teal"
-                  value={formData.lockType}
-                  onChange={(e) => handleInputChange('lockType', e.target.value)}
+                  value={formData.lockTypeId}
+                  onChange={(e) => handleInputChange('lockTypeId', parseInt(e.target.value))}
                 >
-                  <option value="Standard">Standard</option>
-                  <option value="Digital">Digital</option>
-                  <option value="Nyckel">Nyckel</option>
-                  <option value="Kod">Kod</option>
-                  <option value="Kort">Kort</option>
+                  <option value="0">Test</option>
+                  <option value="1">Elektronisk</option>
+                  <option value="2">Alien</option>
+                  <option value="3">Epic lock</option>
+                  <option value="4">Old lock</option>
                 </select>
               </div>
               
@@ -266,10 +274,10 @@ export default function PropertyPage() {
                         <span className="font-medium">Lägenheter:</span> {property.numberOfApartments}
                       </div>
                       <div>
-                        <span className="font-medium">Lås:</span> {property.lockType}
+                        <span className="font-medium">Lås:</span> {property.lockName ?? 'Ingen'}
                       </div>
                       <div>
-                        <span className="font-medium">Dragväg:</span> {property.accessPathLength}m
+                        <span className="font-medium">Dragväg:</span> {property.accessPathLength}
                       </div>
                     </div>
                     <div className="mt-2 text-xs text-gray-500">
