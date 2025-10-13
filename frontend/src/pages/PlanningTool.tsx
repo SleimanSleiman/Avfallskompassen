@@ -58,6 +58,55 @@ export default function PlanningTool() {
     //State to track selected subscription type
     const [selectedType, setSelectedType] = useState<string | null>(null);
 
+   /*──────────────── Door Configuration ────────────────
+        Handles door-related state, types, and data setup
+    ────────────────────────────────────────────────────────*/
+    //Check door right nav bar open
+    const [isAddDoorOpen, setIsAddDoorOpen] = useState(false);
+
+    //State to track door position and size
+    const [doors, setDoors] = useState<{ id: number; name: string; x: number; y: number; width: number; height: number; rotation: number;}[]>([]);
+    type DoorSide = 'top' | 'right' | 'bottom' | 'left';
+
+    // TODO: Replace with real door types from database
+    const doorTypes: Door[] = [
+        { id: 1, name: 'Standarddörr', width: 24, height: 10, x: 0, y: 0, rotation: 0},
+        { id: 2, name: 'Dubbel dörr', width: 48, height: 10, x: 0, y: 0, rotation: 0 },
+    ];
+
+    type Door = {
+        id: number;
+        name: string;
+        width: number;
+        height: number;
+        x: number;
+        y: number;
+        rotation: number;
+    };
+
+    // Function to toggle door visibility (create or remove)
+    const handleAddDoor = (doorType: { id: number; name: string; width: number; height: number }) => {
+        const newDoor = {
+            id: Date.now(),
+            x: room.x + room.width / 2 - doorType.width / 2,
+            y: room.y + room.height,
+            width: doorType.width,
+            height: doorType.height,
+            name: doorType.name,
+            rotation: 0
+        };
+        setDoors([...doors, newDoor]);
+    };
+    /* ──────────────── End of Door Configuration ──────────────── */
+
+    type Room = {
+        x: number;
+        y: number;
+        width: number;
+        height: number;
+    };
+
+
     //Handles dragging of corners to resize the room dynamically
     const handleDragCorner = (index: number, pos: { x: number; y: number }) => {
         let { x, y, width, height } = room;
@@ -177,6 +226,98 @@ export default function PlanningTool() {
                                 onDragMove={(e) => handleDragCorner(index, e.target.position())}
                             />
                         ))}
+
+                    {/* Doors */}
+                    {doors.map((door) => (
+                    <Rect
+                        key={door.id}
+                        // Swap width/height when rotated 90°
+                        x={door.x}
+                        y={door.y}
+                        width={door.rotation === 90 ? door.height : door.width}
+                        height={door.rotation === 90 ? door.width : door.height}
+                        fill="#ffc18c"
+                        stroke="#563232"
+                        strokeWidth={2}
+                        cornerRadius={2}
+                        draggable
+                        dragBoundFunc={(pos) => {
+
+                        const distTop = Math.abs(pos.y - room.y);
+                        const distBottom = Math.abs(pos.y - (room.y + room.height));
+                        const distLeft = Math.abs(pos.x - room.x);
+                        const distRight = Math.abs(pos.x - (room.x + room.width));
+                        const minDist = Math.min(distTop, distBottom, distLeft, distRight);
+
+                        if (minDist === distTop) {
+                            return {
+                                x: clamp(pos.x, room.x, room.x + room.width - door.width),
+                                y: room.y - door.height,
+                            };
+                        } else if (minDist === distBottom) {
+                            return {
+                                x: clamp(pos.x, room.x, room.x + room.width - door.width),
+                                y: room.y + room.height,
+                            };
+                        } else if (minDist === distLeft) {
+                            return {
+                                x: room.x - door.height,
+                                y: clamp(pos.y, room.y, room.y + room.height - door.width),
+                            };
+                        } else {
+                            return {
+                                x: room.x + room.width,
+                                y: clamp(pos.y, room.y, room.y + room.height - door.width),
+                            };
+                        }
+                        }}
+                        onDragMove={(e) => {
+                            const pos = e.target.position();
+                            const distTop = Math.abs(pos.y - room.y);
+                            const distBottom = Math.abs(pos.y - (room.y + room.height));
+                            const distLeft = Math.abs(pos.x - room.x);
+                            const distRight = Math.abs(pos.x - (room.x + room.width));
+                            const minDist = Math.min(distTop, distBottom, distLeft, distRight);
+
+                            let newRotation = 0;
+                            let newX = pos.x;
+                            let newY = pos.y;
+
+                            if (minDist === distTop) {
+                                newRotation = 0;
+                                newX = clamp(pos.x, room.x, room.x + room.width - door.width);
+                                newY = room.y - door.height;
+                            } else if (minDist === distBottom) {
+                                newRotation = 0;
+                                newX = clamp(pos.x, room.x, room.x + room.width - door.width);
+                                newY = room.y + room.height;
+                            } else if (minDist === distLeft) {
+                                newRotation = 90;
+                                newX = room.x - door.height;
+                                newY = clamp(pos.y, room.y, room.y + room.height - door.width);
+                            } else {
+                                newRotation = 90;
+                                newX = room.x + room.width;
+                                newY = clamp(pos.y, room.y, room.y + room.height - door.width);
+                            }
+
+                            // Update React state so it re-renders with new rotation
+                            setDoors((prevDoors) =>
+                                prevDoors.map((d) => {
+                                    if (d.id === door.id) {
+                                        return {
+                                        ...d,
+                                        x: newX,
+                                        y: newY,
+                                        rotation: newRotation
+                                    };
+                                } else {
+                                    return d;
+                                }
+                            }));
+                        }}
+                    />
+                    ))}
                     </Layer>
                 </Stage>
             </div>
@@ -228,6 +369,37 @@ export default function PlanningTool() {
                                         )}
                                     </motion.div>
                                 ))}
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+
+                      {/* Button to add door */}
+                    <button
+                        className="p-3 mt-3 rounded bg-blue-600 text-white hover:bg-blue-700 transition"
+                        onClick={() => setIsAddDoorOpen(!isAddDoorOpen)}
+                    >
+                        Lägg till ny dörr
+                    </button>
+                    <AnimatePresence>
+                        {isAddDoorOpen && (
+                            <motion.div
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: 'auto' }}
+                            exit={{ opacity: 0, height: 0 }}
+                            className="mt-2 pl-4 space-y-2"
+                            >
+                            <ul className="space-y-2">
+                                {doorTypes.map((doorType) => (
+                                <li key={doorType.id}>
+                                    <button
+                                    onClick={() => handleAddDoor(doorType)}
+                                    className="w-full text-left p-2 border rounded bg-white hover:bg-blue-50 transition"
+                                    >
+                                    {doorType.name}
+                                    </button>
+                                </li>
+                                ))}
+                            </ul>
                             </motion.div>
                         )}
                     </AnimatePresence>
