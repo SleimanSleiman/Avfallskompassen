@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { createProperty, getMyProperties, deleteProperty } from '../lib/property';
+import { createProperty, getMyProperties, deleteProperty, updateProperty } from '../lib/property';
 import type { Property } from '../lib/property';
 import type { PropertyRequest } from '../lib/property';
 import { currentUser } from '../lib/auth';
@@ -10,6 +10,8 @@ export default function PropertyPage() {
   const [msg, setMsg] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
+  const [editingId, setEditingId] = useState<number | null>(null);
+
   
   // Form state
   const [formData, setFormData] = useState<PropertyRequest>({
@@ -42,20 +44,28 @@ export default function PropertyPage() {
     setLoading(true);
     
     try {
-      const response = await createProperty(formData);
+      let response;
+      if (editingId) {
+        response = await updateProperty(editingId, formData);
+      } else {
+        response = await createProperty(formData);
+      }
+
       if (response.success) {
-        setMsg('Fastighet skapad framgångsrikt!');
+        setMsg(editingId ? 'Fastighet uppdaterad!' : 'Fastighet skapad framgångsrikt!');
+        // reset form
         setFormData({
           address: '',
           numberOfApartments: 1,
-          lockType: 'Standard',
+          lockTypeId: "Standard",
           accessPathLength: 0
         });
         setShowForm(false);
+        setEditingId(null);
         // Reload the properties list
         await loadProperties();
       } else {
-        setError(response.message || 'Kunde inte skapa fastighet');
+         setError(response.message || (editingId ? 'Kunde inte uppdatera fastighet' : 'Kunde inte skapa fastighet'));
       }
     } catch (err: any) {
       setError(err.message || 'Något gick fel');
@@ -80,6 +90,18 @@ export default function PropertyPage() {
     } catch (err: any) {
       setError(err.message || 'Kunde inte ta bort fastighet');
     }
+  }
+
+  function handleEdit(p: Property) {
+    setEditingId(p.id);
+    setFormData({
+      address: p.address,
+      numberOfApartments: p.numberOfApartments,
+      lockTypeId: p.lockType?.id ?? "Standard",
+      accessPathLength: p.accessPathLength ?? 0
+    });
+    setShowForm(true);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
   
   function handleInputChange(field: keyof PropertyRequest, value: string | number) {
@@ -256,6 +278,12 @@ export default function PropertyPage() {
                   </div>
                   
                   <div className="ml-4 flex gap-2">
+                    <button
+                      onClick={() => handleEdit(property)}
+                      className="rounded-lg border border-blue-200 bg-blue-50 px-3 py-1 text-sm text-blue-700 hover:bg-blue-100"
+                    >
+                      Redigera
+                    </button>
                     <button
                       onClick={() => handleDelete(property.id, property.address)}
                       className="rounded-lg border border-red-200 bg-red-50 px-3 py-1 text-sm text-red-700 hover:bg-red-100"

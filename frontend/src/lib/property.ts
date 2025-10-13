@@ -43,7 +43,16 @@ export async function createProperty(property: PropertyRequest): Promise<Propert
     headers: getAuthHeaders()
   });
 }
-
+export async function updateProperty(id: number, property: PropertyRequest): Promise<PropertyResponse> {
+  return await api<PropertyResponse>(`/api/properties/${id}`, {
+    method: 'PUT',
+    headers: { 
+    ...(getAuthHeaders() || {}), 
+    'Content-Type': 'application/json' 
+  },
+    body: JSON.stringify(property)
+  });
+}
 export async function getMyProperties(): Promise<Property[]> {
   return await api<Property[]>('/api/properties/my-properties', {
     method: 'GET',
