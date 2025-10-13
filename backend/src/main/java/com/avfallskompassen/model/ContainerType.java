@@ -16,19 +16,20 @@ public class ContainerType {
     @Column(nullable = false)
     private int size;
 
-    @Column(nullable = false)
+    //TODO: make nullable = false when completing container type data
+    @Column(nullable = true)
     private double width;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private double depth;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private double height;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private String imageFrontViewUrl;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private String imageTopViewUrl;
 
     public long getId() {
