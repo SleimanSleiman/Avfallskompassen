@@ -17,14 +17,15 @@ public class ContainerType {
     private int size;
 
     //TODO: make nullable = false when completing container type data
+    //TODO: change Double to double after that
     @Column(nullable = true)
-    private double width;
+    private Double width;
 
     @Column(nullable = true)
-    private double depth;
+    private Double depth;
 
     @Column(nullable = true)
-    private double height;
+    private Double height;
 
     @Column(nullable = true)
     private String imageFrontViewUrl;
@@ -59,7 +60,7 @@ public class ContainerType {
     public double getWidth() {
         return width;
     }
-    
+
     public void setWidth(double width) {
         this.width = width;
     }
