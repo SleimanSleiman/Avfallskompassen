@@ -2,6 +2,9 @@ package com.avfallskompassen.model;
 
 import jakarta.persistence.*;
 
+/**
+ * Entity representing a type of service (e.g., general waste, paper etc.).
+ */
 @Entity
 @Table(name = "Service_Type")
 public class ServiceType {

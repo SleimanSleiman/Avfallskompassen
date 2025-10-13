@@ -1,9 +1,13 @@
 package com.avfallskompassen.repository;
 
 import com.avfallskompassen.model.LockType;
+import com.avfallskompassen.model.Municipality;
 import com.avfallskompassen.model.Property;
+import com.avfallskompassen.model.PropertyType;
 import com.avfallskompassen.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -13,6 +17,7 @@ import java.util.Optional;
  * Repository interface for Property entity operations.
  * 
  * @author Akmal Safi
+ * @author Sleiman Sleiman
  */
 
 @Repository
@@ -59,7 +64,30 @@ public interface PropertyRepository extends JpaRepository<Property, Long> {
      * @param user the user
      * @return true if such a property exists
      */
-
     boolean existsByIdAndCreatedBy(Long propertyId, User user);
+
+    /**
+     * Find similar properties for comparison.
+     * Properties are similar if they have the same property type, same municipality,
+     * and number of apartments within ±5 of the given property.
+     * 
+     * @param propertyType the property type
+     * @param municipality the municipality
+     * @param minApartments minimum number of apartments (numberOfApartments - 5)
+     * @param maxApartments maximum number of apartments (numberOfApartments + 5)
+     * @param excludePropertyId the property ID to exclude from results
+     * @return list of similar properties
+     */
+    @Query("SELECT p FROM Property p WHERE p.propertyType = :propertyType " +
+           "AND p.municipality = :municipality " +
+           "AND p.numberOfApartments BETWEEN :minApartments AND :maxApartments " +
+           "AND p.id != :excludePropertyId")
+    List<Property> findSimilarProperties(
+        @Param("propertyType") PropertyType propertyType,
+        @Param("municipality") Municipality municipality,
+        @Param("minApartments") Integer minApartments,
+        @Param("maxApartments") Integer maxApartments,
+        @Param("excludePropertyId") Long excludePropertyId
+    );
 
 }
