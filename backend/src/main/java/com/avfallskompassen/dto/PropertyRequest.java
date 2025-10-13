@@ -8,6 +8,7 @@ import jakarta.validation.constraints.Min;
  * Request DTO for creating a new property.
  * 
  * @author Akmal Safi
+ * @author Sleiman Sleiman
  */
 public class PropertyRequest {
     
@@ -20,6 +21,8 @@ public class PropertyRequest {
     
     @NotNull(message = "Lock type is required")
     private long lockTypeId;
+    
+    private String propertyType; // Optional: FLERBOSTADSHUS, SMAHUS, VERKSAMHET
     
     @NotNull(message = "Access path length is required")
     @Min(value = 0, message = "Access path length cannot be negative")
@@ -66,5 +69,13 @@ public class PropertyRequest {
     
     public void setAccessPathLength(Double accessPathLength) {
         this.accessPathLength = accessPathLength;
+    }
+    
+    public String getPropertyType() {
+        return propertyType;
+    }
+    
+    public void setPropertyType(String propertyType) {
+        this.propertyType = propertyType;
     }
 }
