@@ -16,8 +16,20 @@ public class ContainerType {
     @Column(nullable = false)
     private int size;
 
-    @Column(nullable = false, length = 400)
-    private String description;
+    @Column(nullable = false)
+    private double width;
+
+    @Column(nullable = false)
+    private double depth;
+
+    @Column(nullable = false)
+    private double height;
+
+    @Column(nullable = false)
+    private String imageFrontViewUrl;
+
+    @Column(nullable = false)
+    private String imageTopViewUrl;
 
     public long getId() {
         return id;
@@ -25,14 +37,6 @@ public class ContainerType {
 
     public void setId(long id) {
         this.id = id;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
     }
 
     public int getSize() {

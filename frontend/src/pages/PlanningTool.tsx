@@ -46,7 +46,7 @@ export default function PlanningTool() {
     //State to track selected subscription type
     const [selectedType, setSelectedType] = useState<string | null>(null);
 
- //State to hold fetched service types from backend
+    //State to hold fetched service types from backend
     const [serviceTypes, setServiceTypes] = useState<{name: string}[]>([]);
 
    /*──────────────── Door Configuration ────────────────
@@ -88,6 +88,7 @@ export default function PlanningTool() {
         };
         setDoors([...doors, newDoor]);
     };
+
     /* ──────────────── End of Door Configuration ──────────────── */
 
     type Room = {
