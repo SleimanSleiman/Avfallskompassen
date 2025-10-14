@@ -41,6 +41,9 @@ export default function PlanningTool() {
     //State to hold fetched containers based on selected service type
     const [containers, setContainers] = useState<ContainerDTO[]>([]);
 
+    //Loading state for fetching containers
+    const [isLoadingContainers, setIsLoadingContainers] = useState(false);
+
    /*──────────────── Door Configuration ────────────────
         Handles door-related state, types, and data setup
     ────────────────────────────────────────────────────────*/
@@ -330,7 +333,7 @@ export default function PlanningTool() {
                                 initial={{ opacity: 0, height: 0 }}
                                 animate={{ opacity: 1, height: 'auto' }}
                                 exit={{ opacity: 0, height: 0 }}
-                                 className="mt-2 pl-4 space-y-2"
+                                className="mt-2 pl-4 space-y-2"
                             >
                                 {serviceTypes.map((type) => (
                                     <motion.div key={type.name} layout>
@@ -341,29 +344,44 @@ export default function PlanningTool() {
                                                     setContainers([]);
                                                 } else {
                                                     setSelectedType(type.name);
+                                                    setContainers([]);
+                                                    setIsLoadingContainers(true);
 
-                                                    //TODO: Replace with actual municipality IDs
-                                                    const fetchedContainers = await fetchContainersByMunicipalityAndService(1, type.id);
-                                                    setContainers(fetchedContainers);
+                                                    try {
+                                                        //TODO: Replace with actual municipality IDs
+                                                        const fetchedContainers = await fetchContainersByMunicipalityAndService(1, type.id);
+                                                        setContainers(fetchedContainers);
+                                                        setIsLoadingContainers(false);
+                                                    } catch (error) {
+                                                        console.error("Failed to fetch containers:", error);
+                                                        setIsLoadingContainers(false);
+                                                    }
                                                 }
                                             }}
                                             className="w-full text-left p-2 border rounded bg-white hover:bg-blue-50 transition"
-                                          >
-                                            {type.name}
+                                        >
+                                           {type.name}
                                         </button>
 
-                                       {/* Grid with container cards */}
-                                       {selectedType === type.name && (
-                                           <motion.div
+                                        {/* Grid with container cards */}
+                                        {selectedType === type.name && (
+                                            <motion.div
                                                 layout
                                                 initial={{ opacity: 0, height: 0 }}
                                                 animate={{ opacity: 1, height: 'auto' }}
                                                 exit={{ opacity: 0, height: 0 }}
-                                                className="mt-2 grid grid-cols-2 gap-4"
-                                           >
+                                                className="mt-2 grid grid-cols-2 gap-4 relative"
+                                            >
                                                 {containers.map((container, i) => (
-                                                    console.log('Container image URL:', container.imageFrontViewUrl),
-                                                    <div key={i} className="border rounded p-2 bg-white flex flex-col items-center">
+                                                    <motion.div
+                                                        key={i}
+                                                        layout
+                                                        initial={{ opacity: 0, y: 10 }}
+                                                        animate={{ opacity: 1, y: 0 }}
+                                                        exit={{ opacity: 0, y: -10 }}
+                                                        transition={{ duration: 0.2 }}
+                                                        className="border rounded p-2 bg-white flex flex-col items-center"
+                                                    >
                                                         <img
                                                             src={`http://localhost:8081${container.imageFrontViewUrl}`}
                                                             alt={container.name}
@@ -371,14 +389,27 @@ export default function PlanningTool() {
                                                         />
                                                         <p className="font-semibold">{container.name}</p>
                                                         <p className="text-sm">
-                                                            {container.width} x {container.height} x {container.depth} mm
+                                                            {container.width} × {container.height} × {container.depth} mm
                                                         </p>
                                                         <p className="text-sm">Töms: {container.emptyingFrequencyPerYear} / år</p>
                                                         <p className="text-sm font-medium">{container.cost}:- / år</p>
-                                                    </div>
+                                                    </motion.div>
                                                 ))}
-                                           </motion.div>
-                                        )}
+
+                                                {/* Laddnings-overlay */}
+                                                {isLoadingContainers && (
+                                                    <motion.div
+                                                        initial={{ opacity: 0 }}
+                                                       animate={{ opacity: 0.7 }}
+                                                       exit={{ opacity: 0 }}
+                                                       transition={{ duration: 0.2 }}
+                                                       className="absolute inset-0 flex items-center justify-center bg-white/70 backdrop-blur-sm rounded"
+                                                    >
+                                                        <div className="animate-spin rounded-full h-8 w-8 border-4 border-gray-400 border-t-transparent" />
+                                                    </motion.div>
+                                                )}
+                                            </motion.div>
+                                       )}
                                     </motion.div>
                                 ))}
                             </motion.div>
