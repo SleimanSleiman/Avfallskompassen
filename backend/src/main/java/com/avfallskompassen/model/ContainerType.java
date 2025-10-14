@@ -16,20 +16,20 @@ public class ContainerType {
     @Column(nullable = false)
     private int size;
 
+    @Column(nullable = false)
+    private double width;
+
+    @Column(nullable = false)
+    private double depth;
+
+    @Column(nullable = false)
+    private double height;
+
     //TODO: make nullable = false when completing container type data
-    //TODO: change Double to double after that
-    @Column(nullable = true)
-    private Double width;
-
-    @Column(nullable = true)
-    private Double depth;
-
-    @Column(nullable = true)
-    private Double height;
-
     @Column(nullable = true)
     private String imageFrontViewUrl;
 
+    //TODO: make nullable = false when completing container type data
     @Column(nullable = true)
     private String imageTopViewUrl;
 

@@ -36,7 +36,7 @@ export default function PlanningTool() {
     const [selectedType, setSelectedType] = useState<string | null>(null);
 
     //State to hold fetched service types from backend
-    const [serviceTypes, setServiceTypes] = useState<{name: string}[]>([]);
+    const [serviceTypes, setServiceTypes] = useState<{ id: number; name: string }[]>([]);
 
     //State to hold fetched containers based on selected service type
     const [containers, setContainers] = useState<ContainerDTO[]>([]);
@@ -342,8 +342,8 @@ export default function PlanningTool() {
                                                 } else {
                                                     setSelectedType(type.name);
 
-                                                    //TODO: Replace with actual municipality and service IDs
-                                                    const fetchedContainers = await fetchContainersByMunicipalityAndService(1, 2);
+                                                    //TODO: Replace with actual municipality IDs
+                                                    const fetchedContainers = await fetchContainersByMunicipalityAndService(1, type.id);
                                                     setContainers(fetchedContainers);
                                                 }
                                             }}
@@ -362,9 +362,10 @@ export default function PlanningTool() {
                                                 className="mt-2 grid grid-cols-2 gap-4"
                                            >
                                                 {containers.map((container, i) => (
+                                                    console.log('Container image URL:', container.imageFrontViewUrl),
                                                     <div key={i} className="border rounded p-2 bg-white flex flex-col items-center">
                                                         <img
-                                                            src={container.imageFrontViewUrl}
+                                                            src={`http://localhost:8081${container.imageFrontViewUrl}`}
                                                             alt={container.name}
                                                             className="w-24 h-24 object-contain mb-2"
                                                         />
@@ -373,7 +374,7 @@ export default function PlanningTool() {
                                                             {container.width} x {container.height} x {container.depth} mm
                                                         </p>
                                                         <p className="text-sm">Töms: {container.emptyingFrequencyPerYear} / år</p>
-                                                        <p className="text-sm font-medium">Kostnad: {container.cost} kr</p>
+                                                        <p className="text-sm font-medium">{container.cost}:- / år</p>
                                                     </div>
                                                 ))}
                                            </motion.div>

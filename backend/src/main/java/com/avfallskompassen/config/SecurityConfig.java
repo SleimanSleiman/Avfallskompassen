@@ -43,7 +43,10 @@ public class SecurityConfig {
         http
             .csrf(csrf -> csrf.disable()) // Disable CSRF for REST API
             .authorizeHttpRequests(authz -> authz
-                .requestMatchers("/api/**").permitAll() // Allow all API endpoints
+                    .requestMatchers(
+                            "/api/**",
+                            "/images/**"
+                    ).permitAll()
                 .anyRequest().authenticated() // Require auth for other endpoints
             );
         return http.build();

@@ -29,7 +29,7 @@ public class ServiceTypeController {
     public List<ServiceTypeDTO> getAllServiceTypes() {
         return serviceTypeService.getAllServiceTypes()
                 .stream()
-                .map(st -> new ServiceTypeDTO(st.getName()))
+                .map(st -> new ServiceTypeDTO(st.getId(), st.getName()))
                 .collect(Collectors.toList());
     }
 }
