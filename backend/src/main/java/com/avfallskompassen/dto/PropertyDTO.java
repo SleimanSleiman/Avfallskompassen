@@ -53,4 +53,8 @@ public class PropertyDTO {
     
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+
+    public String getLockName() {
+        return lockTypeDto != null ? lockTypeDto.getName() : null;
+    }
 }

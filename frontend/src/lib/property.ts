@@ -5,11 +5,8 @@ export type Property = {
   id: number;
   address: string;
   numberOfApartments: number;
-  lockType: {
-      id: number;
-      name: string;
-      cost: number;
-      };
+  lockName?: string;
+  lockPrice?: number;
   accessPathLength: number;
   createdAt: string;
 };
@@ -38,9 +35,13 @@ function getAuthHeaders(): Record<string, string> | undefined {
 }
 
 export async function createProperty(property: PropertyRequest): Promise<PropertyResponse> {
-  return await post<PropertyResponse>('/api/properties', {
-    ...property,
-    headers: getAuthHeaders()
+  return await api<PropertyResponse>('/api/properties', {
+      method: 'POST',
+      headers: {
+          ...(getAuthHeaders() || {}),
+          'Content-Type': 'application/json',
+          },
+      body: property,
   });
 }
 export async function updateProperty(id: number, property: PropertyRequest): Promise<PropertyResponse> {
@@ -50,7 +51,7 @@ export async function updateProperty(id: number, property: PropertyRequest): Pro
     ...(getAuthHeaders() || {}), 
     'Content-Type': 'application/json' 
   },
-    body: JSON.stringify(property)
+    body: property
   });
 }
 export async function getMyProperties(): Promise<Property[]> {
