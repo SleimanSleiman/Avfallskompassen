@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { Stage, Layer, Rect, Circle, Text, Line } from 'react-konva';
 import { motion, AnimatePresence } from 'framer-motion';
 import { fetchServiceTypes } from '../lib/serviceType';
+import type { ContainerDTO } from '../lib/container';
+import { fetchContainersByMunicipalityAndService} from '../lib/container';
 
 //Scale factor: 1 pixel = 0.05 meter in real life
 const SCALE = 0.05;
@@ -13,19 +15,6 @@ const STAGE_HEIGHT = 600;
 
 //Clamp function to restrict values within min and max bounds
 const clamp = (value: number, min: number, max: number) => Math.max(min, Math.min(value, max));
-
-//TODO: Replace with bins from database
-const binsPerType: Record<string, string[]> = {
-    'Restavfall': ['Kärl 1', 'Kärl 2', 'Kärl 3'],
-    'Matavfall': ['Kärl 1', 'Kärl 2'],
-    'Tidningar': ['Kärl 1', 'Kärl 2', 'Kärl 3', 'Kärl 4'],
-    'Pappersförpackningar': ['Kärl 1'],
-    'Plast': ['Kärl 1', 'Kärl 2'],
-    'Metallförpackningar': ['Kärl 1', 'Kärl 2'],
-    'Färgat glas': ['Kärl 1'],
-    'Ofärgat glas': ['Kärl 1', 'Kärl 2'],
-    'Småelspaket': ['Kärl 1']
-};
 
 export default function PlanningTool() {
     //Room state containing room's position and dimensions in pixels
@@ -46,8 +35,17 @@ export default function PlanningTool() {
     //State to track selected subscription type
     const [selectedType, setSelectedType] = useState<string | null>(null);
 
- //State to hold fetched service types from backend
-    const [serviceTypes, setServiceTypes] = useState<{name: string}[]>([]);
+    //State to hold fetched service types from backend
+    const [serviceTypes, setServiceTypes] = useState<{ id: number; name: string }[]>([]);
+
+    //State to hold fetched containers based on selected service type
+    const [containers, setContainers] = useState<ContainerDTO[]>([]);
+
+    //Loading state for fetching containers
+    const [isLoadingContainers, setIsLoadingContainers] = useState(false);
+
+    //State to track which size button is selected for each subscription type
+    const [selectedSize, setSelectedSize] = useState<{ [key: number]: number | null }>({});
 
    /*──────────────── Door Configuration ────────────────
         Handles door-related state, types, and data setup
@@ -88,6 +86,7 @@ export default function PlanningTool() {
         };
         setDoors([...doors, newDoor]);
     };
+
     /* ──────────────── End of Door Configuration ──────────────── */
 
     type Room = {
@@ -337,32 +336,113 @@ export default function PlanningTool() {
                                 initial={{ opacity: 0, height: 0 }}
                                 animate={{ opacity: 1, height: 'auto' }}
                                 exit={{ opacity: 0, height: 0 }}
-                                 className="mt-2 pl-4 space-y-2"
+                                className="mt-2 pl-4 space-y-2 relative" // relative för loading overlay
                             >
                                 {serviceTypes.map((type) => (
-                                    <motion.div key={type.name} layout>
+                                    <motion.div key={type.id} layout className="relative">
+                                        {/* Subscription type button */}
                                         <button
-                                            onClick={() => setSelectedType(prev => prev === type.name ? null : type.name)}
+                                            onClick={async () => {
+                                                if (selectedType === type.name) {
+                                                    setSelectedType(null);
+                                                    setContainers([]);
+                                                    setSelectedSize({});
+                                                    return;
+                                                }
+
+                                                setSelectedType(type.name);
+                                                setContainers([]);
+                                                setSelectedSize({});
+                                                setIsLoadingContainers(true);
+
+                                                try {
+                                                    const fetchedContainers = await fetchContainersByMunicipalityAndService(1, type.id);
+                                                    setContainers(fetchedContainers);
+                                                } catch (error) {
+                                                    console.error("Failed to fetch containers:", error);
+                                                } finally {
+                                                    setIsLoadingContainers(false);
+                                                }
+                                            }}
                                             className="w-full text-left p-2 border rounded bg-white hover:bg-blue-50 transition"
                                         >
                                             {type.name}
                                         </button>
 
-                                        {/* List with bins */}
-                                        {selectedType === type.name && (
+                                        {/* Loading overlay */}
+                                        {isLoadingContainers && selectedType === type.name && (
+                                            <motion.div
+                                                initial={{ opacity: 0 }}
+                                                animate={{ opacity: 0.7 }}
+                                                exit={{ opacity: 0 }}
+                                                transition={{ duration: 0.2 }}
+                                                className="absolute inset-0 flex items-center justify-center bg-white/70 backdrop-blur-sm rounded z-10"
+                                            >
+                                                <div className="animate-spin rounded-full h-8 w-8 border-4 border-gray-400 border-t-transparent" />
+                                            </motion.div>
+                                        )}
+
+                                        {/* Size buttons and containers */}
+                                        {selectedType === type.name && containers.length > 0 && (
                                             <motion.div
                                                 layout
                                                 initial={{ opacity: 0, height: 0 }}
                                                 animate={{ opacity: 1, height: 'auto' }}
                                                 exit={{ opacity: 0, height: 0 }}
-                                                className="mt-2 pl-4 space-y-2"
+                                                className="mt-2"
                                             >
-                                                <ul className="space-y-2">
-                                                   {binsPerType[type.name]?.map((bin, i) => (
-                                                     <li key={i} className="p-2 border rounded bg-white">{bin}</li>
-                                                   ))}
 
-                                                </ul>
+                                                {/* Size buttons */}
+                                                <div className="flex flex-wrap gap-2">
+                                                    {Array.from(new Set(containers.map(c => c.size)))
+                                                        .sort((a, b) => a - b)
+                                                        .map((size) => (
+                                                        <button
+                                                            key={size}
+                                                            onClick={() =>
+                                                                setSelectedSize({
+                                                                    ...selectedSize,
+                                                                    [type.id]: selectedSize[type.id] === size ? null : size,
+                                                                })
+                                                            }
+                                                            className="flex-1 min-w-[60px] text-center p-1 border rounded bg-gray-50 hover:bg-gray-100 transition text-sm"
+                                                        >
+                                                            {size}L
+                                                        </button>
+                                                    ))}
+                                                </div>
+
+                                                {/* Containers for selected size */}
+                                                {selectedSize[type.id] && (
+                                                    <div className="mt-2 grid grid-cols-2 gap-4 relative">
+                                                        {containers
+                                                            .filter(c => c.size === selectedSize[type.id])
+                                                            .map((container, i) => (
+                                                                <motion.div
+                                                                    key={i}
+                                                                    layout
+                                                                    initial={{ opacity: 0, y: 10 }}
+                                                                    animate={{ opacity: 1, y: 0 }}
+                                                                    exit={{ opacity: 0, y: -10 }}
+                                                                    transition={{ duration: 0.2 }}
+                                                                    className="border rounded p-2 bg-white flex flex-col items-center"
+                                                                >
+                                                                    <img
+                                                                        src={`http://localhost:8081${container.imageFrontViewUrl}`}
+                                                                        alt={container.name}
+                                                                        className="w-24 h-24 object-contain mb-2"
+                                                                    />
+                                                                    <p className="font-semibold">{container.name}</p>
+                                                                    <p className="text-sm">
+                                                                        {container.width} × {container.height} × {container.depth} mm
+                                                                    </p>
+                                                                    <p className="text-sm">Töms: {container.emptyingFrequencyPerYear} / år</p>
+                                                                    <p className="text-sm font-medium">{container.cost}:- / år</p>
+                                                                </motion.div>
+                                                            ))
+                                                        }
+                                                    </div>
+                                                )}
                                             </motion.div>
                                         )}
                                     </motion.div>
@@ -371,7 +451,7 @@ export default function PlanningTool() {
                         )}
                     </AnimatePresence>
 
-                      {/* Button to add door */}
+                    {/* Button to add door */}
                     <button
                         className="p-3 mt-3 rounded bg-blue-600 text-white hover:bg-blue-700 transition"
                         onClick={() => setIsAddDoorOpen(!isAddDoorOpen)}

@@ -16,8 +16,22 @@ public class ContainerType {
     @Column(nullable = false)
     private int size;
 
-    @Column(nullable = false, length = 400)
-    private String description;
+    @Column(nullable = false)
+    private double width;
+
+    @Column(nullable = false)
+    private double depth;
+
+    @Column(nullable = false)
+    private double height;
+
+    //TODO: make nullable = false when completing container type data
+    @Column(nullable = true)
+    private String imageFrontViewUrl;
+
+    //TODO: make nullable = false when completing container type data
+    @Column(nullable = true)
+    private String imageTopViewUrl;
 
     public long getId() {
         return id;
@@ -25,14 +39,6 @@ public class ContainerType {
 
     public void setId(long id) {
         this.id = id;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
     }
 
     public int getSize() {
@@ -49,5 +55,45 @@ public class ContainerType {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public double getWidth() {
+        return width;
+    }
+
+    public void setWidth(double width) {
+        this.width = width;
+    }
+
+    public double getDepth() {
+        return depth;
+    }
+
+    public void setDepth(double depth) {
+        this.depth = depth;
+    }
+
+    public double getHeight() {
+        return height;
+    }
+
+    public void setHeight(double height) {
+        this.height = height;
+    }
+
+    public String getImageFrontViewUrl() {
+        return imageFrontViewUrl;
+    }
+
+    public void setImageFrontViewUrl(String imageFrontViewUrl) {
+        this.imageFrontViewUrl = imageFrontViewUrl;
+    }
+
+    public String getImageTopViewUrl() {
+        return imageTopViewUrl;
+    }
+
+    public void setImageTopViewUrl(String imageTopViewUrl) {
+        this.imageTopViewUrl = imageTopViewUrl;
     }
 }
