@@ -394,7 +394,9 @@ export default function PlanningTool() {
 
                                                 {/* Size buttons */}
                                                 <div className="flex flex-wrap gap-2">
-                                                    {Array.from(new Set(containers.map(c => c.size))).map((size) => (
+                                                    {Array.from(new Set(containers.map(c => c.size)))
+                                                        .sort((a, b) => a - b)
+                                                        .map((size) => (
                                                         <button
                                                             key={size}
                                                             onClick={() =>
