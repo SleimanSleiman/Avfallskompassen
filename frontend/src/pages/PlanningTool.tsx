@@ -4,6 +4,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { fetchServiceTypes } from '../lib/serviceType';
 import type { ContainerDTO } from '../lib/container';
 import { fetchContainersByMunicipalityAndService} from '../lib/container';
+import RoomSizePrompt from '../components/RoomSizePrompt';
+
 
 //Scale factor: 1 pixel = 0.05 meter in real life
 const SCALE = 0.05;
@@ -17,15 +19,7 @@ const STAGE_HEIGHT = 600;
 const clamp = (value: number, min: number, max: number) => Math.max(min, Math.min(value, max));
 
 export default function PlanningTool() {
-    //Room state containing room's position and dimensions in pixels
-    const [room, setRoom] = useState({
-        x: 120,
-        y: 120,
-        width: 450,
-        height: 350,
-    });
-
-    //State to track which tab is active in the sidebar
+     //State to track which tab is active in the sidebar
     const [activeTab, setActiveTab] = useState<'addBins' | 'costs' | null>(null);
 
     //State to control visibility of "Add Bins" and "Costs" sections
@@ -46,6 +40,29 @@ export default function PlanningTool() {
 
     //State to track which size button is selected for each subscription type
     const [selectedSize, setSelectedSize] = useState<{ [key: number]: number | null }>({});
+
+    const [isAlterRoomSizeOpen, setIsAlterRoomSizeOpen] = useState(false);
+
+    const initialRoom = (() => {
+        const savedRoom = localStorage.getItem('trashRoomData');
+        if (savedRoom) {
+            const parsed = JSON.parse(savedRoom);
+            const roomWidth = parsed.length / SCALE;
+            const roomHeight = parsed.width / SCALE;
+
+            return {
+                x: (STAGE_WIDTH - roomWidth) / 2,   
+                y: (STAGE_HEIGHT - roomHeight) / 2, 
+                width: roomWidth,
+                height: roomHeight,
+            };
+        }
+        return { x: 120, y: 120, width: 450, height: 350 };
+    })();
+
+
+    //Room state containing room's position and dimensions in pixels
+    const [room, setRoom] = useState(initialRoom); 
 
    /*──────────────── Door Configuration ────────────────
         Handles door-related state, types, and data setup
@@ -481,6 +498,29 @@ export default function PlanningTool() {
                             </motion.div>
                         )}
                     </AnimatePresence>
+
+                    <button 
+                    className = "p-3 mt-3 rounded bg-blue-600 text-white hover:bg-blue-700 transition"
+                        onClick ={() => setIsAlterRoomSizeOpen(true)}
+                        >
+                        Ange bredd och längd på rummet
+                    </button>
+
+                    {/* Opens up a window where users can insert numbers to change the size of the room */}
+                    {isAlterRoomSizeOpen && (
+                        <RoomSizePrompt
+                        onConfirm={(length: number, width: number) => {
+                            setIsAlterRoomSizeOpen(false);
+                            setRoom((prev) => ({
+                                x: (STAGE_WIDTH - length / SCALE) / 2, 
+                                y: (STAGE_HEIGHT - width / SCALE) / 2,           
+                                width: length / SCALE, 
+                                height: width / SCALE, 
+                                }));
+                        }}
+                        onCancel={() => setIsAlterRoomSizeOpen(false)}
+                        />
+                    )}
 
                     {/* Button to view subscription costs */}
                     <button

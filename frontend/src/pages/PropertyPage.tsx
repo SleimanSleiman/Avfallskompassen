@@ -3,6 +3,7 @@ import { createProperty, getMyProperties, deleteProperty, updateProperty } from 
 import type { Property } from '../lib/property';
 import type { PropertyRequest } from '../lib/property';
 import { currentUser } from '../lib/auth';
+import RoomSizePrompt from '../components/RoomSizePrompt';
 
 export default function PropertyPage() {
   const [properties, setProperties] = useState<Property[]>([]);
@@ -11,6 +12,8 @@ export default function PropertyPage() {
   const [error, setError] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
+  const [isCreateRoomOpen, setIsCreateRoomOpen] = useState(false);
+  const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
 
   const lockMap: Record<string, number> = {
       Standard: 1,
@@ -110,6 +113,11 @@ export default function PropertyPage() {
     });
     setShowForm(true);
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function createWasteRoom(p: Property) {
+    setSelectedProperty(p);
+    setIsCreateRoomOpen(true);
   }
   
   function handleInputChange(field: keyof PropertyRequest, value: string | number) {
@@ -287,6 +295,12 @@ export default function PropertyPage() {
                   
                   <div className="ml-4 flex gap-2">
                     <button
+                    onClick={() => createWasteRoom(property)}
+                      className="rounded-lg border border-green-200 bg-green-50 px-3 py-1 text-sm text-green-700 hover:bg-green-100"
+                      >  
+                      Skapa miljörum
+                    </button>
+                    <button
                       onClick={() => handleEdit(property)}
                       className="rounded-lg border border-blue-200 bg-blue-50 px-3 py-1 text-sm text-blue-700 hover:bg-blue-100"
                     >
@@ -305,6 +319,21 @@ export default function PropertyPage() {
           </div>
         )}
       </div>
+
+     {isCreateRoomOpen && (
+        <RoomSizePrompt
+        onConfirm={(length: number, width: number) => {
+          localStorage.setItem(
+            'trashRoomData',
+            JSON.stringify({ length, width, property : selectedProperty})
+          );
+
+          setIsCreateRoomOpen(false); 
+          window.location.href = '/planningTool';
+        }}
+        onCancel={() => setIsCreateRoomOpen(false)}
+        />
+      )}
     </main>
   );
 }
