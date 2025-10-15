@@ -4,9 +4,13 @@ import com.avfallskompassen.dto.ServiceTypeDTO;
 import com.avfallskompassen.repository.ServiceTypeRepository;
 import com.avfallskompassen.services.ServiceTypeService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -24,12 +28,21 @@ public class ServiceTypeController {
     /**
      * Get all service types.
      * @return List of ServiceTypeDTO containing service type names.
+     * HTTP 200 OK with list of service types if successful,
+     * HTTP 500 Internal Server Error for other errors
      */
     @GetMapping
-    public List<ServiceTypeDTO> getAllServiceTypes() {
-        return serviceTypeService.getAllServiceTypes()
-                .stream()
-                .map(st -> new ServiceTypeDTO(st.getId(), st.getName()))
-                .collect(Collectors.toList());
+    public ResponseEntity<List<ServiceTypeDTO>> getAllServiceTypes() {
+        try {
+            List<ServiceTypeDTO> serviceTypes = serviceTypeService.getAllServiceTypes()
+                    .stream()
+                    .map(st -> new ServiceTypeDTO(st.getId(), st.getName()))
+                    .collect(Collectors.toList());
+            return ResponseEntity.ok(serviceTypes);
+        } catch (RuntimeException ex) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Collections.emptyList());
+        }
     }
+
 }
