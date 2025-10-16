@@ -28,6 +28,9 @@ public class PropertyRequest {
     @Min(value = 0, message = "Access path length cannot be negative")
     private Double accessPathLength;
     
+    @NotNull(message = "Municipality is required")
+    private Long municipalityId;
+    
     // Constructors
     public PropertyRequest() {}
     
@@ -36,6 +39,11 @@ public class PropertyRequest {
         this.numberOfApartments = numberOfApartments;
         this.lockTypeId = lockTypeId;
         this.accessPathLength = accessPathLength;
+    }
+
+    public PropertyRequest(String address, Integer numberOfApartments, Long lockTypeId, Double accessPathLength, Long municipalityId) {
+        this(address, numberOfApartments, lockTypeId, accessPathLength);
+        this.municipalityId = municipalityId;
     }
     
     // Getters and Setters
@@ -69,6 +77,14 @@ public class PropertyRequest {
     
     public void setAccessPathLength(Double accessPathLength) {
         this.accessPathLength = accessPathLength;
+    }
+
+    public Long getMunicipalityId() {
+        return municipalityId;
+    }
+
+    public void setMunicipalityId(Long municipalityId) {
+        this.municipalityId = municipalityId;
     }
     
     public String getPropertyType() {

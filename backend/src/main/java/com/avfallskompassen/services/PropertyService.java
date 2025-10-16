@@ -4,6 +4,7 @@ import com.avfallskompassen.dto.PropertyRequest;
 import com.avfallskompassen.model.LockType;
 import com.avfallskompassen.model.Property;
 import com.avfallskompassen.model.PropertyType;
+import com.avfallskompassen.model.Municipality;
 import com.avfallskompassen.model.User;
 import com.avfallskompassen.repository.PropertyRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +27,9 @@ public class PropertyService {
     
     @Autowired
     private PropertyRepository propertyRepository;
+
+    @Autowired
+    private com.avfallskompassen.repository.MunicipalityRepository municipalityRepository;
 
     @Autowired
     private UserService userService;
@@ -59,6 +63,11 @@ public class PropertyService {
                 }
             }
             
+            Municipality municipality = null;
+            if (request.getMunicipalityId() != null) {
+                municipality = municipalityRepository.findById(request.getMunicipalityId()).orElse(null);
+            }
+
             Property property = new Property(
                 request.getAddress(),
                 request.getNumberOfApartments(),
@@ -67,6 +76,7 @@ public class PropertyService {
                 request.getAccessPathLength(),
                 user  
             );
+            property.setMunicipality(municipality);
             
             return propertyRepository.save(property);
         } catch (DataIntegrityViolationException e) {
@@ -181,6 +191,11 @@ public class PropertyService {
 
         if (request.getAccessPathLength() != null) {
             property.setAccessPathLength(request.getAccessPathLength());
+        }
+
+        if (request.getMunicipalityId() != null) {
+            Municipality municipality = municipalityRepository.findById(request.getMunicipalityId()).orElse(null);
+            property.setMunicipality(municipality);
         }
 
         try {
