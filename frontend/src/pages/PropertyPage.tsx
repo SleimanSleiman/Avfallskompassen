@@ -73,6 +73,12 @@ async function handleSubmit(e: React.FormEvent) {
   setError(null);
   setLoading(true);
 
+  if (!formData.municipalityId || formData.municipalityId === 0) {
+    setLoading(false);
+    setError('Du måste välja kommun');
+    return;
+  }
+
   try {
     let response;
     if (editingId) {
