@@ -7,12 +7,19 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+/**
+ * Service class for managing service types.
+ */
 @Service
 public class ServiceTypeService {
 
     @Autowired
     private ServiceTypeRepository serviceTypeRepository;
 
+    /**
+     * Get all service types.
+     * @return List of ServiceType
+     */
     public List<ServiceType> getAllServiceTypes() {
         return serviceTypeRepository.findAll();
     }
