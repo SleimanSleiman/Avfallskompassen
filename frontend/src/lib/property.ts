@@ -9,6 +9,13 @@ export type Property = {
   lockPrice?: number;
   accessPathLength: number;
   createdAt: string;
+  municipalityId?: number;
+  municipalityName?: string;
+};
+
+export type Municipality = {
+  id: number;
+  name: string;
 };
 
 export type PropertyRequest = {
@@ -16,6 +23,7 @@ export type PropertyRequest = {
   numberOfApartments: number;
   lockTypeId: number;
   accessPathLength: number;
+  municipalityId: number;
 };
 
 export type PropertyResponse = {
@@ -27,6 +35,8 @@ export type PropertyResponse = {
   lockType?: string;
   accessPathLength?: number;
   createdAt?: string;
+  municipalityId?: number;
+  municipalityName?: string;
 };
 
 function getAuthHeaders(): Record<string, string> | undefined {
@@ -64,6 +74,13 @@ export async function getMyProperties(): Promise<Property[]> {
 export async function deleteProperty(id: number): Promise<PropertyResponse> {
   return await api<PropertyResponse>(`/api/properties/${id}`, {
     method: 'DELETE',
+    headers: getAuthHeaders()
+  });
+}
+
+export async function getMunicipalities(): Promise<Municipality[]> {
+  return await api<Municipality[]>('/api/municipalities', {
+    method: 'GET',
     headers: getAuthHeaders()
   });
 }

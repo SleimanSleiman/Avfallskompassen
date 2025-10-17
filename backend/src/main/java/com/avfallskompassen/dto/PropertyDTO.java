@@ -14,6 +14,8 @@ public class PropertyDTO {
     private Double accessPathLength;
     private LocalDateTime createdAt;
     private LockTypeDto lockTypeDto;
+    private Long municipalityId;
+    private String municipalityName;
     
     // Constructors
     public PropertyDTO() {}
@@ -26,6 +28,8 @@ public class PropertyDTO {
         this.lockTypeDto = property.getLockType() != null? new LockTypeDto(property.getLockType()) : null;
         this.accessPathLength = property.getAccessPathLength();
         this.createdAt = property.getCreatedAt();
+        this.municipalityId = property.getMunicipality() != null ? property.getMunicipality().getId() : null;
+        this.municipalityName = property.getMunicipality() != null ? property.getMunicipality().getName() : null;
     }
     
     // Getters and Setters
@@ -53,6 +57,22 @@ public class PropertyDTO {
     
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+
+    public Long getMunicipalityId() {
+        return municipalityId;
+    }
+
+    public void setMunicipalityId(Long municipalityId) {
+        this.municipalityId = municipalityId;
+    }
+
+    public String getMunicipalityName() {
+        return municipalityName;
+    }
+
+    public void setMunicipalityName(String municipalityName) {
+        this.municipalityName = municipalityName;
+    }
 
     public String getLockName() {
         return lockTypeDto != null ? lockTypeDto.getName() : null;
