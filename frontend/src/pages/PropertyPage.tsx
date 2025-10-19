@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
-import { createProperty, getMyProperties, deleteProperty, updateProperty } from '../lib/property';
-import type { Property } from '../lib/property';
+import { createProperty, getMyProperties, deleteProperty, updateProperty,getMunicipalities } from '../lib/property';
+import type { Municipality, Property } from '../lib/property';
 import type { PropertyRequest } from '../lib/property';
 import { currentUser } from '../lib/auth';
+import RoomSizePrompt from '../components/RoomSizePrompt';
 
 export default function PropertyPage() {
   const [properties, setProperties] = useState<Property[]>([]);
@@ -11,6 +12,8 @@ export default function PropertyPage() {
   const [error, setError] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
+  const [isCreateRoomOpen, setIsCreateRoomOpen] = useState(false);
+  const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
 
   const lockMap: Record<string, number> = {
       Standard: 1,
@@ -26,16 +29,35 @@ export default function PropertyPage() {
     address: '',
     numberOfApartments: 1,
     lockTypeId: 0,
-    accessPathLength: 0
+    accessPathLength: 0,
+    municipalityId: 0
   });
+
+ const [municipalities, setMunicipalities] = useState<Municipality[]>([]);
   
   const user = currentUser();
-  
+
+  function getMunicipalityName(id?: number) {
+    if (!id) return '—';
+    const m = municipalities.find((x) => x.id === id);
+    return m?.name ?? '—';
+  }
+
   // Load properties on component mount
   useEffect(() => {
     loadProperties();
+    loadMunicipalities();
   }, []);
-  
+
+  async function loadMunicipalities() {
+    try {
+      const data = await getMunicipalities();
+      setMunicipalities(data);
+    } catch (err: any) {
+      setError('Kunde inte ladda kommuner: ' + err.message);
+    }
+  }
+
   async function loadProperties() {
     try {
       const data = await getMyProperties();
@@ -45,42 +67,49 @@ export default function PropertyPage() {
     }
   }
   
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setMsg(null);
-    setError(null);
-    setLoading(true);
-    
-    try {
-      let response;
-      if (editingId) {
-        response = await updateProperty(editingId, formData);
-      } else {
-        response = await createProperty(formData);
-      }
+async function handleSubmit(e: React.FormEvent) {
+  e.preventDefault();
+  setMsg(null);
+  setError(null);
+  setLoading(true);
 
-      if (response.success) {
-        setMsg(editingId ? 'Fastighet uppdaterad!' : 'Fastighet skapad framgångsrikt!');
-        // reset form
-        setFormData({
-          address: '',
-          numberOfApartments: 1,
-          lockTypeId: 1,
-          accessPathLength: 0
-        });
-        setShowForm(false);
-        setEditingId(null);
-        // Reload the properties list
-        await loadProperties();
-      } else {
-         setError(response.message || (editingId ? 'Kunde inte uppdatera fastighet' : 'Kunde inte skapa fastighet'));
-      }
-    } catch (err: any) {
-      setError(err.message || 'Något gick fel');
-    } finally {
-      setLoading(false);
-    }
+  if (!formData.municipalityId || formData.municipalityId === 0) {
+    setLoading(false);
+    setError('Du måste välja kommun');
+    return;
   }
+
+  try {
+    let response;
+    if (editingId) {
+      response = await updateProperty(editingId, formData);
+    } else {
+      response = await createProperty(formData);
+    }
+
+    if (response.success) {
+      setMsg(editingId ? 'Fastighet uppdaterad!' : 'Fastighet skapad framgångsrikt!');
+      // reset form
+      setFormData({
+        address: '',
+        numberOfApartments: 1,
+        lockTypeId: 1,
+        accessPathLength: 0,
+        municipalityId: municipalities.length > 0 ? municipalities[0].id : 0
+      });
+      setShowForm(false);
+      setEditingId(null);
+      // Reload the properties list
+      await loadProperties();
+    } else {
+       setError(response.message || (editingId ? 'Kunde inte uppdatera fastighet' : 'Kunde inte skapa fastighet'));
+    }
+  } catch (err: any) {
+    setError(err.message || 'Något gick fel');
+  } finally {
+    setLoading(false);
+  }
+}
   
   async function handleDelete(id: number, address: string) {
     if (!confirm(`Är du säker på att du vill ta bort fastigheten "${address}"?`)) {
@@ -105,11 +134,17 @@ export default function PropertyPage() {
     setFormData({
       address: p.address,
       numberOfApartments: p.numberOfApartments,
-      lockTypeId: lockMap[p.lockName ?? 'Standard'],
-      accessPathLength: p.accessPathLength ?? 0
+      lockTypeId: lockMap[p.lockName ?? 'Standard'] || 1,
+      accessPathLength: p.accessPathLength ?? 0,
+      municipalityId: p.municipalityId ?? 0
     });
     setShowForm(true);
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function createWasteRoom(p: Property) {
+    setSelectedProperty(p);
+    setIsCreateRoomOpen(true);
   }
   
   function handleInputChange(field: keyof PropertyRequest, value: string | number) {
@@ -168,8 +203,26 @@ export default function PropertyPage() {
                   className="w-full rounded-xl border-gray-300 shadow-sm focus:border-nsr-teal focus:ring-nsr-teal"
                   value={formData.address}
                   onChange={(e) => handleInputChange('address', e.target.value)}
-                  placeholder="t.ex. Storgatan 123, Malmö"
+                  placeholder="t.ex. Storgatan 123"
                 />
+              </div>
+
+              <div>
+                <label htmlFor="municipalityId" className="block text-sm font-medium mb-2">
+                  Kommun *
+                </label>
+                <select
+                  id="municipalityId"
+                  required
+                  className="w-full rounded-xl border-gray-300 shadow-sm focus:border-nsr-teal focus:ring-nsr-teal"
+                  value={formData.municipalityId}
+                  onChange={(e) => handleInputChange('municipalityId', parseInt(e.target.value))}
+                >
+                  <option value={0}>Välj kommun</option>
+                  {municipalities.map((m) => (
+                    <option key={m.id} value={m.id}>{m.name}</option>
+                  ))}
+                </select>
               </div>
               
               <div>
@@ -271,7 +324,10 @@ export default function PropertyPage() {
                     </h3>
                     <div className="mt-2 grid gap-2 text-sm text-gray-600 md:grid-cols-3">
                       <div>
-                        <span className="font-medium">Lägenheter:</span> {property.numberOfApartments}
+                         <div className="mt-1 text-sm text-gray-600">
+                       <span className="font-medium">Kommun:</span> {getMunicipalityName(property.municipalityId)}
+                     </div>
+                                        <span className="font-medium">Lägenheter:</span> {property.numberOfApartments}
                       </div>
                       <div>
                         <span className="font-medium">Lås:</span> {property.lockName ?? 'Ingen'}
@@ -286,6 +342,12 @@ export default function PropertyPage() {
                   </div>
                   
                   <div className="ml-4 flex gap-2">
+                    <button
+                    onClick={() => createWasteRoom(property)}
+                      className="rounded-lg border border-green-200 bg-green-50 px-3 py-1 text-sm text-green-700 hover:bg-green-100"
+                      >  
+                      Skapa miljörum
+                    </button>
                     <button
                       onClick={() => handleEdit(property)}
                       className="rounded-lg border border-blue-200 bg-blue-50 px-3 py-1 text-sm text-blue-700 hover:bg-blue-100"
@@ -305,6 +367,21 @@ export default function PropertyPage() {
           </div>
         )}
       </div>
+
+     {isCreateRoomOpen && (
+        <RoomSizePrompt
+        onConfirm={(length: number, width: number) => {
+          localStorage.setItem(
+            'trashRoomData',
+            JSON.stringify({ length, width, property : selectedProperty})
+          );
+
+          setIsCreateRoomOpen(false); 
+          window.location.href = '/planningTool';
+        }}
+        onCancel={() => setIsCreateRoomOpen(false)}
+        />
+      )}
     </main>
   );
 }

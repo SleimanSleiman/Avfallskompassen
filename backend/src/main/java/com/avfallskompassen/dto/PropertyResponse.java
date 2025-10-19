@@ -18,6 +18,8 @@ public class PropertyResponse {
     private String lockName;
     private BigDecimal lockPrice;
     private Double accessPathLength;
+    private Long municipalityId;
+    private String municipalityName;
     private LocalDateTime createdAt;
     
     // Constructors
@@ -38,6 +40,22 @@ public class PropertyResponse {
         this.lockName = lockName;
         this.accessPathLength = accessPathLength;
         this.createdAt = createdAt;
+    }
+
+    public Long getMunicipalityId() {
+        return municipalityId;
+    }
+
+    public void setMunicipalityId(Long municipalityId) {
+        this.municipalityId = municipalityId;
+    }
+
+    public String getMunicipalityName() {
+        return municipalityName;
+    }
+
+    public void setMunicipalityName(String municipalityName) {
+        this.municipalityName = municipalityName;
     }
     
     public boolean isSuccess() {

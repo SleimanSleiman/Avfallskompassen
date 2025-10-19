@@ -1,7 +1,11 @@
 import { useState, useEffect } from 'react';
-import { Stage, Layer, Rect, Circle, Text, Line } from 'react-konva';
+import { Stage, Layer, Rect, Circle, Text, Line, Group  } from 'react-konva';
 import { motion, AnimatePresence } from 'framer-motion';
 import { fetchServiceTypes } from '../lib/serviceType';
+import type { ContainerDTO } from '../lib/container';
+import { fetchContainersByMunicipalityAndService} from '../lib/container';
+import RoomSizePrompt from '../components/RoomSizePrompt';
+
 
 //Scale factor: 1 pixel = 0.05 meter in real life
 const SCALE = 0.05;
@@ -14,29 +18,8 @@ const STAGE_HEIGHT = 600;
 //Clamp function to restrict values within min and max bounds
 const clamp = (value: number, min: number, max: number) => Math.max(min, Math.min(value, max));
 
-//TODO: Replace with bins from database
-const binsPerType: Record<string, string[]> = {
-    'Restavfall': ['Kärl 1', 'Kärl 2', 'Kärl 3'],
-    'Matavfall': ['Kärl 1', 'Kärl 2'],
-    'Tidningar': ['Kärl 1', 'Kärl 2', 'Kärl 3', 'Kärl 4'],
-    'Pappersförpackningar': ['Kärl 1'],
-    'Plast': ['Kärl 1', 'Kärl 2'],
-    'Metallförpackningar': ['Kärl 1', 'Kärl 2'],
-    'Färgat glas': ['Kärl 1'],
-    'Ofärgat glas': ['Kärl 1', 'Kärl 2'],
-    'Småelspaket': ['Kärl 1']
-};
-
 export default function PlanningTool() {
-    //Room state containing room's position and dimensions in pixels
-    const [room, setRoom] = useState({
-        x: 120,
-        y: 120,
-        width: 450,
-        height: 350,
-    });
-
-    //State to track which tab is active in the sidebar
+     //State to track which tab is active in the sidebar
     const [activeTab, setActiveTab] = useState<'addBins' | 'costs' | null>(null);
 
     //State to control visibility of "Add Bins" and "Costs" sections
@@ -46,18 +29,50 @@ export default function PlanningTool() {
     //State to track selected subscription type
     const [selectedType, setSelectedType] = useState<string | null>(null);
 
- //State to hold fetched service types from backend
-    const [serviceTypes, setServiceTypes] = useState<{name: string}[]>([]);
+    //State to hold fetched service types from backend
+    const [serviceTypes, setServiceTypes] = useState<{ id: number; name: string }[]>([]);
+
+    //State to hold fetched containers based on selected service type
+    const [containers, setContainers] = useState<ContainerDTO[]>([]);
+
+    //Loading state for fetching containers
+    const [isLoadingContainers, setIsLoadingContainers] = useState(false);
+
+    //State to track which size button is selected for each subscription type
+    const [selectedSize, setSelectedSize] = useState<{ [key: number]: number | null }>({});
+
+    const [isAlterRoomSizeOpen, setIsAlterRoomSizeOpen] = useState(false);
+
+    const initialRoom = (() => {
+        const savedRoom = localStorage.getItem('trashRoomData');
+        if (savedRoom) {
+            const parsed = JSON.parse(savedRoom);
+            const roomWidth = parsed.length / SCALE;
+            const roomHeight = parsed.width / SCALE;
+
+            return {
+                x: (STAGE_WIDTH - roomWidth) / 2,   
+                y: (STAGE_HEIGHT - roomHeight) / 2, 
+                width: roomWidth,
+                height: roomHeight,
+            };
+        }
+        return { x: 120, y: 120, width: 450, height: 350 };
+    })();
+
+
+    //Room state containing room's position and dimensions in pixels
+    const [room, setRoom] = useState(initialRoom); 
 
    /*──────────────── Door Configuration ────────────────
         Handles door-related state, types, and data setup
     ────────────────────────────────────────────────────────*/
     //Check door right nav bar open
     const [isAddDoorOpen, setIsAddDoorOpen] = useState(false);
+    const [selectedDoorId, setSelectedDoorId] = useState<number | null>(null);
 
     //State to track door position and size
     const [doors, setDoors] = useState<{ id: number; name: string; x: number; y: number; width: number; height: number; rotation: number;}[]>([]);
-    type DoorSide = 'top' | 'right' | 'bottom' | 'left';
 
     // TODO: Replace with real door types from database
     const doorTypes: Door[] = [
@@ -90,12 +105,30 @@ export default function PlanningTool() {
     };
     /* ──────────────── End of Door Configuration ──────────────── */
 
-    type Room = {
-        x: number;
-        y: number;
-        width: number;
-        height: number;
+    /*──────────────── Place bin ──────────────── */
+
+    const [bins, setBins] = useState<{ id: number; name: string; x: number; y: number; width: number; height: number; }[]>([]);
+    const [selectedBinId, setSelectedBinId] = useState<number | null>(null);
+
+    const handleAddBin = (binName: string) => {
+        const newBin = {
+            id: Date.now(),
+            name: binName,
+            x: room.x + room.width / 2 - 15, 
+            y: room.y + room.height / 2 - 15,
+            width: 30,
+            height: 30,
+        };
+
+        setBins((prev) => [...prev, newBin]);
     };
+
+    const handleRemoveBin = (id: number) => {
+        setBins((prev) => prev.filter((b) => b.id !== id));
+    };
+
+    /* ──────────────── End of place bin ──────────────── */
+
 
     //Handles dragging of corners to resize the room dynamically
     const handleDragCorner = (index: number, pos: { x: number; y: number }) => {
@@ -157,7 +190,7 @@ export default function PlanningTool() {
 
     return (
         <div className="flex w-full h-full p-6">
-            <div className="flex justify-center items-start w-3/5">
+            <div className="flex flex-col items-center w-3/5">
                 <Stage width={STAGE_WIDTH} height={STAGE_HEIGHT} className="border border-gray-300 bg-gray-50 rounded">
                     <Layer>
                         {/* Room */}
@@ -226,97 +259,187 @@ export default function PlanningTool() {
 
                     {/* Doors */}
                     {doors.map((door) => (
-                    <Rect
-                        key={door.id}
-                        // Swap width/height when rotated 90°
-                        x={door.x}
-                        y={door.y}
-                        width={door.rotation === 90 ? door.height : door.width}
-                        height={door.rotation === 90 ? door.width : door.height}
-                        fill="#ffc18c"
-                        stroke="#563232"
-                        strokeWidth={2}
-                        cornerRadius={2}
-                        draggable
-                        dragBoundFunc={(pos) => {
-
-                        const distTop = Math.abs(pos.y - room.y);
-                        const distBottom = Math.abs(pos.y - (room.y + room.height));
-                        const distLeft = Math.abs(pos.x - room.x);
-                        const distRight = Math.abs(pos.x - (room.x + room.width));
-                        const minDist = Math.min(distTop, distBottom, distLeft, distRight);
-
-                        if (minDist === distTop) {
-                            return {
-                                x: clamp(pos.x, room.x, room.x + room.width - door.width),
-                                y: room.y - door.height,
-                            };
-                        } else if (minDist === distBottom) {
-                            return {
-                                x: clamp(pos.x, room.x, room.x + room.width - door.width),
-                                y: room.y + room.height,
-                            };
-                        } else if (minDist === distLeft) {
-                            return {
-                                x: room.x - door.height,
-                                y: clamp(pos.y, room.y, room.y + room.height - door.width),
-                            };
-                        } else {
-                            return {
-                                x: room.x + room.width,
-                                y: clamp(pos.y, room.y, room.y + room.height - door.width),
-                            };
-                        }
-                        }}
-                        onDragMove={(e) => {
-                            const pos = e.target.position();
+                        <Group
+                            key={door.id}
+                            x={door.x}
+                            y={door.y}
+                            draggable
+                            dragBoundFunc={(pos) => {
+                            // Calculate distance from each wall
                             const distTop = Math.abs(pos.y - room.y);
                             const distBottom = Math.abs(pos.y - (room.y + room.height));
                             const distLeft = Math.abs(pos.x - room.x);
                             const distRight = Math.abs(pos.x - (room.x + room.width));
                             const minDist = Math.min(distTop, distBottom, distLeft, distRight);
 
-                            let newRotation = 0;
                             let newX = pos.x;
                             let newY = pos.y;
 
+                            // Snap door to closest wall and clamp along wall
                             if (minDist === distTop) {
-                                newRotation = 0;
-                                newX = clamp(pos.x, room.x, room.x + room.width - door.width);
+                                // Top wall
                                 newY = room.y - door.height;
-                            } else if (minDist === distBottom) {
-                                newRotation = 0;
                                 newX = clamp(pos.x, room.x, room.x + room.width - door.width);
+                            } else if (minDist === distBottom) {
+                                // Bottom wall
                                 newY = room.y + room.height;
+                                newX = clamp(pos.x, room.x, room.x + room.width - door.width);
                             } else if (minDist === distLeft) {
-                                newRotation = 90;
+                                // Left wall
                                 newX = room.x - door.height;
                                 newY = clamp(pos.y, room.y, room.y + room.height - door.width);
                             } else {
-                                newRotation = 90;
+                                // Right wall
                                 newX = room.x + room.width;
                                 newY = clamp(pos.y, room.y, room.y + room.height - door.width);
                             }
 
-                            // Update React state so it re-renders with new rotation
-                            setDoors((prevDoors) =>
-                                prevDoors.map((d) => {
-                                    if (d.id === door.id) {
-                                        return {
-                                        ...d,
-                                        x: newX,
-                                        y: newY,
-                                        rotation: newRotation
-                                    };
-                                } else {
-                                    return d;
+                            return { x: newX, y: newY };
+                            }}
+                            onDragMove={(e) => {
+                                const pos = e.target.position();
+
+                                // Determine rotation from position relative to walls
+                                const distTop = Math.abs(pos.y - room.y);
+                                const distBottom = Math.abs(pos.y - (room.y + room.height));
+                                const distLeft = Math.abs(pos.x - room.x);
+                                const distRight = Math.abs(pos.x - (room.x + room.width));
+                                const minDist = Math.min(distTop, distBottom, distLeft, distRight);
+
+                                let newRotation = 0;
+                                if (minDist === distLeft || minDist === distRight) {
+                                    newRotation = 90;
                                 }
-                            }));
-                        }}
-                    />
+
+                                setDoors((prevDoors) =>
+                                    prevDoors.map((d) =>
+                                    d.id === door.id
+                                        ? { ...d, x: pos.x, y: pos.y, rotation: newRotation }
+                                        : d
+                                    )
+                                );
+                            }}
+                            onClick={(e) => {
+                            e.cancelBubble = true;
+                            setSelectedDoorId((prevId) => (prevId === door.id ? null : door.id));
+                            }}
+                        >
+                            <Rect
+                            width={door.rotation === 90 ? door.height : door.width}
+                            height={door.rotation === 90 ? door.width : door.height}
+                            fill={selectedDoorId === door.id ? "#ffcf8c" : "#ffc18c"}
+                            stroke="#563232"
+                            strokeWidth={2}
+                            cornerRadius={2}
+                            />
+        
+                        </Group>
+                        ))}
+                    {/* Bins */}
+                    {bins.map((bin) => (
+                        <Group
+                            key={bin.id}
+                            x={bin.x}
+                            y={bin.y}
+                            draggable
+                            onClick={() =>
+                                setSelectedBinId((prevId) => (prevId === bin.id ? null : bin.id))
+                            }
+                            onDragMove={(e) => {
+                                const newPos = e.target.position();
+                                setBins((prev) =>
+                                    prev.map((b) =>
+                                    b.id === bin.id ? { ...b, x: newPos.x, y: newPos.y } : b
+                                    )
+                                );
+                            }}
+                        >
+                            {/* Bin rectangle */}
+                            <Rect
+                            width={bin.width}
+                            height={bin.height}
+                            fill={selectedBinId === bin.id ? "#7fd97f" : "#9df29d"}
+                            stroke="#256029"
+                            strokeWidth={2}
+                            cornerRadius={4}
+                            />
+
+                            {/* Bin label text */}
+                            <Text
+                            text={bin.name}
+                            fontSize={10}
+                            fontStyle="bold"
+                            fill="#333"
+                            width={bin.width}
+                            align="center"
+                            />
+
+                        </Group>
                     ))}
                     </Layer>
                 </Stage>
+                {/* Panel around action buttons */}
+                <div className="mt-4 w-full max-w-md border border-gray-400 rounded p-3 bg-gray-50">
+                    {/* Selected item name */}
+                    <div className="mb-2 text-sm font-semibold text-gray-700">
+                        {(() => {
+                            let selectedName = 'No item selected';
+
+                            if (selectedBinId !== null) {
+                                const bin = bins.find((b) => b.id === selectedBinId);
+                                if (bin) {
+                                    selectedName = bin.name;
+                                }
+                            } else if (selectedDoorId !== null) {
+                                const door = doors.find((d) => d.id === selectedDoorId);
+                                if (door) {
+                                    selectedName = door.name;
+                                }
+                            }
+
+                            return selectedName;
+                        })()}
+                    </div>
+
+                    {/* Buttons */}
+                    <div className="flex gap-4">
+                        {/* Move button */}
+                        <button
+                            className="flex-1 px-4 py-2 rounded bg-blue-500 text-white hover:bg-blue-600 transition"
+                            onClick={() => {
+                                // Move action, can be applied to both bins and doors
+                            }}
+                        >
+                            Move
+                        </button>
+
+                        {/* Rotate selected item */}
+                        <button
+                            className="flex-1 px-4 py-2 rounded bg-green-500 text-white hover:bg-green-600 transition"
+                            onClick={() => {
+                                // Rotate action, can be applied to bins 
+                            }}
+                        >
+                            Rotate
+                        </button>
+
+                        {/* Remove selected item */}
+                        <button
+                            className="flex-1 px-4 py-2 rounded bg-red-500 text-white hover:bg-red-600 transition"
+                            onClick={() => {
+                                if (selectedBinId !== null) {
+                                    setBins((prev) => prev.filter((b) => b.id !== selectedBinId));
+                                    setSelectedBinId(null);
+                                } else if (selectedDoorId !== null) {
+                                    setDoors((prev) => prev.filter((d) => d.id !== selectedDoorId));
+                                    setSelectedDoorId(null);
+                                }
+                            }}
+                        >
+                            Remove
+                        </button>
+                    </div>
+                </div>
             </div>
 
             {/* Right sidebar */}
@@ -337,32 +460,121 @@ export default function PlanningTool() {
                                 initial={{ opacity: 0, height: 0 }}
                                 animate={{ opacity: 1, height: 'auto' }}
                                 exit={{ opacity: 0, height: 0 }}
-                                 className="mt-2 pl-4 space-y-2"
+                                className="mt-2 pl-4 space-y-2 relative" // relative för loading overlay
                             >
                                 {serviceTypes.map((type) => (
-                                    <motion.div key={type.name} layout>
+                                    <motion.div key={type.id} layout className="relative">
+                                        {/* Subscription type button */}
                                         <button
-                                            onClick={() => setSelectedType(prev => prev === type.name ? null : type.name)}
+                                            onClick={async () => {
+                                                if (selectedType === type.name) {
+                                                    setSelectedType(null);
+                                                    setContainers([]);
+                                                    setSelectedSize({});
+                                                    return;
+                                                }
+
+                                                setSelectedType(type.name);
+                                                setContainers([]);
+                                                setSelectedSize({});
+                                                setIsLoadingContainers(true);
+
+                                                try {
+                                                    const fetchedContainers = await fetchContainersByMunicipalityAndService(1, type.id);
+                                                    setContainers(fetchedContainers);
+                                                } catch (error) {
+                                                    console.error("Failed to fetch containers:", error);
+                                                } finally {
+                                                    setIsLoadingContainers(false);
+                                                }
+                                            }}
                                             className="w-full text-left p-2 border rounded bg-white hover:bg-blue-50 transition"
                                         >
                                             {type.name}
                                         </button>
 
-                                        {/* List with bins */}
-                                        {selectedType === type.name && (
+                                        {/* Loading overlay */}
+                                        {isLoadingContainers && selectedType === type.name && (
+                                            <motion.div
+                                                initial={{ opacity: 0 }}
+                                                animate={{ opacity: 0.7 }}
+                                                exit={{ opacity: 0 }}
+                                                transition={{ duration: 0.2 }}
+                                                className="absolute inset-0 flex items-center justify-center bg-white/70 backdrop-blur-sm rounded z-10"
+                                            >
+                                                <div className="animate-spin rounded-full h-8 w-8 border-4 border-gray-400 border-t-transparent" />
+                                            </motion.div>
+                                        )}
+
+                                        {/* Size buttons and containers */}
+                                        {selectedType === type.name && containers.length > 0 && (
                                             <motion.div
                                                 layout
                                                 initial={{ opacity: 0, height: 0 }}
                                                 animate={{ opacity: 1, height: 'auto' }}
                                                 exit={{ opacity: 0, height: 0 }}
-                                                className="mt-2 pl-4 space-y-2"
+                                                className="mt-2"
                                             >
-                                                <ul className="space-y-2">
-                                                   {binsPerType[type.name]?.map((bin, i) => (
-                                                     <li key={i} className="p-2 border rounded bg-white">{bin}</li>
-                                                   ))}
 
-                                                </ul>
+                                                {/* Size buttons */}
+                                                <div className="flex flex-wrap gap-2">
+                                                    {Array.from(new Set(containers.map(c => c.size)))
+                                                        .sort((a, b) => a - b)
+                                                        .map((size) => (
+                                                        <button
+                                                            key={size}
+                                                            onClick={() =>
+                                                                setSelectedSize({
+                                                                    ...selectedSize,
+                                                                    [type.id]: selectedSize[type.id] === size ? null : size,
+                                                                })
+                                                            }
+                                                            className="flex-1 min-w-[60px] text-center p-1 border rounded bg-gray-50 hover:bg-gray-100 transition text-sm"
+                                                        >
+                                                            {size}L
+                                                        </button>
+                                                    ))}
+                                                </div>
+
+                                                {/* Containers for selected size */}
+                                                {selectedSize[type.id] && (
+                                                    <div className="mt-2 grid grid-cols-2 gap-4 relative">
+                                                        {containers
+                                                            .filter(c => c.size === selectedSize[type.id])
+                                                            .map((container, i) => (
+                                                                <motion.div
+                                                                key={i}
+                                                                layout
+                                                                initial={{ opacity: 0, y: 10 }}
+                                                                animate={{ opacity: 1, y: 0 }}
+                                                                exit={{ opacity: 0, y: -10 }}
+                                                                transition={{ duration: 0.2 }}
+                                                                className="border rounded p-2 bg-white flex flex-col items-center"
+                                                                >
+                                                                <img
+                                                                    src={`http://localhost:8081${container.imageFrontViewUrl}`}
+                                                                    alt={container.name}
+                                                                    className="w-24 h-24 object-contain mb-2"
+                                                                />
+                                                                <p className="font-semibold">{container.name}</p>
+                                                                <p className="text-sm">
+                                                                    {container.width} × {container.height} × {container.depth} mm
+                                                                </p>
+                                                                <p className="text-sm">Töms: {container.emptyingFrequencyPerYear} / år</p>
+                                                                <p className="text-sm font-medium">{container.cost}:- / år</p>
+                                                                 
+                                                                {/* Button to add bin */}
+                                                                <button
+                                                                    onClick={() => handleAddBin(container.name)}
+                                                                    className="mt-2 px-3 py-1 text-sm rounded bg-blue-600 text-white hover:bg-blue-700 transition"
+                                                                >
+                                                                    Lägg till i rummet
+                                                                </button>
+                                                                </motion.div>
+                                                            ))
+                                                        }
+                                                    </div>
+                                                )}
                                             </motion.div>
                                         )}
                                     </motion.div>
@@ -371,7 +583,7 @@ export default function PlanningTool() {
                         )}
                     </AnimatePresence>
 
-                      {/* Button to add door */}
+                    {/* Button to add door */}
                     <button
                         className="p-3 mt-3 rounded bg-blue-600 text-white hover:bg-blue-700 transition"
                         onClick={() => setIsAddDoorOpen(!isAddDoorOpen)}
@@ -401,6 +613,29 @@ export default function PlanningTool() {
                             </motion.div>
                         )}
                     </AnimatePresence>
+
+                    <button 
+                    className = "p-3 mt-3 rounded bg-blue-600 text-white hover:bg-blue-700 transition"
+                        onClick ={() => setIsAlterRoomSizeOpen(true)}
+                        >
+                        Ange bredd och längd på rummet
+                    </button>
+
+                    {/* Opens up a window where users can insert numbers to change the size of the room */}
+                    {isAlterRoomSizeOpen && (
+                        <RoomSizePrompt
+                        onConfirm={(length: number, width: number) => {
+                            setIsAlterRoomSizeOpen(false);
+                            setRoom((prev) => ({
+                                x: (STAGE_WIDTH - length / SCALE) / 2, 
+                                y: (STAGE_HEIGHT - width / SCALE) / 2,           
+                                width: length / SCALE, 
+                                height: width / SCALE, 
+                                }));
+                        }}
+                        onCancel={() => setIsAlterRoomSizeOpen(false)}
+                        />
+                    )}
 
                     {/* Button to view subscription costs */}
                     <button
