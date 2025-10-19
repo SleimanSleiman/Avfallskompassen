@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, type DragEvent } from 'react';
 import { Stage, Layer, Rect, Circle, Text, Line, Group  } from 'react-konva';
 import { motion, AnimatePresence } from 'framer-motion';
 import { fetchServiceTypes } from '../lib/serviceType';
@@ -14,14 +14,32 @@ const MIN_HEIGHT = 50;
 const MARGIN = 30;
 const STAGE_WIDTH = 700;
 const STAGE_HEIGHT = 600;
+const DEFAULT_BIN_PIXEL_SIZE = 40;
+const MIN_BIN_PIXEL_SIZE = 28;
+const DRAG_DATA_FORMAT = 'application/avfallskompassen-container';
+
+interface BinMetadata {
+    size?: number;
+    widthMm?: number;
+    depthMm?: number;
+    heightMm?: number;
+}
+
+interface Bin {
+    id: number;
+    name: string;
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+    metadata?: BinMetadata;
+}
 
 //Clamp function to restrict values within min and max bounds
 const clamp = (value: number, min: number, max: number) => Math.max(min, Math.min(value, max));
 
 export default function PlanningTool() {
      //State to track which tab is active in the sidebar
-    const [activeTab, setActiveTab] = useState<'addBins' | 'costs' | null>(null);
-
     //State to control visibility of "Add Bins" and "Costs" sections
     const [isAddBinsOpen, setIsAddBinsOpen] = useState(false);
     const [showCosts, setShowCosts] = useState(false);
@@ -42,6 +60,8 @@ export default function PlanningTool() {
     const [selectedSize, setSelectedSize] = useState<{ [key: number]: number | null }>({});
 
     const [isAlterRoomSizeOpen, setIsAlterRoomSizeOpen] = useState(false);
+    const [isStageDropActive, setIsStageDropActive] = useState(false);
+    const stageWrapperRef = useRef<HTMLDivElement | null>(null);
 
     const initialRoom = (() => {
         const savedRoom = localStorage.getItem('trashRoomData');
@@ -107,20 +127,44 @@ export default function PlanningTool() {
 
     /*──────────────── Place bin ──────────────── */
 
-    const [bins, setBins] = useState<{ id: number; name: string; x: number; y: number; width: number; height: number; }[]>([]);
+    const [bins, setBins] = useState<Bin[]>([]);
     const [selectedBinId, setSelectedBinId] = useState<number | null>(null);
 
-    const handleAddBin = (binName: string) => {
-        const newBin = {
+    const mmToPixels = (mm?: number) => {
+        if (!mm || mm <= 0) {
+            return null;
+        }
+        const pixels = (mm / 1000) / SCALE;
+        return Math.max(MIN_BIN_PIXEL_SIZE, Math.round(pixels));
+    };
+
+    const handleAddBin = (container: ContainerDTO, position?: { x: number; y: number }) => {
+        const binWidth = mmToPixels(container.width) ?? DEFAULT_BIN_PIXEL_SIZE;
+        const binHeight = mmToPixels(container.depth) ?? DEFAULT_BIN_PIXEL_SIZE;
+
+        let targetX = position ? position.x - binWidth / 2 : room.x + room.width / 2 - binWidth / 2;
+        let targetY = position ? position.y - binHeight / 2 : room.y + room.height / 2 - binHeight / 2;
+
+        targetX = clamp(targetX, room.x, room.x + room.width - binWidth);
+        targetY = clamp(targetY, room.y, room.y + room.height - binHeight);
+
+        const newBin: Bin = {
             id: Date.now(),
-            name: binName,
-            x: room.x + room.width / 2 - 15, 
-            y: room.y + room.height / 2 - 15,
-            width: 30,
-            height: 30,
+            name: container.name,
+            x: targetX,
+            y: targetY,
+            width: binWidth,
+            height: binHeight,
+            metadata: {
+                size: container.size,
+                widthMm: container.width,
+                depthMm: container.depth,
+                heightMm: container.height,
+            },
         };
 
         setBins((prev) => [...prev, newBin]);
+        setSelectedBinId(newBin.id);
     };
 
     const handleRemoveBin = (id: number) => {
@@ -188,10 +232,65 @@ export default function PlanningTool() {
           .catch(err => console.error('Error fetching service types:', err));
       }, []);
 
+    const handleStageDrop = (event: DragEvent<HTMLDivElement>) => {
+        event.preventDefault();
+        setIsStageDropActive(false);
+
+        const data = event.dataTransfer.getData(DRAG_DATA_FORMAT);
+        if (!data) {
+            return;
+        }
+
+        let container: ContainerDTO;
+        try {
+            container = JSON.parse(data) as ContainerDTO;
+        } catch (error) {
+            console.error('Failed to parse dropped container data', error);
+            return;
+        }
+
+        if (!stageWrapperRef.current) {
+            return;
+        }
+
+        const rect = stageWrapperRef.current.getBoundingClientRect();
+        const dropX = clamp(event.clientX - rect.left, 0, STAGE_WIDTH);
+        const dropY = clamp(event.clientY - rect.top, 0, STAGE_HEIGHT);
+
+        handleAddBin(container, { x: dropX, y: dropY });
+    };
+
+    const handleStageDragOver = (event: DragEvent<HTMLDivElement>) => {
+        if (!Array.from(event.dataTransfer.types).includes(DRAG_DATA_FORMAT)) {
+            return;
+        }
+
+        event.preventDefault();
+        event.dataTransfer.dropEffect = 'copy';
+
+        if (!isStageDropActive) {
+            setIsStageDropActive(true);
+        }
+    };
+
+    const handleStageDragLeave = (event: DragEvent<HTMLDivElement>) => {
+        if (event.currentTarget.contains(event.relatedTarget as Node)) {
+            return;
+        }
+        setIsStageDropActive(false);
+    };
+
     return (
         <div className="flex w-full h-full p-6">
             <div className="flex flex-col items-center w-3/5">
-                <Stage width={STAGE_WIDTH} height={STAGE_HEIGHT} className="border border-gray-300 bg-gray-50 rounded">
+                <div
+                    ref={stageWrapperRef}
+                    className={`rounded ${isStageDropActive ? 'ring-4 ring-blue-300 ring-offset-2' : ''}`}
+                    onDrop={handleStageDrop}
+                    onDragOver={handleStageDragOver}
+                    onDragLeave={handleStageDragLeave}
+                >
+                    <Stage width={STAGE_WIDTH} height={STAGE_HEIGHT} className="border border-gray-300 bg-gray-50 rounded">
                     <Layer>
                         {/* Room */}
                         <Rect
@@ -232,7 +331,7 @@ export default function PlanningTool() {
                                 draggable
                                 dragBoundFunc={(pos) => {
                                     //Use same logic as handleDragCorner to constrain movement for corner-circles
-                                    let newPos = { x: pos.x, y: pos.y };
+                                    const newPos = { x: pos.x, y: pos.y };
                                     switch (index) {
                                         case 0:
                                             newPos.x = clamp(pos.x, MARGIN, room.x + room.width - MIN_WIDTH);
@@ -377,7 +476,8 @@ export default function PlanningTool() {
                         </Group>
                     ))}
                     </Layer>
-                </Stage>
+                    </Stage>
+                </div>
                 {/* Panel around action buttons */}
                 <div className="mt-4 w-full max-w-md border border-gray-400 rounded p-3 bg-gray-50">
                     {/* Selected item name */}
@@ -428,7 +528,7 @@ export default function PlanningTool() {
                             className="flex-1 px-4 py-2 rounded bg-red-500 text-white hover:bg-red-600 transition"
                             onClick={() => {
                                 if (selectedBinId !== null) {
-                                    setBins((prev) => prev.filter((b) => b.id !== selectedBinId));
+                                    handleRemoveBin(selectedBinId);
                                     setSelectedBinId(null);
                                 } else if (selectedDoorId !== null) {
                                     setDoors((prev) => prev.filter((d) => d.id !== selectedDoorId));
@@ -543,33 +643,41 @@ export default function PlanningTool() {
                                                             .filter(c => c.size === selectedSize[type.id])
                                                             .map((container, i) => (
                                                                 <motion.div
-                                                                key={i}
-                                                                layout
-                                                                initial={{ opacity: 0, y: 10 }}
-                                                                animate={{ opacity: 1, y: 0 }}
-                                                                exit={{ opacity: 0, y: -10 }}
-                                                                transition={{ duration: 0.2 }}
-                                                                className="border rounded p-2 bg-white flex flex-col items-center"
+                                                                    key={i}
+                                                                    layout
+                                                                    initial={{ opacity: 0, y: 10 }}
+                                                                    animate={{ opacity: 1, y: 0 }}
+                                                                    exit={{ opacity: 0, y: -10 }}
+                                                                    transition={{ duration: 0.2 }}
                                                                 >
-                                                                <img
-                                                                    src={`http://localhost:8081${container.imageFrontViewUrl}`}
-                                                                    alt={container.name}
-                                                                    className="w-24 h-24 object-contain mb-2"
-                                                                />
-                                                                <p className="font-semibold">{container.name}</p>
-                                                                <p className="text-sm">
-                                                                    {container.width} × {container.height} × {container.depth} mm
-                                                                </p>
-                                                                <p className="text-sm">Töms: {container.emptyingFrequencyPerYear} / år</p>
-                                                                <p className="text-sm font-medium">{container.cost}:- / år</p>
-                                                                 
-                                                                {/* Button to add bin */}
-                                                                <button
-                                                                    onClick={() => handleAddBin(container.name)}
-                                                                    className="mt-2 px-3 py-1 text-sm rounded bg-blue-600 text-white hover:bg-blue-700 transition"
-                                                                >
-                                                                    Lägg till i rummet
-                                                                </button>
+                                                                    <div className="border rounded p-2 bg-white flex flex-col items-center">
+                                                                        <img
+                                                                            src={`http://localhost:8081${container.imageFrontViewUrl}`}
+                                                                            alt={container.name}
+                                                                            className="w-24 h-24 object-contain mb-2 cursor-move"
+                                                                            draggable
+                                                                            onDragStart={(event: DragEvent<HTMLImageElement>) => {
+                                                                                event.dataTransfer.effectAllowed = 'copy';
+                                                                                event.dataTransfer.setData(DRAG_DATA_FORMAT, JSON.stringify(container));
+                                                                                event.dataTransfer.setData('text/plain', container.name);
+                                                                            }}
+                                                                            onDragEnd={() => setIsStageDropActive(false)}
+                                                                        />
+                                                                        <p className="font-semibold">{container.name}</p>
+                                                                        <p className="text-sm">
+                                                                            {container.width} × {container.height} × {container.depth} mm
+                                                                        </p>
+                                                                        <p className="text-sm">Töms: {container.emptyingFrequencyPerYear} / år</p>
+                                                                        <p className="text-sm font-medium">{container.cost}:- / år</p>
+
+                                                                        {/* Button to add bin */}
+                                                                        <button
+                                                                            onClick={() => handleAddBin(container)}
+                                                                            className="mt-2 px-3 py-1 text-sm rounded bg-blue-600 text-white hover:bg-blue-700 transition"
+                                                                        >
+                                                                            Lägg till i rummet
+                                                                        </button>
+                                                                    </div>
                                                                 </motion.div>
                                                             ))
                                                         }
@@ -626,7 +734,7 @@ export default function PlanningTool() {
                         <RoomSizePrompt
                         onConfirm={(length: number, width: number) => {
                             setIsAlterRoomSizeOpen(false);
-                            setRoom((prev) => ({
+                            setRoom(() => ({
                                 x: (STAGE_WIDTH - length / SCALE) / 2, 
                                 y: (STAGE_HEIGHT - width / SCALE) / 2,           
                                 width: length / SCALE, 
