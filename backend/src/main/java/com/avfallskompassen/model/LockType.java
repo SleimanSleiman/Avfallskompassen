@@ -4,6 +4,11 @@ import jakarta.persistence.*;
 
 import java.math.BigDecimal;
 
+/**
+ * Entity class for the LockTypes.
+ * @Author Christian Storck
+ */
+
 @Entity
 @Table(name = "lock_types")
 public class LockType {

@@ -7,6 +7,7 @@ import org.springframework.stereotype.Repository;
 /**
  * Repository interface for ServiceType entity operations.
  */
+
 @Repository
 public interface ServiceTypeRepository extends JpaRepository<ServiceType, Long> {
 

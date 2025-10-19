@@ -2,6 +2,11 @@ package com.avfallskompassen.model;
 
 import jakarta.persistence.*;
 
+/**
+ * Entity class for the ContainerTypes.
+ * @Author Christian Storck
+ */
+
 @Entity
 @Table(name = "container_type")
 public class ContainerType {
