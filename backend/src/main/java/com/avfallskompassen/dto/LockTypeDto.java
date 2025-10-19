@@ -4,6 +4,11 @@ import com.avfallskompassen.model.LockType;
 
 import java.math.BigDecimal;
 
+/**
+ * DTO containing the served data regarding LockTypes.
+ * @Author Christian Storck
+ */
+
 public class LockTypeDto {
     private long id;
     private String name;

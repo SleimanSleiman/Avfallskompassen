@@ -4,6 +4,11 @@ import jakarta.persistence.*;
 
 import java.math.BigDecimal;
 
+/**
+ * Entity class for the container plans.
+ * @Author Christian Storck
+ */
+
 @Entity
 @Table(name = "container_plan")
 public class ContainerPlan {

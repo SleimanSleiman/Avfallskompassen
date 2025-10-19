@@ -1,34 +1,15 @@
 package com.avfallskompassen.services;
 
-import com.avfallskompassen.model.CollectionFee;
-import com.avfallskompassen.repository.CollectionFeeRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import com.avfallskompassen.dto.CollectionFeeDTO;
 
-import java.math.BigDecimal;
-import java.util.List;
-import java.util.Optional;
+/**
+ * Interface for the service class CollectionFeeImpl
+ * @Author Christian
+ */
 
-@Service
-@Transactional
-public class CollectionFeeService {
+public interface CollectionFeeService {
 
-    @Autowired
-    private CollectionFeeRepository collectionFeeRepository;
+    CollectionFeeDTO findCollectionFeeByMunicipalityId(Long id, double distance);
 
-    public BigDecimal findCollectionFeeById(Long id, double distance) {
-        CollectionFee collectionFee = collectionFeeRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Collection fee not found"));
-
-        if(distance <= 5) {
-            return BigDecimal.ZERO;
-        }
-
-        double distanceFee = distance -5;
-
-        int segment = (int) Math.ceil(distanceFee / 10.0);
-
-        return collectionFee.getCost().multiply(BigDecimal.valueOf(segment));
-    }
+    CollectionFeeDTO findCollectionFeeByPropertyId(Long propertyId);
 }

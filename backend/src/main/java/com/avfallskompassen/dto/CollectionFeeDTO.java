@@ -4,6 +4,11 @@ import com.avfallskompassen.model.CollectionFee;
 
 import java.math.BigDecimal;
 
+/**
+ * DTO containing the served data regarding Collection Fee's.
+ * @Author Christian Storck
+ */
+
 public class CollectionFeeDTO {
     private Long id;
     private BigDecimal cost;

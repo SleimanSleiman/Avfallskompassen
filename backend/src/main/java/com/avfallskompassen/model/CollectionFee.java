@@ -4,6 +4,11 @@ import jakarta.persistence.*;
 
 import java.math.BigDecimal;
 
+/**
+ * Entity class for the collection fee's.
+ * @Author Christian Storck
+ */
+
 @Entity
 @Table(name = "collection_fee")
 public class CollectionFee {
