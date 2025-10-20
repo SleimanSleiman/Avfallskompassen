@@ -2,6 +2,11 @@ package com.avfallskompassen.model;
 
 import jakarta.persistence.*;
 
+/**
+ * Entity class for the different municipality services.
+ * @Author Christian Storck
+ */
+
 @Entity
 @Table(name = "Municipality_Service")
 public class MunicipalityService {

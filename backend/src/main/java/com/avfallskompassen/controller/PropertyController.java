@@ -59,6 +59,10 @@ public class PropertyController {
             response.setLockPrice(lockType.getCost());
             response.setAccessPathLength(property.getAccessPathLength());
             response.setCreatedAt(property.getCreatedAt());
+            if (property.getMunicipality() != null) {
+                response.setMunicipalityId(property.getMunicipality().getId());
+                response.setMunicipalityName(property.getMunicipality().getName());
+            }
             
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
             
@@ -163,6 +167,10 @@ public class PropertyController {
             response.setLockPrice(lockType != null ? lockType.getCost() : null);
             response.setAccessPathLength(updated.getAccessPathLength());
             response.setCreatedAt(updated.getCreatedAt());
+            if (updated.getMunicipality() != null) {
+                response.setMunicipalityId(updated.getMunicipality().getId());
+                response.setMunicipalityName(updated.getMunicipality().getName());
+            }
 
             return ResponseEntity.ok(response);
 
@@ -227,7 +235,7 @@ public class PropertyController {
             return ResponseEntity.ok(response);
         } else {
             PropertyResponse response = new PropertyResponse(false, "Property not found");
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
         }
     }
     

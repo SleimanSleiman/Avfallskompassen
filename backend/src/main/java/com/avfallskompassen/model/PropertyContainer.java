@@ -4,6 +4,11 @@ package com.avfallskompassen.model;
 import com.fasterxml.jackson.databind.annotation.JsonAppend;
 import jakarta.persistence.*;
 
+/**
+ * Entity class for the different propertyContainers.
+ * @Author Christian Storck
+ */
+
 @Entity
 @Table(name = "property_container")
 public class PropertyContainer {
