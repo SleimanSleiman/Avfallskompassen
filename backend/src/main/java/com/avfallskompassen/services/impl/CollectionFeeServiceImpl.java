@@ -13,7 +13,7 @@ import java.math.BigDecimal;
 
 /**
  * Service class that serves DTO's to the controller layer. Handles the CollectionFee calculations.
- * And implementation of the CollectionFee interface.
+ * And implementation of the CollectionFeeService interface.
  * @Author Christian Storck
  */
 
