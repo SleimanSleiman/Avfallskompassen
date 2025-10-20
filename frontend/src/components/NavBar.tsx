@@ -16,8 +16,12 @@ export default function NavBar() {
       <div className="bg-nsr-teal">
         <div className="mx-auto max-w-7xl px-4">
           <div className="flex h-14 items-center justify-between">
-            <Link to="/" className="flex items-center gap-2 text-white font-semibold">
-              <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-white/20">e</span>
+            <Link to="/dashboard" className="flex items-center gap-2 text-white font-semibold">
+              <img
+                src="\src\assets\avfallskompassen_logo.png"
+                alt="Avfallskompassen logo"
+                className="h-12 w-12 object-contain"
+              />
               <span className="tracking-wide">NSR</span>
             </Link>
 
