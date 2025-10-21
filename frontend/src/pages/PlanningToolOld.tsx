@@ -51,8 +51,8 @@ export default function PlanningTool() {
             const roomHeight = parsed.width / SCALE;
 
             return {
-                x: (STAGE_WIDTH - roomWidth) / 2,   
-                y: (STAGE_HEIGHT - roomHeight) / 2, 
+                x: (STAGE_WIDTH - roomWidth) / 2,
+                y: (STAGE_HEIGHT - roomHeight) / 2,
                 width: roomWidth,
                 height: roomHeight,
             };
@@ -62,7 +62,7 @@ export default function PlanningTool() {
 
 
     //Room state containing room's position and dimensions in pixels
-    const [room, setRoom] = useState(initialRoom); 
+    const [room, setRoom] = useState(initialRoom);
 
    /*──────────────── Door Configuration ────────────────
         Handles door-related state, types, and data setup
@@ -114,7 +114,7 @@ export default function PlanningTool() {
         const newBin = {
             id: Date.now(),
             name: binName,
-            x: room.x + room.width / 2 - 15, 
+            x: room.x + room.width / 2 - 15,
             y: room.y + room.height / 2 - 15,
             width: 30,
             height: 30,
@@ -332,7 +332,7 @@ export default function PlanningTool() {
                             strokeWidth={2}
                             cornerRadius={2}
                             />
-        
+
                         </Group>
                         ))}
                     {/* Bins */}
@@ -417,7 +417,7 @@ export default function PlanningTool() {
                         <button
                             className="flex-1 px-4 py-2 rounded bg-green-500 text-white hover:bg-green-600 transition"
                             onClick={() => {
-                                // Rotate action, can be applied to bins 
+                                // Rotate action, can be applied to bins
                             }}
                         >
                             Rotate
@@ -562,7 +562,7 @@ export default function PlanningTool() {
                                                                 </p>
                                                                 <p className="text-sm">Töms: {container.emptyingFrequencyPerYear} / år</p>
                                                                 <p className="text-sm font-medium">{container.cost}:- / år</p>
-                                                                 
+
                                                                 {/* Button to add bin */}
                                                                 <button
                                                                     onClick={() => handleAddBin(container.name)}
@@ -614,7 +614,7 @@ export default function PlanningTool() {
                         )}
                     </AnimatePresence>
 
-                    <button 
+                    <button
                     className = "p-3 mt-3 rounded bg-blue-600 text-white hover:bg-blue-700 transition"
                         onClick ={() => setIsAlterRoomSizeOpen(true)}
                         >
@@ -627,10 +627,10 @@ export default function PlanningTool() {
                         onConfirm={(length: number, width: number) => {
                             setIsAlterRoomSizeOpen(false);
                             setRoom((prev) => ({
-                                x: (STAGE_WIDTH - length / SCALE) / 2, 
-                                y: (STAGE_HEIGHT - width / SCALE) / 2,           
-                                width: length / SCALE, 
-                                height: width / SCALE, 
+                                x: (STAGE_WIDTH - length / SCALE) / 2,
+                                y: (STAGE_HEIGHT - width / SCALE) / 2,
+                                width: length / SCALE,
+                                height: width / SCALE,
                                 }));
                         }}
                         onCancel={() => setIsAlterRoomSizeOpen(false)}

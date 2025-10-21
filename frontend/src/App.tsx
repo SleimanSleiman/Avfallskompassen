@@ -5,7 +5,7 @@ import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import PropertyPage from './pages/PropertyPage';
 import { currentUser } from './lib/auth';
-import PlanningTool from './pages/PlanningTool';
+import PlanningTool from './pages/PlanningTool/PlanningTool';
 
 function Dashboard() {
   const user = currentUser();
