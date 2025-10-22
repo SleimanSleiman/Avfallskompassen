@@ -12,5 +12,5 @@ import java.util.List;
 
 @Repository
 public interface PropertyContainerRepository extends JpaRepository<PropertyContainer, Long> {
-    List<PropertyContainer> findByProperty(Long propertyId);
+    List<PropertyContainer> findByPropertyId(Long propertyId);
 }
