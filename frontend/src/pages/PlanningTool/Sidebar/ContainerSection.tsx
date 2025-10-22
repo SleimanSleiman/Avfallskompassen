@@ -4,6 +4,7 @@
  */
 import { motion, AnimatePresence } from "framer-motion";
 import type { ContainerDTO } from "../../lib/container";
+import { DRAG_DATA_FORMAT } from "../constants";
 
 /* ─────────────── Container Props ─────────────── */
 type ContainerSectionProps = {
@@ -19,7 +20,8 @@ type ContainerSectionProps = {
     setSelectedSize: React.Dispatch<React.SetStateAction<{ [key: number]: number | null }>>;
     isLoadingContainers: boolean;
     fetchContainers: (serviceId: number) => Promise<void>;
-    handleAddContainer: (containerName: string) => void;
+    handleAddContainer: (container: ContainerDTO, position?: { x: number; y: number }) => void;
+    setIsStageDropActive: (v: boolean) => void;
 };
 
 export default function ContainerSection({
@@ -34,6 +36,7 @@ export default function ContainerSection({
     isLoadingContainers,
     fetchContainers,
     handleAddContainer,
+    setIsStageDropActive,
 }: ContainerSectionProps) {
 
     /* ─────────────── Render ─────────────── */
@@ -133,14 +136,21 @@ export default function ContainerSection({
                                                             <img
                                                                 src={`http://localhost:8081${container.imageFrontViewUrl}`}
                                                                 alt={container.name}
-                                                                className="w-24 h-24 object-contain mb-2"
+                                                                className="w-24 h-24 object-contain mb-2 cursor-move"
+                                                                draggable
+                                                                onDragStart={(event: React.DragEvent<HTMLImageElement>) => {
+                                                                    event.dataTransfer.effectAllowed = 'copy';
+                                                                    event.dataTransfer.setData(DRAG_DATA_FORMAT, JSON.stringify(container));
+                                                                    event.dataTransfer.setData('text/plain', container.name);
+                                                                }}
+                                                                onDragEnd={() => setIsStageDropActive(false)}
                                                             />
                                                             <p className="font-semibold">{container.name}</p>
                                                             <p className="text-sm">{container.width} × {container.height} × {container.depth} mm</p>
                                                             <p className="text-sm">Töms: {container.emptyingFrequencyPerYear}/år</p>
                                                             <p className="text-sm font-medium">{container.cost}:- / år</p>
                                                             <button
-                                                                onClick={() => handleAddContainer(container.name)}
+                                                                onClick={() => handleAddContainer(container)}
                                                                 className="mt-2 px-3 py-1 text-sm rounded bg-blue-600 text-white hover:bg-blue-700 transition"
                                                             >
                                                                 Lägg till i rummet

@@ -46,7 +46,7 @@ export default function ContainersLayer({
 
                     {/* Container name */}
                     <Text
-                        text={container.name}
+                        text={container.container.name}
                         fontSize={10}
                         fontStyle="bold"
                         fill="#333"

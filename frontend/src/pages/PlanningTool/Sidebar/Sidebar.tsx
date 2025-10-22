@@ -31,7 +31,8 @@ type SidebarProps = {
     setSelectedSize: React.Dispatch<React.SetStateAction<{ [key: number]: number | null }>>;
     isLoadingContainers: boolean;
     fetchContainers: (serviceId: number) => Promise<void>;
-    handleAddContainer: (containerName: string) => void;
+    handleAddContainer: (container: ContainerDTO, position?: { x: number; y: number }) => void;
+    setIsStageDropActive: (v: boolean) => void;
 
     //Doors & room management
     handleAddDoor: (type: any) => void;
@@ -56,6 +57,7 @@ export default function Sidebar({
     isLoadingContainers,
     fetchContainers,
     handleAddContainer,
+    setIsStageDropActive,
     handleAddDoor,
     setRoom,
 }: SidebarProps ) {
@@ -94,6 +96,7 @@ export default function Sidebar({
                     isLoadingContainers={isLoadingContainers}
                     fetchContainers={fetchContainers}
                     handleAddContainer={handleAddContainer}
+                    setIsStageDropActive={setIsStageDropActive}
                 />
 
                 {/* Section to show costs */}

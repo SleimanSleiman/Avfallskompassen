@@ -9,9 +9,9 @@ import type { Room } from "../types";
 
 /* ─────────────── RoomSizeSection Props ──────────────── */
 type RoomSizeSectionProps = {
-  isAlterRoomSizeOpen: boolean;
-  setIsAlterRoomSizeOpen: (v: boolean) => void;
-  setRoom: (room: Room) => void;
+    isAlterRoomSizeOpen: boolean;
+    setIsAlterRoomSizeOpen: (v: boolean) => void;
+    setRoom: (room: Room) => void;
 };
 
 export default function RoomSizeSection({

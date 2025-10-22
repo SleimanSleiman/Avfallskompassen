@@ -27,7 +27,7 @@ export default function ActionPanel({
     const selectedName = (() => {
         if (selectedContainerId !== null) {
             const container = containers.find((c) => c.id === selectedContainerId);
-            return container ? container.name : "Inget objekt valt";
+            return container ? container.container.name : "Inget objekt valt";
         } else if (selectedDoorId !== null) {
             const door = doors.find((d) => d.id === selectedDoorId);
             return door ? door.name : "Inget objekt valt";

@@ -52,6 +52,12 @@ export default function PlanningTool() {
         availableContainers,
         isLoadingContainers,
         fetchAvailableContainers,
+        isStageDropActive,
+        setIsStageDropActive,
+        stageWrapperRef,
+        handleStageDrop,
+        handleStageDragOver,
+        handleStageDragLeave,
     } = useContainers(room);
 
     /* ──────────────── Service Types (API data) ──────────────── */
@@ -86,6 +92,12 @@ export default function PlanningTool() {
                     selectedContainerId={selectedContainerId}
                     handleDragContainer={handleDragContainer}
                     handleSelectContainer={handleSelectContainer}
+
+                    isStageDropActive={isStageDropActive}
+                    stageWrapperRef={stageWrapperRef}
+                    handleStageDrop={handleStageDrop}
+                    handleStageDragOver={handleStageDragOver}
+                    handleStageDragLeave={handleStageDragLeave}
                 />
 
                 {/* ActionPanel for moving/rotating/removing selected items */}
@@ -114,6 +126,7 @@ export default function PlanningTool() {
                     isLoadingContainers={isLoadingContainers}
                     fetchContainers={fetchAvailableContainers}
                     handleAddContainer={handleAddContainer}
+                    setIsStageDropActive={setIsStageDropActive}
 
                     // UI state for sidebar sections
                     isAddContainersOpen={isAddContainersOpen}

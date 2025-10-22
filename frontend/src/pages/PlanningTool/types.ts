@@ -28,9 +28,10 @@ export type DoorTemplate = {
 
 export type ContainerInRoom = {
   id: number;
-  name: string;
+  container: ContainerDTO;
   x: number;
   y: number;
   width: number;
   height: number;
+  container: ContainerDTO;
 };

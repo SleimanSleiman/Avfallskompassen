@@ -8,7 +8,7 @@ import CornerHandles from "./CornerHandles";
 import DoorsLayer from "./DoorsLayer";
 import ContainersLayer from "./ContainersLayer";
 import { STAGE_WIDTH, STAGE_HEIGHT } from "../constants";
-import type { Room } from "../types";
+import type { Room, ContainerInRoom, Door } from "../types";
 
 /* ─────────────── RoomCanvas Props ──────────────── */
 type RoomCanvasProps = {
@@ -28,6 +28,13 @@ type RoomCanvasProps = {
     selectedContainerId: number | null;
     handleDragContainer: (id: number, pos: { x: number; y: number }) => void;
     handleSelectContainer: (id: number) => void;
+
+    //Drag & Drop props
+    stageWrapperRef: React.RefObject<HTMLDivElement>;
+    handleStageDrop: (event: React.DragEvent<HTMLDivElement>) => void;
+    handleStageDragOver: (event: React.DragEvent<HTMLDivElement>) => void;
+    handleStageDragLeave: (event: React.DragEvent<HTMLDivElement>) => void;
+    isStageDropActive: boolean;
 };
 
 export default function RoomCanvas({
@@ -42,43 +49,56 @@ export default function RoomCanvas({
     selectedContainerId,
     handleDragContainer,
     handleSelectContainer,
+    stageWrapperRef,
+    handleStageDrop,
+    handleStageDragOver,
+    handleStageDragLeave,
+    isStageDropActive,
 }: RoomCanvasProps) {
 
     /* ──────────────── Render ──────────────── */
     return (
-        <Stage
-            width={STAGE_WIDTH}
-            height={STAGE_HEIGHT}
-            className="border border-gray-300 bg-gray-50 rounded"
+        <div
+            ref={stageWrapperRef}
+            className={`rounded ${isStageDropActive ? 'ring-4 ring-blue-300 ring-offset-2' : ''}`}
+            onDrop={handleStageDrop}
+            onDragOver={handleStageDragOver}
+            onDragLeave={handleStageDragLeave}
         >
-            <Layer>
-                {/* Room rectangle */}
-                <RoomShape room={room} />
+            <Stage
+                width={STAGE_WIDTH}
+                height={STAGE_HEIGHT}
+                className="border border-gray-300 bg-gray-50 rounded"
+            >
+                <Layer>
+                    {/* Room rectangle */}
+                    <RoomShape room={room} />
 
-                {/* Draggable corners for resizing the room */}
-                <CornerHandles
-                    corners={corners}
-                    room={room}
-                    handleDragCorner={handleDragCorner}
-                />
+                    {/* Draggable corners for resizing the room */}
+                    <CornerHandles
+                        corners={corners}
+                        room={room}
+                        handleDragCorner={handleDragCorner}
+                    />
 
-                {/* Doors layer */}
-                <DoorsLayer
-                    room={room}
-                    doors={doors}
-                    selectedDoorId={selectedDoorId}
-                    handleDragDoor={handleDragDoor}
-                    handleSelectDoor={handleSelectDoor}
-                />
+                    {/* Doors layer */}
+                    <DoorsLayer
+                        room={room}
+                        doors={doors}
+                        selectedDoorId={selectedDoorId}
+                        handleDragDoor={handleDragDoor}
+                        handleSelectDoor={handleSelectDoor}
+                    />
 
-                {/* Containers layer */}
-                <ContainersLayer
-                    containersInRoom={containers}
-                    selectedContainerId={selectedContainerId}
-                    handleDragContainer={handleDragContainer}
-                    handleSelectContainer={handleSelectContainer}
-                />
-            </Layer>
-        </Stage>
+                    {/* Containers layer */}
+                    <ContainersLayer
+                        containersInRoom={containers}
+                        selectedContainerId={selectedContainerId}
+                        handleDragContainer={handleDragContainer}
+                        handleSelectContainer={handleSelectContainer}
+                    />
+                </Layer>
+            </Stage>
+        </div>
     );
 }
