@@ -30,16 +30,32 @@ export function useDoors(room: Room) {
         setDoors((prev) => prev.filter((d) => d.id !== id));
     };
 
-    //Handle dragging a door and snapping it to the nearest wall
-    const handleDragDoor = (id: number, pos: { x: number; y: number }, room: Room) => {
-        const distLeft = Math.abs(pos.x - room.x);
-        const distRight = Math.abs(pos.x - (room.x + room.width));
-        const newRotation = distLeft < distRight ? 90 : 0;
+   //Handle dragging a door and snapping it to the nearest wall
+   const handleDragDoor = (id: number, pos: { x: number; y: number }, room: Room) => {
+       const distTop = Math.abs(pos.y - room.y);
+       const distBottom = Math.abs(pos.y - (room.y + room.height));
+       const distLeft = Math.abs(pos.x - room.x);
+       const distRight = Math.abs(pos.x - (room.x + room.width));
 
-        setDoors((prev) =>
-            prev.map((d) => (d.id === id ? { ...d, ...pos, rotation: newRotation } : d))
-        );
-    };
+       const minDist = Math.min(distTop, distBottom, distLeft, distRight);
+       let newRotation = 0;
+
+       if (minDist === distTop) {
+           newRotation = 0;
+       } else if (minDist === distBottom) {
+           newRotation = 0;
+       } else if (minDist === distLeft) {
+           newRotation = 90;
+       } else {
+           newRotation = 90;
+       }
+
+       setDoors((prev) =>
+           prev.map((d) =>
+               d.id === id ? { ...d, ...pos, rotation: newRotation } : d
+           )
+       );
+   };
 
     //Select or deselect a door
     const handleSelectDoor = (id: number) => {

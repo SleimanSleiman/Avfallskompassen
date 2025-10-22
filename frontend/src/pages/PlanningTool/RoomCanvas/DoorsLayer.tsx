@@ -30,7 +30,7 @@ export default function DoorsLayer({
                 <Group
                     key={door.id}
                     x={door.x}
-                     y={door.y}
+                    y={door.y}
                     draggable
                     //Constrain door movement to room edges
                     dragBoundFunc={(pos) => {
@@ -43,18 +43,20 @@ export default function DoorsLayer({
                         let newX = pos.x;
                         let newY = pos.y;
 
+                        const CORNER_MARGIN = 15; //margin to prevent door from reaching corners
+
                         if (minDist === distTop) {
                             newY = room.y - door.height;
-                            newX = clamp(pos.x, room.x, room.x + room.width - door.width);
+                            newX = clamp(pos.x, room.x + CORNER_MARGIN, room.x + room.width - door.width - CORNER_MARGIN);
                         } else if (minDist === distBottom) {
                             newY = room.y + room.height;
-                            newX = clamp(pos.x, room.x, room.x + room.width - door.width);
+                            newX = clamp(pos.x, room.x + CORNER_MARGIN, room.x + room.width - door.width - CORNER_MARGIN);
                         } else if (minDist === distLeft) {
                             newX = room.x - door.height;
-                            newY = clamp(pos.y, room.y, room.y + room.height - door.width);
-                        } else {
+                            newY = clamp(pos.y, room.y + CORNER_MARGIN, room.y + room.height - door.width - CORNER_MARGIN);
+                        } else if (minDist === distRight) {
                             newX = room.x + room.width;
-                            newY = clamp(pos.y, room.y, room.y + room.height - door.width);
+                            newY = clamp(pos.y, room.y + CORNER_MARGIN, room.y + room.height - door.width - CORNER_MARGIN);
                         }
 
                         return { x: newX, y: newY };
