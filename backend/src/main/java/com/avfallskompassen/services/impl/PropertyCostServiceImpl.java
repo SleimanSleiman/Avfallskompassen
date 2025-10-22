@@ -1,11 +1,9 @@
 package com.avfallskompassen.services.impl;
 
 import com.avfallskompassen.dto.GeneralPropertyCostDTO;
-import com.avfallskompassen.dto.PropertyCostDTO;
 import com.avfallskompassen.model.Property;
 import com.avfallskompassen.model.PropertyContainer;
 import com.avfallskompassen.repository.PropertyContainerRepository;
-import com.avfallskompassen.repository.PropertyRepository;
 import com.avfallskompassen.services.CollectionFeeService;
 import com.avfallskompassen.services.LockTypeService;
 import com.avfallskompassen.services.PropertyCostService;
@@ -47,7 +45,7 @@ public class PropertyCostServiceImpl implements PropertyCostService {
 
         BigDecimal lockCost = lockTypeService.findLockTypeById(propertyId).getCost();
 
-        List<PropertyContainer> propertyContainerList = propertyContainerRepository.findByProperty(propertyId);
+        List<PropertyContainer> propertyContainerList = propertyContainerRepository.findByPropertyId(propertyId);
 
         BigDecimal containerCost = propertyContainerList.stream()
                 .map(propertyContainer -> {

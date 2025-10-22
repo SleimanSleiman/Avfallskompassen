@@ -74,7 +74,7 @@ public class PropertyCostServiceImplTest {
         propertyContainer2.setContainerPlan(plan);
         propertyContainer2.setContainerCount(3);
 
-        when(propertyContainerRepository.findByProperty(propertyId)).thenReturn(List.of(propertyContainer1, propertyContainer2));
+        when(propertyContainerRepository.findByPropertyId(propertyId)).thenReturn(List.of(propertyContainer1, propertyContainer2));
 
         GeneralPropertyCostDTO result = propertyCostService.calculateAnnualCost(propertyId);
 
@@ -88,7 +88,7 @@ public class PropertyCostServiceImplTest {
         assertEquals(expectedResultPerApartment, result.getCostPerApartment());
 
         verify(propertyService).findById(propertyId);
-        verify(propertyContainerRepository).findByProperty(propertyId);
+        verify(propertyContainerRepository).findByPropertyId(propertyId);
     }
 
     @Test
@@ -135,7 +135,7 @@ public class PropertyCostServiceImplTest {
         PropertyContainer propertyContainer = new PropertyContainer();
         propertyContainer.setContainerPlan(plan);
         propertyContainer.setContainerCount(2);
-        when(propertyContainerRepository.findByProperty(anyLong())).thenReturn(List.of(propertyContainer));
+        when(propertyContainerRepository.findByPropertyId(anyLong())).thenReturn(List.of(propertyContainer));
 
         List<GeneralPropertyCostDTO> result = propertyCostService.calculateAllCostsForUser(username);
         
@@ -153,7 +153,7 @@ public class PropertyCostServiceImplTest {
         verify(propertyService).getPropertiesByUser(username);
         verify(collectionFeeService, times(2)).findCollectionFeeByPropertyId(anyLong());
         verify(lockTypeService, times(2)).findLockTypeById(anyLong());
-        verify(propertyContainerRepository, times(2)).findByProperty(anyLong());
+        verify(propertyContainerRepository, times(2)).findByPropertyId(anyLong());
     }
 
     @Test
