@@ -16,6 +16,11 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Rest API controller that serves DTO's containing the different costs tied to a property.
+ * @Author Christian Storck
+ */
+
 @RestController
 @RequestMapping("/api/propertycost")
 public class PropertyCostController {

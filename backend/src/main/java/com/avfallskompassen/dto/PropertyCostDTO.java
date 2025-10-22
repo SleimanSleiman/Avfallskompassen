@@ -2,6 +2,11 @@ package com.avfallskompassen.dto;
 
 import java.math.BigDecimal;
 
+/**
+ * DTO containing the served data regarding more detailed costs from the property.
+ * @Author Christian Storck
+ */
+
 public class PropertyCostDTO {
     private BigDecimal totalCost;
     private BigDecimal collectionFee;

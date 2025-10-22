@@ -2,6 +2,11 @@ package com.avfallskompassen.dto;
 
 import java.math.BigDecimal;
 
+/**
+ * DTO containing the served data regarding general property costs.
+ * @Author Christian Storck
+ */
+
 public class GeneralPropertyCostDTO {
     private String address;
     private BigDecimal totalCost;

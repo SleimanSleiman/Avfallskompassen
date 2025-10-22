@@ -8,6 +8,11 @@ import com.avfallskompassen.repository.PropertyRepository;
 
 import java.util.List;
 
+/**
+ * Interface for the service class PropertyCostServiceImpl
+ * @Author Christian
+ */
+
 public interface PropertyCostService {
 
     GeneralPropertyCostDTO calculateAnnualCost(Long propertyId);

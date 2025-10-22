@@ -12,12 +12,22 @@ import com.avfallskompassen.services.PropertyCostService;
 import com.avfallskompassen.services.PropertyService;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Service class that serves DTO's to the controller layer. Handles the PropertyCost calculations.
+ * And implementation of the PropertyCostService interface.
+ * @Author Christian Storck
+ */
+
+@Service
+@Transactional
 public class PropertyCostServiceImpl implements PropertyCostService {
 
     @Autowired
