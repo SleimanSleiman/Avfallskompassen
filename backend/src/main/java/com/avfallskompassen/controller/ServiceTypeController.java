@@ -29,15 +29,21 @@ public class ServiceTypeController {
      * Get all service types.
      * @return List of ServiceTypeDTO containing service type names.
      * HTTP 200 OK with list of service types if successful,
+     * HTTP 204 No Content if no service types found,
      * HTTP 500 Internal Server Error for other errors
      */
-    @GetMapping
+    @GetMapping("/all")
     public ResponseEntity<List<ServiceTypeDTO>> getAllServiceTypes() {
         try {
             List<ServiceTypeDTO> serviceTypes = serviceTypeService.getAllServiceTypes()
                     .stream()
                     .map(st -> new ServiceTypeDTO(st.getId(), st.getName()))
                     .collect(Collectors.toList());
+
+            if (serviceTypes.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+            }
+
             return ResponseEntity.ok(serviceTypes);
         } catch (RuntimeException ex) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)

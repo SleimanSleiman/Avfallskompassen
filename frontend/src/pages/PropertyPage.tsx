@@ -188,7 +188,9 @@ async function handleSubmit(e: React.FormEvent) {
       {/* Property Form */}
       {showForm && (
         <div className="mb-8 rounded-2xl border bg-white p-6 shadow-soft">
-          <h2 className="mb-6 text-xl font-semibold">Lägg till ny fastighet</h2>
+          <h2 className="mb-6 text-xl font-semibold">
+            {editingId ? 'Redigera fastighet' : 'Lägg till ny fastighet'}
+          </h2>
           
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="grid gap-6 md:grid-cols-2">
@@ -283,11 +285,24 @@ async function handleSubmit(e: React.FormEvent) {
                 disabled={loading}
                 className="btn-primary disabled:opacity-60"
               >
-                {loading ? 'Skapar...' : 'Skapa fastighet'}
+                  {loading 
+                  ? editingId ? 'Uppdaterar...' : 'Skapar...' 
+                  : editingId ? 'Uppdatera fastighet' : 'Skapa fastighet'}
               </button>
               <button
                 type="button"
-                onClick={() => setShowForm(false)}
+                onClick={() => {
+                    setShowForm(false);
+                    setEditingId(null);
+                    setFormData({
+                      address: '',
+                      numberOfApartments: 1,
+                      lockTypeId: 1,
+                      accessPathLength: 0,
+                      municipalityId: municipalities.length > 0 ? municipalities[0].id : 0
+                    });
+                  }
+                }
                 className="btn-secondary"
               >
                 Avbryt

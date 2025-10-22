@@ -50,7 +50,7 @@ public class ServiceTypeControllerTest {
 
         when(service.getAllServiceTypes()).thenReturn(List.of(type1, type2));
 
-        mockMvc.perform(get("/api/serviceTypes")
+        mockMvc.perform(get("/api/serviceTypes/all")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(2))
@@ -69,7 +69,7 @@ public class ServiceTypeControllerTest {
         when(service.getAllServiceTypes())
                 .thenThrow(new RuntimeException("DB-fel"));
 
-        mockMvc.perform(get("/api/serviceTypes")
+        mockMvc.perform(get("/api/serviceTypes/all")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().is5xxServerError());
     }

@@ -1,0 +1,28 @@
+package com.avfallskompassen.services.impl;
+
+import com.avfallskompassen.model.LockType;
+import com.avfallskompassen.repository.LockTypeRepository;
+import com.avfallskompassen.services.LockTypeService;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+/**
+ * Service class that serves DTO's to the controller layer.
+ * And implementation of the LockTypeService interface.
+ * @Author Christian Storck
+ */
+
+@Service
+public class LockTypeServiceImpl implements LockTypeService {
+    private final LockTypeRepository lockTypeRepository;
+
+    public LockTypeServiceImpl(LockTypeRepository lockTypeRepository) {
+        this.lockTypeRepository = lockTypeRepository;
+    }
+
+    @Transactional(readOnly = true)
+    public LockType findLockTypeById(Long lockTypeId) {
+        return lockTypeRepository.findById(lockTypeId)
+                .orElseThrow(() -> new RuntimeException("No Locktype found with ID: " + lockTypeId));
+    }
+}
