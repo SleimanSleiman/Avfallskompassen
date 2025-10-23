@@ -113,4 +113,20 @@ public class WasteRoom {
     public void setProperty(Property property) {
         this.property = property;
     }
+
+    public List<DoorPosition> getDoors() {
+        return doors;
+    }
+
+    public void setDoors(List<DoorPosition> doors) {
+        this.doors = doors;
+    }
+
+    public List<ContainerPosition> getContainers() {
+        return containers;
+    }
+
+    public void setContainers(List<ContainerPosition> containers) {
+        this.containers = containers;
+    }
 }
