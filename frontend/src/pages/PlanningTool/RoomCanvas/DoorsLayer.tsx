@@ -15,6 +15,7 @@ type DoorsLayerProps = {
     handleSelectDoor: (id: number) => void;
 };
 
+/* ─────────────── Component ─────────────── */
 export default function DoorsLayer({
     room,
     doors,
@@ -32,7 +33,8 @@ export default function DoorsLayer({
                     x={door.x}
                     y={door.y}
                     draggable
-                    //Constrain door movement to room edges
+                    
+                    // Restrict door movement to nearest wall, preventing overlap with corners
                     dragBoundFunc={(pos) => {
                         const distTop = Math.abs(pos.y - room.y);
                         const distBottom = Math.abs(pos.y - (room.y + room.height));
@@ -62,7 +64,10 @@ export default function DoorsLayer({
                         return { x: newX, y: newY };
                     }}
 
+                    // Update door position during drag
                     onDragMove={(e) => handleDragDoor(door.id, e.target.position(), room)}
+
+                    // Select door when clicked
                     onClick={(e) => {
                         e.cancelBubble = true;
                         handleSelectDoor(door.id);

@@ -1,9 +1,8 @@
 import { useState, useEffect } from 'react';
-import { createProperty, getMyProperties, deleteProperty, updateProperty,getMunicipalities } from '../lib/property';
-import type { Municipality, Property } from '../lib/property';
+import { createProperty, getMyProperties, deleteProperty } from '../lib/property';
+import type { Property } from '../lib/property';
 import type { PropertyRequest } from '../lib/property';
 import { currentUser } from '../lib/auth';
-import RoomSizePrompt from '../components/RoomSizePrompt';
 
 export default function PropertyPage() {
   const [properties, setProperties] = useState<Property[]>([]);
@@ -11,53 +10,22 @@ export default function PropertyPage() {
   const [msg, setMsg] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
-  const [editingId, setEditingId] = useState<number | null>(null);
-  const [isCreateRoomOpen, setIsCreateRoomOpen] = useState(false);
-  const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
-
-  const lockMap: Record<string, number> = {
-      Standard: 1,
-      Electronic: 2,
-      SuperLock: 3
-      };
-  const lockMapReverse: Record<number, string> = Object.fromEntries(
-      Object.entries(lockMap).map(([k, v]) => [v, k])
-      );
-
+  
   // Form state
   const [formData, setFormData] = useState<PropertyRequest>({
     address: '',
     numberOfApartments: 1,
-    lockTypeId: 0,
-    accessPathLength: 0,
-    municipalityId: 0
+    lockType: 'Standard',
+    accessPathLength: 0
   });
-
- const [municipalities, setMunicipalities] = useState<Municipality[]>([]);
   
   const user = currentUser();
-
-  function getMunicipalityName(id?: number) {
-    if (!id) return '—';
-    const m = municipalities.find((x) => x.id === id);
-    return m?.name ?? '—';
-  }
-
+  
   // Load properties on component mount
   useEffect(() => {
     loadProperties();
-    loadMunicipalities();
   }, []);
-
-  async function loadMunicipalities() {
-    try {
-      const data = await getMunicipalities();
-      setMunicipalities(data);
-    } catch (err: any) {
-      setError('Kunde inte ladda kommuner: ' + err.message);
-    }
-  }
-
+  
   async function loadProperties() {
     try {
       const data = await getMyProperties();
@@ -67,49 +35,34 @@ export default function PropertyPage() {
     }
   }
   
-async function handleSubmit(e: React.FormEvent) {
-  e.preventDefault();
-  setMsg(null);
-  setError(null);
-  setLoading(true);
-
-  if (!formData.municipalityId || formData.municipalityId === 0) {
-    setLoading(false);
-    setError('Du måste välja kommun');
-    return;
-  }
-
-  try {
-    let response;
-    if (editingId) {
-      response = await updateProperty(editingId, formData);
-    } else {
-      response = await createProperty(formData);
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setMsg(null);
+    setError(null);
+    setLoading(true);
+    
+    try {
+      const response = await createProperty(formData);
+      if (response.success) {
+        setMsg('Fastighet skapad framgångsrikt!');
+        setFormData({
+          address: '',
+          numberOfApartments: 1,
+          lockType: 'Standard',
+          accessPathLength: 0
+        });
+        setShowForm(false);
+        // Reload the properties list
+        await loadProperties();
+      } else {
+        setError(response.message || 'Kunde inte skapa fastighet');
+      }
+    } catch (err: any) {
+      setError(err.message || 'Något gick fel');
+    } finally {
+      setLoading(false);
     }
-
-    if (response.success) {
-      setMsg(editingId ? 'Fastighet uppdaterad!' : 'Fastighet skapad framgångsrikt!');
-      // reset form
-      setFormData({
-        address: '',
-        numberOfApartments: 1,
-        lockTypeId: 1,
-        accessPathLength: 0,
-        municipalityId: municipalities.length > 0 ? municipalities[0].id : 0
-      });
-      setShowForm(false);
-      setEditingId(null);
-      // Reload the properties list
-      await loadProperties();
-    } else {
-       setError(response.message || (editingId ? 'Kunde inte uppdatera fastighet' : 'Kunde inte skapa fastighet'));
-    }
-  } catch (err: any) {
-    setError(err.message || 'Något gick fel');
-  } finally {
-    setLoading(false);
   }
-}
   
   async function handleDelete(id: number, address: string) {
     if (!confirm(`Är du säker på att du vill ta bort fastigheten "${address}"?`)) {
@@ -127,24 +80,6 @@ async function handleSubmit(e: React.FormEvent) {
     } catch (err: any) {
       setError(err.message || 'Kunde inte ta bort fastighet');
     }
-  }
-
-  function handleEdit(p: Property) {
-    setEditingId(p.id);
-    setFormData({
-      address: p.address,
-      numberOfApartments: p.numberOfApartments,
-      lockTypeId: lockMap[p.lockName ?? 'Standard'] || 1,
-      accessPathLength: p.accessPathLength ?? 0,
-      municipalityId: p.municipalityId ?? 0
-    });
-    setShowForm(true);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }
-
-  function createWasteRoom(p: Property) {
-    setSelectedProperty(p);
-    setIsCreateRoomOpen(true);
   }
   
   function handleInputChange(field: keyof PropertyRequest, value: string | number) {
@@ -188,9 +123,7 @@ async function handleSubmit(e: React.FormEvent) {
       {/* Property Form */}
       {showForm && (
         <div className="mb-8 rounded-2xl border bg-white p-6 shadow-soft">
-          <h2 className="mb-6 text-xl font-semibold">
-            {editingId ? 'Redigera fastighet' : 'Lägg till ny fastighet'}
-          </h2>
+          <h2 className="mb-6 text-xl font-semibold">Lägg till ny fastighet</h2>
           
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="grid gap-6 md:grid-cols-2">
@@ -205,26 +138,8 @@ async function handleSubmit(e: React.FormEvent) {
                   className="w-full rounded-xl border-gray-300 shadow-sm focus:border-nsr-teal focus:ring-nsr-teal"
                   value={formData.address}
                   onChange={(e) => handleInputChange('address', e.target.value)}
-                  placeholder="t.ex. Storgatan 123"
+                  placeholder="t.ex. Storgatan 123, Malmö"
                 />
-              </div>
-
-              <div>
-                <label htmlFor="municipalityId" className="block text-sm font-medium mb-2">
-                  Kommun *
-                </label>
-                <select
-                  id="municipalityId"
-                  required
-                  className="w-full rounded-xl border-gray-300 shadow-sm focus:border-nsr-teal focus:ring-nsr-teal"
-                  value={formData.municipalityId}
-                  onChange={(e) => handleInputChange('municipalityId', parseInt(e.target.value))}
-                >
-                  <option value={0}>Välj kommun</option>
-                  {municipalities.map((m) => (
-                    <option key={m.id} value={m.id}>{m.name}</option>
-                  ))}
-                </select>
               </div>
               
               <div>
@@ -247,17 +162,17 @@ async function handleSubmit(e: React.FormEvent) {
                   Typ av lås för miljörum *
                 </label>
                 <select
-                  id="lockTypeId"
+                  id="lockType"
                   required
                   className="w-full rounded-xl border-gray-300 shadow-sm focus:border-nsr-teal focus:ring-nsr-teal"
-                  value={formData.lockTypeId}
-                  onChange={(e) => handleInputChange('lockTypeId', parseInt(e.target.value))}
+                  value={formData.lockType}
+                  onChange={(e) => handleInputChange('lockType', e.target.value)}
                 >
-                  <option value="0">Test</option>
-                  <option value="1">Elektronisk</option>
-                  <option value="2">Alien</option>
-                  <option value="3">Epic lock</option>
-                  <option value="4">Old lock</option>
+                  <option value="Standard">Standard</option>
+                  <option value="Digital">Digital</option>
+                  <option value="Nyckel">Nyckel</option>
+                  <option value="Kod">Kod</option>
+                  <option value="Kort">Kort</option>
                 </select>
               </div>
               
@@ -285,24 +200,11 @@ async function handleSubmit(e: React.FormEvent) {
                 disabled={loading}
                 className="btn-primary disabled:opacity-60"
               >
-                  {loading 
-                  ? editingId ? 'Uppdaterar...' : 'Skapar...' 
-                  : editingId ? 'Uppdatera fastighet' : 'Skapa fastighet'}
+                {loading ? 'Skapar...' : 'Skapa fastighet'}
               </button>
               <button
                 type="button"
-                onClick={() => {
-                    setShowForm(false);
-                    setEditingId(null);
-                    setFormData({
-                      address: '',
-                      numberOfApartments: 1,
-                      lockTypeId: 1,
-                      accessPathLength: 0,
-                      municipalityId: municipalities.length > 0 ? municipalities[0].id : 0
-                    });
-                  }
-                }
+                onClick={() => setShowForm(false)}
                 className="btn-secondary"
               >
                 Avbryt
@@ -339,16 +241,13 @@ async function handleSubmit(e: React.FormEvent) {
                     </h3>
                     <div className="mt-2 grid gap-2 text-sm text-gray-600 md:grid-cols-3">
                       <div>
-                         <div className="mt-1 text-sm text-gray-600">
-                       <span className="font-medium">Kommun:</span> {getMunicipalityName(property.municipalityId)}
-                     </div>
-                                        <span className="font-medium">Lägenheter:</span> {property.numberOfApartments}
+                        <span className="font-medium">Lägenheter:</span> {property.numberOfApartments}
                       </div>
                       <div>
-                        <span className="font-medium">Lås:</span> {property.lockName ?? 'Ingen'}
+                        <span className="font-medium">Lås:</span> {property.lockType}
                       </div>
                       <div>
-                        <span className="font-medium">Dragväg:</span> {property.accessPathLength}
+                        <span className="font-medium">Dragväg:</span> {property.accessPathLength}m
                       </div>
                     </div>
                     <div className="mt-2 text-xs text-gray-500">
@@ -357,18 +256,6 @@ async function handleSubmit(e: React.FormEvent) {
                   </div>
                   
                   <div className="ml-4 flex gap-2">
-                    <button
-                    onClick={() => createWasteRoom(property)}
-                      className="rounded-lg border border-green-200 bg-green-50 px-3 py-1 text-sm text-green-700 hover:bg-green-100"
-                      >  
-                      Skapa miljörum
-                    </button>
-                    <button
-                      onClick={() => handleEdit(property)}
-                      className="rounded-lg border border-blue-200 bg-blue-50 px-3 py-1 text-sm text-blue-700 hover:bg-blue-100"
-                    >
-                      Redigera
-                    </button>
                     <button
                       onClick={() => handleDelete(property.id, property.address)}
                       className="rounded-lg border border-red-200 bg-red-50 px-3 py-1 text-sm text-red-700 hover:bg-red-100"
@@ -382,21 +269,6 @@ async function handleSubmit(e: React.FormEvent) {
           </div>
         )}
       </div>
-
-     {isCreateRoomOpen && (
-        <RoomSizePrompt
-        onConfirm={(length: number, width: number) => {
-          localStorage.setItem(
-            'trashRoomData',
-            JSON.stringify({ length, width, property : selectedProperty})
-          );
-
-          setIsCreateRoomOpen(false); 
-          window.location.href = '/planningTool';
-        }}
-        onCancel={() => setIsCreateRoomOpen(false)}
-        />
-      )}
     </main>
   );
 }

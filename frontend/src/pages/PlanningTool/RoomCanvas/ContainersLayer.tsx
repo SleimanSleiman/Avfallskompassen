@@ -7,13 +7,20 @@ import type { ContainerInRoom } from "../types";
 
 /* ─────────────── ContainersLayer Props ──────────────── */
 type ContainersLayerProps = {
+    /** List of containers currently placed in the room */
     containersInRoom: ContainerInRoom[];
+
+    /** ID of the currently selected container, or null if none is selected */
     selectedContainerId: number | null;
+
+    /** Called when a container is dragged to update its position */
     handleDragContainer: (id: number, pos: { x: number; y: number }) => void;
+
+    /** Called when a container is clicked to select it */
     handleSelectContainer: (id: number) => void;
 };
 
-
+/* ─────────────── Component ─────────────── */
 export default function ContainersLayer({
     containersInRoom,
     selectedContainerId,
@@ -30,7 +37,9 @@ export default function ContainersLayer({
                     x={container.x}
                     y={container.y}
                     draggable
+                    // Handle selection when clicked
                     onClick={() => handleSelectContainer(container.id)}
+                    // Update position when dragged
                     onDragMove={(e) => handleDragContainer(container.id, e.target.position())}
                 >
 
@@ -44,7 +53,7 @@ export default function ContainersLayer({
                         cornerRadius={4}
                     />
 
-                    {/* Container name */}
+                    {/* Container name (label)*/}
                     <Text
                         text={container.container.name}
                         fontSize={10}
