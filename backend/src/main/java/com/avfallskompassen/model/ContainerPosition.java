@@ -2,6 +2,10 @@ package com.avfallskompassen.model;
 
 import jakarta.persistence.*;
 
+/**
+ * Entity class for Containers in a waste room.
+ * @author Anton Persson
+ */
 @Entity
 @Table(
         name = "container_position",

@@ -7,6 +7,10 @@ import jakarta.validation.constraints.NotNull;
 
 import java.util.List;
 
+/**
+ * Class containing the necessary data to create a wasteRoom
+ * @author Anton Persson
+ */
 public class WasteRoomRequest {
     @NotNull
     @DecimalMin("2.5")

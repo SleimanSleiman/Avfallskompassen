@@ -6,10 +6,17 @@ import com.avfallskompassen.model.WasteRoom;
 
 import java.util.List;
 
+/**
+ * Interface for {@link com.avfallskompassen.services.impl.WasteRoomServiceImpl}
+ */
 public interface WasteRoomService {
     WasteRoomDTO saveWasteRoom(WasteRoomRequest request);
 
     WasteRoomDTO getWasteRoomById(Long id);
 
     List<WasteRoomDTO> getWasteRoomsByPropertyId(Long id);
+
+    WasteRoomDTO updateWasteRoom(Long wasteRoomId, WasteRoomRequest wasteRoomRequest);
+
+    void deleteWasteRoom(Long wasteRoomId);
 }
