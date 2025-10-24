@@ -2,20 +2,24 @@ package com.avfallskompassen.dto;
 
 import java.time.LocalDateTime;
 
+
+/**
+ * DTO containing the served data regarding Roompdfs.
+ * @Author Christian Storck
+ */
+
 public class RoomPdfDTO {
     private Long id;
     private Long wasteRoomId;
-    private byte[] pdfData;
     private Long fileSize;
     private LocalDateTime createdAt;
 
     public RoomPdfDTO() {
     }
 
-    public RoomPdfDTO(Long id, Long wasteRoomId, byte[] pdfData, Long fileSize, LocalDateTime createdAt) {
+    public RoomPdfDTO(Long id, Long wasteRoomId, Long fileSize, LocalDateTime createdAt) {
         this.id = id;
         this.wasteRoomId = wasteRoomId;
-        this.pdfData = pdfData;
         this.fileSize = fileSize;
         this.createdAt = createdAt;
     }
@@ -34,14 +38,6 @@ public class RoomPdfDTO {
 
     public void setWasteRoomId(Long wasteRoomId) {
         this.wasteRoomId = wasteRoomId;
-    }
-
-    public byte[] getPdfData() {
-        return pdfData;
-    }
-
-    public void setPdfData(byte[] pdfData) {
-        this.pdfData = pdfData;
     }
 
     public Long getFileSize() {

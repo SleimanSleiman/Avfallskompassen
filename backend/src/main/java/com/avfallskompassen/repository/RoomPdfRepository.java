@@ -7,6 +7,11 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Repository class responsible for handling the RoomPdf entity.
+ * @Author Christian Storck
+ */
+
 @Repository
 public interface RoomPdfRepository extends JpaRepository<RoomPdf, Long> {
     Optional <RoomPdf> findById(Long roomPdfId);

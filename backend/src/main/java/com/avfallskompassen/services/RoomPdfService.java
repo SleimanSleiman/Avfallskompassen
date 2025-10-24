@@ -1,10 +1,16 @@
 package com.avfallskompassen.services;
 
 import com.avfallskompassen.dto.RoomPdfDTO;
+import com.avfallskompassen.dto.RoomPdfDTO;
 import com.avfallskompassen.model.RoomPdf;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+
+/**
+ * Interface class for the RoomPdfServiceImpl
+ * @Author Christian Storck
+ */
 
 public interface RoomPdfService {
     RoomPdfDTO uploadPdf(MultipartFile file, Long roomId);

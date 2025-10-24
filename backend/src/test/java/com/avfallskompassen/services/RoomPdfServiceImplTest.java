@@ -112,7 +112,6 @@ public class RoomPdfServiceImplTest {
         pdf2.setCreatedAt(LocalDateTime.now());
         List<RoomPdf> pdfs = List.of(pdf1, pdf2);
 
-
         when(roomPdfRepository.findByWasteRoomId(1L)).thenReturn(List.of(pdf1, pdf2));
 
         List<RoomPdfDTO> result = roomPdfService.getPdfsByRoomId(1L);

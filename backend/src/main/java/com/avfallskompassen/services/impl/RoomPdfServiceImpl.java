@@ -1,6 +1,7 @@
 package com.avfallskompassen.services.impl;
 
 import com.avfallskompassen.dto.RoomPdfDTO;
+import com.avfallskompassen.dto.RoomPdfDTO;
 import com.avfallskompassen.exception.ResourceNotFoundException;
 import com.avfallskompassen.model.RoomPdf;
 import com.avfallskompassen.model.WasteRoom;
@@ -16,6 +17,12 @@ import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Service implementation of RoomPpfService.
+ * Manages PDF files associated with waste rooms.
+ * Handles uploading, downloading and listing PDF files linked to specifik waste rooms.
+ * @Author Christian Storck
+ */
 @Service
 @Transactional
 public class RoomPdfServiceImpl implements RoomPdfService {

@@ -4,6 +4,11 @@ import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
 
+/**
+ * Entity class for the RoomPdf entity.
+ * @Author Christian Storck
+ */
+
 @Entity
 @Table(name = "room_pdfs")
 public class RoomPdf {
