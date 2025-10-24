@@ -12,4 +12,8 @@ public interface WasteRoomService {
     WasteRoomDTO getWasteRoomById(Long id);
 
     List<WasteRoomDTO> getWasteRoomsByPropertyId(Long id);
+
+    WasteRoomDTO updateWasteRoom(Long wasteRoomId, WasteRoomRequest wasteRoomRequest);
+
+    void deleteWasteRoom(Long wasteRoomId);
 }

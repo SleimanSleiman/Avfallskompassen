@@ -84,6 +84,43 @@ public class WasteRoomServiceImpl implements WasteRoomService {
     }
 
     /**
+     * Processes the data from a request to update a waste room and saves the updated version in the database
+     * @param wasteRoomId Id to the waste room to be updated
+     * @param request The request containing the information about the waste room
+     * @return A DTO containing the information about the waste room that was updated in the database
+     */
+    @Override
+    @Transactional
+    public WasteRoomDTO updateWasteRoom(Long wasteRoomId, WasteRoomRequest request) {
+        WasteRoom wasteRoom = findWasteRoomById(wasteRoomId);
+
+        wasteRoom.setLength(request.getLength());
+        wasteRoom.setWidth(request.getWidth());
+        wasteRoom.setX(request.getX());
+        wasteRoom.setY(request.getY());
+        wasteRoom.setProperty(findPropertyById(request.getPropertyId()));
+
+        wasteRoom.getContainers().clear();
+        wasteRoom.getDoors().clear();
+
+        List<ContainerPosition> newContainers = convertContainerRequest(request.getContainers(), wasteRoom);
+        List<DoorPosition> newDoors = convertDoorRequest(request.getDoors(), wasteRoom);
+
+        wasteRoom.setContainers(newContainers);
+        wasteRoom.setDoors(newDoors);
+
+        WasteRoom updated = wasteRoomRepository.save(wasteRoom);
+        return WasteRoomDTO.fromEntity(updated);
+    }
+
+    @Override
+    @Transactional
+    public void deleteWasteRoom(Long wasteRoomId) {
+        WasteRoom wasteRoom = findWasteRoomById(wasteRoomId);
+        wasteRoomRepository.delete(wasteRoom);
+    }
+
+    /**
      * Helper method that converts the data from a request containing information about containers. Transfers
      * the data from {@link ContainerPositionRequest} to {@link ContainerPosition} which must be done before saving
      * the containers in the database
@@ -118,7 +155,7 @@ public class WasteRoomServiceImpl implements WasteRoomService {
      * the doors in the database
      * @param doors A list containing requests of doors
      * @param wasteRoom The waste room to be altered or created
-     * @returnA list of {@link DoorPosition} with the appropriate data needed before saving it in database
+     * @return A list of {@link DoorPosition} with the appropriate data needed before saving it in database
      */
     private List<DoorPosition> convertDoorRequest(List<DoorPositionRequest> doors, WasteRoom wasteRoom) {
         if (doors == null) {
@@ -153,6 +190,18 @@ public class WasteRoomServiceImpl implements WasteRoomService {
         return propertyRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Property with id: " + id + " can't be found"
+                ));
+    }
+
+    /**
+     * Collects a waste room from the database and returns it
+     * @param id the id of the waste room to be collected
+     * @return The waste room matching the id
+     */
+    private WasteRoom findWasteRoomById(Long id) {
+        return wasteRoomRepository.findById(id).orElseThrow(
+                () -> new ResourceNotFoundException(
+                        "WasteRoom with id: " + id + " can't be found"
                 ));
     }
 }
