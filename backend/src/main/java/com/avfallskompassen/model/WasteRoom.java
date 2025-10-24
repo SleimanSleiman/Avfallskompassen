@@ -5,6 +5,10 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.List;
 
+/**
+ * Entity class for waste rooms
+ * @author Anton Persson
+ */
 @Entity
 @Table(name = "waste_room")
 public class WasteRoom {

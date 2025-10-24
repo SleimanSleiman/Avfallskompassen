@@ -2,6 +2,10 @@ package com.avfallskompassen.dto;
 
 import jakarta.validation.constraints.NotNull;
 
+/**
+ * Class containing the necessary data to create doors in a wasteRoom
+ * @author Anton Persson
+ */
 public class DoorPositionRequest {
     @NotNull
     private Long id;

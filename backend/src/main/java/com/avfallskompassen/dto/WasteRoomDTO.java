@@ -1,12 +1,14 @@
 package com.avfallskompassen.dto;
 
-import com.avfallskompassen.dto.ContainerPositionDTO;
-import com.avfallskompassen.dto.DoorPositionDTO;
 import com.avfallskompassen.model.WasteRoom;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * DTO for sending data related to {@link WasteRoom} out from the server
+ * @author Anton Persson
+ */
 public class WasteRoomDTO {
 
     private Long propertyId;
@@ -80,6 +82,11 @@ public class WasteRoomDTO {
         this.doors = doors;
     }
 
+    /**
+     * Method for converting an entity object to a DTO object
+     * @param entity The entity object to be converted
+     * @return A converted DTO
+     */
     public static WasteRoomDTO fromEntity(WasteRoom entity) {
         return new WasteRoomDTO(
                 entity.getProperty().getId(),

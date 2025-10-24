@@ -12,6 +12,13 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+
+/**
+ * Service class for handling waste rooms.
+ * Contains methods such as creating, updating, retrieving and deleting waste rooms.
+ * Uses transaction on some methods since the methods uses several tables, to ensure database consistency.
+ * @author Anton Persson
+ */
 @Service
 public class WasteRoomServiceImpl implements WasteRoomService {
     private final WasteRoomRepository wasteRoomRepository;

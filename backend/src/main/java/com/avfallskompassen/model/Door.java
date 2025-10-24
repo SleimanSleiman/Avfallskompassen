@@ -2,6 +2,10 @@ package com.avfallskompassen.model;
 
 import jakarta.persistence.*;
 
+/**
+ * Entity class for doors
+ * @author Anton Persson
+ */
 @Entity
 @Table(name = "doors")
 public class Door {

@@ -6,6 +6,9 @@ import com.avfallskompassen.model.WasteRoom;
 
 import java.util.List;
 
+/**
+ * Interface for {@link com.avfallskompassen.services.impl.WasteRoomServiceImpl}
+ */
 public interface WasteRoomService {
     WasteRoomDTO saveWasteRoom(WasteRoomRequest request);
 

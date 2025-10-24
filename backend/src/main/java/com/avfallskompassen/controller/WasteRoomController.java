@@ -12,7 +12,7 @@ import java.util.List;
 /**
  * REST controller for handling waste rooms.
  * Includes operations such as creating, deleting, updating and fetching waste rooms
- * @Author Anton Persson
+ * @author Anton Persson
  */
 @RestController
 @RequestMapping("/api")

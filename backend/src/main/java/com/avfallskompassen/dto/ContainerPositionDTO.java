@@ -2,6 +2,10 @@ package com.avfallskompassen.dto;
 
 import com.avfallskompassen.model.ContainerPosition;
 
+/**
+ * DTO for sending data related to {@link ContainerPosition} out from the server
+ * @author Anton Persson
+ */
 public class ContainerPositionDTO {
     private Long id;
     private double x;
@@ -28,6 +32,11 @@ public class ContainerPositionDTO {
     public Long getWasteRoomId() { return wasteRoomId; }
     public void setWasteRoomId(Long wasteRoomId) { this.wasteRoomId = wasteRoomId; }
 
+    /**
+     * Method for converting an entity object to a DTO object
+     * @param entity The entity object to be converted
+     * @return A converted DTO
+     */
     public static ContainerPositionDTO fromEntity(ContainerPosition entity) {
         ContainerPositionDTO dto = new ContainerPositionDTO();
         dto.setId(entity.getId());
