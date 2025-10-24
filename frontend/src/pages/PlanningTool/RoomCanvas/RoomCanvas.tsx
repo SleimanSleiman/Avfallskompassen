@@ -7,6 +7,7 @@ import RoomShape from "./RoomShape";
 import CornerHandles from "./CornerHandles";
 import DoorsLayer from "./DoorsLayer";
 import ContainersLayer from "./ContainersLayer";
+import DoorMeasurmentLayer from "./DoorMeasurmentLayer";
 import { STAGE_WIDTH, STAGE_HEIGHT } from "../constants";
 import type { Room, ContainerInRoom, Door } from "../types";
 
@@ -22,6 +23,7 @@ type RoomCanvasProps = {
     selectedDoorId: number | null;
     handleDragDoor: (id: number, pos: { x: number; y: number }, room: Room) => void;
     handleSelectDoor: (id: number) => void;
+    doorMetaRef: React.MutableRefObject<Record<number, { wall: "top" | "bottom" | "left" | "right"; offsetRatio: number }>>;
 
     //Container props
     containers: ContainerInRoom[];
@@ -45,6 +47,7 @@ export default function RoomCanvas({
     selectedDoorId,
     handleDragDoor,
     handleSelectDoor,
+    doorMetaRef,
     containers,
     selectedContainerId,
     handleDragContainer,
@@ -88,6 +91,13 @@ export default function RoomCanvas({
                         selectedDoorId={selectedDoorId}
                         handleDragDoor={handleDragDoor}
                         handleSelectDoor={handleSelectDoor}
+                    />
+
+                    {/* Door measurement layer */}
+                    <DoorMeasurmentLayer
+                        room={room}
+                        doors={doors}
+                        doorMetaRef={doorMetaRef}
                     />
 
                     {/* Containers layer */}

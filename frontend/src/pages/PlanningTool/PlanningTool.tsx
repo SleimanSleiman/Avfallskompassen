@@ -39,6 +39,7 @@ export default function PlanningTool() {
         handleDragDoor,
         handleSelectDoor,
         handleRemoveDoor,
+        doorMetaRef,
     } = useDoors(room);
 
     /* ──────────────── Container state & logic ──────────────── */
@@ -87,6 +88,7 @@ export default function PlanningTool() {
                     selectedDoorId={selectedDoorId}
                     handleDragDoor={handleDragDoor}
                     handleSelectDoor={handleSelectDoor}
+                    doorMetaRef={doorMetaRef}
 
                     containers={containersInRoom}
                     selectedContainerId={selectedContainerId}

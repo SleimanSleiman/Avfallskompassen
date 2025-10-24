@@ -130,5 +130,6 @@ export function useDoors(room: Room) {
         handleRemoveDoor,
         handleDragDoor,
         handleSelectDoor,
+        doorMetaRef
     };
 }
