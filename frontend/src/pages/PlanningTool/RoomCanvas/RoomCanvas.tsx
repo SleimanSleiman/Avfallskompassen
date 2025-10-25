@@ -21,9 +21,8 @@ type RoomCanvasProps = {
     //Door props
     doors: Door[];
     selectedDoorId: number | null;
-    handleDragDoor: (id: number, pos: { x: number; y: number }, room: Room) => void;
     handleSelectDoor: (id: number) => void;
-    doorMetaRef: React.MutableRefObject<Record<number, { wall: "top" | "bottom" | "left" | "right"; offsetRatio: number }>>;
+    handleDragDoor: (id: number,pos: { x: number; y: number; wall: Door["wall"]; rotation: number }) => void;
 
     //Container props
     containers: ContainerInRoom[];
@@ -47,7 +46,7 @@ export default function RoomCanvas({
     selectedDoorId,
     handleDragDoor,
     handleSelectDoor,
-    doorMetaRef,
+    setDoors,
     containers,
     selectedContainerId,
     handleDragContainer,
@@ -84,20 +83,19 @@ export default function RoomCanvas({
                         handleDragCorner={handleDragCorner}
                     />
 
-                    {/* Doors layer */}
+                    {/* Door layer*/}
                     <DoorsLayer
-                        room={room}
                         doors={doors}
                         selectedDoorId={selectedDoorId}
+                        room={room}
                         handleDragDoor={handleDragDoor}
                         handleSelectDoor={handleSelectDoor}
                     />
 
-                    {/* Door measurement layer */}
+                    {/* Measurments between door and corners*/}
                     <DoorMeasurmentLayer
-                        room={room}
                         doors={doors}
-                        doorMetaRef={doorMetaRef}
+                        room={room}
                     />
 
                     {/* Containers layer */}
