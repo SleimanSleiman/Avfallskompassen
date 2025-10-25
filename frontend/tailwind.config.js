@@ -3,12 +3,19 @@ export default {
   content: ['./index.html', './src/**/*.{ts,tsx,js,jsx}'],
   theme: {
     extend: {
+      fontFamily: {
+        'sans': ['Arial', 'sans-serif'],
+      },
+      fontWeight: {
+        'black': '900',
+      },
       colors: {
         nsr: {
-          teal: '#007A84',     // top bar
+          teal: '#007788',     // top bar
           tealDark: '#003F44', // dark strip (a bit darker)
           sky: '#E6F6F7',      // pale background accent
           ink: '#0B1F22',      // text color
+          accent: '#e8c222',   // accent color for buttons
         },
       },
       boxShadow: {
