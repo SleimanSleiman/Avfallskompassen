@@ -7,7 +7,7 @@ import RoomShape from "./RoomShape";
 import CornerHandles from "./CornerHandles";
 import DoorsLayer from "./DoorsLayer";
 import ContainersLayer from "./ContainersLayer";
-import DoorMeasurmentLayer from "./DoorMeasurmentLayer";
+import DoorMeasurementLayer from "./DoorMeasurementLayer";
 import { STAGE_WIDTH, STAGE_HEIGHT } from "../constants";
 import type { Room, ContainerInRoom, Door } from "../types";
 
@@ -93,7 +93,7 @@ export default function RoomCanvas({
                     />
 
                     {/* Measurments between door and corners*/}
-                    <DoorMeasurmentLayer
+                    <DoorMeasurementLayer
                         doors={doors}
                         room={room}
                     />
