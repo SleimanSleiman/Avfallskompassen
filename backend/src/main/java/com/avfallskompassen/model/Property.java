@@ -59,6 +59,9 @@ public class Property {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
+    @Column(name = "last_notified_at")
+    private LocalDateTime lastNotifiedAt;
+
     // Constructors
     public Property() {
         this.createdAt = LocalDateTime.now();
@@ -159,6 +162,14 @@ public class Property {
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public LocalDateTime getLastNotifiedAt() {
+        return lastNotifiedAt;
+    }
+
+    public void setLastNotifiedAt(LocalDateTime lastNotifiedAt) {
+        this.lastNotifiedAt = lastNotifiedAt;
     }
 
     @PreUpdate
