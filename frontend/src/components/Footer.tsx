@@ -3,19 +3,15 @@ export default function Footer() {
     <footer className="mt-16">
       {/* Skyline band (sits at the top of the footer) */}
       <div className="w-full" aria-hidden role="presentation">
-        <svg viewBox="0 0 800 140" className="w-full h-24 md:h-32" preserveAspectRatio="none">
-          {/* dark base strip */}
-          <path d="M0 120h800v20H0z" fill="#003F44" />
-          {/* teal skyline wave */}
-          <path
-            d="M0 120c40-20 80-30 120-10 60 30 140-60 200-20 70 45 120-10 180 0s100 40 160 10 120 10 140 20H0z"
-            fill="#007A84"
-          />
-        </svg>
+        <img
+          src="/src/assets/footer-top-0eea79a353e0e1eee2dc8ee691d0d004.svg"
+          alt=""
+          className="w-full h-24 md:h-32 object-cover"
+        />
       </div>
 
       {/* Footer content on dark background */}
-      <div className="bg-nsr-tealDark text-white">
+      <div className="bg-nsr-teal text-white">
         <div className="mx-auto max-w-7xl px-4 py-10">
           <div className="grid gap-8 md:grid-cols-3">
             <div>
@@ -43,8 +39,20 @@ export default function Footer() {
             </div>
           </div>
 
-          <div className="mt-8 border-t border-white/10 pt-4 text-xs text-white/70">
-            © {new Date().getFullYear()} NSR. Alla rättigheter förbehållna.
+          <div className="mt-8 border-t border-white/10 pt-4 flex items-center justify-between text-xs text-white/70">
+            <span>© {new Date().getFullYear()} NSR. Alla rättigheter förbehållna.</span>
+            <div className="flex items-center gap-3">
+              <img
+                src="/src/assets/avfallskompassen_logo.png"
+                alt="Avfallskompassen logo"
+                className="h-8 w-auto"
+              />
+              <img
+                src="/src/assets/nsr_white.svg"
+                alt="NSR logo"
+                className="h-8 w-auto"
+              />
+            </div>
           </div>
         </div>
       </div>

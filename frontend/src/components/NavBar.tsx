@@ -22,7 +22,11 @@ export default function NavBar() {
                 alt="Avfallskompassen logo"
                 className="h-12 w-12 object-contain"
               />
-              <span className="tracking-wide">NSR</span>
+              <img
+                src="\src\assets\nsr_white.svg"
+                alt="NSR logo"
+                className="h-8 w-auto"
+              />
             </Link>
 
             <button className="md:hidden text-white" onClick={() => setOpen(v => !v)} aria-label="Toggle navigation">
@@ -31,17 +35,17 @@ export default function NavBar() {
               </svg>
             </button>
 
-            <nav className="hidden md:flex items-center gap-6 text-white/90">
+            <nav className="hidden md:flex items-center gap-6 text-white font-black text-lg">
               {user ? (
                 <>
-                  <NavLink to="/dashboard" className="hover:text-white">Dashboard</NavLink>
-                  <NavLink to="/properties" className="hover:text-white">Mina fastigheter</NavLink>
-                  <NavLink to="/planningTool" className="hover:text-white">Planeringsverktyg</NavLink>
+                  <NavLink to="/dashboard" className={({ isActive }) => `nav-link hover:text-white transition-colors ${isActive ? 'nav-link-active' : ''}`}>Dashboard</NavLink>
+                  <NavLink to="/properties" className={({ isActive }) => `nav-link hover:text-white transition-colors ${isActive ? 'nav-link-active' : ''}`}>Mina fastigheter</NavLink>
+                  <NavLink to="/planningTool" className={({ isActive }) => `nav-link hover:text-white transition-colors ${isActive ? 'nav-link-active' : ''}`}>Planeringsverktyg</NavLink>
                   <div className="flex items-center gap-3">
                     <span className="text-sm">Hej {user.username}!</span>
                     <button
                       onClick={handleLogout}
-                      className="rounded-full bg-white/20 px-3 py-1 text-sm hover:bg-white/30"
+                      className="rounded-xl2 bg-nsr-accent px-4 py-2 text-sm text-white hover:bg-nsr-accent/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-nsr-accent transition-colors"
                     >
                       Logga ut
                     </button>
@@ -49,8 +53,8 @@ export default function NavBar() {
                 </>
               ) : (
                 <>
-                  <NavLink to="#" className="hover:text-white">Abonnemang</NavLink>
-                  <NavLink to="#" className="hover:text-white">Information</NavLink>
+                  <NavLink to="#" className="nav-link hover:text-white transition-colors">Abonnemang</NavLink>
+                  <NavLink to="#" className="nav-link hover:text-white transition-colors">Information</NavLink>
                   <div className="relative">
                     <input className="h-9 w-64 rounded-full border-0 bg-white/95 pl-4 pr-10 text-sm placeholder:text-gray-500 focus:ring-2 focus:ring-nsr-teal" placeholder="Vad letar du efter?" />
                     <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500">
@@ -68,7 +72,7 @@ export default function NavBar() {
       <div className="h-3 w-full bg-nsr-tealDark" />
       {open && (
         <div className="md:hidden bg-white border-b">
-          <nav className="mx-auto max-w-7xl px-4 py-3 flex flex-col gap-3">
+          <nav className="mx-auto max-w-7xl px-4 py-3 flex flex-col gap-3 font-black">
             {user ? (
               <>
                 <NavLink to="/dashboard" className="text-nsr-ink">Dashboard</NavLink>
