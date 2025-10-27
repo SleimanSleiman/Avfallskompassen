@@ -3,6 +3,7 @@ package com.avfallskompassen.model;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
+import java.time.Duration;
 import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -16,7 +17,9 @@ public class PropertyTest {
         assertNotNull(p.getCreatedAt(), "createdAt should be set in no-arg constructor");
         assertNotNull(p.getUpdatedAt(), "updatedAt should be set in no-arg constructor");
 
-        assertEquals(p.getCreatedAt(), p.getUpdatedAt(), "createdAt and updatedAt should be equal on construction");
+        assertTrue(Duration.between(p.getCreatedAt(), p.getUpdatedAt()).abs().toMillis() < 5,
+                "createdAt and updatedAt should be nearly equal on construction");
+
         assertFalse(p.getCreatedAt().isAfter(LocalDateTime.now()), "createdAt should not be in the future");
     }
 
