@@ -49,6 +49,10 @@ public class PropertyServiceImpl implements PropertyService {
         }
         
         User user = userOptional.get();
+
+        if (lockType == null) {
+            throw new RuntimeException("Lock type not found or not provided");
+        }
         
         if (propertyRepository.existsByAddress(request.getAddress())) {
             throw new RuntimeException("Property with this address already exists");

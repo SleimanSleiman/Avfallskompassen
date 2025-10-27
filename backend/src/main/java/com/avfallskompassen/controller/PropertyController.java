@@ -10,6 +10,7 @@ import com.avfallskompassen.services.PropertyService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import com.avfallskompassen.exception.ExceptionResponseUtil;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -140,8 +141,8 @@ public class PropertyController {
         }
     }
 
-     @PutMapping("/{id}")
-    public ResponseEntity<PropertyResponse> updateProperty(
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateProperty(
             @PathVariable Long id,
             @Valid @RequestBody PropertyRequest request,
             @RequestHeader(value = "X-Username", required = false) String username) {
@@ -159,22 +160,12 @@ public class PropertyController {
             LockType lockType = lockTypeService.findLockTypeById(request.getLockTypeId());
             Property updated = propertyService.updateProperty(id, request, username, lockType);
 
-            PropertyResponse response = new PropertyResponse(true, "Property updated successfully");
-            response.setPropertyId(updated.getId());
-            response.setAddress(updated.getAddress());
-            response.setNumberOfApartments(updated.getNumberOfApartments());
-            response.setLockName(lockType != null ? lockType.getName() : null);
-            response.setLockPrice(lockType != null ? lockType.getCost() : null);
-            response.setAccessPathLength(updated.getAccessPathLength());
-            response.setCreatedAt(updated.getCreatedAt());
-            if (updated.getMunicipality() != null) {
-                response.setMunicipalityId(updated.getMunicipality().getId());
-                response.setMunicipalityName(updated.getMunicipality().getName());
-            }
-
-            return ResponseEntity.ok(response);
+            // Return a DTO instead of exposing the entity
+            PropertyDTO propertyDTO = new PropertyDTO(updated);
+            return ResponseEntity.ok(propertyDTO);
 
         } catch (RuntimeException e) {
+            // Return 400 with a brief message wrapped in PropertyResponse body as before for errors
             PropertyResponse response = new PropertyResponse(false, e.getMessage());
             return ResponseEntity.badRequest().body(response);
         }
@@ -244,8 +235,7 @@ public class PropertyController {
      */
     @ExceptionHandler(ResponseStatusException.class)
     public ResponseEntity<PropertyResponse> handleResponseStatusException(ResponseStatusException e) {
-        PropertyResponse response = new PropertyResponse(false, e.getReason());
-        return ResponseEntity.status(e.getStatusCode()).body(response);
+        return ExceptionResponseUtil.propertyResponse(e.getStatusCode(), false, e.getReason());
     }
     
     /**
