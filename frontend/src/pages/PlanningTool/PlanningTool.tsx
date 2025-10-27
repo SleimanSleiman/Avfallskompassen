@@ -32,13 +32,12 @@ export default function PlanningTool() {
     /* ──────────────── Door state & logic ──────────────── */
     const {
         doors,
-        setDoors,
-        selectedDoorId,
-        setSelectedDoorId,
         handleAddDoor,
+        selectedDoorId,
         handleDragDoor,
-        handleSelectDoor,
+        handleRotateDoor,
         handleRemoveDoor,
+        handleSelectDoor
     } = useDoors(room);
 
     /* ──────────────── Container state & logic ──────────────── */
@@ -67,7 +66,6 @@ export default function PlanningTool() {
     const [selectedType, setSelectedType] = useState<string | null>(null);
     const [selectedSize, setSelectedSize] = useState<{ [key: number]: number | null }>({});
     const [isAddContainersOpen, setIsAddContainersOpen] = useState(false);
-    const [isAddDoorOpen, setIsAddDoorOpen] = useState(false);
     const [showCosts, setShowCosts] = useState(false);
     const [isAlterRoomSizeOpen, setIsAlterRoomSizeOpen] = useState(false);
 
@@ -107,16 +105,16 @@ export default function PlanningTool() {
                     selectedContainerId={selectedContainerId}
                     selectedDoorId={selectedDoorId}
                     setSelectedContainerId={handleSelectContainer}
-                    setSelectedDoorId={setSelectedDoorId}
                     handleRemoveContainer={handleRemoveContainer}
                     handleRemoveDoor={handleRemoveDoor}
+                    handleRotateDoor={handleRotateDoor}
                 />
             </div>
 
             {/* ─────────────── Sidebar ──────────────── */}
             <div className="w-2/5 pl-8 flex flex-col h-[600px]">
                 <Sidebar
-                    // Service types and available containers (from API)
+                    //Service types and available containers (from API)
                     serviceTypes={serviceTypes}
                     containers={availableContainers}
                     selectedType={selectedType}
@@ -128,17 +126,15 @@ export default function PlanningTool() {
                     handleAddContainer={handleAddContainer}
                     setIsStageDropActive={setIsStageDropActive}
 
-                    // UI state for sidebar sections
+                    //UI state for sidebar sections
                     isAddContainersOpen={isAddContainersOpen}
                     setIsAddContainersOpen={setIsAddContainersOpen}
-                    isAddDoorOpen={isAddDoorOpen}
-                    setIsAddDoorOpen={setIsAddDoorOpen}
                     showCosts={showCosts}
                     setShowCosts={setShowCosts}
                     isAlterRoomSizeOpen={isAlterRoomSizeOpen}
                     setIsAlterRoomSizeOpen={setIsAlterRoomSizeOpen}
 
-                    // Room and door management
+                    //Room and door management
                     setRoom={setRoom}
                     handleAddDoor={handleAddDoor}
                 />

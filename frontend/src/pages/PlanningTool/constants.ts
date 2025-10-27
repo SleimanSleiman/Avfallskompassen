@@ -25,9 +25,9 @@ export const MIN_WIDTH = 50;
 export const MIN_HEIGHT = 50;
 
 //Canvas dimensions and margins
-export const MARGIN = 30;
-export const STAGE_WIDTH = 700;
-export const STAGE_HEIGHT = 600;
+export const MARGIN = 100;
+export const STAGE_WIDTH = 850;
+export const STAGE_HEIGHT = 700;
 
 //Default container sizing in pixels
 export const DEFAULT_CONTAINER_PIXEL_SIZE = 40;

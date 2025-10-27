@@ -14,8 +14,8 @@ export function useRoom() {
         //if saved room data exists in localStorage, parse and center it
         if (savedRoom) {
             const parsed = JSON.parse(savedRoom);
-            const roomWidth = parsed.length ? parsed.length / SCALE : 450;
-            const roomHeight = parsed.width ? parsed.width / SCALE : 350;
+            const roomWidth = parsed.width ? parsed.width / SCALE : 450;
+            const roomHeight = parsed.height ? parsed.height / SCALE : 350;
             return {
                 x: (STAGE_WIDTH - roomWidth) / 2,
                 y: (STAGE_HEIGHT - roomHeight) / 2,
@@ -36,39 +36,39 @@ export function useRoom() {
         let { x, y, width, height } = room;
 
         switch (index) {
-            case 0: //Top-left corner
-                x = clamp(pos.x, MARGIN, x + width - MIN_WIDTH);
-                y = clamp(pos.y, MARGIN, y + height - MIN_HEIGHT);
-                width = room.x + room.width - x;
-                height = room.y + room.height - y;
+            case 0: // Top-left
+                const newX = clamp(pos.x, MARGIN, x + width - MIN_WIDTH);
+                const newY = clamp(pos.y, MARGIN, y + height - MIN_HEIGHT);
+                width = x + width - newX;
+                height = y + height - newY;
+                x = newX;
+                y = newY;
                 break;
-
-            case 1: //Top-right corner
-                const trX = clamp(pos.x, x + MIN_WIDTH, STAGE_WIDTH - MARGIN);
-                const trY = clamp(pos.y, MARGIN, y + height - MIN_HEIGHT);
-                width = trX - x;
-                height = room.y + room.height - trY;
-                y = trY;
+            case 1: // Top-right
+                const newTRX = clamp(pos.x, x + MIN_WIDTH, STAGE_WIDTH - MARGIN);
+                const newTRY = clamp(pos.y, MARGIN, y + height - MIN_HEIGHT);
+                width = newTRX - x;
+                height = y + height - newTRY;
+                y = newTRY;
                 break;
-
-            case 2: //Bottom-right corner
-                const brX = clamp(pos.x, x + MIN_WIDTH, STAGE_WIDTH - MARGIN);
-                const brY = clamp(pos.y, y + MIN_HEIGHT, STAGE_HEIGHT - MARGIN);
-                width = brX - x;
-                height = brY - y;
+            case 2: // Bottom-right
+                const newBRX = clamp(pos.x, x + MIN_WIDTH, STAGE_WIDTH - MARGIN);
+                const newBRY = clamp(pos.y, y + MIN_HEIGHT, STAGE_HEIGHT - MARGIN);
+                width = newBRX - x;
+                height = newBRY - y;
                 break;
-
-            case 3: //Bottom-left corner
-                const blX = clamp(pos.x, MARGIN, x + width - MIN_WIDTH);
-                const blY = clamp(pos.y, y + MIN_HEIGHT, STAGE_HEIGHT - MARGIN);
-                x = blX;
-                width = room.x + room.width - x;
-                height = blY - y;
+            case 3: // Bottom-left
+                const newBLX = clamp(pos.x, MARGIN, x + width - MIN_WIDTH);
+                const newBLY = clamp(pos.y, y + MIN_HEIGHT, STAGE_HEIGHT - MARGIN);
+                width = x + width - newBLX;
+                height = newBLY - y;
+                x = newBLX;
                 break;
         }
 
         setRoom({ x, y, width, height });
     };
+
 
     //Define corners for resizing handles
     const corners = [
