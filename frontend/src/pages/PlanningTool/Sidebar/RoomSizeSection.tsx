@@ -37,10 +37,13 @@ export default function RoomSizeSection({
 
         {/* Button to open the prompt for custom room size */}
         <button
-            className="w-full p-3 rounded bg-blue-600 text-white hover:bg-blue-700 transition"
+            className="w-full flex items-center justify-between p-3 rounded border border-gray-200 bg-white text-nsr-teal hover:bg-gray-50 transition text-left"
             onClick={() => setIsAlterRoomSizeOpen(true)}
         >
-            Ange bredd och längd på rummet
+            <span className="font-medium">Ange bredd och längd på rummet</span>
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+            </svg>
         </button>
 
         {/* Show prompt if user wants to alter room size */}

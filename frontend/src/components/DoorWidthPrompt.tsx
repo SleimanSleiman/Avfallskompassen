@@ -16,21 +16,23 @@ export default function DoorWidthPrompt({
 
     //Standard width for a door is set as 90cm
     const [width, setWidth] = useState("0.90");
+    const [error, setError] = useState<string | null>(null);
 
     //Function that runs when the user clicks the "Confirm" button
     const handleConfirm = () => {
         const widthNum = Number(width);
 
         if (widthNum < 0.5) {
-            alert("Dörrens bredd måste vara minst 0.5 meter.");
+            setError("Dörrens bredd måste vara minst 0.5 meter.");
             return;
         }
 
         if (widthNum > 3) {
-            alert("Dörrens bredd får inte överstiga 3 meter.");
+            setError("Dörrens bredd får inte överstiga 3 meter.");
             return;
         }
 
+        setError(null);
         onConfirm(widthNum);
     };
 
@@ -47,9 +49,18 @@ export default function DoorWidthPrompt({
                     max={3}
                     placeholder="Bredd (meter)"
                     value={width}
-                    onChange={(e) => setWidth(e.target.value)}
+                    onChange={(e) => {
+                        setWidth(e.target.value);
+                        setError(null); // Clear error when user starts typing
+                    }}
                     className="w-full border border-gray-300 rounded-xl2 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-nsr-teal focus:border-nsr-teal"
                 />
+
+                {error && (
+                    <div className="mt-3 p-3 rounded-xl2 bg-red-50 border border-red-200">
+                        <p className="text-sm text-red-700 font-medium">{error}</p>
+                    </div>
+                )}
 
                 <div className="flex justify-end gap-3 mt-6">
                     <button

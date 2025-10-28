@@ -11,24 +11,26 @@ export default function RoomSizePrompt({
 }: RoomSizePromptProps) {
   const [length, setLength] = useState("");
   const [width, setWidth] = useState("");
+  const [error, setError] = useState<string | null>(null);
 
   const handleConfirm = () => {
   const lengthNum = Number(length);
   const widthNum = Number(width);
 
   if (!(lengthNum >= 2.5) || !(widthNum >= 2.5)) {
-    alert('Rummets längd och bredd måste vara större än 2.5 meter.');
+    setError('Rummets längd och bredd måste vara minst 2.5 meter.');
     return;
   }
   if (lengthNum > 32) {
-    alert('Runnets längd får inte överstiga 32 meter.');
+    setError('Rummets längd får inte överstiga 32 meter.');
     return;
   }
   if (widthNum > 27) {
-    alert('Rummets bredd får inte överstiga 27 meter.');
+    setError('Rummets bredd får inte överstiga 27 meter.');
     return;
   }
 
+  setError(null);
   onConfirm(lengthNum, widthNum);
 };
 
@@ -42,17 +44,29 @@ export default function RoomSizePrompt({
           type="number"
           placeholder="Längd (meter)"
           value={length}
-          onChange={(e) => setLength(e.target.value)}
+          onChange={(e) => {
+            setLength(e.target.value);
+            setError(null); // Clear error when user starts typing
+          }}
           className="w-full border border-gray-300 rounded-xl2 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-nsr-teal focus:border-nsr-teal"
         />
         <input
           type="number"
           placeholder="Bredd (meter)"
           value={width}
-          onChange={(e) => setWidth(e.target.value)}
+          onChange={(e) => {
+            setWidth(e.target.value);
+            setError(null); // Clear error when user starts typing
+          }}
           className="w-full border border-gray-300 rounded-xl2 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-nsr-teal focus:border-nsr-teal"
         />
       </div>
+
+      {error && (
+        <div className="mt-3 p-3 rounded-xl2 bg-red-50 border border-red-200">
+          <p className="text-sm text-red-700 font-medium">{error}</p>
+        </div>
+      )}
 
       <div className="flex justify-end gap-3 mt-6">
         <button

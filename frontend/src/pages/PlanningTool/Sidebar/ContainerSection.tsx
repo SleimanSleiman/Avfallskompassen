@@ -44,10 +44,18 @@ export default function ContainerSection({
         <div>
             {/* Toggle section */}
             <button
-                className="w-full p-3 rounded bg-blue-600 text-white hover:bg-blue-700 transition"
+                className="w-full flex items-center justify-between p-3 rounded border border-gray-200 bg-white text-nsr-teal hover:bg-gray-50 transition text-left"
                 onClick={() => setIsAddContainersOpen(!isAddContainersOpen)}
             >
-                Lägg till nya sopkärl
+                <span className="font-medium">Lägg till nya sopkärl</span>
+                <svg 
+                    className={`w-5 h-5 transition-transform ${isAddContainersOpen ? 'rotate-180' : ''}`} 
+                    fill="none" 
+                    stroke="currentColor" 
+                    viewBox="0 0 24 24"
+                >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
             </button>
 
             {/* Container list */}
