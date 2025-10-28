@@ -6,8 +6,11 @@ import com.avfallskompassen.model.Property;
 import com.avfallskompassen.model.PropertyType;
 import com.avfallskompassen.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -89,5 +92,17 @@ public interface PropertyRepository extends JpaRepository<Property, Long> {
         @Param("maxApartments") Integer maxApartments,
         @Param("excludePropertyId") Long excludePropertyId
     );
+
+    /**
+     * Update lastNotifiedAt for a property without loading the full entity.
+     * Uses a new transaction to avoid rolling back other updates if one fails.
+     * @param id property id
+     * @param now timestamp to set
+     * @return number of rows updated (should be 1)
+     */
+    @Modifying
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Query("UPDATE Property p SET p.lastNotifiedAt = :now WHERE p.id = :id")
+    int updateLastNotifiedAt(@Param("id") Long id, @Param("now") java.time.LocalDateTime now);
 
 }

@@ -2,12 +2,26 @@ import { useEffect, useState } from 'react';
 import { getMyProperties } from '../lib/property';
 import type { Property } from '../lib/property';
 
-function isOlderThanOneYear(dateString?: string) {
+// Determine notification threshold in seconds.
+// Frontend uses VITE_NOTIFICATION_THRESHOLD_SECONDS (set in .env) if available.
+// Default is ~1 year (31536000 seconds).
+const DEFAULT_THRESHOLD_SECONDS = (() => {
+  try {
+    const raw = (import.meta as any).env?.VITE_NOTIFICATION_THRESHOLD_SECONDS;
+    if (raw) return parseInt(raw, 10);
+  } catch (e) {
+    // ignore
+  }
+  // default to ~1 year in seconds
+  return 31536000;
+})();
+
+function isOlderThanThreshold(dateString?: string) {
   if (!dateString) return false;
   const d = new Date(dateString);
   const now = new Date();
-  const oneYearAgo = new Date(now.getFullYear() - 1, now.getMonth(), now.getDate(), now.getHours(), now.getMinutes(), now.getSeconds());
-  return d < oneYearAgo;
+  const threshold = new Date(now.getTime() - DEFAULT_THRESHOLD_SECONDS * 1000);
+  return d < threshold;
 }
 
 export default function NotificationCenter() {
@@ -34,8 +48,16 @@ export default function NotificationCenter() {
         // Determine last meaningful change
         const lastChange = p.updatedAt ?? p.createdAt;
         if (!lastChange) return false;
-        // Only notify if it's older than a year
-        return isOlderThanOneYear(lastChange);
+
+        // If property was already notified after the last change, skip it
+        if (p.lastNotifiedAt) {
+          const notified = new Date(p.lastNotifiedAt);
+          const changed = new Date(lastChange);
+          if (notified >= changed) return false;
+        }
+
+        // Only notify if it's older than the configured threshold
+        return isOlderThanThreshold(lastChange);
       });
 
       // Exclude dismissed local ids
