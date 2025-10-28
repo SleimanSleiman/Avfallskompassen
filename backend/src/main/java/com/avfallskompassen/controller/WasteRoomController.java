@@ -14,6 +14,11 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
+/**
+ * REST controller for handling waste rooms.
+ * Includes operations such as creating, deleting, updating and fetching waste rooms
+ * @author Anton Persson
+ */
 @RestController
 @RequestMapping("/api")
 @CrossOrigin(origins = "*")
@@ -86,6 +91,14 @@ public class WasteRoomController {
         return ResponseEntity.ok(rooms);
     }
 
+    /**
+     * Handles requests for uploading a PDF connected to a waste room
+     * @Author Christian Storck
+     * @param file Multipart file containing the PDF document
+     * @param roomId Id to the waste room the PDF should be connected to
+     * @return A status code with either an error message or a DTO containing information
+     * about the uploaded PDF
+     */
     @PostMapping("/upload-pdf")
     public ResponseEntity<RoomPdfDTO> uploadPdf(@RequestParam("file")MultipartFile file,
                                                  @RequestParam("roomId") Long roomId) {
@@ -102,6 +115,13 @@ public class WasteRoomController {
         }
     }
 
+    /**
+     * Handles requests for fetching all PDFs connected to a certain waste room
+     * @Author Christian Storck
+     * @param roomId Id to the waste room
+     * @return A status code with either an error message or a list containing DTOs
+     * representing the PDFs connected to the room
+     */
     @GetMapping("/{roomId}/pdfs")
     public ResponseEntity<List<RoomPdfDTO>> getRoomPdfs(@PathVariable Long roomId) {
         try {
@@ -112,6 +132,12 @@ public class WasteRoomController {
         }
     }
 
+    /**
+     * Handles requests for downloading a specific PDF connected to a waste room
+     * @Author Christian Storck
+     * @param pdfId Id to the PDF that should be downloaded
+     * @return A status code with the requested PDF file or an error message if not found
+     */
     @GetMapping
     public ResponseEntity<byte[]> downloadPfd(@PathVariable Long pdfId) {
         try {

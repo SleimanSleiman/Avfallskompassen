@@ -162,7 +162,7 @@ public class WasteRoomServiceImpl implements WasteRoomService {
      * the doors in the database
      * @param doors A list containing requests of doors
      * @param wasteRoom The waste room to be altered or created
-     * @returnA list of {@link DoorPosition} with the appropriate data needed before saving it in database
+     * @return A list of {@link DoorPosition} with the appropriate data needed before saving it in database
      */
     private List<DoorPosition> convertDoorRequest(List<DoorPositionRequest> doors, WasteRoom wasteRoom) {
         if (doors == null) {

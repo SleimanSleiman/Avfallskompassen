@@ -16,7 +16,6 @@ import java.math.BigDecimal;
  * And implementation of the CollectionFeeService interface.
  * @Author Christian Storck
  */
-
 @Service
 @Transactional
 public class CollectionFeeServiceImpl implements CollectionFeeService {
@@ -33,7 +32,6 @@ public class CollectionFeeServiceImpl implements CollectionFeeService {
      * @return CollectionFeeDTO
      * @Author Christian Storck
      */
-
     public CollectionFeeDTO findCollectionFeeByMunicipalityId(Long id, double distance) {
         CollectionFee collectionFee = collectionFeeRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Collection fee not found"));
@@ -62,7 +60,6 @@ public class CollectionFeeServiceImpl implements CollectionFeeService {
      * @return CollectionFeeDTO
      * @Author Christian Storck
      */
-
     public CollectionFeeDTO findCollectionFeeByPropertyId(Long propertyId) {
         var property = propertyService.findById(propertyId)
                 .orElseThrow(()-> new IllegalArgumentException("Property not found"));

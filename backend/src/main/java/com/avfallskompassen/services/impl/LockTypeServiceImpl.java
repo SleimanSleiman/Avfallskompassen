@@ -20,6 +20,14 @@ public class LockTypeServiceImpl implements LockTypeService {
         this.lockTypeRepository = lockTypeRepository;
     }
 
+    /**
+     * Fetches a lock type based on its ID.
+     *
+     * @Author Christian Storck
+     * @param lockTypeId Id of the lock type to retrieve
+     * @return A {@link LockType} entity matching the provided ID
+     * @throws RuntimeException if no lock type is found with the given ID
+     */
     @Transactional(readOnly = true)
     public LockType findLockTypeById(Long lockTypeId) {
         return lockTypeRepository.findById(lockTypeId)

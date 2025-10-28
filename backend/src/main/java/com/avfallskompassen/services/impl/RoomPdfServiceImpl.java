@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
  * Service implementation of RoomPpfService.
  * Manages PDF files associated with waste rooms.
  * Handles uploading, downloading and listing PDF files linked to specifik waste rooms.
- * @Author Christian Storck
+ * @author Christian Storck
  */
 @Service
 @Transactional
@@ -33,6 +33,16 @@ public class RoomPdfServiceImpl implements RoomPdfService {
     @Autowired
     private WasteRoomRepository wasteRoomRepository;
 
+    /**
+     * Handles uploading and saving a PDF file linked to a specific waste room.
+     *
+     * @author Christian Storck
+     * @param file   Multipart file containing the PDF data
+     * @param roomId Id of the waste room the PDF should be linked to
+     * @return A {@link RoomPdfDTO} containing details of the uploaded file
+     * @throws ResourceNotFoundException if the specified waste room cannot be found
+     * @throws RuntimeException if an error occurs while saving the file data
+     */
     public RoomPdfDTO uploadPdf(MultipartFile file, Long roomId){
         try {
             WasteRoom room = wasteRoomRepository.findById(roomId)
@@ -51,6 +61,14 @@ public class RoomPdfServiceImpl implements RoomPdfService {
         }
     }
 
+    /**
+     * Fetches a stored PDF file by its ID.
+     *
+     * @author Christian Storck
+     * @param pdfId Id of the PDF file to retrieve
+     * @return A byte array containing the PDF data
+     * @throws ResourceNotFoundException if no PDF file is found with the given ID
+     */
     public byte[] downloadPdf(Long pdfId) {
         RoomPdf roomPdf = roomPdfRepository.findById(pdfId)
                 .orElseThrow(() -> new ResourceNotFoundException("PDF not found"));
@@ -58,6 +76,13 @@ public class RoomPdfServiceImpl implements RoomPdfService {
         return roomPdf.getPdfData();
     }
 
+    /**
+     * Retrieves all PDF files associated with a specific waste room.
+     *
+     * @author Christian Storck
+     * @param roomId Id of the waste room
+     * @return A list of {@link RoomPdfDTO} objects representing all PDFs linked to the given room
+     */
     public List<RoomPdfDTO> getPdfsByRoomId(Long roomId) {
         return roomPdfRepository.findByWasteRoomId(roomId)
                 .stream()
@@ -65,6 +90,13 @@ public class RoomPdfServiceImpl implements RoomPdfService {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Maps a {@link RoomPdf} entity to a {@link RoomPdfDTO}.
+     *
+     * @author Christian Storck
+     * @param roomPdf The entity to map
+     * @return A {@link RoomPdfDTO} containing relevant information about the PDF
+     */
     public RoomPdfDTO mapToDto(RoomPdf roomPdf) {
         RoomPdfDTO dto = new RoomPdfDTO();
         dto.setId(roomPdf.getId());
