@@ -1,5 +1,7 @@
 package com.avfallskompassen.dto;
 
+import com.avfallskompassen.dto.ContainerPositionDTO;
+import com.avfallskompassen.dto.DoorPositionDTO;
 import com.avfallskompassen.model.WasteRoom;
 
 import java.util.List;

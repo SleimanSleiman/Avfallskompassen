@@ -18,7 +18,7 @@ import java.util.Map;
 
 /**
  * Rest API controller that serves DTO's containing the different costs tied to a property.
- * @Author Christian Storck
+ * @author Christian Storck
  */
 
 @RestController
@@ -28,6 +28,14 @@ public class PropertyCostController {
     @Autowired
     private PropertyCostService propertyCostService;
 
+    /**
+     * Handles requests for calculating the total annual cost of a specific property.
+     *
+     * @author Christian Storck
+     * @param id The ID of the property to calculate the total cost for
+     * @return A {@link GeneralPropertyCostDTO} containing the calculated costs,
+     * or an error response if the property could not be found
+     */
     @GetMapping("/{id}/totalCost")
     public ResponseEntity<?> getAnnualCost(@PathVariable Long id) {
         try{
@@ -44,6 +52,14 @@ public class PropertyCostController {
         }
     }
 
+    /**
+     * Handles requests for calculating the total property costs for all properties owned by a user.
+     *
+     * @author Christian Storck
+     * @param username The username associated with the user's properties
+     * @return A list of {@link GeneralPropertyCostDTO} objects representing each property’s calculated cost,
+     * or an error response if no properties were found
+     */
     @GetMapping("/user/{username}")
     public ResponseEntity<?> getAllCostsForUser(@PathVariable String username) {
         try{

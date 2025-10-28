@@ -61,6 +61,7 @@ public class PropertyCostServiceImplTest {
 
         LockType lockType = new LockType();
         lockType.setCost(BigDecimal.valueOf(200));
+        property.setLockType(lockType);
         when(lockTypeService.findLockTypeById(propertyId)).thenReturn(lockType);
 
         ContainerPlan plan = new ContainerPlan();
@@ -127,6 +128,8 @@ public class PropertyCostServiceImplTest {
 
         LockType lockType = new LockType();
         lockType.setCost(BigDecimal.valueOf(200));
+        property1.setLockType(lockType);
+        property2.setLockType(lockType);
         when(lockTypeService.findLockTypeById(anyLong())).thenReturn(lockType);
 
         ContainerPlan plan = new ContainerPlan();
@@ -152,7 +155,6 @@ public class PropertyCostServiceImplTest {
         
         verify(propertyService).getPropertiesByUser(username);
         verify(collectionFeeService, times(2)).findCollectionFeeByPropertyId(anyLong());
-        verify(lockTypeService, times(2)).findLockTypeById(anyLong());
         verify(propertyContainerRepository, times(2)).findByPropertyId(anyLong());
     }
 
