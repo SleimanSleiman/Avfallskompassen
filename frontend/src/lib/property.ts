@@ -9,6 +9,8 @@ export type Property = {
   lockPrice?: number;
   accessPathLength: number;
   createdAt: string;
+  updatedAt?: string;
+  lastNotifiedAt?: string;
   municipalityId?: number;
   municipalityName?: string;
 };

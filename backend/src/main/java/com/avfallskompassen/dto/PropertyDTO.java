@@ -1,7 +1,7 @@
 package com.avfallskompassen.dto;
 
 import com.avfallskompassen.model.Property;
-import java.time.LocalDateTime;
+// timestamps are exposed as ISO strings for frontend compatibility
 
 /**
  * DTO for Property responses to avoid Hibernate proxy issues.
@@ -12,7 +12,9 @@ public class PropertyDTO {
     private Integer numberOfApartments;
     private String propertyType;
     private Double accessPathLength;
-    private LocalDateTime createdAt;
+    private String createdAt;
+    private String updatedAt;
+    private String lastNotifiedAt;
     private LockTypeDto lockTypeDto;
     private Long municipalityId;
     private String municipalityName;
@@ -26,8 +28,10 @@ public class PropertyDTO {
         this.numberOfApartments = property.getNumberOfApartments();
         this.propertyType = property.getPropertyType() != null ? property.getPropertyType().getDisplayName() : null;
         this.lockTypeDto = property.getLockType() != null? new LockTypeDto(property.getLockType()) : null;
-        this.accessPathLength = property.getAccessPathLength();
-        this.createdAt = property.getCreatedAt();
+    this.accessPathLength = property.getAccessPathLength();
+    this.createdAt = property.getCreatedAt() != null ? property.getCreatedAt().toString() : null;
+    this.updatedAt = property.getUpdatedAt() != null ? property.getUpdatedAt().toString() : null;
+    this.lastNotifiedAt = property.getLastNotifiedAt() != null ? property.getLastNotifiedAt().toString() : null;
         this.municipalityId = property.getMunicipality() != null ? property.getMunicipality().getId() : null;
         this.municipalityName = property.getMunicipality() != null ? property.getMunicipality().getName() : null;
     }
@@ -55,8 +59,14 @@ public class PropertyDTO {
     public Double getAccessPathLength() { return accessPathLength; }
     public void setAccessPathLength(Double accessPathLength) { this.accessPathLength = accessPathLength; }
     
-    public LocalDateTime getCreatedAt() { return createdAt; }
-    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+    public String getCreatedAt() { return createdAt; }
+    public void setCreatedAt(String createdAt) { this.createdAt = createdAt; }
+
+    public String getUpdatedAt() { return updatedAt; }
+    public void setUpdatedAt(String updatedAt) { this.updatedAt = updatedAt; }
+
+    public String getLastNotifiedAt() { return lastNotifiedAt; }
+    public void setLastNotifiedAt(String lastNotifiedAt) { this.lastNotifiedAt = lastNotifiedAt; }
 
     public Long getMunicipalityId() {
         return municipalityId;

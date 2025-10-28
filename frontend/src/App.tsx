@@ -4,6 +4,7 @@ import Footer from './components/Footer';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import PropertyPage from './pages/PropertyPage';
+import NotificationCenter from './components/NotificationCenter';
 import { currentUser } from './lib/auth';
 import PlanningTool from './pages/PlanningTool/PlanningTool';
 
@@ -77,6 +78,8 @@ function Dashboard() {
             </button>
           </div>
         </div>
+
+        <NotificationCenter />
 
         {/* Recent Activity Section */}
         <div className="bg-white rounded-2xl p-6 shadow-soft">
