@@ -1,13 +1,34 @@
 import { Link, NavLink } from 'react-router-dom';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { currentUser, logout } from '../lib/auth';
 
 export default function NavBar() {
   const [open, setOpen] = useState(false);
-  const user = currentUser();
+  const [user, setUser] = useState(currentUser());
+
+  useEffect(() => {
+    // Update user state when component mounts
+    setUser(currentUser());
+
+    // Listen for storage changes (e.g., when user logs in/out in another tab)
+    const handleStorageChange = () => {
+      setUser(currentUser());
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    
+    // Custom event for same-tab login/logout
+    window.addEventListener('auth-change', handleStorageChange);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('auth-change', handleStorageChange);
+    };
+  }, []);
 
   function handleLogout() {
     logout();
+    setUser(null);
     window.location.href = '/login';
   }
 
@@ -36,35 +57,27 @@ export default function NavBar() {
             </button>
 
             <nav className="hidden md:flex items-center gap-6 text-white font-black text-lg">
-              {user ? (
-                <>
-                  <NavLink to="/dashboard" className={({ isActive }) => `nav-link hover:text-white transition-colors ${isActive ? 'nav-link-active' : ''}`}>Dashboard</NavLink>
-                  <NavLink to="/properties" className={({ isActive }) => `nav-link hover:text-white transition-colors ${isActive ? 'nav-link-active' : ''}`}>Mina fastigheter</NavLink>
-                  <NavLink to="/planningTool" className={({ isActive }) => `nav-link hover:text-white transition-colors ${isActive ? 'nav-link-active' : ''}`}>Planeringsverktyg</NavLink>
-                  <div className="flex items-center gap-3">
-                    <span className="text-sm">Hej {user.username}!</span>
-                    <button
-                      onClick={handleLogout}
-                      className="rounded-xl2 bg-nsr-accent px-4 py-2 text-sm text-white hover:bg-nsr-accent/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-nsr-accent transition-colors"
-                    >
-                      Logga ut
-                    </button>
-                  </div>
-                </>
-              ) : (
-                <>
-                  <NavLink to="#" className="nav-link hover:text-white transition-colors">Abonnemang</NavLink>
-                  <NavLink to="#" className="nav-link hover:text-white transition-colors">Information</NavLink>
-                  <div className="relative">
-                    <input className="h-9 w-64 rounded-full border-0 bg-white/95 pl-4 pr-10 text-sm placeholder:text-gray-500 focus:ring-2 focus:ring-nsr-teal" placeholder="Vad letar du efter?" />
-                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500">
-                      <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor">
-                        <circle cx="11" cy="11" r="7" strokeWidth="2"/><path d="m20 20-3-3" strokeWidth="2"/>
-                      </svg>
-                    </span>
-                  </div>
-                </>
-              )}
+              <NavLink to="/dashboard" className={({ isActive }) => `nav-link hover:text-white transition-colors ${isActive ? 'nav-link-active' : ''}`}>Dashboard</NavLink>
+              <NavLink to="/properties" className={({ isActive }) => `nav-link hover:text-white transition-colors ${isActive ? 'nav-link-active' : ''}`}>Mina fastigheter</NavLink>
+              <NavLink to="/planningTool" className={({ isActive }) => `nav-link hover:text-white transition-colors ${isActive ? 'nav-link-active' : ''}`}>Planeringsverktyg</NavLink>
+              <div className="flex items-center gap-3">
+                {user && <span className="text-sm">Hej {user.username}!</span>}
+                {user ? (
+                  <button
+                    onClick={handleLogout}
+                    className="rounded-xl2 bg-nsr-accent px-4 py-2 text-sm text-white hover:bg-nsr-accent/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-nsr-accent transition-colors"
+                  >
+                    Logga ut
+                  </button>
+                ) : (
+                  <Link
+                    to="/login"
+                    className="rounded-xl2 bg-nsr-accent px-4 py-2 text-sm text-white hover:bg-nsr-accent/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-nsr-accent transition-colors"
+                  >
+                    Logga in
+                  </Link>
+                )}
+              </div>
             </nav>
           </div>
         </div>
@@ -73,18 +86,13 @@ export default function NavBar() {
       {open && (
         <div className="md:hidden bg-white border-b">
           <nav className="mx-auto max-w-7xl px-4 py-3 flex flex-col gap-3 font-black">
+            <NavLink to="/dashboard" className="text-nsr-ink">Dashboard</NavLink>
+            <NavLink to="/properties" className="text-nsr-ink">Mina fastigheter</NavLink>
+            <NavLink to="/planningTool" className="text-nsr-ink">Planeringsverktyg</NavLink>
             {user ? (
-              <>
-                <NavLink to="/dashboard" className="text-nsr-ink">Dashboard</NavLink>
-                <NavLink to="/properties" className="text-nsr-ink">Mina fastigheter</NavLink>
-                <NavLink to="/planningTool" className="text-nsr-ink">Planeringsverktyg</NavLink>
-                <button onClick={handleLogout} className="text-left text-nsr-ink">Logga ut</button>
-              </>
+              <button onClick={handleLogout} className="text-left text-nsr-ink">Logga ut</button>
             ) : (
-              <>
-                <NavLink to="#" className="text-nsr-ink">Abonnemang</NavLink>
-                <NavLink to="#" className="text-nsr-ink">Information</NavLink>
-              </>
+              <Link to="/login" className="text-left text-nsr-ink">Logga in</Link>
             )}
           </nav>
         </div>
