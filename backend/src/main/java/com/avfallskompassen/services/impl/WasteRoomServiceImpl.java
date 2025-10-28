@@ -113,8 +113,8 @@ public class WasteRoomServiceImpl implements WasteRoomService {
         List<ContainerPosition> newContainers = convertContainerRequest(request.getContainers(), wasteRoom);
         List<DoorPosition> newDoors = convertDoorRequest(request.getDoors(), wasteRoom);
 
-        wasteRoom.setContainers(newContainers);
-        wasteRoom.setDoors(newDoors);
+        wasteRoom.getContainers().addAll(newContainers);
+        wasteRoom.getDoors().addAll(newDoors);
 
         WasteRoom updated = wasteRoomRepository.save(wasteRoom);
         return WasteRoomDTO.fromEntity(updated);
