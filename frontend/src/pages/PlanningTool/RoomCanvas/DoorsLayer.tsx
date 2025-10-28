@@ -1,84 +1,111 @@
 /**
- * DoorsLayer Component
- * Renders doors within a room on the canvas.
+ * DoorsLayer component
+ * Renders all the doors in the room.
+ * Handles dragging, snapping to walls, and selection highlighting.
  */
-import { Group, Rect } from "react-konva";
-import { clamp } from "../constants";
-import type { Door, Room } from "../types";
+import { Group, Arc, Line } from "react-konva";
+import type { Door } from "../types";
+import { SCALE, clamp } from "../constants";
 
-/* ─────────────── DoorsLayer Props ──────────────── */
+/* ─────────────── Props ──────────────── */
 type DoorsLayerProps = {
-    room: Room;
     doors: Door[];
     selectedDoorId: number | null;
-    handleDragDoor: (id: number, pos: { x: number; y: number }, room: Room) => void;
+    room: { x: number; y: number; width: number; height: number };
+    handleDragDoor: (id: number,pos: { x: number; y: number; wall: Door["wall"]; rotation: number }) => void;
     handleSelectDoor: (id: number) => void;
 };
 
 export default function DoorsLayer({
-    room,
     doors,
     selectedDoorId,
+    room,
     handleDragDoor,
-    handleSelectDoor,
+    handleSelectDoor
 }: DoorsLayerProps) {
 
     /* ──────────────── Render ──────────────── */
     return (
         <>
-            {doors.map((door) => (
-                <Group
-                    key={door.id}
-                    x={door.x}
-                    y={door.y}
-                    draggable
-                    //Constrain door movement to room edges
-                    dragBoundFunc={(pos) => {
-                        const distTop = Math.abs(pos.y - room.y);
-                        const distBottom = Math.abs(pos.y - (room.y + room.height));
-                        const distLeft = Math.abs(pos.x - room.x);
-                        const distRight = Math.abs(pos.x - (room.x + room.width));
-                        const minDist = Math.min(distTop, distBottom, distLeft, distRight);
+            {doors.map(door => {
 
-                        let newX = pos.x;
-                        let newY = pos.y;
+                return (
+                    <Group
+                        key={door.id}
+                        x={door.x}
+                        y={door.y}
+                        data-testid={`door-group-${door.id}`}
+                        draggable
+                        //Snap door to closest wall during drag
+                        dragBoundFunc={(pos) => {
+                            const topY = room.y;
+                            const bottomY = room.y + room.height;
+                            const leftX = room.x;
+                            const rightX = room.x + room.width;
 
-                        const CORNER_MARGIN = 15; //margin to prevent door from reaching corners
+                            //Calculate distances to each wall
+                            const distTop = Math.abs(pos.y - topY);
+                            const distBottom = Math.abs(pos.y - bottomY);
+                            const distLeft = Math.abs(pos.x - leftX);
+                            const distRight = Math.abs(pos.x - rightX);
+                            const minDist = Math.min(distTop, distBottom, distLeft, distRight);
 
-                        if (minDist === distTop) {
-                            newY = room.y - door.height;
-                            newX = clamp(pos.x, room.x + CORNER_MARGIN, room.x + room.width - door.width - CORNER_MARGIN);
-                        } else if (minDist === distBottom) {
-                            newY = room.y + room.height;
-                            newX = clamp(pos.x, room.x + CORNER_MARGIN, room.x + room.width - door.width - CORNER_MARGIN);
-                        } else if (minDist === distLeft) {
-                            newX = room.x - door.height;
-                            newY = clamp(pos.y, room.y + CORNER_MARGIN, room.y + room.height - door.width - CORNER_MARGIN);
-                        } else if (minDist === distRight) {
-                            newX = room.x + room.width;
-                            newY = clamp(pos.y, room.y + CORNER_MARGIN, room.y + room.height - door.width - CORNER_MARGIN);
+                            let newX = pos.x;
+                            let newY = pos.y;
+
+                            //Snap to the closest wall
+                            if (minDist === distTop) {
+                                newY = topY;
+                                newX = clamp(pos.x, leftX, rightX);
+                            } else if (minDist === distBottom) {
+                                newY = bottomY;
+                                newX = clamp(pos.x, leftX, rightX);
+                            } else if (minDist === distLeft) {
+                                newX = leftX;
+                                newY = clamp(pos.y, topY, bottomY);
+                            } else if (minDist === distRight) {
+                                newX = rightX;
+                                newY = clamp(pos.y, topY, bottomY);
+                            }
+
+                            return { x: newX, y: newY };
+                        }}
+
+                        //Update parent state on drag move
+                        onDragMove={(e) =>
+                            handleDragDoor(door.id, e.target.position(), room)
                         }
 
-                        return { x: newX, y: newY };
-                    }}
+                        //Select door when clicked
+                        onClick={(e) => {
+                            e.cancelBubble = true;
+                            handleSelectDoor(door.id);
+                        }}
+                    >
+                        {/* Draw door swing arc*/}
+                        <Arc
+                            x={0}
+                            y={0}
+                            innerRadius={0}
+                            outerRadius={door.width / SCALE}
+                            angle={90}
+                            rotation={door.rotation}
+                            stroke={selectedDoorId === door.id ? "orange" : "blue"}
+                            strokeWidth={2}
+                            data-testid={`door-arc-${door.id}`}
+                        />
+                        {/* Draw door line*/}
+                        <Line
+                            points={[0, 0, door.width / SCALE, 0]}
+                            rotation={door.rotation}
+                            stroke={selectedDoorId === door.id ? "orange" : "blue"}
+                            strokeWidth={2}
+                            data-testid={`door-line-${door.id}`}
+                        />
+                    </Group>
 
-                    onDragMove={(e) => handleDragDoor(door.id, e.target.position(), room)}
-                    onClick={(e) => {
-                        e.cancelBubble = true;
-                        handleSelectDoor(door.id);
-                    }}
-                >
-                    {/* Render door rectangle */}
-                    <Rect
-                        width={door.rotation === 90 ? door.height : door.width}
-                        height={door.rotation === 90 ? door.width : door.height}
-                        fill={selectedDoorId === door.id ? "#ffcf8c" : "#ffc18c"}
-                        stroke="#563232"
-                        strokeWidth={2}
-                        cornerRadius={2}
-                    />
-                </Group>
-            ))}
+                );
+            })}
         </>
-    );
-}
+    )
+;}

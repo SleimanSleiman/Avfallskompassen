@@ -13,6 +13,7 @@ type ActionPanelProps = {
     selectedDoorId: number | null;
     handleRemoveContainer: (id: number) => void;
     handleRemoveDoor: (id: number) => void;
+    handleRotateDoor: (id: number, newRotation: number, newSwing: "inward" | "outward") => void;
 };
 
 export default function ActionPanel({
@@ -22,6 +23,7 @@ export default function ActionPanel({
     selectedDoorId,
     handleRemoveContainer,
     handleRemoveDoor,
+    handleRotateDoor,
 }: ActionPanelProps) {
     //Determine the name of the selected item
     const selectedName = (() => {
@@ -30,7 +32,7 @@ export default function ActionPanel({
             return container ? container.container.name : "Inget objekt valt";
         } else if (selectedDoorId !== null) {
             const door = doors.find((d) => d.id === selectedDoorId);
-            return door ? door.name : "Inget objekt valt";
+            return door ? "Dörr " + door.width*100 + "cm" : "Inget objekt valt";
         }
 
         return "Inget objekt valt";
@@ -60,11 +62,20 @@ export default function ActionPanel({
                 <button
                     className="flex-1 px-4 py-2 rounded bg-green-500 text-white hover:bg-green-600 transition"
                     onClick={() => {
-                        // TODO: Implement rotate logic
+                        if (selectedDoorId !== null) {
+                            const door = doors.find(d => d.id === selectedDoorId);
+                            if (!door) return;
+
+                            const newRotation = (door.rotation + 180) % 360;
+                            const newSwing = door.swingDirection === "inward" ? "outward" : "inward";
+
+                            handleRotateDoor(door.id, newRotation, newSwing);
+                        }
                     }}
                 >
-                    Rotera
+                  Rotera
                 </button>
+
 
                 {/* Remove button */}
                 <button

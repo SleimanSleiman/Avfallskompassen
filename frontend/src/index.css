@@ -7,14 +7,14 @@
 }
 
 body {
-  @apply text-nsr-ink bg-white;
+  @apply text-nsr-ink bg-white font-sans;
 }
 
 /* Reusable buttons */
 .btn-primary {
   @apply inline-flex items-center justify-center rounded-xl2 px-5 py-3 font-medium
-         bg-nsr-teal text-white shadow-soft hover:bg-nsr-teal/90
-         focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-nsr-teal;
+         bg-nsr-accent text-white shadow-soft hover:bg-nsr-accent/90
+         focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-nsr-accent;
 }
 .btn-secondary {
   @apply inline-flex items-center justify-center rounded-xl2 px-5 py-3 font-medium
@@ -24,6 +24,36 @@ body {
 
 /* Headline */
 .h1 { @apply text-4xl md:text-5xl font-semibold tracking-tight; }
+
+/* Text type classes */
+.rubriktext { @apply font-black; } /* Arial Black for rubriktext */
+.ingress { @apply font-bold; } /* Arial Bold for ingress */
+.ingress-och-rubrik { @apply font-bold; } /* Arial Bold for ingress och rubrik */
+.brodtext { @apply font-normal; } /* Arial Regular for brödtext */
+
+/* Navigation underline styles */
+.nav-link::after {
+  content: "";
+  display: block;
+  width: 100%;
+  height: 6px;
+  margin-top: 2px;
+  border-radius: 10px;
+  opacity: 0;
+  transform: scaleX(0);
+  background-color: #e8c222;
+  transition: all 0.22s ease;
+}
+
+.nav-link:hover::after {
+  opacity: 1;
+  transform: scaleX(1);
+}
+
+.nav-link-active::after {
+  opacity: 1;
+  transform: scaleX(1);
+}
 
 /* Mock-like footer background */
 .footer-skyline {

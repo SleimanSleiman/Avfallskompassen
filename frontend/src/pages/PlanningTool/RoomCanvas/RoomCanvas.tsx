@@ -7,6 +7,7 @@ import RoomShape from "./RoomShape";
 import CornerHandles from "./CornerHandles";
 import DoorsLayer from "./DoorsLayer";
 import ContainersLayer from "./ContainersLayer";
+import DoorMeasurementLayer from "./DoorMeasurementLayer";
 import { STAGE_WIDTH, STAGE_HEIGHT } from "../constants";
 import type { Room, ContainerInRoom, Door } from "../types";
 
@@ -20,8 +21,8 @@ type RoomCanvasProps = {
     //Door props
     doors: Door[];
     selectedDoorId: number | null;
-    handleDragDoor: (id: number, pos: { x: number; y: number }, room: Room) => void;
     handleSelectDoor: (id: number) => void;
+    handleDragDoor: (id: number,pos: { x: number; y: number; wall: Door["wall"]; rotation: number }) => void;
 
     //Container props
     containers: ContainerInRoom[];
@@ -45,6 +46,7 @@ export default function RoomCanvas({
     selectedDoorId,
     handleDragDoor,
     handleSelectDoor,
+    setDoors,
     containers,
     selectedContainerId,
     handleDragContainer,
@@ -81,13 +83,19 @@ export default function RoomCanvas({
                         handleDragCorner={handleDragCorner}
                     />
 
-                    {/* Doors layer */}
+                    {/* Door layer*/}
                     <DoorsLayer
-                        room={room}
                         doors={doors}
                         selectedDoorId={selectedDoorId}
+                        room={room}
                         handleDragDoor={handleDragDoor}
                         handleSelectDoor={handleSelectDoor}
+                    />
+
+                    {/* Measurments between door and corners*/}
+                    <DoorMeasurementLayer
+                        doors={doors}
+                        room={room}
                     />
 
                     {/* Containers layer */}

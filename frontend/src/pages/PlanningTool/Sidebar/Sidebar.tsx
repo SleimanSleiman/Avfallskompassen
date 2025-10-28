@@ -15,8 +15,6 @@ type SidebarProps = {
     //UI state
     isAddContainersOpen: boolean;
     setIsAddContainersOpen: (v: boolean) => void;
-    isAddDoorOpen: boolean;
-    setIsAddDoorOpen: (v: boolean) => void;
     isAlterRoomSizeOpen: boolean;
     setIsAlterRoomSizeOpen: (v: boolean) => void;
     showCosts: boolean;
@@ -35,15 +33,13 @@ type SidebarProps = {
     setIsStageDropActive: (v: boolean) => void;
 
     //Doors & room management
-    handleAddDoor: (type: any) => void;
+    handleAddDoor: (door: { width: number }) => void;
     setRoom: any;
 };
 
 export default function Sidebar({
     isAddContainersOpen,
     setIsAddContainersOpen,
-    isAddDoorOpen,
-    setIsAddDoorOpen,
     isAlterRoomSizeOpen,
     setIsAlterRoomSizeOpen,
     showCosts,
@@ -76,10 +72,8 @@ export default function Sidebar({
                     setRoom={setRoom}
                 />
 
-                {/* Section to add and manage doors */}
+                {/* Section to add a door */}
                 <DoorSection
-                    isAddDoorOpen={isAddDoorOpen}
-                    setIsAddDoorOpen={setIsAddDoorOpen}
                     handleAddDoor={handleAddDoor}
                 />
 

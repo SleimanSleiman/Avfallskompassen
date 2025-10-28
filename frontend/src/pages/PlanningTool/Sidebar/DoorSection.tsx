@@ -1,64 +1,44 @@
 /**
- * DoorSection component.
- * Allows users tp add doors to the room layout.
- * Shows a collapsible list of door types when the button is clicked.
+ * DoorSection components
+ * Manages the UI for adding a new door.
  */
-import { motion, AnimatePresence } from "framer-motion";
+import { useState } from "react";
+import DoorWidthPrompt from "../../../components/DoorWidthPrompt";
 import type { Door } from "../types";
-import type { DoorTemplate } from "../types";
 
-/* ─────────────── Door Props ─────────────── */
+/* ─────────────── Props ──────────────── */
 type DoorSectionProps = {
-    isAddDoorOpen: boolean;
-    setIsAddDoorOpen: (v: boolean) => void;
-    handleAddDoor: (doorTypes: Omit<Door, "id" | "x" | "y" | "rotation">) => void;
+    handleAddDoor: (door: { width: number }) => void;
 };
 
-export default function DoorSection({
-    isAddDoorOpen,
-    setIsAddDoorOpen,
-    handleAddDoor,
-}: DoorSectionProps) {
+export default function DoorSection({ handleAddDoor }: DoorSectionProps) {
+    //State to control if the width prompt is visible
+    const [isPromptOpen, setIsPromptOpen] = useState(false);
 
-    //Predefined door types
-    const doorTypes: DoorTemplate[] = [
-        { id: 1, name: "Standarddörr", width: 24, height: 10 },
-        { id: 2, name: "Dubbel dörr", width: 48, height: 10 },
-    ];
+    //Called when the user confirms a width in the promopt
+    const handleConfirm = (width: number) => {
+        handleAddDoor({ width }); //Pass width up to parent
+        setIsPromptOpen(false); //Close the prompt
+    };
 
-    /* ─────────────── Render ─────────────── */
+    /* ──────────────── Render ──────────────── */
     return (
         <div>
+            {/* Button to open the door width prompt*/}
+            <button
+                className="w-full p-3 rounded bg-blue-600 text-white hover:bg-blue-700 transition"
+                onClick={() => setIsPromptOpen(true)}
+            >
+                Lägg till ny dörr
+            </button>
 
-        {/* Toggle door section */}
-        <button
-            className="w-full p-3 rounded bg-blue-600 text-white hover:bg-blue-700 transition"
-            onClick={() => setIsAddDoorOpen(!isAddDoorOpen)}
-        >
-            Lägg till ny dörr
-        </button>
-
-        {/* List of door types */}
-        <AnimatePresence>
-            {isAddDoorOpen && (
-                <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: "auto" }}
-                    exit={{ opacity: 0, height: 0 }}
-                    className="mt-2 pl-4 space-y-2"
-                >
-                    {doorTypes.map((doorType) => (
-                        <button
-                            key={doorType.id}
-                            onClick={() => handleAddDoor(doorType)}
-                            className="w-full text-left p-2 border rounded bg-white hover:bg-blue-50 transition"
-                        >
-                            {doorType.name}
-                        </button>
-                    ))}
-                </motion.div>
+            {/* Show the width prompt when state is true */}
+            {isPromptOpen && (
+                <DoorWidthPrompt
+                    onConfirm={handleConfirm}
+                    onCancel={() => setIsPromptOpen(false)}
+                />
             )}
-        </AnimatePresence>
-    </div>
-  );
+        </div>
+    );
 }
