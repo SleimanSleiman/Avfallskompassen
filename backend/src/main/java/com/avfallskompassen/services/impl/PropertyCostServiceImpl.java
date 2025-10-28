@@ -43,7 +43,7 @@ public class PropertyCostServiceImpl implements PropertyCostService {
 
         BigDecimal collectionFee = collectionFeeService.findCollectionFeeByPropertyId(propertyId).getCost();
 
-        BigDecimal lockCost = lockTypeService.findLockTypeById(propertyId).getCost();
+        BigDecimal lockCost = property.getLockType().getCost();
 
         List<PropertyContainer> propertyContainerList = propertyContainerRepository.findByPropertyId(propertyId);
 
