@@ -58,7 +58,6 @@ public class PropertyUpdateNotificationScheduler {
 
             if (needsNotification) {
                 
-                // Use a JPQL update to avoid triggering entity validation on other fields
                 try {
                     int updated = propertyRepository.updateLastNotifiedAt(p.getId(), now);
                     if (updated > 0) {
