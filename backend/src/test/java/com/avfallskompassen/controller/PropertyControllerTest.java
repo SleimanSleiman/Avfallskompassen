@@ -148,9 +148,11 @@ public class PropertyControllerTest {
     @Test
     void updateProperty_unauthorized_returns401() {
         PropertyRequest req = new PropertyRequest();
-        ResponseEntity<PropertyResponse> resp = controller.updateProperty(1L, req, null);
+        ResponseEntity<?> resp = controller.updateProperty(1L, req, null);
         assertEquals(401, resp.getStatusCodeValue());
-        assertFalse(resp.getBody().isSuccess());
+        assertTrue(resp.getBody() instanceof PropertyResponse);
+        PropertyResponse body = (PropertyResponse) resp.getBody();
+        assertFalse(body.isSuccess());
     }
 
     @Test
@@ -158,10 +160,11 @@ public class PropertyControllerTest {
         PropertyRequest req = new PropertyRequest();
         when(propertyService.isPropertyOwnedByUser(1L, "bob")).thenReturn(false);
 
-        ResponseEntity<PropertyResponse> resp = controller.updateProperty(1L, req, "bob");
+        ResponseEntity<?> resp = controller.updateProperty(1L, req, "bob");
 
         assertEquals(403, resp.getStatusCodeValue());
-        assertFalse(resp.getBody().isSuccess());
+        assertTrue(resp.getBody() instanceof PropertyResponse);
+        assertFalse(((PropertyResponse) resp.getBody()).isSuccess());
     }
 
     @Test
@@ -174,12 +177,13 @@ public class PropertyControllerTest {
         when(lockTypeService.findLockTypeById(1L)).thenReturn(lock);
         when(propertyService.updateProperty(10L, req, "alice", lock)).thenReturn(updated);
 
-        ResponseEntity<PropertyResponse> resp = controller.updateProperty(10L, req, "alice");
+        ResponseEntity<?> resp = controller.updateProperty(10L, req, "alice");
 
         assertEquals(200, resp.getStatusCodeValue());
-        assertTrue(resp.getBody().isSuccess());
-        assertEquals(updated.getId(), resp.getBody().getPropertyId());
-        assertEquals("New", resp.getBody().getAddress());
+        assertTrue(resp.getBody() instanceof PropertyDTO, "Expected PropertyDTO on success");
+        PropertyDTO dto = (PropertyDTO) resp.getBody();
+        assertEquals(updated.getId(), dto.getId());
+        assertEquals("New", dto.getAddress());
     }
 
     @Test
