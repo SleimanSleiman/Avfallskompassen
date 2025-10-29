@@ -11,22 +11,27 @@ export function useRoom() {
     const initialRoom = (() => {
         const savedRoom = localStorage.getItem("trashRoomData");
 
-        //if saved room data exists in localStorage, parse and center it
         if (savedRoom) {
-            const parsed = JSON.parse(savedRoom);
-            const roomWidth = parsed.width ? parsed.width / SCALE : 450;
-            const roomHeight = parsed.height ? parsed.height / SCALE : 350;
-            return {
-                x: (STAGE_WIDTH - roomWidth) / 2,
-                y: (STAGE_HEIGHT - roomHeight) / 2,
-                width: roomWidth,
-                height: roomHeight,
-            };
+            try {
+                const parsed = JSON.parse(savedRoom);
+
+                const widthMeters = parsed.width ?? 10;
+                const heightMeters = parsed.height ?? 10;
+
+                return {
+                    x: (STAGE_WIDTH - widthMeters / SCALE) / 2,
+                    y: (STAGE_HEIGHT - heightMeters / SCALE) / 2,
+                    width: widthMeters / SCALE,
+                    height: heightMeters / SCALE,
+                };
+            } catch {
+                return { x: 120, y: 120, width: 10 / SCALE, height: 10 / SCALE };
+            }
         }
 
-        //Default room size and position
-        return { x: 120, y: 120, width: 450, height: 350 };
+        return { x: 120, y: 120, width: 10 / SCALE, height: 10 / SCALE };
     })();
+
 
     /* ──────────────── Room State ──────────────── */
     const [room, setRoom] = useState<Room>(initialRoom);

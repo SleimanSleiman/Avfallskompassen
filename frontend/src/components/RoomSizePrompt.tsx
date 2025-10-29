@@ -20,11 +20,11 @@ export default function RoomSizePrompt({
     alert('Rummets längd och bredd måste vara större än 2.5 meter.');
     return;
   }
-  if (lengthNum > 32) {
+  if (lengthNum > 10) {
     alert('Runnets längd får inte överstiga 32 meter.');
     return;
   }
-  if (widthNum > 27) {
+  if (widthNum > 13) {
     alert('Rummets bredd får inte överstiga 27 meter.');
     return;
   }

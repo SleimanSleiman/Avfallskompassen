@@ -8,17 +8,12 @@ export const clamp = (value: number, min: number, max: number) =>
 
 //Convert millimeters to pixels based on SCALE
 export const mmToPixels = (mm?: number): number => {
-    if (!mm || mm <= 0) return DEFAULT_CONTAINER_PIXEL_SIZE;
-
-    const pixelsPerMeter = 100;
-    const pixels = (mm / 1000) * pixelsPerMeter;
-
-    return Math.round(Math.max(MIN_CONTAINER_PIXEL_SIZE, pixels));
+    const mmToMeter = mm / 1000;
+    return mmToMeter / SCALE;
 };
 
-
-//Scale factor: 1 pixel = 0.05 meter in real life
-export const SCALE = 0.05;
+//Scale factor: 1 pixel = 0.02 meter in real life
+export const SCALE = 0.02;
 
 //Minimum room dimensions in pixels
 export const MIN_WIDTH = 50;
