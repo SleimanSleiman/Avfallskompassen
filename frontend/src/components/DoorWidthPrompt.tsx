@@ -26,8 +26,8 @@ export default function DoorWidthPrompt({
             return;
         }
 
-        if (widthNum > 3) {
-            alert("Dörrens bredd får inte överstiga 3 meter.");
+        if (widthNum > 2) {
+            alert("Dörrens bredd får inte överstiga 2 meter.");
             return;
         }
 

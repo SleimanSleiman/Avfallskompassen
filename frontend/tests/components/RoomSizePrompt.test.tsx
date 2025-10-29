@@ -56,7 +56,7 @@ describe("RoomSizePrompt", () => {
     expect(onConfirm).not.toHaveBeenCalled();
   });
 
-   it("Shows alert for beadth more than 28", () => {
+   it("Shows alert for breadth more than 28", () => {
     window.alert = vi.fn();
 
     fireEvent.change(lengthInput, { target: { value: "6" } });
