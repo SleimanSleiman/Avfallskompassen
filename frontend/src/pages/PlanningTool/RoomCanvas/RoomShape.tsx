@@ -3,8 +3,8 @@
  * Renders a rectangular room shape with dimensions on a Konva canvas.
  */
 import { Rect, Text } from "react-konva";
-import type { Room } from "../types";
-import { SCALE } from "../constants";
+import type { Room } from "../Types";
+import { SCALE } from "../Constants";
 
 /* ─────────────── RoomShape Props ──────────────── */
 type RoomShapeProps = {

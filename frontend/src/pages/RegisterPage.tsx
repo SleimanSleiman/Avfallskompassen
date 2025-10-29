@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { register } from '../lib/auth';
+import { register } from '../lib/Auth';
 import { Link } from 'react-router-dom';
 
 export default function RegisterPage() {

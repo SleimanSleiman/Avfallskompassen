@@ -8,7 +8,7 @@ import ContainerSection from "./ContainerSection";
 import DoorSection from "./DoorSection";
 import RoomSizeSection from "./RoomSizeSection";
 import CostSection from "./CostSection";
-import type { ContainerDTO } from "../../lib/container";
+import type { ContainerDTO } from "../../lib/Container";
 
 /* ─────────────── Sidebar Props ─────────────── */
 type SidebarProps = {

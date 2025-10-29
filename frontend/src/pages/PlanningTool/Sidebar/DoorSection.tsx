@@ -4,7 +4,7 @@
  */
 import { useState } from "react";
 import DoorWidthPrompt from "../../../components/DoorWidthPrompt";
-import type { Door } from "../types";
+import type { Door } from "../Types";
 
 /* ─────────────── Props ──────────────── */
 type DoorSectionProps = {

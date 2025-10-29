@@ -2,7 +2,7 @@
  * Custom hook to fetch and return service types from the API.
  */
 import { useState, useEffect } from "react";
-import { fetchServiceTypes } from "../../../lib/serviceType";
+import { fetchServiceTypes } from "../../../lib/ServiceType";
 
 export function useServiceTypes() {
     /* ──────────────── Service Types state ──────────────── */

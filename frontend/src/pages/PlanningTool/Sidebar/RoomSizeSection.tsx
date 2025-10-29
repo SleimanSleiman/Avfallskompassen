@@ -4,8 +4,8 @@
  * Opens a prompt when the button is clicked and updates the room size on confirmation.
  */
 import RoomSizePrompt from "../../../components/RoomSizePrompt";
-import { STAGE_WIDTH, STAGE_HEIGHT, SCALE } from "../constants";
-import type { Room } from "../types";
+import { STAGE_WIDTH, STAGE_HEIGHT, SCALE } from "../Constants";
+import type { Room } from "../Types";
 
 /* ─────────────── RoomSizeSection Props ──────────────── */
 type RoomSizeSectionProps = {

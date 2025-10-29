@@ -7,7 +7,7 @@
 import { useState, useEffect } from 'react';
 import { Stage, Layer, Rect, Circle, Text, Line } from 'react-konva';
 import { motion, AnimatePresence } from 'framer-motion';
-import { fetchServiceTypes } from '../lib/serviceType';
+import { fetchServiceTypes } from '../lib/ServiceType';
 
 
 const SCALE = 0.05; //Scale factor: 1 pixel = 0.05 meter in real life

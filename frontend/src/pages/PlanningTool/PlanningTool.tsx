@@ -6,8 +6,8 @@
 import { useState, useEffect } from 'react';
 
 //Lib
-import { fetchServiceTypes } from '../../lib/serviceType';
-import type { ContainerDTO } from '../../lib/container';
+import { fetchServiceTypes } from '../../lib/ServiceType';
+import type { ContainerDTO } from '../../lib/Container';
 
 //Components
 import RoomCanvas from './RoomCanvas/RoomCanvas';
@@ -15,10 +15,10 @@ import Sidebar from './Sidebar/Sidebar';
 import ActionPanel from './ActionPanel';
 
 //Hooks
-import { useRoom } from './hooks/useRoom';
-import { useDoors } from './hooks/useDoors';
-import { useContainers } from './hooks/useContainers';
-import { useServiceTypes } from './hooks/useServiceTypes';
+import { useRoom } from './hooks/UseRoom';
+import { useDoors } from './hooks/UseDoors';
+import { useContainers } from './hooks/UseContainers';
+import { useServiceTypes } from './hooks/UseServiceTypes';
 
 export default function PlanningTool() {
     /* ──────────────── Room state & logic ──────────────── */

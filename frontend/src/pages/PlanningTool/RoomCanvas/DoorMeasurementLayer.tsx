@@ -4,8 +4,8 @@
  * The text displayes the distance between the corners in meters.
  */
 import { Line, Text } from "react-konva";
-import type { Door } from "../types";
-import { SCALE } from "../constants";
+import type { Door } from "../Types";
+import { SCALE } from "../Constants";
 
 /* ─────────────── Props ──────────────── */
 type DoorMeasurementLayerProps = {

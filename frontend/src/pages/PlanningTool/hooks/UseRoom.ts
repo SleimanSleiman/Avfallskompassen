@@ -3,8 +3,8 @@
  * Handles corner dragging, constraints, and initial state from localStorage.
  */
 import { useState } from "react";
-import { SCALE, STAGE_WIDTH, STAGE_HEIGHT, MIN_WIDTH, MIN_HEIGHT, MARGIN, clamp } from "../constants";
-import type { Room } from "../types";
+import { SCALE, STAGE_WIDTH, STAGE_HEIGHT, MIN_WIDTH, MIN_HEIGHT, MARGIN, clamp } from "../Constants";
+import type { Room } from "../Types";
 
 export function useRoom() {
     /* ──────────────── Initial Room State ──────────────── */
