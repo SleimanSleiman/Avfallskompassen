@@ -11,43 +11,113 @@ const mockRoom = {
 };
 
 describe("useDoors hook", () => {
+
+    //Mock global alert
+    beforeAll(() => {
+            global.alert = vi.fn();
+    });
+
     //Test adding a new door
     it("adds a new door to the room", () => {
         const { result } = renderHook(() => useDoors(mockRoom));
 
+        let added: boolean;
         act(() => {
-            result.current.handleAddDoor({ width: 1 });
+            added = result.current.handleAddDoor({ width: 1.2 });
         });
 
-        const door = result.current.doors[0];
+        expect(added).toBe(true);
         expect(result.current.doors.length).toBe(1);
+        const door = result.current.doors[0];
         expect(door.wall).toBe("bottom");
         expect(result.current.selectedDoorId).toBe(door.id);
     });
 
-    //Test removing a door
-    it("removes a door from the room", () => {
+    //Test adding a door with width less than 1.2m when it's the first door
+    it("does not add a door if first door is smaller than 1.2m", () => {
+        const { result } = renderHook(() => useDoors(mockRoom));
+
+        let added: boolean;
+        act(() => {
+            added = result.current.handleAddDoor({ width: 1 });
+        });
+
+        expect(added).toBe(false);
+        expect(result.current.doors.length).toBe(0);
+        expect(global.alert).toHaveBeenCalledWith("Minst en dörr måste vara 1.2 meter bred.");
+    });
+
+    //Test adding a smaller door after a large door exists
+    it("allows adding smaller doors after a large door exists", () => {
         const { result } = renderHook(() => useDoors(mockRoom));
 
         act(() => {
-            result.current.handleAddDoor({ width: 1 });
+            result.current.handleAddDoor({ width: 1.2 });
         });
 
-        const id = result.current.doors[0].id;
+        let added: boolean;
+        act(() => {
+            added = result.current.handleAddDoor({ width: 0.9 });
+        });
+
+        expect(added).toBe(true);
+        expect(result.current.doors.length).toBe(2);
+    });
+
+    //Test removing a door >=1.2m when it's the only large door
+    it("prevents removing the last large door (≥1.2m)", () => {
+        const { result } = renderHook(() => useDoors(mockRoom));
 
         act(() => {
-            result.current.handleRemoveDoor(id);
+            result.current.handleAddDoor({ width: 1.2 });
+        });
+        act(() => {
+            result.current.handleAddDoor({ width: 0.9 });
         });
 
-        expect(result.current.doors.length).toBe(0);
+        const largeDoor = result.current.doors.find(d => d.width >= 1.2)!;
+
+        act(() => {
+            result.current.handleRemoveDoor(largeDoor.id);
+        });
+
+        // The large door should still exist
+        const stillExists = result.current.doors.some(d => d.id === largeDoor.id);
+        expect(stillExists).toBe(true);
+        expect(global.alert).toHaveBeenCalledWith("Minst en dörr måste vara 1.2 meter bred.");
     });
+
+    //Test removing a small door normally
+    it("removes a small door normally", async () => {
+        const { result } = renderHook(() => useDoors(mockRoom));
+
+        act(() => {
+            result.current.handleAddDoor({ width: 1.2 });
+        });
+
+        //Ensures doors have different IDs
+        await new Promise(resolve => setTimeout(resolve, 1));
+
+        act(() => {
+            result.current.handleAddDoor({ width: 0.9 });
+        });
+
+        const smallDoor = result.current.doors.find(d => d.width < 1.2)!;
+        act(() => {
+            result.current.handleRemoveDoor(smallDoor.id);
+        });
+
+        const stillExists = result.current.doors.some(d => d.id === smallDoor.id);
+        expect(stillExists).toBe(false);
+    });
+
 
     //Test selecting a door
     it("selects a door by id", () => {
         const { result } = renderHook(() => useDoors(mockRoom));
 
         act(() => {
-            result.current.handleAddDoor({ width: 1 });
+            result.current.handleAddDoor({ width: 1.2 });
         });
 
         const id = result.current.doors[0].id;
@@ -64,7 +134,7 @@ describe("useDoors hook", () => {
         const { result } = renderHook(() => useDoors(mockRoom));
 
         act(() => {
-            result.current.handleAddDoor({ width: 1 });
+            result.current.handleAddDoor({ width: 1.2 });
         });
 
         const id = result.current.doors[0].id;
@@ -83,7 +153,7 @@ describe("useDoors hook", () => {
         const { result } = renderHook(() => useDoors(mockRoom));
 
         act(() => {
-            result.current.handleAddDoor({ width: 1 });
+            result.current.handleAddDoor({ width: 1.2 });
         });
 
         const id = result.current.doors[0].id;
@@ -106,7 +176,7 @@ describe("useDoors hook", () => {
         });
 
         act(() => {
-            result.current.handleAddDoor({ width: 1 });
+            result.current.handleAddDoor({ width: 1.2 });
         });
 
         const id = result.current.doors[0].id;

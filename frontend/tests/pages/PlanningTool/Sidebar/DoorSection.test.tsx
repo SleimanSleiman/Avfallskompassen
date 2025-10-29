@@ -1,4 +1,5 @@
 import { render, screen, fireEvent } from "@testing-library/react";
+import "@testing-library/jest-dom";
 import DoorSection from "../../../../src/pages/PlanningTool/Sidebar/DoorSection";
 
 describe("DoorSection", () => {
@@ -24,7 +25,7 @@ describe("DoorSection", () => {
 
     //Test confirming a width
     it("calls handleAddDoor and closes prompt on confirm", () => {
-        const handleAddDoor = vi.fn();
+        const handleAddDoor = vi.fn(() => true);
         render(<DoorSection handleAddDoor={handleAddDoor} />);
 
         //Open the prompt
@@ -57,4 +58,21 @@ describe("DoorSection", () => {
         //Prompt should be removed from the DOM
         expect(screen.queryByText(/Ange dörrens bredd/i)).toBeNull();
     });
+
+    //Test handling invalid width (too small)
+    it("keeps prompt open if width is too small", () => {
+        const handleAddDoor = vi.fn(() => false);
+        render(<DoorSection handleAddDoor={handleAddDoor} />);
+
+        fireEvent.click(screen.getByText("Lägg till ny dörr"));
+        const input = screen.getByRole("spinbutton");
+        fireEvent.change(input, { target: { value: 1 } });
+
+        fireEvent.click(screen.getByText("Bekräfta"));
+
+        expect(handleAddDoor).toHaveBeenCalledWith({ width: 1 });
+
+        expect(screen.getByText(/Ange dörrens bredd/i)).toBeInTheDocument();
+    });
+
 });
