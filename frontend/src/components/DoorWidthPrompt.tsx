@@ -15,7 +15,7 @@ export default function DoorWidthPrompt({
 }: DoorWidthPromptProps) {
 
     //Standard width for a door is set as 90cm
-    const [width, setWidth] = useState("0.90");
+    const [width, setWidth] = useState("1.20");
 
     //Function that runs when the user clicks the "Confirm" button
     const handleConfirm = () => {

@@ -17,8 +17,10 @@ export default function DoorSection({ handleAddDoor }: DoorSectionProps) {
 
     //Called when the user confirms a width in the promopt
     const handleConfirm = (width: number) => {
-        handleAddDoor({ width }); //Pass width up to parent
-        setIsPromptOpen(false); //Close the prompt
+        const success = handleAddDoor({ width });
+        if (success) {
+            setIsPromptOpen(false);
+        }
     };
 
     /* ──────────────── Render ──────────────── */
