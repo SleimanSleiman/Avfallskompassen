@@ -11,59 +11,73 @@ export default function RoomSizePrompt({
 }: RoomSizePromptProps) {
   const [length, setLength] = useState("");
   const [width, setWidth] = useState("");
+  const [error, setError] = useState<string | null>(null);
 
   const handleConfirm = () => {
   const lengthNum = Number(length);
   const widthNum = Number(width);
 
   if (!(lengthNum >= 2.5) || !(widthNum >= 2.5)) {
-    alert('Rummets längd och bredd måste vara större än 2.5 meter.');
+    setError('Rummets längd och bredd måste vara minst 2.5 meter.');
     return;
   }
   if (lengthNum > 32) {
-    alert('Runnets längd får inte överstiga 32 meter.');
+    setError('Rummets längd får inte överstiga 32 meter.');
     return;
   }
   if (widthNum > 27) {
-    alert('Rummets bredd får inte överstiga 27 meter.');
+    setError('Rummets bredd får inte överstiga 27 meter.');
     return;
   }
 
+  setError(null);
   onConfirm(lengthNum, widthNum);
 };
 
   return (
   <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
-    <div className="bg-white rounded-lg shadow-lg p-6 w-80">
-      <h2 className="text-lg font-semibold mb-4"> Ange längden och bredden på miljörummet</h2>
+    <div className="bg-white rounded-2xl border shadow-soft p-6 w-80">
+      <h2 className="text-lg font-black mb-4">Ange längden och bredden på miljörummet</h2>
 
       <div className="space-y-3">
         <input
           type="number"
-          placeholder="Längd"
+          placeholder="Längd (meter)"
           value={length}
-          onChange={(e) => setLength(e.target.value)}
-          className="w-full border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-green-300"
+          onChange={(e) => {
+            setLength(e.target.value);
+            setError(null); // Clear error when user starts typing
+          }}
+          className="w-full border border-gray-300 rounded-xl2 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-nsr-teal focus:border-nsr-teal"
         />
         <input
           type="number"
-          placeholder="Bredd"
+          placeholder="Bredd (meter)"
           value={width}
-          onChange={(e) => setWidth(e.target.value)}
-          className="w-full border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-green-300"
+          onChange={(e) => {
+            setWidth(e.target.value);
+            setError(null); // Clear error when user starts typing
+          }}
+          className="w-full border border-gray-300 rounded-xl2 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-nsr-teal focus:border-nsr-teal"
         />
       </div>
+
+      {error && (
+        <div className="mt-3 p-3 rounded-xl2 bg-red-50 border border-red-200">
+          <p className="text-sm text-red-700 font-medium">{error}</p>
+        </div>
+      )}
 
       <div className="flex justify-end gap-3 mt-6">
         <button
           onClick={onCancel}
-          className="rounded bg-gray-200 text-gray-800 px-3 py-1 hover:bg-gray-300"
+          className="inline-flex items-center justify-center rounded-xl2 px-4 py-2 font-medium bg-red-500 text-white shadow-soft hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors"
         >
           Avbryt
         </button>
         <button
           onClick={handleConfirm}
-          className="rounded bg-green-500 text-white px-3 py-1 hover:bg-green-600"
+          className="inline-flex items-center justify-center rounded-xl2 px-4 py-2 font-medium bg-nsr-accent text-white shadow-soft hover:bg-nsr-accent/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-nsr-accent transition-colors"
         >
           Bekräfta
         </button>

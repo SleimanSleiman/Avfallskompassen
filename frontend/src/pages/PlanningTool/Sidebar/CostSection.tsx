@@ -17,10 +17,18 @@ export default function CostSection({ showCosts, setShowCosts }: CostSectionProp
         <div>
             {/* Toggle button */}
             <button
-                className="w-full p-3 rounded bg-blue-600 text-white hover:bg-blue-700 transition"
+                className="w-full flex items-center justify-between p-3 rounded border border-gray-200 bg-white text-nsr-teal hover:bg-gray-50 transition text-left"
                 onClick={() => setShowCosts(!showCosts)}
             >
-                Se abonnemangskostnader
+                <span className="font-medium">Se abonnemangskostnader</span>
+                <svg 
+                    className={`w-5 h-5 transition-transform ${showCosts ? 'rotate-180' : ''}`} 
+                    fill="none" 
+                    stroke="currentColor" 
+                    viewBox="0 0 24 24"
+                >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
             </button>
 
             {/* Content */}

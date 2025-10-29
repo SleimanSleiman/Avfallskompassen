@@ -1,5 +1,6 @@
 import "@testing-library/jest-dom";
 import { render, screen, fireEvent } from "@testing-library/react";
+import { describe, it, expect, vi } from "vitest";
 import DoorWidthPrompt from "../../src/components/DoorWidthPrompt";
 
 //Tests for DoorWidthPrompt component
@@ -30,8 +31,7 @@ describe("DoorWidthPrompt", () => {
     });
 
     //Test if alert is shown when the width is too small
-    it("shows alert if width is too small", () => {
-        window.alert = vi.fn(); //Mock browser aler
+     it("shows error if width is too small", () => {
         render(<DoorWidthPrompt onConfirm={() => {}} onCancel={() => {}} />);
 
         //Enter invalid value and click confirm
@@ -39,7 +39,7 @@ describe("DoorWidthPrompt", () => {
         fireEvent.change(input, { target: { value: "0.2" } });
         fireEvent.click(screen.getByText("Bekräfta"));
 
-        //Check that alert is shown with correct message
-        expect(window.alert).toHaveBeenCalledWith("Dörrens bredd måste vara minst 0.5 meter.");
+        // Component now renders error inline instead of using window.alert
+        expect(screen.getByText("Dörrens bredd måste vara minst 0.5 meter.")).toBeInTheDocument();
     });
 });
