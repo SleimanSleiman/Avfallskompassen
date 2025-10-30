@@ -14,6 +14,7 @@ type ActionPanelProps = {
     handleRemoveContainer: (id: number) => void;
     handleRemoveDoor: (id: number) => void;
     handleRotateDoor: (id: number, newRotation: number, newSwing: "inward" | "outward") => void;
+    handleRotateContainer: (id: number) => void;
 };
 
 export default function ActionPanel({
@@ -24,6 +25,7 @@ export default function ActionPanel({
     handleRemoveContainer,
     handleRemoveDoor,
     handleRotateDoor,
+    handleRotateContainer,
 }: ActionPanelProps) {
     //Determine the name of the selected item
     const selectedName = (() => {
@@ -47,14 +49,15 @@ export default function ActionPanel({
 
             {/* Action buttons */}
             <div className="flex gap-4">
-                {/* Move button (secondary small style) */}
+
+                {/* EmptyBtn button */}
                 <button
                     className="btn-secondary-sm flex-1"
                     onClick={() => {
                         // TODO: Implement move logic
                     }}
                 >
-                    Flytta
+                    EmptyBtn
                 </button>
 
                 {/* Rotate button (secondary small style) */}
@@ -69,6 +72,10 @@ export default function ActionPanel({
                             const newSwing = door.swingDirection === "inward" ? "outward" : "inward";
 
                             handleRotateDoor(door.id, newRotation, newSwing);
+                        }
+                        else if (selectedContainerId !== null) {
+                            handleRotateContainer(selectedContainerId);
+                            console.log("ID " + selectedContainerId)
                         }
                     }}
                 >
