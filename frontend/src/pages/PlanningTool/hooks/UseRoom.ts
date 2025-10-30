@@ -10,13 +10,17 @@ export function useRoom() {
     /* ──────────────── Initial Room State ──────────────── */
     const initialRoom = (() => {
         const savedRoom = localStorage.getItem("trashRoomData");
+        const defaultWidthMeters = 10;
+        const defaultHeightMeters = 8;
+        const defaultX = (STAGE_WIDTH - defaultWidthMeters / SCALE) / 2;
+        const defaultY = (STAGE_HEIGHT - defaultHeightMeters / SCALE) / 2;
 
         if (savedRoom) {
             try {
                 const parsed = JSON.parse(savedRoom);
 
-                const widthMeters = parsed.width ?? 10;
-                const heightMeters = parsed.height ?? 10;
+                const widthMeters = parsed.width ?? defaultWidthMeters;
+                const heightMeters = parsed.height ?? defaultHeightMeters;
 
                 return {
                     x: (STAGE_WIDTH - widthMeters / SCALE) / 2,
@@ -25,11 +29,11 @@ export function useRoom() {
                     height: heightMeters / SCALE,
                 };
             } catch {
-                return { x: 120, y: 120, width: 10 / SCALE, height: 10 / SCALE };
+                return { x: defaultX, y: defaultY, width: defaultWidthMeters / SCALE, height: defaultHeightMeters / SCALE };
             }
         }
 
-        return { x: 120, y: 120, width: 10 / SCALE, height: 10 / SCALE };
+        return { x: defaultX, y: defaultY, width: defaultWidthMeters / SCALE, height: defaultHeightMeters / SCALE };
     })();
 
 
