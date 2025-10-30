@@ -39,29 +39,29 @@ describe("RoomSizePrompt", () => {
   });
 
   it("Works with max inputs", () => {
-    fireEvent.change(lengthInput, { target: { value: "32" } });
-    fireEvent.change(widthInput, { target: { value: "27" } });
+    fireEvent.change(lengthInput, { target: { value: "9" } });
+    fireEvent.change(widthInput, { target: { value: "12" } });
     fireEvent.click(confirmButton);
 
-    expect(onConfirm).toHaveBeenCalledWith(32, 27);
+    expect(onConfirm).toHaveBeenCalledWith(9, 12);
   });
 
-  it("Shows error for length more than 32", () => {
-    fireEvent.change(lengthInput, { target: { value: "33" } });
+  it("Shows error for length more than 9", () => {
+    fireEvent.change(lengthInput, { target: { value: "10" } });
     fireEvent.change(widthInput, { target: { value: "6" } });
     fireEvent.click(confirmButton);
 
     // Component renders the error inline instead of using window.alert
-    expect(screen.getByText('Rummets längd får inte överstiga 32 meter.')).toBeInTheDocument();
+    expect(screen.getByText('Rummets längd får inte överstiga 9 meter.')).toBeInTheDocument();
     expect(onConfirm).not.toHaveBeenCalled();
   });
 
    it("Shows error for width greater than allowed", () => {
     fireEvent.change(lengthInput, { target: { value: "6" } });
-    fireEvent.change(widthInput, { target: { value: "28" } });
+    fireEvent.change(widthInput, { target: { value: "13" } });
     fireEvent.click(confirmButton);
 
-    expect(screen.getByText('Rummets bredd får inte överstiga 27 meter.')).toBeInTheDocument();
+    expect(screen.getByText('Rummets bredd får inte överstiga 12 meter.')).toBeInTheDocument();
     expect(onConfirm).not.toHaveBeenCalled();
   });
 

@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
-import { createProperty, getMyProperties, deleteProperty, updateProperty,getMunicipalities } from '../lib/property';
-import type { Municipality, Property } from '../lib/property';
-import type { PropertyRequest } from '../lib/property';
-import { currentUser } from '../lib/auth';
+import { createProperty, getMyProperties, deleteProperty, updateProperty,getMunicipalities } from '../lib/Property';
+import type { Municipality, Property, PropertyRequest } from '../lib/Property';
+import { currentUser } from '../lib/Auth';
 import RoomSizePrompt from '../components/RoomSizePrompt';
 
 export default function PropertyPage() {

@@ -8,8 +8,8 @@ import CornerHandles from "./CornerHandles";
 import DoorsLayer from "./DoorsLayer";
 import ContainersLayer from "./ContainersLayer";
 import DoorMeasurementLayer from "./DoorMeasurementLayer";
-import { STAGE_WIDTH, STAGE_HEIGHT } from "../constants";
-import type { Room, ContainerInRoom, Door } from "../types";
+import { STAGE_WIDTH, STAGE_HEIGHT } from "../Constants";
+import type { Room, ContainerInRoom, Door } from "../Types";
 
 /* ─────────────── RoomCanvas Props ──────────────── */
 type RoomCanvasProps = {

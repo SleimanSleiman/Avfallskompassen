@@ -3,7 +3,7 @@
  * Displays the selected item and provides buttons to move, rotate, or remove it.
  */
 
-import type { ContainerInRoom as Container, Door } from "../types";
+import type { ContainerInRoom as Container, Door } from "../Types";
 
 /* ─────────────── ActionPanel Props ──────────────── */
 type ActionPanelProps = {

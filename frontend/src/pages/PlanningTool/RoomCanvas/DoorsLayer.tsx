@@ -4,8 +4,8 @@
  * Handles dragging, snapping to walls, and selection highlighting.
  */
 import { Group, Arc, Line } from "react-konva";
-import type { Door } from "../types";
-import { SCALE, clamp } from "../constants";
+import type { Door } from "../Types";
+import { SCALE, clamp } from "../Constants";
 
 /* ─────────────── Props ──────────────── */
 type DoorsLayerProps = {

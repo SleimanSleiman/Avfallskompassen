@@ -4,7 +4,7 @@
  */
 import { useState } from "react";
 import DoorWidthPrompt from "../../../components/DoorWidthPrompt";
-import type { Door } from "../types";
+import type { Door } from "../Types";
 
 /* ─────────────── Props ──────────────── */
 type DoorSectionProps = {
@@ -17,8 +17,10 @@ export default function DoorSection({ handleAddDoor }: DoorSectionProps) {
 
     //Called when the user confirms a width in the promopt
     const handleConfirm = (width: number) => {
-        handleAddDoor({ width }); //Pass width up to parent
-        setIsPromptOpen(false); //Close the prompt
+        const success = handleAddDoor({ width });
+        if (success) {
+            setIsPromptOpen(false);
+        }
     };
 
     /* ──────────────── Render ──────────────── */

@@ -5,7 +5,7 @@ import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import PropertyPage from './pages/PropertyPage';
 import NotificationCenter from './components/NotificationCenter';
-import { currentUser } from './lib/auth';
+import { currentUser } from './lib/Auth';
 import PlanningTool from './pages/PlanningTool/PlanningTool';
 
 function Dashboard() {

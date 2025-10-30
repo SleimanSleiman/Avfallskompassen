@@ -8,30 +8,21 @@ export const clamp = (value: number, min: number, max: number) =>
 
 //Convert millimeters to pixels based on SCALE
 export const mmToPixels = (mm?: number): number => {
-    if (!mm || mm <= 0) return DEFAULT_CONTAINER_PIXEL_SIZE;
-
-    const pixelsPerMeter = 100;
-    const pixels = (mm / 1000) * pixelsPerMeter;
-
-    return Math.round(Math.max(MIN_CONTAINER_PIXEL_SIZE, pixels));
+    const mmToMeter = mm / 1000;
+    return mmToMeter / SCALE;
 };
 
-
-//Scale factor: 1 pixel = 0.05 meter in real life
-export const SCALE = 0.05;
+//Scale factor: 1 pixel = 0.02 meter in real life
+export const SCALE = 0.02;
 
 //Minimum room dimensions in pixels
 export const MIN_WIDTH = 50;
 export const MIN_HEIGHT = 50;
 
 //Canvas dimensions and margins
-export const MARGIN = 100;
-export const STAGE_WIDTH = 850;
-export const STAGE_HEIGHT = 700;
-
-//Default container sizing in pixels
-export const DEFAULT_CONTAINER_PIXEL_SIZE = 40;
-export const MIN_CONTAINER_PIXEL_SIZE = 28;
+export const MARGIN = 150;
+export const STAGE_WIDTH = 900;
+export const STAGE_HEIGHT = 750;
 
 //Drag-and-drop data format for containers
 export const DRAG_DATA_FORMAT = 'application/avfallskompassen-container';

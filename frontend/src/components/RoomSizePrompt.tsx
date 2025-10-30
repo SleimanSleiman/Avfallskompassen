@@ -21,12 +21,12 @@ export default function RoomSizePrompt({
     setError('Rummets längd och bredd måste vara minst 2.5 meter.');
     return;
   }
-  if (lengthNum > 32) {
-    setError('Rummets längd får inte överstiga 32 meter.');
+  if (lengthNum > 9) {
+    setError('Rummets längd får inte överstiga 9 meter.');
     return;
   }
-  if (widthNum > 27) {
-    setError('Rummets bredd får inte överstiga 27 meter.');
+  if (widthNum > 12) {
+    setError('Rummets bredd får inte överstiga 12 meter.');
     return;
   }
 

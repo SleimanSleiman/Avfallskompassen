@@ -3,30 +3,39 @@
  * Handles corner dragging, constraints, and initial state from localStorage.
  */
 import { useState } from "react";
-import { SCALE, STAGE_WIDTH, STAGE_HEIGHT, MIN_WIDTH, MIN_HEIGHT, MARGIN, clamp } from "../constants";
-import type { Room } from "../types";
+import { SCALE, STAGE_WIDTH, STAGE_HEIGHT, MIN_WIDTH, MIN_HEIGHT, MARGIN, clamp } from "../Constants";
+import type { Room } from "../Types";
 
 export function useRoom() {
     /* ──────────────── Initial Room State ──────────────── */
     const initialRoom = (() => {
         const savedRoom = localStorage.getItem("trashRoomData");
+        const defaultWidthMeters = 10;
+        const defaultHeightMeters = 8;
+        const defaultX = (STAGE_WIDTH - defaultWidthMeters / SCALE) / 2;
+        const defaultY = (STAGE_HEIGHT - defaultHeightMeters / SCALE) / 2;
 
-        //if saved room data exists in localStorage, parse and center it
         if (savedRoom) {
-            const parsed = JSON.parse(savedRoom);
-            const roomWidth = parsed.width ? parsed.width / SCALE : 450;
-            const roomHeight = parsed.height ? parsed.height / SCALE : 350;
-            return {
-                x: (STAGE_WIDTH - roomWidth) / 2,
-                y: (STAGE_HEIGHT - roomHeight) / 2,
-                width: roomWidth,
-                height: roomHeight,
-            };
+            try {
+                const parsed = JSON.parse(savedRoom);
+
+                const widthMeters = parsed.width ?? defaultWidthMeters;
+                const heightMeters = parsed.height ?? defaultHeightMeters;
+
+                return {
+                    x: (STAGE_WIDTH - widthMeters / SCALE) / 2,
+                    y: (STAGE_HEIGHT - heightMeters / SCALE) / 2,
+                    width: widthMeters / SCALE,
+                    height: heightMeters / SCALE,
+                };
+            } catch {
+                return { x: defaultX, y: defaultY, width: defaultWidthMeters / SCALE, height: defaultHeightMeters / SCALE };
+            }
         }
 
-        //Default room size and position
-        return { x: 120, y: 120, width: 450, height: 350 };
+        return { x: defaultX, y: defaultY, width: defaultWidthMeters / SCALE, height: defaultHeightMeters / SCALE };
     })();
+
 
     /* ──────────────── Room State ──────────────── */
     const [room, setRoom] = useState<Room>(initialRoom);

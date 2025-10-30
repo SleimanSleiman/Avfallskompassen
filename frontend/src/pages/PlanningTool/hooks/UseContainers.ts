@@ -3,10 +3,10 @@
  * types from the API.
  */
 import { useState, useRef } from "react";
-import type { ContainerInRoom, Room } from "../types";
-import type { ContainerDTO } from "../../../lib/container";
-import { fetchContainersByMunicipalityAndService } from "../../../lib/container";
-import { mmToPixels, clamp, DEFAULT_CONTAINER_PIXEL_SIZE, DRAG_DATA_FORMAT, STAGE_WIDTH, STAGE_HEIGHT } from "../constants";
+import type { ContainerInRoom, Room } from "../Types";
+import type { ContainerDTO } from "../../../lib/Container";
+import { fetchContainersByMunicipalityAndService } from "../../../lib/Container";
+import { mmToPixels, clamp, DRAG_DATA_FORMAT, STAGE_WIDTH, STAGE_HEIGHT } from "../Constants";
 
 export function useContainers(room: Room) {
 

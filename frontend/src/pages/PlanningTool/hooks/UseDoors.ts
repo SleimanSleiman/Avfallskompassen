@@ -3,8 +3,8 @@
  * Handles adding, removing, dragging, rotating and selecting doors.
  */
 import { useState, useRef, useEffect } from "react";
-import type { Door, Room } from "../types";
-import { SCALE, clamp } from "../constants";
+import type { Door, Room } from "../Types";
+import { SCALE, clamp } from "../Constants";
 
 export function useDoors(room: Room) {
 
@@ -30,6 +30,11 @@ export function useDoors(room: Room) {
         //Adds door to centre of bottom wall with outward rotation
         const { width, wall = "bottom" } = doorData;
 
+        if (doors.length === 0 && width < 1.2) {
+            alert("Minst en dörr måste vara 1.2 meter bred.");
+            return false;
+        }
+
         const x = room.x + room.width / 2 - width / 2;
         const y = room.y + room.height;
 
@@ -42,6 +47,7 @@ export function useDoors(room: Room) {
             ]);
 
         setSelectedDoorId(id);
+        return true;
     };
 
     /* ──────────────── Drag Door ──────────────── */
@@ -161,6 +167,16 @@ export function useDoors(room: Room) {
 
     /* ──────────────── Remove Door ──────────────── */
     const handleRemoveDoor = (id: number) => {
+        const doorToRemove = doors.find(d => d.id === id);
+        if (!doorToRemove) return;
+
+        const minimumSizeDoors = doors.filter(d => d.width >= 1.2);
+
+        if (doorToRemove.width >= 1.2 && minimumSizeDoors.length === 1) {
+            alert("Minst en dörr måste vara 1.2 meter bred.");
+            return;
+        }
+
         setDoors((prev) => prev.filter((d) => d.id !== id));
     };
 

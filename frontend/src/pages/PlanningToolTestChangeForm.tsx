@@ -1,7 +1,13 @@
+/**
+ * This component allows the user to reshape a room (size + form) by dragging its corners.
+ * It is not used in the current PlanningTool but serves as an example of what may be implemented
+ * in the future.
+ */
+
 import { useState, useEffect } from 'react';
 import { Stage, Layer, Rect, Circle, Text, Line } from 'react-konva';
 import { motion, AnimatePresence } from 'framer-motion';
-import { fetchServiceTypes } from '../lib/serviceType';
+import { fetchServiceTypes } from '../lib/ServiceType';
 
 
 const SCALE = 0.05; //Scale factor: 1 pixel = 0.05 meter in real life

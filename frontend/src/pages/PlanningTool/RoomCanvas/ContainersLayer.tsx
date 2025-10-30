@@ -3,7 +3,7 @@
  * Renders containers within a room on the canvas.
  */
 import { Group, Rect, Text } from "react-konva";
-import type { ContainerInRoom } from "../types";
+import type { ContainerInRoom } from "../Types";
 
 /* ─────────────── ContainersLayer Props ──────────────── */
 type ContainersLayerProps = {

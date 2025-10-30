@@ -1,4 +1,4 @@
-import { currentUser } from './auth';
+import { currentUser } from './Auth';
 
 export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
 

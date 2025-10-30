@@ -14,8 +14,8 @@ export default function DoorWidthPrompt({
         onCancel
 }: DoorWidthPromptProps) {
 
-    //Standard width for a door is set as 90cm
-    const [width, setWidth] = useState("0.90");
+    //Standard width for a door is set as 120cm
+    const [width, setWidth] = useState("1.20");
     const [error, setError] = useState<string | null>(null);
 
     //Function that runs when the user clicks the "Confirm" button
@@ -27,8 +27,8 @@ export default function DoorWidthPrompt({
             return;
         }
 
-        if (widthNum > 3) {
-            setError("Dörrens bredd får inte överstiga 3 meter.");
+        if (widthNum > 2) {
+            setError("Dörrens bredd får inte överstiga 2 meter.");
             return;
         }
 

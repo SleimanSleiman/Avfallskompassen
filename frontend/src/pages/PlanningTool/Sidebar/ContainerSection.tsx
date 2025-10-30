@@ -3,8 +3,8 @@
  * Allows users to select service types, sizes, and specific containers to add to the room.
  */
 import { motion, AnimatePresence } from "framer-motion";
-import type { ContainerDTO } from "../../lib/container";
-import { DRAG_DATA_FORMAT } from "../constants";
+import type { ContainerDTO } from "../../lib/Container";
+import { DRAG_DATA_FORMAT } from "../Constants";
 
 /* ─────────────── Container Props ─────────────── */
 type ContainerSectionProps = {
