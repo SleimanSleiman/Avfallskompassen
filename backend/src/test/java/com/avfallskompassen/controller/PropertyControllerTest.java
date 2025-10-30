@@ -1,5 +1,6 @@
 package com.avfallskompassen.controller;
 
+import com.avfallskompassen.dto.LockTypeDto;
 import com.avfallskompassen.dto.PropertyRequest;
 import com.avfallskompassen.dto.PropertyResponse;
 import com.avfallskompassen.dto.PropertyDTO;
@@ -16,7 +17,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -249,5 +250,32 @@ public class PropertyControllerTest {
         PropertyResponse pr = controller.handleRuntimeException(new RuntimeException("bad"));
         assertFalse(pr.isSuccess());
         assertEquals("bad", pr.getMessage());
+    }
+
+    @Test
+    void testGetAllLockTypes() {
+        LockType lock1 = new LockType();
+        lock1.setId(1);
+        lock1.setName("Inget lås");
+
+        LockType lock2 = new LockType();
+        lock2.setId(2);
+        lock2.setName("Fysisk nyckel");
+
+        List<LockType> mockLocks = Arrays.asList(lock1, lock2);
+        when(lockTypeService.getAllLockTypes()).thenReturn(mockLocks);
+
+        ResponseEntity<List<LockTypeDto>> response = controller.getAllLockTypes();
+
+        assertNotNull(response);
+        assertEquals(200, response.getStatusCodeValue());
+
+        List<LockTypeDto> body = response.getBody();
+        assertNotNull(body);
+        assertEquals(2, body.size());
+        assertEquals("Inget lås", body.get(0).getName());
+        assertEquals("Fysisk nyckel", body.get(1).getName());
+
+        verify(lockTypeService, times(1)).getAllLockTypes();
     }
 }
