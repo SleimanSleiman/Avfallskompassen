@@ -62,7 +62,7 @@ export default function RoomCanvas({
     return (
         <div
             ref={stageWrapperRef}
-            className={`rounded ${isStageDropActive ? 'ring-4 ring-blue-300 ring-offset-2' : ''}`}
+            className={`w-full overflow-x-auto rounded-2xl ${isStageDropActive ? 'ring-4 ring-blue-300 ring-offset-2' : ''}`}
             onDrop={handleStageDrop}
             onDragOver={handleStageDragOver}
             onDragLeave={handleStageDragLeave}
@@ -70,7 +70,7 @@ export default function RoomCanvas({
             <Stage
                 width={STAGE_WIDTH}
                 height={STAGE_HEIGHT}
-                className="border border-gray-300 bg-gray-50 rounded"
+                className="border border-gray-300 bg-gray-50 rounded-2xl inline-block"
             >
                 <Layer>
                     {/* Room rectangle */}

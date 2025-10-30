@@ -47,10 +47,9 @@ export default function ActionPanel({
 
             {/* Action buttons */}
             <div className="flex gap-4">
-
-                {/* Move button */}
+                {/* Move button (secondary small style) */}
                 <button
-                    className="flex-1 px-4 py-2 rounded bg-blue-500 text-white hover:bg-blue-600 transition"
+                    className="btn-secondary-sm flex-1"
                     onClick={() => {
                         // TODO: Implement move logic
                     }}
@@ -58,9 +57,9 @@ export default function ActionPanel({
                     Flytta
                 </button>
 
-                {/* Rotate button */}
+                {/* Rotate button (secondary small style) */}
                 <button
-                    className="flex-1 px-4 py-2 rounded bg-green-500 text-white hover:bg-green-600 transition"
+                    className="btn-secondary-sm flex-1"
                     onClick={() => {
                         if (selectedDoorId !== null) {
                             const door = doors.find(d => d.id === selectedDoorId);
@@ -76,10 +75,9 @@ export default function ActionPanel({
                   Rotera
                 </button>
 
-
-                {/* Remove button */}
+                {/* Remove button (red soft style, same size/radius) */}
                 <button
-                    className="flex-1 px-4 py-2 rounded bg-red-500 text-white hover:bg-red-600 transition"
+                    className="inline-flex items-center justify-center rounded-xl2 px-3 py-1 text-sm font-medium border border-red-200 bg-red-50 text-red-700 hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-600 flex-1"
                     onClick={() => {
                         if (selectedContainerId !== null) {
                             handleRemoveContainer(selectedContainerId);
