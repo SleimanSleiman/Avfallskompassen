@@ -6,11 +6,14 @@ import { useState, useRef, useEffect } from "react";
 import type { Door, Room } from "../types";
 import { SCALE, clamp } from "../constants";
 
-export function useDoors(room: Room) {
+export function useDoors(
+  room: Room,
+  setSelectedDoorId: (id: number | null) => void,
+  setSelectedContainerId: (id: number | null) => void,
+) {
 
     /* ──────────────── Door state ──────────────── */
     const [doors, setDoors] = useState<Door[]>([]);
-    const [selectedDoorId, setSelectedDoorId] = useState<number | null>(null);
 
     //Stores relative position (offset) of each door along the wall
     const doorOffsetRef = useRef<Record<number, number>>({});
@@ -165,14 +168,16 @@ export function useDoors(room: Room) {
     };
 
     /* ──────────────── Select Door ──────────────── */
-    const handleSelectDoor = (id: number) => {
+    const handleSelectDoor = (id: number | null) => {
         setSelectedDoorId(id);
+        setSelectedContainerId(null); // Clear container selection
     };
+
 
     /* ──────────────── Return ──────────────── */
     return {
         doors,
-        selectedDoorId,
+        setSelectedDoorId,
         handleAddDoor,
         handleDragDoor,
         handleRotateDoor,
