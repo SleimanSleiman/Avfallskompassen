@@ -14,6 +14,17 @@ public class DoorPositionDTO {
     private Long doorId;
     private Long wasteRoomId;
 
+    public DoorPositionDTO(Long id, double x, double y, double angle, Long doorId, Long wasteRoomId) {
+        this.id = id;
+        this.x = x;
+        this.y = y;
+        this.angle = angle;
+        this.doorId = doorId;
+        this.wasteRoomId = wasteRoomId;
+    }
+
+    public DoorPositionDTO() {}
+
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
