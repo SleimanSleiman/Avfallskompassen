@@ -18,11 +18,6 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", exception.getMessage()));
     }
 
-    @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<Map<String, String>> handleIllegalArgument(IllegalArgumentException exception) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", exception.getMessage()));
-    }
-
     @ExceptionHandler(BadRequestException.class)
     public ResponseEntity<Map<String, String>> handleIllegalArgument(BadRequestException exception) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", exception.getMessage()));
@@ -30,7 +25,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(InternalServerException.class)
     public ResponseEntity<Map<String, String>> handleException(InternalServerException internalServerException) {
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", "Something went wrong in the server"));
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", internalServerException.getMessage()));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

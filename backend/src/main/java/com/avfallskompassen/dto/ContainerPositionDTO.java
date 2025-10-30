@@ -14,6 +14,18 @@ public class ContainerPositionDTO {
     private Long containerTypeId;
     private Long wasteRoomId;
 
+    // Doesn't serve any real purpose for the server. Just put this here to simply the testing -- Anton
+    public ContainerPositionDTO(Long id, double x, double y, double angle, Long containerTypeId, Long wasteRoomId) {
+        this.id = id;
+        this.x = x;
+        this.y = y;
+        this.angle = angle;
+        this.containerTypeId = containerTypeId;
+        this.wasteRoomId = wasteRoomId;
+    }
+
+    public ContainerPositionDTO() {}
+
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
