@@ -21,6 +21,7 @@ import { useContainers } from './hooks/UseContainers';
 import { useServiceTypes } from './hooks/UseServiceTypes';
 
 export default function PlanningTool() {
+    
     /* ──────────────── Room state & logic ──────────────── */
     const {
         room,
@@ -29,25 +30,29 @@ export default function PlanningTool() {
         setRoom
     } = useRoom();
 
+
     /* ──────────────── Door state & logic ──────────────── */
+    const [selectedContainerId, setSelectedContainerId] = useState<number | null>(null);
+    const [selectedDoorId, setSelectedDoorId] = useState<number | null>(null);
+
     const {
         doors,
         handleAddDoor,
-        selectedDoorId,
         handleDragDoor,
         handleRotateDoor,
         handleRemoveDoor,
-        handleSelectDoor
-    } = useDoors(room);
+        handleSelectDoor,
+    } = useDoors(room, setSelectedDoorId, setSelectedContainerId);
 
     /* ──────────────── Container state & logic ──────────────── */
+    
     const {
         containersInRoom,
-        selectedContainerId,
         handleAddContainer,
         handleRemoveContainer,
         handleDragContainer,
-        handleSelectContainer,
+        handleSelectContainer,  
+
         availableContainers,
         isLoadingContainers,
         fetchAvailableContainers,
@@ -57,7 +62,8 @@ export default function PlanningTool() {
         handleStageDrop,
         handleStageDragOver,
         handleStageDragLeave,
-    } = useContainers(room);
+        handleRotateContainer,
+    } = useContainers(room, setSelectedContainerId, setSelectedDoorId);
 
     /* ──────────────── Service Types (API data) ──────────────── */
     const serviceTypes = useServiceTypes();
@@ -104,10 +110,10 @@ export default function PlanningTool() {
                     doors={doors}
                     selectedContainerId={selectedContainerId}
                     selectedDoorId={selectedDoorId}
-                    setSelectedContainerId={handleSelectContainer}
                     handleRemoveContainer={handleRemoveContainer}
                     handleRemoveDoor={handleRemoveDoor}
                     handleRotateDoor={handleRotateDoor}
+                    handleRotateContainer={handleRotateContainer} 
                 />
             </div>
 
