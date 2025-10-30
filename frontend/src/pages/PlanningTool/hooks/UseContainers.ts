@@ -8,11 +8,14 @@ import type { ContainerDTO } from "../../../lib/Container";
 import { fetchContainersByMunicipalityAndService } from "../../../lib/Container";
 import { mmToPixels, clamp, DRAG_DATA_FORMAT, STAGE_WIDTH, STAGE_HEIGHT } from "../Constants";
 
-export function useContainers(room: Room) {
+export function useContainers(
+  room: Room,
+  setSelectedContainerId: (id: number | null) => void,
+  setSelectedDoorId: (id: number | null) => void
+) {
 
     /* ──────────────── Containers placed in the room canvas ──────────────── */
     const [containersInRoom, setContainersInRoom] = useState<ContainerInRoom[]>([]);
-    const [selectedContainerId, setSelectedContainerId] = useState<number | null>(null);
 
     /* ─────────────── Stage Drop State & Ref ──────────────── */
     const [isStageDropActive, setIsStageDropActive] = useState(false);
@@ -40,6 +43,7 @@ export function useContainers(room: Room) {
             y: targetY,
             width: widthPx,
             height: heightPx,
+            rotation: 0,
             };
         setContainersInRoom((prev) => [...prev, newContainer]);
         setSelectedContainerId(newContainer.id);
@@ -48,7 +52,7 @@ export function useContainers(room: Room) {
     //Remove a container from the room
     const handleRemoveContainer = (id: number) => {
         setContainersInRoom((prev) => prev.filter((c) => c.id !== id));
-        if (selectedContainerId === id) setSelectedContainerId(null);
+        setSelectedContainerId(null);
     };
 
     //Handle dragging a container within the room
@@ -59,8 +63,22 @@ export function useContainers(room: Room) {
     };
 
     //Select or deselect a container
-    const handleSelectContainer = (id: number) => {
-        setSelectedContainerId((prev) => (prev === id ? null : id));
+    const handleSelectContainer = (id: number | null) => {
+        setSelectedContainerId(id);
+        setSelectedDoorId(null); // Clear door selection
+    };
+
+    //Container rotation
+    const handleRotateContainer = (id: number) => {
+        setContainersInRoom((prev) =>
+        prev.map((container) =>
+            container.id === id
+                ? { ...container, rotation: ((container.rotation || 0) + 90) % 360 }
+                : container
+            )
+        );
+
+        console.log("Rotating ID " + id);
     };
 
     /* ──────────────── Drag & Drop Handlers ──────────────── */
@@ -125,11 +143,12 @@ export function useContainers(room: Room) {
     /* ──────────────── Return ──────────────── */
     return {
         containersInRoom,
-        selectedContainerId,
+        setSelectedContainerId,
         handleAddContainer,
         handleRemoveContainer,
         handleDragContainer,
         handleSelectContainer,
+        handleRotateContainer,
         availableContainers,
         isLoadingContainers,
         fetchAvailableContainers,

@@ -27,4 +27,6 @@ export type ContainerInRoom = {
     width: number;
     height: number;
     container: ContainerDTO;
+    rotation: number;
+
 };
