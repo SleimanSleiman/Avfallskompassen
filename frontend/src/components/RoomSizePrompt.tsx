@@ -26,7 +26,7 @@ export default function RoomSizePrompt({
     return;
   }
   if (widthNum > 12) {
-    setError('Rummets bredd får inte överstiga 10 meter.');
+    setError('Rummets bredd får inte överstiga 12 meter.');
     return;
   }
 
