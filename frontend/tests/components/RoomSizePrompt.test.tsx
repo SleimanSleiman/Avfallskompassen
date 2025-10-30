@@ -16,8 +16,9 @@ describe("RoomSizePrompt", () => {
 
     render(<RoomSizePrompt onConfirm={onConfirm} onCancel={onCancel} />);
 
-    lengthInput = screen.getByPlaceholderText("Längd");
-    widthInput = screen.getByPlaceholderText("Bredd");
+    // Component placeholders contain the unit ("Längd (meter)") so use a partial/regex match
+    lengthInput = screen.getByPlaceholderText(/Längd/i);
+    widthInput = screen.getByPlaceholderText(/Bredd/i);
     confirmButton = screen.getByText("Bekräfta");
   });
 
@@ -45,47 +46,40 @@ describe("RoomSizePrompt", () => {
     expect(onConfirm).toHaveBeenCalledWith(32, 27);
   });
 
-  it("Shows alert for length more than 32", () => {
-    window.alert = vi.fn();
-
+  it("Shows error for length more than 32", () => {
     fireEvent.change(lengthInput, { target: { value: "33" } });
     fireEvent.change(widthInput, { target: { value: "6" } });
     fireEvent.click(confirmButton);
 
-    expect(window.alert).toHaveBeenCalledWith('Runnets längd får inte överstiga 32 meter.');
+    // Component renders the error inline instead of using window.alert
+    expect(screen.getByText('Rummets längd får inte överstiga 32 meter.')).toBeInTheDocument();
     expect(onConfirm).not.toHaveBeenCalled();
   });
 
-   it("Shows alert for breadth more than 28", () => {
-    window.alert = vi.fn();
-
+   it("Shows error for width greater than allowed", () => {
     fireEvent.change(lengthInput, { target: { value: "6" } });
     fireEvent.change(widthInput, { target: { value: "28" } });
     fireEvent.click(confirmButton);
 
-    expect(window.alert).toHaveBeenCalledWith('Rummets bredd får inte överstiga 27 meter.');
+    expect(screen.getByText('Rummets bredd får inte överstiga 27 meter.')).toBeInTheDocument();
     expect(onConfirm).not.toHaveBeenCalled();
   });
 
-  it("Shows alert for invalid input", () => {
-    window.alert = vi.fn();
-
+  it("Shows error for invalid input", () => {
     fireEvent.change(lengthInput, { target: { value: "hej" } });
     fireEvent.change(widthInput, { target: { value: "halloj" } });
     fireEvent.click(confirmButton);
 
-    expect(window.alert).toHaveBeenCalledWith('Rummets längd och bredd måste vara större än 2.5 meter.');
+    expect(screen.getByText('Rummets längd och bredd måste vara minst 2.5 meter.')).toBeInTheDocument();
     expect(onConfirm).not.toHaveBeenCalled();
   });
 
-  it("Shows alert for length and width less than 2.5", () => {
-    window.alert = vi.fn();
-
+  it("Shows error for length and width less than 2.5", () => {
     fireEvent.change(lengthInput, { target: { value: "2.4" } });
     fireEvent.change(widthInput, { target: { value: "2.4" } });
     fireEvent.click(confirmButton);
 
-    expect(window.alert).toHaveBeenCalledWith('Rummets längd och bredd måste vara större än 2.5 meter.');
+    expect(screen.getByText('Rummets längd och bredd måste vara minst 2.5 meter.')).toBeInTheDocument();
     expect(onConfirm).not.toHaveBeenCalled();
   });
 

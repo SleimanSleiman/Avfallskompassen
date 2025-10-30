@@ -28,10 +28,13 @@ export default function DoorSection({ handleAddDoor }: DoorSectionProps) {
         <div>
             {/* Button to open the door width prompt*/}
             <button
-                className="w-full p-3 rounded bg-blue-600 text-white hover:bg-blue-700 transition"
+                className="w-full flex items-center justify-between p-3 rounded border border-gray-200 bg-white text-nsr-teal hover:bg-gray-50 transition text-left"
                 onClick={() => setIsPromptOpen(true)}
             >
-                Lägg till ny dörr
+                <span className="font-medium">Lägg till ny dörr</span>
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                </svg>
             </button>
 
             {/* Show the width prompt when state is true */}

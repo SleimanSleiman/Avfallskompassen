@@ -63,7 +63,9 @@ export default function Sidebar({
         <div className="pl-8 flex flex-col h-[600px]">
 
             {/* Scrollable container for all sidebar sections */}
-            <div className="flex flex-col border rounded p-4 h-full overflow-y-auto space-y-3">
+            <div className="flex flex-col border rounded-2xl bg-white p-4 h-full overflow-y-auto">
+                <h2 className="text-lg font-black mb-4">Verktyg</h2>
+                <div className="space-y-2">
 
                 {/* Section to adjust room size */}
                 <RoomSizeSection
@@ -98,6 +100,7 @@ export default function Sidebar({
                     showCosts={showCosts}
                     setShowCosts={setShowCosts}
                 />
+                </div>
             </div>
         </div>
     );

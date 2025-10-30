@@ -44,10 +44,18 @@ export default function ContainerSection({
         <div>
             {/* Toggle section */}
             <button
-                className="w-full p-3 rounded bg-blue-600 text-white hover:bg-blue-700 transition"
+                className="w-full flex items-center justify-between p-3 rounded border border-gray-200 bg-white text-nsr-teal hover:bg-gray-50 transition text-left"
                 onClick={() => setIsAddContainersOpen(!isAddContainersOpen)}
             >
-                Lägg till nya sopkärl
+                <span className="font-medium">Lägg till nya sopkärl</span>
+                <svg 
+                    className={`w-5 h-5 transition-transform ${isAddContainersOpen ? 'rotate-180' : ''}`} 
+                    fill="none" 
+                    stroke="currentColor" 
+                    viewBox="0 0 24 24"
+                >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
             </button>
 
             {/* Container list */}
@@ -63,7 +71,7 @@ export default function ContainerSection({
                             <motion.div key={type.id} layout className="relative">
                                 {/* Service type button */}
                                 <button
-                                    className="w-full text-left p-2 border rounded bg-white hover:bg-blue-50 transition"
+                                    className="w-full text-left p-2 border rounded bg-white hover:bg-nsr-teal/10 transition"
                                     onClick={async () => {
                                         if (selectedType === type.name) {
                                             setSelectedType(null);
@@ -108,8 +116,10 @@ export default function ContainerSection({
                                                                 [type.id]: selectedSize[type.id] === size ? null : size,
                                                             })
                                                         }
-                                                        className={`flex-1 min-w-[60px] text-center p-1 border rounded bg-gray-50 hover:bg-gray-100 transition text-sm ${
-                                                            selectedSize[type.id] === size ? "bg-blue-200" : ""
+                                                        className={`flex-1 min-w-[60px] text-center p-1 border rounded transition text-sm ${
+                                                            selectedSize[type.id] === size 
+                                                                ? "bg-nsr-teal text-white border-nsr-teal" 
+                                                                : "bg-white hover:bg-nsr-teal/10"
                                                         }`}
                                                     >
                                                         {size}L
@@ -151,7 +161,7 @@ export default function ContainerSection({
                                                             <p className="text-sm font-medium">{container.cost}:- / år</p>
                                                             <button
                                                                 onClick={() => handleAddContainer(container)}
-                                                                className="mt-2 px-3 py-1 text-sm rounded bg-blue-600 text-white hover:bg-blue-700 transition"
+                                                                className="btn-secondary mt-2 text-sm"
                                                             >
                                                                 Lägg till i rummet
                                                             </button>

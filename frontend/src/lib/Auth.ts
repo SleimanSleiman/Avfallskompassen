@@ -11,6 +11,8 @@ export async function login(username: string, password: string): Promise<LoginRe
   const res = await post<LoginResponse>('/api/auth/login', { username, password });
   if (res.success) {
     localStorage.setItem('auth_user', JSON.stringify({ username: res.username, role: res.role }));
+    // Dispatch event to notify components of auth change
+    window.dispatchEvent(new Event('auth-change'));
   }
   return res;
 }
@@ -19,6 +21,8 @@ export async function register(username: string, password: string): Promise<Logi
   const res = await post<LoginResponse>('/api/auth/register', { username, password });
   if (res.success) {
     localStorage.setItem('auth_user', JSON.stringify({ username: res.username, role: res.role }));
+    // Dispatch event to notify components of auth change
+    window.dispatchEvent(new Event('auth-change'));
   }
   return res;
 }
@@ -30,4 +34,6 @@ export function currentUser() {
 
 export function logout() {
   localStorage.removeItem('auth_user');
+  // Dispatch event to notify components of auth change
+  window.dispatchEvent(new Event('auth-change'));
 }
