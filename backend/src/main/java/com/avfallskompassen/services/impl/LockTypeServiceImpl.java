@@ -6,6 +6,8 @@ import com.avfallskompassen.services.LockTypeService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 /**
  * Service class that serves DTO's to the controller layer.
  * And implementation of the LockTypeService interface.
@@ -23,7 +25,7 @@ public class LockTypeServiceImpl implements LockTypeService {
     /**
      * Fetches a lock type based on its ID.
      *
-     * @Author Christian Storck
+     * @author Christian Storck
      * @param lockTypeId Id of the lock type to retrieve
      * @return A {@link LockType} entity matching the provided ID
      * @throws RuntimeException if no lock type is found with the given ID
@@ -32,5 +34,14 @@ public class LockTypeServiceImpl implements LockTypeService {
     public LockType findLockTypeById(Long lockTypeId) {
         return lockTypeRepository.findById(lockTypeId)
                 .orElseThrow(() -> new RuntimeException("No Locktype found with ID: " + lockTypeId));
+    }
+
+    /**
+     * Fetches all lock types.
+     * @author Christian Storck
+     * @return A list of {@link LockType} entity.
+     */
+    public List<LockType> getAllLockTypes() {
+        return lockTypeRepository.findAll();
     }
 }

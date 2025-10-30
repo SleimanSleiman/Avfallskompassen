@@ -1,5 +1,6 @@
 package com.avfallskompassen.controller;
 
+import com.avfallskompassen.dto.LockTypeDto;
 import com.avfallskompassen.dto.PropertyRequest;
 import com.avfallskompassen.dto.PropertyResponse;
 import com.avfallskompassen.dto.PropertyDTO;
@@ -199,7 +200,21 @@ public class PropertyController {
                 
         return ResponseEntity.ok(propertyDTOs);
     }
-    
+
+    /**
+     * Fetches all available lock types from the DB - Returns DTO.
+     * @return LockTypeDTO
+     * @author Christian Storck
+     */
+    @GetMapping("/lock-type")
+    public ResponseEntity<List<LockTypeDto>> getAllLockTypes() {
+        List<LockType> lockTypes = lockTypeService.getAllLockTypes();
+
+        List<LockTypeDto> lockTypeDTO = lockTypes.stream()
+                .map(LockTypeDto::new)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(lockTypeDTO);
+    }
     /**
      * Delete property by ID (only if owned by current user).
      */
@@ -207,20 +222,20 @@ public class PropertyController {
     public ResponseEntity<PropertyResponse> deleteProperty(
             @PathVariable Long id,
             @RequestHeader(value = "X-Username", required = false) String username) {
-        
+
         if (username == null || username.isEmpty()) {
             PropertyResponse response = new PropertyResponse(false, "User authentication required");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
         }
-        
+
         // Check if user owns the property before deleting
         if (!propertyService.isPropertyOwnedByUser(id, username)) {
             PropertyResponse response = new PropertyResponse(false, "Property not found or access denied");
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
         }
-        
+
         boolean deleted = propertyService.deleteProperty(id);
-        
+
         if (deleted) {
             PropertyResponse response = new PropertyResponse(true, "Property deleted successfully");
             return ResponseEntity.ok(response);
@@ -229,7 +244,8 @@ public class PropertyController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
         }
     }
-    
+
+
     /**
      * Global exception handler for ResponseStatusException
      */

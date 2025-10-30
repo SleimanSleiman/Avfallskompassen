@@ -15,6 +15,11 @@ export type Property = {
   municipalityName?: string;
 };
 
+export type LockType = {
+    id: number;
+    name: string;
+};
+
 export type Municipality = {
   id: number;
   name: string;
@@ -85,4 +90,11 @@ export async function getMunicipalities(): Promise<Municipality[]> {
     method: 'GET',
     headers: getAuthHeaders()
   });
+}
+
+export async function getLockTypes(): Promise<LockType[]> {
+    return await api<LockType[]>('/api/properties/lock-type', {
+        method: 'GET',
+        headers: getAuthHeaders()
+        });
 }
