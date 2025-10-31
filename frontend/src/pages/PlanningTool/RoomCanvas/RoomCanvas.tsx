@@ -104,6 +104,7 @@ export default function RoomCanvas({
                         selectedContainerId={selectedContainerId}
                         handleDragContainer={handleDragContainer}
                         handleSelectContainer={handleSelectContainer}
+                        room={room}
                     />
                 </Layer>
             </Stage>
