@@ -21,6 +21,7 @@ import { useContainers } from './hooks/UseContainers';
 import { useServiceTypes } from './hooks/UseServiceTypes';
 
 export default function PlanningTool() {
+    
     /* ──────────────── Room state & logic ──────────────── */
     const {
         room,
@@ -29,25 +30,29 @@ export default function PlanningTool() {
         setRoom
     } = useRoom();
 
+
     /* ──────────────── Door state & logic ──────────────── */
+    const [selectedContainerId, setSelectedContainerId] = useState<number | null>(null);
+    const [selectedDoorId, setSelectedDoorId] = useState<number | null>(null);
+
     const {
         doors,
         handleAddDoor,
-        selectedDoorId,
         handleDragDoor,
         handleRotateDoor,
         handleRemoveDoor,
-        handleSelectDoor
-    } = useDoors(room);
+        handleSelectDoor,
+    } = useDoors(room, setSelectedDoorId, setSelectedContainerId);
 
     /* ──────────────── Container state & logic ──────────────── */
+    
     const {
         containersInRoom,
-        selectedContainerId,
         handleAddContainer,
         handleRemoveContainer,
         handleDragContainer,
-        handleSelectContainer,
+        handleSelectContainer,  
+
         availableContainers,
         isLoadingContainers,
         fetchAvailableContainers,
@@ -57,7 +62,8 @@ export default function PlanningTool() {
         handleStageDrop,
         handleStageDragOver,
         handleStageDragLeave,
-    } = useContainers(room);
+        handleRotateContainer,
+    } = useContainers(room, setSelectedContainerId, setSelectedDoorId);
 
     /* ──────────────── Service Types (API data) ──────────────── */
     const serviceTypes = useServiceTypes();
@@ -71,10 +77,10 @@ export default function PlanningTool() {
 
     /* ──────────────── Render ──────────────── */
     return (
-        <div className="flex w-full h-full p-6">
+        <div className="flex w-full h-full p-4 sm:p-6 flex-col lg:flex-row gap-4 lg:gap-6">
 
             {/* ─────────────── Canvas & Action Panel ──────────────── */}
-            <div className="flex flex-col items-center w-3/5">
+            <div className="flex flex-col items-center w-full lg:w-3/5 gap-4">
                 {/* RoomCanvas displays the room, containers, and doors */}
                 <RoomCanvas
                     room={room}
@@ -104,15 +110,15 @@ export default function PlanningTool() {
                     doors={doors}
                     selectedContainerId={selectedContainerId}
                     selectedDoorId={selectedDoorId}
-                    setSelectedContainerId={handleSelectContainer}
                     handleRemoveContainer={handleRemoveContainer}
                     handleRemoveDoor={handleRemoveDoor}
                     handleRotateDoor={handleRotateDoor}
+                    handleRotateContainer={handleRotateContainer} 
                 />
             </div>
 
             {/* ─────────────── Sidebar ──────────────── */}
-            <div className="w-2/5 pl-8 flex flex-col h-[600px]">
+            <div className="w-full lg:w-2/5 lg:pl-8 flex flex-col lg:h-[600px]">
                 <Sidebar
                     //Service types and available containers (from API)
                     serviceTypes={serviceTypes}

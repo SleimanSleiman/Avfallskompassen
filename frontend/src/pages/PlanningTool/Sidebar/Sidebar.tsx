@@ -60,7 +60,7 @@ export default function Sidebar({
 
     /* ─────────────── Render ─────────────── */
     return (
-        <div className="pl-8 flex flex-col h-[600px]">
+        <div className="pl-0 lg:pl-8 flex flex-col h-auto lg:h-[600px]">
 
             {/* Scrollable container for all sidebar sections */}
             <div className="flex flex-col border rounded-2xl bg-white p-4 h-full overflow-y-auto">

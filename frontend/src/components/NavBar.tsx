@@ -65,14 +65,14 @@ export default function NavBar() {
                 {user ? (
                   <button
                     onClick={handleLogout}
-                    className="rounded-xl2 bg-nsr-accent px-4 py-2 text-sm text-white hover:bg-nsr-accent/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-nsr-accent transition-colors"
+                    className="rounded-xl2 bg-nsr-accent px-4 py-2 text-sm text-[#121212] hover:bg-nsr-accent/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-nsr-accent transition-colors"
                   >
                     Logga ut
                   </button>
                 ) : (
                   <Link
                     to="/login"
-                    className="rounded-xl2 bg-nsr-accent px-4 py-2 text-sm text-white hover:bg-nsr-accent/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-nsr-accent transition-colors"
+                    className="rounded-xl2 bg-nsr-accent px-4 py-2 text-sm text-[#121212] hover:bg-nsr-accent/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-nsr-accent transition-colors"
                   >
                     Logga in
                   </Link>
