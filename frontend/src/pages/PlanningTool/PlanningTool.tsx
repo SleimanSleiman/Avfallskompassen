@@ -77,10 +77,10 @@ export default function PlanningTool() {
 
     /* ──────────────── Render ──────────────── */
     return (
-        <div className="flex w-full h-full p-6">
+        <div className="flex w-full h-full p-4 sm:p-6 flex-col lg:flex-row gap-4 lg:gap-6">
 
             {/* ─────────────── Canvas & Action Panel ──────────────── */}
-            <div className="flex flex-col items-center w-3/5">
+            <div className="flex flex-col items-center w-full lg:w-3/5 gap-4">
                 {/* RoomCanvas displays the room, containers, and doors */}
                 <RoomCanvas
                     room={room}
@@ -118,7 +118,7 @@ export default function PlanningTool() {
             </div>
 
             {/* ─────────────── Sidebar ──────────────── */}
-            <div className="w-2/5 pl-8 flex flex-col h-[600px]">
+            <div className="w-full lg:w-2/5 lg:pl-8 flex flex-col lg:h-[600px]">
                 <Sidebar
                     //Service types and available containers (from API)
                     serviceTypes={serviceTypes}
