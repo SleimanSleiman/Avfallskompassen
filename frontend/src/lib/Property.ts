@@ -51,25 +51,57 @@ function getAuthHeaders(): Record<string, string> | undefined {
   return user?.username ? { 'X-Username': user.username } : undefined;
 }
 
-export async function createProperty(property: PropertyRequest): Promise<PropertyResponse> {
-  return await api<PropertyResponse>('/api/properties', {
-      method: 'POST',
-      headers: {
-          ...(getAuthHeaders() || {}),
-          'Content-Type': 'application/json',
-          },
-      body: property,
-  });
+function normalizePropertyResponse(data: any): PropertyResponse | null {
+  if (!data) return null;
+  const id = data.id ?? data.propertyId;
+  if (typeof id === 'number') {
+    return {
+      success: data.success ?? true,
+      message: data.message ?? '',
+      propertyId: id,
+      address: data.address,
+      numberOfApartments: data.numberOfApartments,
+      lockType: data.lockName ?? (data.lockTypeDto && data.lockTypeDto.name),
+      accessPathLength: data.accessPathLength,
+      createdAt: data.createdAt,
+      municipalityId: data.municipalityId,
+      municipalityName: data.municipalityName,
+    } as PropertyResponse;
+  }
+
+  if (typeof data.success === 'boolean') {
+    return data as PropertyResponse;
+  }
+
+  return null;
 }
-export async function updateProperty(id: number, property: PropertyRequest): Promise<PropertyResponse> {
-  return await api<PropertyResponse>(`/api/properties/${id}`, {
-    method: 'PUT',
-    headers: { 
-    ...(getAuthHeaders() || {}), 
-    'Content-Type': 'application/json' 
-  },
-    body: property
+
+export async function createProperty(property: PropertyRequest): Promise<PropertyResponse> {
+  const data = await api<any>('/api/properties', {
+    method: 'POST',
+    headers: {
+      ...(getAuthHeaders() || {}),
+      'Content-Type': 'application/json',
+    },
+    body: property,
   });
+
+  const normalized = normalizePropertyResponse(data);
+  return normalized ?? (data as PropertyResponse);
+}
+
+export async function updateProperty(id: number, property: PropertyRequest): Promise<PropertyResponse> {
+  const data = await api<any>(`/api/properties/${id}`, {
+    method: 'PUT',
+    headers: {
+      ...(getAuthHeaders() || {}),
+      'Content-Type': 'application/json',
+    },
+    body: property,
+  });
+
+  const normalized = normalizePropertyResponse(data);
+  return normalized ?? (data as PropertyResponse);
 }
 export async function getMyProperties(): Promise<Property[]> {
   return await api<Property[]>('/api/properties/my-properties', {
