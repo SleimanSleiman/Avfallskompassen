@@ -27,12 +27,12 @@ import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 /**
- * Service for comparing properties with similar properties.
+ * Service implementation for comparing properties with similar properties.
  * Implements comparison functionality for costs, container sizes, waste amounts, and collection frequencies.
  */
 @Service
 @Transactional(readOnly = true)
-public class PropertyComparisonService {
+public class PropertyComparisonService implements IPropertyComparisonService {
 
     private static final int APARTMENT_RANGE = 5;
 
@@ -42,19 +42,14 @@ public class PropertyComparisonService {
 
     @Autowired
     public PropertyComparisonService(PropertyRepository propertyRepository,
-                                     PropertyCostService propertyCostService,
-                                     PropertyContainerRepository propertyContainerRepository) {
+                                         PropertyCostService propertyCostService,
+                                         PropertyContainerRepository propertyContainerRepository) {
         this.propertyRepository = propertyRepository;
         this.propertyCostService = propertyCostService;
         this.propertyContainerRepository = propertyContainerRepository;
     }
 
-    /**
-     * Get complete comparison data for a property.
-     *
-     * @param propertyId the property ID to compare
-     * @return complete comparison data
-     */
+    @Override
     public PropertyComparisonDTO getPropertyComparison(Long propertyId) {
         Property property = loadProperty(propertyId);
         List<Property> similarProperties = findSimilarProperties(property);
@@ -74,12 +69,14 @@ public class PropertyComparisonService {
         return comparison;
     }
 
+    @Override
     public CostComparisonDTO getCostComparison(Long propertyId) {
         Property property = loadProperty(propertyId);
         List<Property> similarProperties = findSimilarProperties(property);
         return calculateCostComparison(property, similarProperties);
     }
 
+    @Override
     public ContainerSizeComparisonDTO getContainerSizeComparison(Long propertyId) {
         Property property = loadProperty(propertyId);
         List<Property> similarProperties = findSimilarProperties(property);
@@ -87,6 +84,7 @@ public class PropertyComparisonService {
         return calculateContainerSizeComparison(property, similarProperties, containersByProperty);
     }
 
+    @Override
     public List<WasteAmountComparisonDTO> getWasteAmountComparisons(Long propertyId) {
         Property property = loadProperty(propertyId);
         List<Property> similarProperties = findSimilarProperties(property);
@@ -94,6 +92,7 @@ public class PropertyComparisonService {
         return calculateWasteAmountComparisons(property, similarProperties, containersByProperty);
     }
 
+    @Override
     public List<CollectionFrequencyComparisonDTO> getFrequencyComparisons(Long propertyId) {
         Property property = loadProperty(propertyId);
         List<Property> similarProperties = findSimilarProperties(property);
@@ -106,9 +105,6 @@ public class PropertyComparisonService {
             .orElseThrow(() -> new EntityNotFoundException("Property not found with ID: " + propertyId));
     }
 
-    /**
-     * Find similar properties based on property type, municipality, and apartment count (±5).
-     */
     private List<Property> findSimilarProperties(Property property) {
         int minApartments = Math.max(1, property.getNumberOfApartments() - APARTMENT_RANGE);
         int maxApartments = property.getNumberOfApartments() + APARTMENT_RANGE;
