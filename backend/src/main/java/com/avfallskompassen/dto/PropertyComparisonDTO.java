@@ -20,7 +20,6 @@ public class PropertyComparisonDTO {
     
     public PropertyComparisonDTO() {}
     
-    // Getters and Setters
     public Long getPropertyId() {
         return propertyId;
     }
