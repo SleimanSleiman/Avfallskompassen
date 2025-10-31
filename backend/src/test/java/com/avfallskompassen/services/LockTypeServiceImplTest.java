@@ -10,10 +10,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 class LockTypeServiceImplTest {
 
@@ -52,5 +55,27 @@ class LockTypeServiceImplTest {
         );
 
         assertEquals("No Locktype found with ID: 2", exception.getMessage());
+    }
+
+    @Test
+    void testGetAllLockTypes() {
+        LockType lock1 = new LockType();
+        lock1.setId(1L);
+        lock1.setName("Inget lås");
+
+        LockType lock2 = new LockType();
+        lock2.setId(2L);
+        lock2.setName("Fysisk nyckel");
+
+
+        List<LockType> mockList = Arrays.asList(lock1, lock2);
+        when(lockTypeRepository.findAll()).thenReturn(mockList);
+
+        List<LockType> result = lockTypeService.getAllLockTypes();
+
+        assertThat(result).hasSize(2);
+        assertThat(result).containsExactlyElementsOf(mockList);
+
+        verify(lockTypeRepository, times(1)).findAll();
     }
 }

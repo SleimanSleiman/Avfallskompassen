@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { createProperty, getMyProperties, deleteProperty, updateProperty,getMunicipalities } from '../lib/Property';
+import { createProperty, getMyProperties, deleteProperty, updateProperty,getMunicipalities, getLockTypes } from '../lib/Property';
 import type { Municipality, Property, PropertyRequest } from '../lib/Property';
 import { currentUser } from '../lib/auth';
 import RoomSizePrompt from '../components/RoomSizePrompt';
@@ -15,6 +15,7 @@ export default function PropertyPage() {
   const [editingId, setEditingId] = useState<number | null>(null);
   const [isCreateRoomOpen, setIsCreateRoomOpen] = useState(false);
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
+  const [lockTypes, setLockTypes] = useState<LockType[]>([]);
   const [query, setQuery] = useState('');
   const [sortBy, setSortBy] = useState<'created'|'address'|'apartmentsAsc'|'apartmentsDesc'>('created');
   const [pendingDelete, setPendingDelete] = useState<{ id: number; address: string } | null>(null);
@@ -50,6 +51,7 @@ export default function PropertyPage() {
   useEffect(() => {
     loadProperties();
     loadMunicipalities();
+    loadLockTypes();
   }, []);
 
   async function loadMunicipalities() {
@@ -82,6 +84,15 @@ export default function PropertyPage() {
       setProperties(data);
     } catch (err: any) {
       setError('Kunde inte ladda fastigheter: ' + err.message);
+    }
+  }
+
+  async function loadLockTypes() {
+    try {
+      const data = await getLockTypes();
+      setLockTypes(data);
+    } catch (err: any) {
+      setError("Kunde inte ladda låstyper: " + err.message);
     }
   }
   
@@ -180,7 +191,7 @@ async function handleSubmit(e: React.FormEvent) {
     setFormData({
       address: p.address,
       numberOfApartments: p.numberOfApartments,
-      lockTypeId: lockMap[p.lockName ?? 'Standard'] || 1,
+      lockTypeId: p.lockTypeId,
       accessPathLength: p.accessPathLength ?? 0,
       municipalityId: p.municipalityId ?? 0
     });
@@ -343,11 +354,12 @@ async function handleSubmit(e: React.FormEvent) {
                   value={formData.lockTypeId}
                   onChange={(e) => handleInputChange('lockTypeId', parseInt(e.target.value))}
                 >
-                  <option value="0">Test</option>
-                  <option value="1">Elektronisk</option>
-                  <option value="2">Alien</option>
-                  <option value="3">Epic lock</option>
-                  <option value="4">Old lock</option>
+                  <option value={0}> Välj låstyp</option>
+                  {lockTypes.map((lt) => (
+                      <option key={lt.id} value={lt.id}>
+                      {lt.name}
+                      </option>
+                      ))}
                 </select>
               </div>
               
