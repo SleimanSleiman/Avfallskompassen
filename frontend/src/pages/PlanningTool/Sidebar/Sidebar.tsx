@@ -3,12 +3,12 @@
  * Contains sections for room size, doors, containers, and cost estimation.
  * Handles state and actions related to these sections.
  */
-import { AnimatePresence } from "framer-motion";
 import ContainerSection from "./ContainerSection";
 import DoorSection from "./DoorSection";
 import RoomSizeSection from "./RoomSizeSection";
 import CostSection from "./CostSection";
-import type { ContainerDTO } from "../../lib/Container";
+import type { ContainerDTO } from "../../../lib/Container";
+import type { Room } from "../Types";
 
 /* ─────────────── Sidebar Props ─────────────── */
 type SidebarProps = {
@@ -33,8 +33,8 @@ type SidebarProps = {
     setIsStageDropActive: (v: boolean) => void;
 
     //Doors & room management
-    handleAddDoor: (door: { width: number }) => void;
-    setRoom: any;
+    handleAddDoor: (door: { width: number }) => boolean;
+    setRoom: (room: Room) => void;
 };
 
 export default function Sidebar({

@@ -1,4 +1,5 @@
 export interface ContainerDTO {
+  id: number;
   name: string;
   size: number;
   width: number;

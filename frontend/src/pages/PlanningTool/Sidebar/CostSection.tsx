@@ -3,6 +3,7 @@
  * Displays the subscription costs of the room.
  */
 import { motion, AnimatePresence } from "framer-motion";
+import InfoTooltip from "../components/InfoTooltip";
 
 /* ─────────────── Cost Props ─────────────── */
 type CostSectionProps = {
@@ -16,20 +17,28 @@ export default function CostSection({ showCosts, setShowCosts }: CostSectionProp
     return (
         <div>
             {/* Toggle button */}
-            <button
-                className="w-full flex items-center justify-between p-3 rounded border border-gray-200 bg-white text-nsr-teal hover:bg-gray-50 transition text-left"
-                onClick={() => setShowCosts(!showCosts)}
-            >
-                <span className="font-medium">Se abonnemangskostnader</span>
-                <svg 
-                    className={`w-5 h-5 transition-transform ${showCosts ? 'rotate-180' : ''}`} 
-                    fill="none" 
-                    stroke="currentColor" 
-                    viewBox="0 0 24 24"
+            <div className="relative">
+                <button
+                    className="w-full flex items-center justify-between p-3 pr-12 rounded border border-gray-200 bg-white text-nsr-teal hover:bg-gray-50 transition text-left"
+                    onClick={() => setShowCosts(!showCosts)}
                 >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
-            </button>
+                    <span className="font-medium">Se abonnemangskostnader</span>
+                    <svg 
+                        className={`w-5 h-5 transition-transform ${showCosts ? 'rotate-180' : ''}`} 
+                        fill="none" 
+                        stroke="currentColor" 
+                        viewBox="0 0 24 24"
+                    >
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                </button>
+
+                <InfoTooltip
+                    className="absolute right-3 top-1/2 -translate-y-1/2"
+                    panelWidthClass="w-64"
+                    text="Visa en översikt över abonnemangs- och hanteringskostnaderna för de kärl som ligger i ritningen."
+                />
+            </div>
 
             {/* Content */}
             {/* TODO: Replace with actual cost details */}
