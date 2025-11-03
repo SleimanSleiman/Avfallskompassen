@@ -49,7 +49,7 @@ function ContainerItem({
     handleSelectContainer: (id: number) => void;
 }) {
 
-    let imageToUse = null;
+    const [imageToUse] = useImage('/path/to/my/image.png');
     return (
         <Group
             x={container.x + container.width / 2}
