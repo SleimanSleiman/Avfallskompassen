@@ -42,6 +42,8 @@ export default function PlanningTool() {
         handleRotateDoor,
         handleRemoveDoor,
         handleSelectDoor,
+        getDoorZones,
+        isOverlapping,
     } = useDoors(room, setSelectedDoorId, setSelectedContainerId);
 
     /* ──────────────── Container state & logic ──────────────── */
@@ -91,6 +93,8 @@ export default function PlanningTool() {
                     selectedDoorId={selectedDoorId}
                     handleDragDoor={handleDragDoor}
                     handleSelectDoor={handleSelectDoor}
+                    doorZones={getDoorZones()}
+                    isOverlapping={isOverlapping}
 
                     containers={containersInRoom}
                     selectedContainerId={selectedContainerId}

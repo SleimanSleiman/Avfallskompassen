@@ -25,8 +25,8 @@ export function useContainers(
     //TODO: change positioning logic if implementing grid/snapping
     const handleAddContainer = (container: ContainerDTO, position?: { x: number; y: number }) => {
         //Default size if no API data is provided
-        const widthPx = mmToPixels(container.width) ?? DEFAULT_BIN_PIXEL_SIZE;
-        const heightPx = mmToPixels(container.depth) ?? DEFAULT_BIN_PIXEL_SIZE;
+        const widthPx = mmToPixels(container.width)
+        const heightPx = mmToPixels(container.depth)
 
         //If user clicked somewhere, center container on that position
         let targetX = position ? position.x - widthPx / 2 : room.x + room.width / 2 - widthPx / 2;

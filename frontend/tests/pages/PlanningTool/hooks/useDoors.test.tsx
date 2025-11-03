@@ -1,6 +1,6 @@
 import { renderHook, act } from "@testing-library/react";
 import { useDoors } from "../../../../src/pages/PlanningTool/hooks/useDoors";
-import { SCALE } from "../../../src/constants";
+import { SCALE } from "../../../../src/pages/PlanningTool/Constants";
 
 //Mock room data
 const mockRoom = {
@@ -21,7 +21,7 @@ describe("useDoors hook", () => {
 
     //Test adding a new door
     it("adds a new door to the room", () => {
-        
+
         const { result } = renderHook(() => useDoors(mockRoom, mockSetSelectedDoorId, mockSetSelectedContainerId));
 
         let added: boolean;
@@ -74,6 +74,7 @@ describe("useDoors hook", () => {
         act(() => {
             result.current.handleAddDoor({ width: 1.2 });
         });
+
         act(() => {
             result.current.handleAddDoor({ width: 0.9 });
         });
@@ -84,7 +85,6 @@ describe("useDoors hook", () => {
             result.current.handleRemoveDoor(largeDoor.id);
         });
 
-        // The large door should still exist
         const stillExists = result.current.doors.some(d => d.id === largeDoor.id);
         expect(stillExists).toBe(true);
         expect(global.alert).toHaveBeenCalledWith("Minst en dörr måste vara 1.2 meter bred.");
@@ -98,7 +98,6 @@ describe("useDoors hook", () => {
             result.current.handleAddDoor({ width: 1.2 });
         });
 
-        //Ensures doors have different IDs
         await new Promise(resolve => setTimeout(resolve, 1));
 
         act(() => {
@@ -172,6 +171,31 @@ describe("useDoors hook", () => {
         expect(updatedDoor?.wall).not.toBe(initialWall);
     });
 
+    //Test rotation update when dragging inward-swing door to new wall
+    it("updates rotation correctly when dragging inward-swing door to new wall", () => {
+        const { result } = renderHook(() =>
+            useDoors(mockRoom, mockSetSelectedDoorId, mockSetSelectedContainerId)
+        );
+
+        act(() => {
+            result.current.handleAddDoor({ width: 1.2 });
+        });
+
+        const id = result.current.doors[0].id;
+
+        act(() => {
+            result.current.handleRotateDoor(id, 0, "inward");
+        });
+
+        act(() => {
+            result.current.handleDragDoor(id, { x: mockRoom.x + mockRoom.width + 50, y: 150 });
+        });
+
+        const door = result.current.doors.find(d => d.id === id);
+        expect(door?.wall).toBe("right");
+        expect(door?.rotation).toBe(-90 + 180);
+    });
+
     //Test door position updates when room changes
     it("updates door position when room size changes", () => {
         const { result, rerender } = renderHook(({ room }) => useDoors(room, mockSetSelectedDoorId, mockSetSelectedContainerId), {
@@ -191,5 +215,40 @@ describe("useDoors hook", () => {
 
         const updatedDoor = result.current.doors.find(d => d.id === id);
         expect(updatedDoor?.x).not.toBe(oldX);
+    });
+
+    //Test door zone generation
+    it("generates door zones correctly", () => {
+        const { result } = renderHook(() =>
+            useDoors(mockRoom, mockSetSelectedDoorId, mockSetSelectedContainerId)
+        );
+
+        act(() => {
+            result.current.handleAddDoor({ width: 1.2 });
+        });
+
+        const zones = result.current.getDoorZones();
+        expect(Array.isArray(zones)).toBe(true);
+        expect(zones.length).toBe(1);
+
+        const door = result.current.doors[0];
+        const zone = zones[0];
+
+        expect(zone.width).toBe(door.width / SCALE);
+        expect(zone.height).toBe(door.width / SCALE);
+    });
+
+    //Test overlapping zone detection
+    it("detects overlapping zones", () => {
+        const { result } = renderHook(() =>
+            useDoors(mockRoom, mockSetSelectedDoorId, mockSetSelectedContainerId)
+        );
+
+        const zoneA = { x: 0, y: 0, width: 100, height: 100 };
+        const zoneB = { x: 50, y: 50, width: 100, height: 100 };
+        const zoneC = { x: 200, y: 200, width: 50, height: 50 };
+
+        expect(result.current.isOverlapping(zoneA, zoneB)).toBe(true);
+        expect(result.current.isOverlapping(zoneA, zoneC)).toBe(false);
     });
 });

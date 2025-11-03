@@ -90,6 +90,7 @@ export default function DoorsLayer({
                             outerRadius={door.width / SCALE}
                             angle={90}
                             rotation={door.rotation}
+                            scaleX={door.swingDirection === "inward" ? -1 : 1}
                             stroke={selectedDoorId === door.id ? "orange" : "blue"}
                             strokeWidth={2}
                             data-testid={`door-arc-${door.id}`}
@@ -98,6 +99,7 @@ export default function DoorsLayer({
                         <Line
                             points={[0, 0, door.width / SCALE, 0]}
                             rotation={door.rotation}
+                            scaleX={door.swingDirection === "inward" ? -1 : 1}
                             stroke={selectedDoorId === door.id ? "orange" : "blue"}
                             strokeWidth={2}
                             data-testid={`door-line-${door.id}`}
