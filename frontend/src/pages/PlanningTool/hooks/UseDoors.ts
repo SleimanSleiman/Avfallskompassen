@@ -38,7 +38,7 @@ export function useDoors(
             return false;
         }
 
-        const x = room.x + room.width / 2 - width / 2;
+        const x = room.x + room.width / 2;
         const y = room.y + room.height;
 
         const id = Date.now();
@@ -62,45 +62,90 @@ export function useDoors(
 
         const widthPx = door.width / SCALE;
 
+        //Room edges
         const topY = room.y;
         const bottomY = room.y + room.height;
         const leftX = room.x;
         const rightX = room.x + room.width;
 
+        //New wall and position variables
         let newWall: Door["wall"] = door.wall;
         let newX = pos.x;
         let newY = pos.y;
 
-        //Calculate edges of the dragged door
-        const left = pos.x - widthPx / 2;
-        const right = pos.x + widthPx / 2;
-        const top = pos.y - widthPx / 2;
-        const bottom = pos.y + widthPx / 2;
+        //Door edges
+        let left: number;
+        let right: number;
+        let top: number;
+        let bottom: number;
 
-        //Detect if the door crosses another wall while draggin
+        //Calculate door edges based on wall
+        switch (door.wall) {
+            case "bottom":
+                left = pos.x;
+                right = pos.x + widthPx;
+                top = pos.y;
+                bottom = pos.y;
+                break;
+            case "top":
+                right = pos.x;
+                left = pos.x - widthPx;
+                top = pos.y;
+                bottom = pos.y;
+                break;
+            case "left":
+                top = pos.y;
+                bottom = pos.y + widthPx;
+                left = pos.x;
+                right = pos.x;
+                break;
+            case "right":
+                bottom = pos.y;
+                top = pos.y - widthPx;
+                left = pos.x;
+                right = pos.x;
+                break;
+        }
+
+        //Snap to closest wall if door goes outside
         if (door.wall === "bottom" || door.wall === "top") {
             if (left <= leftX) {
                 newWall = "left";
                 newX = leftX;
-                newY = clamp(pos.y, topY + widthPx / 2, bottomY - widthPx / 2);
+                newY = clamp(pos.y, topY, bottomY);
             } else if (right >= rightX) {
                 newWall = "right";
                 newX = rightX;
-                newY = clamp(pos.y, topY + widthPx / 2, bottomY - widthPx / 2);
+                newY = clamp(pos.y, topY, bottomY);
             }
         } else if (door.wall === "left" || door.wall === "right") {
             if (top <= topY) {
                 newWall = "top";
                 newY = topY;
-                newX = clamp(pos.x, leftX + widthPx / 2, rightX - widthPx / 2);
+                newX = clamp(pos.x, leftX, rightX);
             } else if (bottom >= bottomY) {
                 newWall = "bottom";
                 newY = bottomY;
-                newX = clamp(pos.x, leftX + widthPx / 2, rightX - widthPx / 2);
+                newX = clamp(pos.x, leftX, rightX);
             }
         }
 
-        //Update door offset based on new wall position
+        const hMargin = 0.01 * room.width;  //horizontal margin for top/bottom walls
+        const vMargin = 0.01 * room.height; //vertical margin for left/right walls
+
+        //Clamp position along the wall to stay within room bounds
+        switch (newWall) {
+            case "bottom":
+            case "top":
+                newX = clamp(newX, leftX + hMargin, rightX - hMargin);
+                break;
+            case "left":
+            case "right":
+                newY = clamp(newY, topY + vMargin, bottomY - vMargin);
+                break;
+        }
+
+        //Update offset along the wall (0 = start, 1 = end)
         let offset = 0.5;
         if (newWall === "top" || newWall === "bottom") {
             offset = (newX - leftX) / room.width;
@@ -109,7 +154,7 @@ export function useDoors(
         }
         doorOffsetRef.current[id] = offset;
 
-        //update door's position and rotation
+        //Update door position and rotation
         setDoors(prev =>
             prev.map(d => {
                 if (d.id !== id) return d;
@@ -124,6 +169,7 @@ export function useDoors(
             })
         );
     };
+
 
     /* ──────────────── Update on Room Resize ──────────────── */
     useEffect(() => {
@@ -189,6 +235,32 @@ export function useDoors(
         setSelectedContainerId(null); // Clear container selection
     };
 
+    /* ──────────────── Door Zones & Collision ──────────────── */
+    const getDoorZones = () => {
+        if (!doors || doors.length === 0) return [];
+        return doors.map(door => {
+            const doorSize = door.width / SCALE;
+            switch(door.wall) {
+                case "top": return { x: door.x - doorSize, y: door.y, width: doorSize, height: doorSize };
+                case "bottom": return { x: door.x, y: door.y - doorSize, width: doorSize, height: doorSize };
+                case "left": return { x: door.x, y: door.y, width: doorSize, height: doorSize };
+                case "right": return { x: door.x - doorSize, y: door.y - doorSize, width: doorSize, height: doorSize };
+            }
+        });
+    };
+
+    const isOverlapping = (
+        a: { x: number; y: number; width: number; height: number },
+        b: { x: number; y: number; width: number; height: number }
+    ) => {
+        return !(
+            a.x + a.width <= b.x ||
+            a.x >= b.x + b.width ||
+            a.y + a.height <= b.y ||
+            a.y >= b.y + b.height
+        );
+    };
+
 
     /* ──────────────── Return ──────────────── */
     return {
@@ -198,7 +270,9 @@ export function useDoors(
         handleDragDoor,
         handleRotateDoor,
         handleRemoveDoor,
-        handleSelectDoor
+        handleSelectDoor,
+        getDoorZones,
+        isOverlapping,
     };
 }
 

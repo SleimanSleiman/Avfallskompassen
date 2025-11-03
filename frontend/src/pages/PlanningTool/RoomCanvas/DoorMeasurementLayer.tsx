@@ -23,7 +23,6 @@ export default function DoorMeasurementLayer({ doors, room }: DoorMeasurementLay
             {doors.flatMap(door => {
                 const swing = door.width / SCALE; //the swing distance of the door, scaled
                 const margin = baseMargin + swing; //margin to apply for measurement lines, considering door swing
-                const halfDoor = swing/2; //half of the door width, used for centering measurments
 
                 //Initialize door corner coordinates
                 let leftX = door.x;
@@ -31,14 +30,30 @@ export default function DoorMeasurementLayer({ doors, room }: DoorMeasurementLay
                 let topY = door.y;
                 let bottomY = door.y;
 
-                //Adjust corners based on rotation
-                if (door.rotation % 180 === 0) {
-                    leftX = door.x - swing / 2;
-                    rightX = door.x + swing / 2;
-                } else {
-                    topY = door.y - swing / 2;
-                    bottomY = door.y + swing / 2;
+                //Calculate door corner coordinates based on wall
+                switch (door.wall) {
+                    case "top":
+                        rightX = door.x;
+                        leftX = door.x - swing;
+                        topY = bottomY = door.y;
+                        break;
+                    case "bottom":
+                        leftX = door.x;
+                        rightX = door.x + swing;
+                        topY = bottomY = door.y;
+                        break;
+                    case "left":
+                        topY = door.y;
+                        bottomY = door.y + swing;
+                        leftX = rightX = door.x;
+                        break;
+                    case "right":
+                        bottomY = door.y;
+                        topY = door.y - swing;
+                        leftX = rightX = door.x;
+                        break;
                 }
+
 
                 let line1: number[] = [];
                 let line2: number[] = [];
@@ -54,7 +69,7 @@ export default function DoorMeasurementLayer({ doors, room }: DoorMeasurementLay
                                 key={`text-left-${door.id}`}
                                 x={(room.x + leftX) / 2}
                                 y={topY - margin - textOffset}
-                                text={`${((leftX - room.x - halfDoor) * SCALE).toFixed(2)} m`}
+                                text={`${((leftX - room.x) * SCALE).toFixed(2)} m`}
                                 fontSize={14}
                                 fill="blue"
                                 align="center"
@@ -66,7 +81,7 @@ export default function DoorMeasurementLayer({ doors, room }: DoorMeasurementLay
                                 key={`text-right-${door.id}`}
                                 x={(rightX + room.x + room.width) / 2}
                                 y={topY - margin - textOffset}
-                                text={`${((room.x + room.width - rightX + halfDoor) * SCALE).toFixed(2)} m`}
+                                text={`${((room.x + room.width - rightX) * SCALE).toFixed(2)} m`}
                                 fontSize={14}
                                 fill="blue"
                                 align="center"
@@ -83,7 +98,7 @@ export default function DoorMeasurementLayer({ doors, room }: DoorMeasurementLay
                                 key={`text-left-${door.id}`}
                                 x={(room.x + leftX) / 2}
                                 y={bottomY + margin + textOffset - 14}
-                                text={`${((leftX - room.x + halfDoor) * SCALE).toFixed(2)} m`}
+                                text={`${((leftX - room.x) * SCALE).toFixed(2)} m`}
                                 fontSize={14}
                                 fill="blue"
                                 align="center"
@@ -95,7 +110,7 @@ export default function DoorMeasurementLayer({ doors, room }: DoorMeasurementLay
                                 key={`text-right-${door.id}`}
                                 x={(rightX + room.x + room.width) / 2}
                                 y={bottomY + margin + textOffset - 14}
-                                text={`${((room.x + room.width - rightX - halfDoor) * SCALE).toFixed(2)} m`}
+                                text={`${((room.x + room.width - rightX) * SCALE).toFixed(2)} m`}
                                 fontSize={14}
                                 fill="blue"
                                 align="center"
@@ -112,7 +127,7 @@ export default function DoorMeasurementLayer({ doors, room }: DoorMeasurementLay
                                 key={`text-top-${door.id}`}
                                 x={leftX - margin - textOffset}
                                 y={(room.y + topY) / 2}
-                                text={`${((topY - room.y + halfDoor) * SCALE).toFixed(2)} m`}
+                                text={`${((topY - room.y) * SCALE).toFixed(2)} m`}
                                 fontSize={14}
                                 fill="blue"
                                 rotation={-90}
@@ -126,7 +141,7 @@ export default function DoorMeasurementLayer({ doors, room }: DoorMeasurementLay
                                 key={`text-bottom-${door.id}`}
                                 x={leftX - margin - textOffset}
                                 y={(bottomY + room.y + room.height) / 2}
-                                text={`${((room.y + room.height - bottomY - halfDoor) * SCALE).toFixed(2)} m`}
+                                text={`${((room.y + room.height - bottomY) * SCALE).toFixed(2)} m`}
                                 fontSize={14}
                                 fill="blue"
                                 rotation={-90}
@@ -145,7 +160,7 @@ export default function DoorMeasurementLayer({ doors, room }: DoorMeasurementLay
                                 key={`text-top-${door.id}`}
                                 x={rightX + margin + textOffset}
                                 y={(room.y + topY) / 2}
-                                text={`${((topY - room.y - halfDoor) * SCALE).toFixed(2)} m`}
+                                text={`${((topY - room.y) * SCALE).toFixed(2)} m`}
                                 fontSize={14}
                                 fill="blue"
                                 rotation={90}
@@ -159,7 +174,7 @@ export default function DoorMeasurementLayer({ doors, room }: DoorMeasurementLay
                                 key={`text-bottom-${door.id}`}
                                 x={rightX + margin + textOffset}
                                 y={(bottomY + room.y + room.height) / 2}
-                                text={`${((room.y + room.height - bottomY + halfDoor) * SCALE).toFixed(2)} m`}
+                                text={`${((room.y + room.height - bottomY) * SCALE).toFixed(2)} m`}
                                 fontSize={14}
                                 fill="blue"
                                 rotation={90}

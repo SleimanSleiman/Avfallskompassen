@@ -2,7 +2,8 @@
  * RoomCanvas Component
  * Renders the Konva Stage with the room shape, corner handles, doors, and containers.
  */
-import { Stage, Layer } from "react-konva";
+import { Stage, Layer, Group, Line } from "react-konva";
+import { useState } from "react";
 import RoomShape from "./RoomShape";
 import CornerHandles from "./CornerHandles";
 import DoorsLayer from "./DoorsLayer";
@@ -23,6 +24,8 @@ type RoomCanvasProps = {
     selectedDoorId: number | null;
     handleSelectDoor: (id: number) => void;
     handleDragDoor: (id: number,pos: { x: number; y: number; wall: Door["wall"]; rotation: number }) => void;
+    doorZones: { x: number; y: number; width: number; height: number }[];
+    isOverlapping: (a: any, b: any) => boolean;
 
     //Container props
     containers: ContainerInRoom[];
@@ -46,7 +49,6 @@ export default function RoomCanvas({
     selectedDoorId,
     handleDragDoor,
     handleSelectDoor,
-    setDoors,
     containers,
     selectedContainerId,
     handleDragContainer,
@@ -56,7 +58,12 @@ export default function RoomCanvas({
     handleStageDragOver,
     handleStageDragLeave,
     isStageDropActive,
+    doorZones,
+    isOverlapping,
 }: RoomCanvasProps) {
+
+    //State to track if a container is being dragged
+    const [isDraggingContainer, setIsDraggingContainer] = useState(false);
 
     /* ──────────────── Render ──────────────── */
     return (
@@ -98,6 +105,35 @@ export default function RoomCanvas({
                         room={room}
                     />
 
+                   {/* Highlight door zones with diagonal lines when dragging a container */}
+                   {isDraggingContainer && doorZones.map((zone, i) => {
+                       const spacing = 10;
+                       const lines = [];
+
+                       for (let x = -zone.height; x < zone.width; x += spacing) {
+                           lines.push(
+                               <Line
+                                   key={x}
+                                   points={[x, 0, x + zone.height, zone.height]}
+                                   stroke="red"
+                                   strokeWidth={2}
+                               />
+                           );
+                       }
+
+                       return (
+                           <Group
+                               key={i}
+                               x={zone.x}
+                               y={zone.y}
+                               clip={{ x: 0, y: 0, width: zone.width, height: zone.height }}
+                               data-testid={`doorzone-${i}`}
+                           >
+                               {lines}
+                           </Group>
+                       );
+                   })}
+
                     {/* Containers layer */}
                     <ContainersLayer
                         containersInRoom={containers}
@@ -105,6 +141,10 @@ export default function RoomCanvas({
                         handleDragContainer={handleDragContainer}
                         handleSelectContainer={handleSelectContainer}
                         room={room}
+                        doors={doors}
+                        doorZones={doorZones}
+                        isOverlapping={isOverlapping}
+                        setIsDraggingContainer={setIsDraggingContainer}
                     />
                 </Layer>
             </Stage>
