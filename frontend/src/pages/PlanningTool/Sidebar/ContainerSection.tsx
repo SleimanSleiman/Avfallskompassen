@@ -21,6 +21,7 @@ type ContainerSectionProps = {
     isLoadingContainers: boolean;
     fetchContainers: (serviceId: number) => Promise<void>;
     handleAddContainer: (container: ContainerDTO, position?: { x: number; y: number }) => void;
+    setDraggedContainer: React.Dispatch<React.SetStateAction<ContainerDTO | null>>;
     setIsStageDropActive: (v: boolean) => void;
 };
 
@@ -37,6 +38,7 @@ export default function ContainerSection({
     fetchContainers,
     handleAddContainer,
     setIsStageDropActive,
+    setDraggedContainer,
 }: ContainerSectionProps) {
 
     /* ─────────────── Render ─────────────── */
@@ -152,8 +154,14 @@ export default function ContainerSection({
                                                                     event.dataTransfer.effectAllowed = 'copy';
                                                                     event.dataTransfer.setData(DRAG_DATA_FORMAT, JSON.stringify(container));
                                                                     event.dataTransfer.setData('text/plain', container.name);
+
+                                                                    setIsStageDropActive(true);
+                                                                    setDraggedContainer(container);
                                                                 }}
-                                                                onDragEnd={() => setIsStageDropActive(false)}
+                                                                onDragEnd={() => {
+                                                                    setIsStageDropActive(false);
+                                                                    setDraggedContainer(null);
+                                                                }}
                                                             />
                                                             <p className="font-semibold">{container.name}</p>
                                                             <p className="text-sm">{container.width} × {container.height} × {container.depth} mm</p>

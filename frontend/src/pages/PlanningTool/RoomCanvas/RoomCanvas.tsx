@@ -2,7 +2,7 @@
  * RoomCanvas Component
  * Renders the Konva Stage with the room shape, corner handles, doors, and containers.
  */
-import { Stage, Layer, Group, Line } from "react-konva";
+import { Stage, Layer, Group, Line, Rect } from "react-konva";
 import { useState } from "react";
 import RoomShape from "./RoomShape";
 import CornerHandles from "./CornerHandles";
@@ -25,13 +25,14 @@ type RoomCanvasProps = {
     handleSelectDoor: (id: number) => void;
     handleDragDoor: (id: number,pos: { x: number; y: number; wall: Door["wall"]; rotation: number }) => void;
     doorZones: { x: number; y: number; width: number; height: number }[];
-    isOverlapping: (a: any, b: any) => boolean;
 
     //Container props
     containers: ContainerInRoom[];
     selectedContainerId: number | null;
     handleDragContainer: (id: number, pos: { x: number; y: number }) => void;
     handleSelectContainer: (id: number) => void;
+    getContainerZones: (excludeId?: number) => { x: number; y: number; width: number; height: number }[];
+    draggedContainer: ContainerDTO | null;
 
     //Drag & Drop props
     stageWrapperRef: React.RefObject<HTMLDivElement>;
@@ -59,11 +60,17 @@ export default function RoomCanvas({
     handleStageDragLeave,
     isStageDropActive,
     doorZones,
-    isOverlapping,
+    getContainerZones,
+    draggedContainer,
 }: RoomCanvasProps) {
+    const isDraggingExistingContainer = isDraggingContainer && selectedContainerId !== null;
 
-    //State to track if a container is being dragged
-    const [isDraggingContainer, setIsDraggingContainer] = useState(false);
+    //Determine which container zones to show
+    const containerZonesToShow = isDraggingExistingContainer
+      ? getContainerZones(selectedContainerId)
+      : draggedContainer
+        ? getContainerZones()
+        : [];
 
     /* ──────────────── Render ──────────────── */
     return (
@@ -105,34 +112,33 @@ export default function RoomCanvas({
                         room={room}
                     />
 
-                   {/* Highlight door zones with diagonal lines when dragging a container */}
-                   {isDraggingContainer && doorZones.map((zone, i) => {
-                       const spacing = 10;
-                       const lines = [];
+                    {/* Highlighted zones a container cannot be placed */}
+                    {(isDraggingContainer || draggedContainer) &&
+                        [...doorZones, ...containerZonesToShow].map((zone, i) => (
+                            <Group key={`zone-${i}`} x={zone.x} y={zone.y} listening={false}>
+                                <Rect
+                                     x={0}
+                                     y={0}
+                                     width={zone.width}
+                                     height={zone.height}
+                                     fill="red"
+                                     opacity={0.15}
+                                     cornerRadius={4}
+                                />
 
-                       for (let x = -zone.height; x < zone.width; x += spacing) {
-                           lines.push(
-                               <Line
-                                   key={x}
-                                   points={[x, 0, x + zone.height, zone.height]}
-                                   stroke="red"
-                                   strokeWidth={2}
-                               />
-                           );
-                       }
-
-                       return (
-                           <Group
-                               key={i}
-                               x={zone.x}
-                               y={zone.y}
-                               clip={{ x: 0, y: 0, width: zone.width, height: zone.height }}
-                               data-testid={`doorzone-${i}`}
-                           >
-                               {lines}
-                           </Group>
-                       );
-                   })}
+                                <Rect
+                                    x={0}
+                                    y={0}
+                                    width={zone.width}
+                                    height={zone.height}
+                                    stroke="red"
+                                    strokeWidth={2}
+                                    dash={[6, 4]}
+                                    cornerRadius={4}
+                                />
+                            </Group>
+                        ))
+                    }
 
                     {/* Containers layer */}
                     <ContainersLayer
@@ -143,7 +149,7 @@ export default function RoomCanvas({
                         room={room}
                         doors={doors}
                         doorZones={doorZones}
-                        isOverlapping={isOverlapping}
+                        getContainerZones={getContainerZones}
                         setIsDraggingContainer={setIsDraggingContainer}
                     />
                 </Layer>
