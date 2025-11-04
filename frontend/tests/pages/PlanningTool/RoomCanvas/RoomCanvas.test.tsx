@@ -12,7 +12,7 @@ vi.mock("react-konva", () => ({
     ),
     Line: (props: any) => <div data-testid="line" {...props} />,
     Rect: (props: any) => <div data-testid="rect" {...props} />,
-    Circle: (props: any) => <div data-testid="circle" {...props} />,
+    Circle: (props: any) => <div data-testid="circle" {...props} />,  // <-- här
     Image: (props: any) => <div data-testid="image" {...props} />,
     Text: (props: any) => <div data-testid="text" {...props} />,
 }));
@@ -32,9 +32,9 @@ afterEach(() => vi.restoreAllMocks());
 const room = { x: 0, y: 0, width: 500, height: 400 };
 const doorZones = [{ x: 100, y: 50, width: 120, height: 40 }];
 
-describe("RoomCanvas - Door zone highlights", () => {
-    //Test that door zone highlights render when a container is being dragged
-    it("renders door zone highlights when a container is being dragged", () => {
+describe("RoomCanvas", () => {
+    //Test rendering highlighted zones for doors and other containers when a container is being dragged
+    it("renders highlighted zones when a container is being dragged", () => {
         render(
             <RoomCanvas
                 room={room}
@@ -54,14 +54,14 @@ describe("RoomCanvas - Door zone highlights", () => {
                 handleStageDragLeave={() => {}}
                 isStageDropActive={false}
                 doorZones={doorZones}
-                isOverlapping={() => false}
+                getContainerZones={() => []}
             />
         );
 
-        const group = screen.getByTestId("doorzone-0");
-        expect(group).toBeInTheDocument();
+        const zoneGroup = screen.getByTestId("zone-0");
+        expect(zoneGroup).toBeInTheDocument();
 
-        const lines = screen.getAllByTestId("line");
-        expect(lines.length).toBeGreaterThan(0);
+        const rects = zoneGroup.querySelectorAll('[data-testid="rect"]');
+        expect(rects.length).toBeGreaterThan(0);
     });
 });
