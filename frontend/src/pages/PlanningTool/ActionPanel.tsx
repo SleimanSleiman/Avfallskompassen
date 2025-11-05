@@ -3,7 +3,8 @@
  * Displays the selected item and provides buttons to move, rotate, or remove it.
  */
 
-import type { ContainerInRoom as Container, Door } from "../Types";
+import InfoTooltip from "./components/InfoTooltip";
+import type { ContainerInRoom as Container, Door } from "./Types";
 
 /* ─────────────── ActionPanel Props ──────────────── */
 type ActionPanelProps = {
@@ -45,7 +46,13 @@ export default function ActionPanel({
         <div className="mt-4 w-full max-w-md border border-gray-400 rounded p-3 bg-gray-50">
 
             {/* Display selected item name */}
-            <div className="mb-2 text-sm font-semibold text-gray-700">{selectedName}</div>
+            <div className="mb-3 flex items-center justify-between gap-2">
+                <div className="text-sm font-semibold text-gray-700">{selectedName}</div>
+                <InfoTooltip
+                    text="Markera ett kärl eller en dörr i ritningen för att kunna rotera eller ta bort objektet. För kärl kan du rotera 90° åt gången. Dörrar växlar mellan öppningsriktningar."
+                    panelWidthClass="w-72"
+                />
+            </div>
 
             {/* Action buttons */}
             <div className="flex gap-4">
