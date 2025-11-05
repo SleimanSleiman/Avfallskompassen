@@ -468,7 +468,7 @@ async function handleSubmit(e: React.FormEvent) {
         onConfirm={(length: number, width: number) => {
           localStorage.setItem(
             'trashRoomData',
-            JSON.stringify({ length, width, property : selectedProperty})
+            JSON.stringify({ height: length, width: width, property : selectedProperty})
           );
 
           setIsCreateRoomOpen(false); 
