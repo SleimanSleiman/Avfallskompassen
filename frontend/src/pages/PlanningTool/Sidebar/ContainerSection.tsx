@@ -3,8 +3,9 @@
  * Allows users to select service types, sizes, and specific containers to add to the room.
  */
 import { motion, AnimatePresence } from "framer-motion";
-import type { ContainerDTO } from "../../lib/Container";
+import type { ContainerDTO } from "../../../lib/Container";
 import { DRAG_DATA_FORMAT } from "../Constants";
+import InfoTooltip from "../components/InfoTooltip";
 
 /* ─────────────── Container Props ─────────────── */
 type ContainerSectionProps = {
@@ -45,20 +46,28 @@ export default function ContainerSection({
     return (
         <div>
             {/* Toggle section */}
-            <button
-                className="w-full flex items-center justify-between p-3 rounded border border-gray-200 bg-white text-nsr-teal hover:bg-gray-50 transition text-left"
-                onClick={() => setIsAddContainersOpen(!isAddContainersOpen)}
-            >
-                <span className="font-medium">Lägg till nya sopkärl</span>
-                <svg 
-                    className={`w-5 h-5 transition-transform ${isAddContainersOpen ? 'rotate-180' : ''}`} 
-                    fill="none" 
-                    stroke="currentColor" 
-                    viewBox="0 0 24 24"
+            <div className="relative">
+                <button
+                    className="w-full flex items-center justify-between p-3 pr-12 rounded border border-gray-200 bg-white text-nsr-teal hover:bg-gray-50 transition text-left"
+                    onClick={() => setIsAddContainersOpen(!isAddContainersOpen)}
                 >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
-            </button>
+                    <span className="font-medium">Lägg till nya sopkärl</span>
+                    <svg 
+                        className={`w-5 h-5 transition-transform ${isAddContainersOpen ? 'rotate-180' : ''}`} 
+                        fill="none" 
+                        stroke="currentColor" 
+                        viewBox="0 0 24 24"
+                    >
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                </button>
+
+                <InfoTooltip
+                    className="absolute right-3 top-1/2 -translate-y-1/2"
+                    panelWidthClass="w-64"
+                    text="Öppna listan för att välja avfallstjänst. Filtrera på volym och dra sedan kärlet till ritningen eller lägg till det med knappen."
+                />
+            </div>
 
             {/* Container list */}
             <AnimatePresence initial={false}>
