@@ -96,7 +96,6 @@ function ContainerItem({
     };
 
     const [imageToUse] = useImage(`http://localhost:8081${container.container.imageTopViewUrl}`);
-    console.log(container.container.imageTopViewUrl);
     
     return (
         <Group
