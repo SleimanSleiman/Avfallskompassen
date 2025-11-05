@@ -249,19 +249,6 @@ export function useDoors(
         });
     };
 
-    const isOverlapping = (
-        a: { x: number; y: number; width: number; height: number },
-        b: { x: number; y: number; width: number; height: number }
-    ) => {
-        return !(
-            a.x + a.width <= b.x ||
-            a.x >= b.x + b.width ||
-            a.y + a.height <= b.y ||
-            a.y >= b.y + b.height
-        );
-    };
-
-
     /* ──────────────── Return ──────────────── */
     return {
         doors,
@@ -272,7 +259,6 @@ export function useDoors(
         handleRemoveDoor,
         handleSelectDoor,
         getDoorZones,
-        isOverlapping,
     };
 }
 

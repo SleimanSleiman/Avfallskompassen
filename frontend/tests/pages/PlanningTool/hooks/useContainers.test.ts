@@ -13,8 +13,8 @@ const mockRoom = { id: 1, x: 0, y: 0, width: 500, height: 500 };
 
 describe("useContainers", () => {
 
-  //Add container
-  it("adds a container to the room", () => {
+    //Add container
+    it("adds a container to the room", () => {
         const setSelectedContainerId = vi.fn();
         const setSelectedDoorId = vi.fn();
 
@@ -40,7 +40,7 @@ describe("useContainers", () => {
         expect(containers.length).toBe(1);
         expect(setSelectedContainerId).toHaveBeenCalled();
     });
-  
+
     //Remove container
     it("removes a container from the room", () => {
         const setSelectedContainerId = vi.fn();
@@ -170,4 +170,32 @@ describe("useContainers", () => {
         expect(rotated?.rotation).toBe(0);
     });
 
+    //Test to ensure overlapping containers are not added
+    it("does not add overlapping container", () => {
+        const { result } = renderHook(() =>
+            useContainers(mockRoom, vi.fn(), vi.fn())
+        );
+
+        const mockContainer = {
+            id: 1,
+            name: "Overlap Test",
+            width: 1000,
+            depth: 800,
+        };
+
+        act(() => {
+            result.current.handleAddContainer(mockContainer);
+        });
+
+        //Try to add another container at same position
+        act(() => {
+            result.current.handleAddContainer(mockContainer, {
+                x: result.current.containersInRoom[0].x,
+                y: result.current.containersInRoom[0].y,
+            });
+        });
+
+        //Still only 1 container — second was invalid
+        expect(result.current.containersInRoom.length).toBe(1);
+    });
 });
