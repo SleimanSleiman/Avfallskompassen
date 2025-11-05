@@ -47,6 +47,7 @@ export function useContainers(
             };
         setContainersInRoom((prev) => [...prev, newContainer]);
         setSelectedContainerId(newContainer.id);
+        console.log(newContainer.container.imageTopViewUrl);
     };
 
     //Remove a container from the room

@@ -49,7 +49,9 @@ function ContainerItem({
     handleSelectContainer: (id: number) => void;
 }) {
 
-    const [imageToUse] = useImage('/path/to/my/image.png');
+    const [imageToUse] = useImage(`http://localhost:8081${container.container.imageTopViewUrl}`);
+    console.log(container.container.imageTopViewUrl);
+    
     return (
         <Group
             x={container.x + container.width / 2}

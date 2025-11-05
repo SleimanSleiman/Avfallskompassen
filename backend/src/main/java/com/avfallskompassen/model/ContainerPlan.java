@@ -31,6 +31,9 @@ public class ContainerPlan {
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal cost;
 
+    @Column(name = "image_top_view_url")
+    private String imageTopViewUrl;
+
     public long getId() {
         return id;
     }
@@ -69,5 +72,13 @@ public class ContainerPlan {
 
     public void setCost(BigDecimal cost) {
         this.cost = cost;
+    }
+
+    public String getImageTopViewUrl() {
+        return imageTopViewUrl;
+    }
+
+    public void setImageTopViewUrl(String imageTopViewUrl) {
+        this.imageTopViewUrl = imageTopViewUrl;
     }
 }
