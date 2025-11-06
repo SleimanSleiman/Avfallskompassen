@@ -7,6 +7,7 @@ import type { ContainerInRoom, Room } from "../Types";
 import type { ContainerDTO } from "../../../lib/Container";
 import { fetchContainersByMunicipalityAndService } from "../../../lib/Container";
 import { mmToPixels, clamp, DRAG_DATA_FORMAT, STAGE_WIDTH, STAGE_HEIGHT } from "../Constants";
+import { useUndoRedo } from "../hooks/UseUndoRedo";
 
 export function useContainers(
   room: Room,
@@ -15,7 +16,7 @@ export function useContainers(
 ) {
 
     /* ──────────────── Containers placed in the room canvas ──────────────── */
-    const [containersInRoom, setContainersInRoom] = useState<ContainerInRoom[]>([]);
+    const { state: containersInRoom, save: saveContainers, undo, redo } = useUndoRedo<ContainerInRoom[]>([]);
 
     /* ─────────────── Stage Drop State & Ref ──────────────── */
     const [isStageDropActive, setIsStageDropActive] = useState(false);
@@ -45,45 +46,43 @@ export function useContainers(
             height: heightPx,
             rotation: 0,
             };
-        setContainersInRoom((prev) => [...prev, newContainer]);
         setSelectedContainerId(newContainer.id);
+        const newState = [...containersInRoom, newContainer];
+        saveContainers(newState);
     };
 
     //Remove a container from the room
     const handleRemoveContainer = (id: number) => {
-        setContainersInRoom((prev) => prev.filter((c) => c.id !== id));
+        const newState = containersInRoom.filter(c => c.id !== id);
+        saveContainers(newState);
         setSelectedContainerId(null);
     };
 
     //Handle dragging a container within the room
     const handleDragContainer = (id: number, pos: { x: number; y: number }) => {
-        setContainersInRoom((prev) =>
-            prev.map((c) => (c.id === id ? { ...c, ...pos } : c))
+        const newState = containersInRoom.map(c =>
+            c.id === id ? { ...c, ...pos } : c
         );
+        saveContainers(newState);
     };
 
     //Select or deselect a container
     const handleSelectContainer = (id: number | null) => {
         setSelectedContainerId(id);
-        setSelectedDoorId(null); // Clear door selection
+        setSelectedDoorId(null);
     };
 
     //Container rotation
     const handleRotateContainer = (id: number) => {
-        setContainersInRoom((prev) =>
-        prev.map((container) =>
-            container.id === id
-                ? { ...container, rotation: ((container.rotation || 0) + 90) % 360 }
-                : container
-            )
+        const newState = containersInRoom.map(c =>
+            c.id === id ? { ...c, rotation: ((c.rotation || 0) + 90) % 360 } : c
         );
-
-        console.log("Rotating ID " + id);
+        saveContainers(newState);
     };
 
     /* ──────────────── Drag & Drop Handlers ──────────────── */
     //Handle dropping a container onto the stage
-    const handleStageDrop = (event: DragEvent<HTMLDivElement>) => {
+    const handleStageDrop = (event: React.DragEvent<HTMLDivElement>) => {
         event.preventDefault();
         setIsStageDropActive(false);
 
@@ -108,7 +107,7 @@ export function useContainers(
     };
 
     //Handle drag over event to allow dropping
-    const handleStageDragOver = (event: DragEvent<HTMLDivElement>) => {
+    const handleStageDragOver = (event: React.DragEvent<HTMLDivElement>) => {
         if (!Array.from(event.dataTransfer.types).includes(DRAG_DATA_FORMAT)) return;
 
         event.preventDefault();
@@ -118,7 +117,7 @@ export function useContainers(
     };
 
     //Handle drag leave event to reset drop state
-    const handleStageDragLeave = (event: DragEvent<HTMLDivElement>) => {
+    const handleStageDragLeave = (event: React.DragEvent<HTMLDivElement>) => {
         if (event.currentTarget.contains(event.relatedTarget as Node)) return;
         setIsStageDropActive(false);
     };
@@ -143,6 +142,8 @@ export function useContainers(
     /* ──────────────── Return ──────────────── */
     return {
         containersInRoom,
+        undo,
+        redo,
         setSelectedContainerId,
         handleAddContainer,
         handleRemoveContainer,

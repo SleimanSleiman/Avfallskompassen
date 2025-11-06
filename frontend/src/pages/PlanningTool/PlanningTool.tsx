@@ -65,6 +65,8 @@ export default function PlanningTool() {
         handleStageDragOver,
         handleStageDragLeave,
         handleRotateContainer,
+        undo,
+        redo,
     } = useContainers(room, setSelectedContainerId, setSelectedDoorId);
 
     /* ──────────────── Service Types (API data) ──────────────── */
@@ -118,6 +120,8 @@ export default function PlanningTool() {
                     handleRemoveDoor={handleRemoveDoor}
                     handleRotateDoor={handleRotateDoor}
                     handleRotateContainer={handleRotateContainer} 
+                    undo={undo}
+                    redo={redo} 
                 />
             </div>
 
