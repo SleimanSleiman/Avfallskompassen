@@ -29,8 +29,8 @@ export const isOverlapping = (
 export const SCALE = 0.02;
 
 //Minimum room dimensions in pixels
-export const MIN_WIDTH = 50;
-export const MIN_HEIGHT = 50;
+export const MIN_WIDTH = 2.5 / SCALE;
+export const MIN_HEIGHT = 2.5 / SCALE;
 
 //Canvas dimensions and margins
 export const MARGIN = 150;
