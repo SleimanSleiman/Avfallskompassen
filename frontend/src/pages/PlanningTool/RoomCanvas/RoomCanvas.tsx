@@ -142,7 +142,12 @@ export default function RoomCanvas({
             >
                 <Layer>
                     {/* Room rectangle */}
-                    <RoomShape room={room} />
+                    <RoomShape
+                        room={room}
+                        handleSelectContainer={handleSelectContainer}
+                        handleSelectDoor={handleSelectDoor}
+                        setSelectedContainerInfo={setSelectedContainerInfo}
+                    />
 
                     {/* Draggable corners for resizing the room */}
                     <CornerHandles
