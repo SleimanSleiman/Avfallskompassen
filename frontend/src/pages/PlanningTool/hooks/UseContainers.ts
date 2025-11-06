@@ -14,8 +14,9 @@ export function useContainers(
   setSelectedDoorId: (id: number | null) => void
 ) {
 
-    /* ──────────────── Containers placed in the room canvas ──────────────── */
+    /* ──────────────── Containers ──────────────── */
     const [containersInRoom, setContainersInRoom] = useState<ContainerInRoom[]>([]);
+    const [selectedContainerInfo, setSelectedContainerInfo] = useState<ContainerDTO | null>(null);
 
     /* ─────────────── Stage Drop State & Ref ──────────────── */
     const [isStageDropActive, setIsStageDropActive] = useState(false);
@@ -46,7 +47,7 @@ export function useContainers(
             rotation: 0,
             };
         setContainersInRoom((prev) => [...prev, newContainer]);
-        setSelectedContainerId(newContainer.id);
+        handleSelectContainer(newContainer.id);
     };
 
     //Remove a container from the room
@@ -79,6 +80,12 @@ export function useContainers(
         );
 
         console.log("Rotating ID " + id);
+    };
+
+    //Show container info in sidebar
+    const handleShowContainerInfo = (id: number) => {
+        const container = containersInRoom.find(c => c.id === id);
+        if (container) setSelectedContainerInfo(container.container);
     };
 
     /* ──────────────── Drag & Drop Handlers ──────────────── */
@@ -158,5 +165,8 @@ export function useContainers(
         handleStageDrop,
         handleStageDragOver,
         handleStageDragLeave,
+        selectedContainerInfo,
+        setSelectedContainerInfo,
+        handleShowContainerInfo,
     };
 }

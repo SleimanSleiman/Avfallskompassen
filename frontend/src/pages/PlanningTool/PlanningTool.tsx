@@ -30,7 +30,6 @@ export default function PlanningTool() {
         setRoom
     } = useRoom();
 
-
     /* ──────────────── Door state & logic ──────────────── */
     const [selectedContainerId, setSelectedContainerId] = useState<number | null>(null);
     const [selectedDoorId, setSelectedDoorId] = useState<number | null>(null);
@@ -47,7 +46,6 @@ export default function PlanningTool() {
     } = useDoors(room, setSelectedDoorId, setSelectedContainerId);
 
     /* ──────────────── Container state & logic ──────────────── */
-    
     const {
         containersInRoom,
         handleAddContainer,
@@ -65,6 +63,9 @@ export default function PlanningTool() {
         handleStageDragOver,
         handleStageDragLeave,
         handleRotateContainer,
+        selectedContainerInfo,
+        setSelectedContainerInfo,
+        handleShowContainerInfo,
     } = useContainers(room, setSelectedContainerId, setSelectedDoorId);
 
     /* ──────────────── Service Types (API data) ──────────────── */
@@ -75,19 +76,19 @@ export default function PlanningTool() {
     const [selectedSize, setSelectedSize] = useState<{ [key: number]: number | null }>({});
     const [isAddContainersOpen, setIsAddContainersOpen] = useState(false);
     const [showCosts, setShowCosts] = useState(false);
-    const [isAlterRoomSizeOpen, setIsAlterRoomSizeOpen] = useState(false);
 
     /* ──────────────── Render ──────────────── */
     return (
         <div className="flex w-full h-full p-4 sm:p-6 flex-col lg:flex-row gap-4 lg:gap-6">
 
-            {/* ─────────────── Canvas & Action Panel ──────────────── */}
-            <div className="flex flex-col items-center w-full lg:w-3/5 gap-4">
+            {/* ─────────────── Canvas ──────────────── */}
+            <div className="relative flex w-full lg:w-4/6">
                 {/* RoomCanvas displays the room, containers, and doors */}
                 <RoomCanvas
                     room={room}
                     corners={corners}
                     handleDragCorner={handleDragCorner}
+                    setRoom={setRoom}
 
                     doors={doors}
                     selectedDoorId={selectedDoorId}
@@ -100,6 +101,7 @@ export default function PlanningTool() {
                     selectedContainerId={selectedContainerId}
                     handleDragContainer={handleDragContainer}
                     handleSelectContainer={handleSelectContainer}
+                    setSelectedContainerInfo={setSelectedContainerInfo}
 
                     isStageDropActive={isStageDropActive}
                     stageWrapperRef={stageWrapperRef}
@@ -108,17 +110,22 @@ export default function PlanningTool() {
                     handleStageDragLeave={handleStageDragLeave}
                 />
 
-                {/* ActionPanel for moving/rotating/removing selected items */}
-                <ActionPanel
-                    containers={containersInRoom}
-                    doors={doors}
-                    selectedContainerId={selectedContainerId}
-                    selectedDoorId={selectedDoorId}
-                    handleRemoveContainer={handleRemoveContainer}
-                    handleRemoveDoor={handleRemoveDoor}
-                    handleRotateDoor={handleRotateDoor}
-                    handleRotateContainer={handleRotateContainer} 
-                />
+                {/* ActionPanel for selected container or door */}
+                {(selectedContainerId !== null || selectedDoorId !== null) && (
+                    <div className="absolute top-4 right-4 z-50">
+                        <ActionPanel
+                            containers={containersInRoom}
+                            doors={doors}
+                            selectedContainerId={selectedContainerId}
+                            selectedDoorId={selectedDoorId}
+                            handleRemoveContainer={handleRemoveContainer}
+                            handleRemoveDoor={handleRemoveDoor}
+                            handleRotateDoor={handleRotateDoor}
+                            handleRotateContainer={handleRotateContainer}
+                            handleShowContainerInfo={handleShowContainerInfo}
+                        />
+                    </div>
+                )}
             </div>
 
             {/* ─────────────── Sidebar ──────────────── */}
@@ -141,8 +148,8 @@ export default function PlanningTool() {
                     setIsAddContainersOpen={setIsAddContainersOpen}
                     showCosts={showCosts}
                     setShowCosts={setShowCosts}
-                    isAlterRoomSizeOpen={isAlterRoomSizeOpen}
-                    setIsAlterRoomSizeOpen={setIsAlterRoomSizeOpen}
+                    selectedContainerInfo={selectedContainerInfo}
+                    setSelectedContainerInfo={setSelectedContainerInfo}
 
                     //Room and door management
                     setRoom={setRoom}
