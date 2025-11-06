@@ -24,8 +24,8 @@ afterEach(cleanup);
 const room = { x: 0, y: 0, width: 500, height: 400 };
 const doors = [{ id: 1, width: 100, x: 100, y: 0, wall: "top", rotation: 0 }];
 const containers = [
-    { id: 1, x: 50, y: 50, width: 40, height: 40, rotation: 0 },
-    { id: 2, x: 200, y: 100, width: 60, height: 60, rotation: 90 },
+    { id: 1, x: 50, y: 50, width: 40, height: 40, rotation: 0, container: { imageTopViewUrl: "/images/test.png" }},
+    { id: 2, x: 200, y: 100, width: 60, height: 60, rotation: 90, container: { imageTopViewUrl: "/images/test.png"}},
 ];
 const doorZones = [{ x: 100, y: 0, width: 100, height: 100 }];
 
