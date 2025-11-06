@@ -106,9 +106,8 @@ export default function Sidebar({
                         </div>
                     </div>
                 ) : (
-
-                    {/* ---------- Main sidebar menu ---------- */}
                     <>
+                        {/* ---------- Main sidebar menu ---------- */}
                         <h2 className="text-lg font-black mb-4">Verktyg</h2>
                         <div className="space-y-2">
 
