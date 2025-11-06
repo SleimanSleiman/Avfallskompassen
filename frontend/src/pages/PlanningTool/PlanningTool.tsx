@@ -30,10 +30,12 @@ export default function PlanningTool() {
         setRoom
     } = useRoom();
 
-    /* ──────────────── Door state & logic ──────────────── */
+
+    /* ──────────────── Door & Container state ──────────────── */
     const [selectedContainerId, setSelectedContainerId] = useState<number | null>(null);
     const [selectedDoorId, setSelectedDoorId] = useState<number | null>(null);
 
+    /* ──────────────── Door logic ──────────────── */
     const {
         doors,
         handleAddDoor,
@@ -42,23 +44,27 @@ export default function PlanningTool() {
         handleRemoveDoor,
         handleSelectDoor,
         getDoorZones,
-        isOverlapping,
     } = useDoors(room, setSelectedDoorId, setSelectedContainerId);
 
-    /* ──────────────── Container state & logic ──────────────── */
+    /* ──────────────── Container logic ──────────────── */
     const {
         containersInRoom,
-        handleAddContainer,
-        handleRemoveContainer,
-        handleDragContainer,
-        handleSelectContainer,  
-
+        setDraggedContainer,
+        draggedContainer,
         availableContainers,
         isLoadingContainers,
-        fetchAvailableContainers,
+
         isStageDropActive,
         setIsStageDropActive,
         stageWrapperRef,
+
+        handleAddContainer,
+        handleRemoveContainer,
+        handleDragContainer,
+        handleSelectContainer,
+
+        fetchAvailableContainers,
+
         handleStageDrop,
         handleStageDragOver,
         handleStageDragLeave,
@@ -66,7 +72,8 @@ export default function PlanningTool() {
         selectedContainerInfo,
         setSelectedContainerInfo,
         handleShowContainerInfo,
-    } = useContainers(room, setSelectedContainerId, setSelectedDoorId);
+        getContainerZones,
+    } = useContainers(room, setSelectedContainerId, setSelectedDoorId, getDoorZones());
 
     /* ──────────────── Service Types (API data) ──────────────── */
     const serviceTypes = useServiceTypes();
@@ -95,12 +102,13 @@ export default function PlanningTool() {
                     handleDragDoor={handleDragDoor}
                     handleSelectDoor={handleSelectDoor}
                     doorZones={getDoorZones()}
-                    isOverlapping={isOverlapping}
 
                     containers={containersInRoom}
                     selectedContainerId={selectedContainerId}
                     handleDragContainer={handleDragContainer}
                     handleSelectContainer={handleSelectContainer}
+                    getContainerZones={getContainerZones}
+                    draggedContainer={draggedContainer}
                     setSelectedContainerInfo={setSelectedContainerInfo}
 
                     isStageDropActive={isStageDropActive}
@@ -142,6 +150,7 @@ export default function PlanningTool() {
                     fetchContainers={fetchAvailableContainers}
                     handleAddContainer={handleAddContainer}
                     setIsStageDropActive={setIsStageDropActive}
+                    setDraggedContainer={setDraggedContainer}
 
                     //UI state for sidebar sections
                     isAddContainersOpen={isAddContainersOpen}

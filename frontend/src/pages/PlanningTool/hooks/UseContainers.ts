@@ -6,46 +6,118 @@ import { useState, useRef } from "react";
 import type { ContainerInRoom, Room } from "../Types";
 import type { ContainerDTO } from "../../../lib/Container";
 import { fetchContainersByMunicipalityAndService } from "../../../lib/Container";
-import { mmToPixels, clamp, DRAG_DATA_FORMAT, STAGE_WIDTH, STAGE_HEIGHT } from "../Constants";
+import { mmToPixels, clamp, DRAG_DATA_FORMAT, STAGE_WIDTH, STAGE_HEIGHT, SCALE, isOverlapping } from "../Constants";
 
+/* ──────────────── Helper functions ──────────────── */
+//Create rectangle for container at given position
+function createContainerRect(container: ContainerDTO, x: number, y: number) {
+    const widthPx = mmToPixels(container.width);
+    const heightPx = mmToPixels(container.depth);
+
+    return {
+        x,
+        y,
+        width: widthPx,
+        height: heightPx,
+    };
+}
+
+//Calculate initial position for a new container
+function calculateInitialPosition(
+    room: Room,
+    container: ContainerDTO,
+    position?: { x: number; y: number }
+) {
+    const widthPx = mmToPixels(container.width);
+    const heightPx = mmToPixels(container.depth);
+
+    let targetX = position ? position.x - widthPx / 2 : room.x + room.width / 2 - widthPx / 2;
+    let targetY = position ? position.y - heightPx / 2 : room.y + room.height / 2 - heightPx / 2;
+
+    return {
+        x: clamp(targetX, room.x, room.x + room.width - widthPx),
+        y: clamp(targetY, room.y, room.y + room.height - heightPx),
+    };
+}
+
+//Build "no-overlap" zones for existing containers
+function buildContainerZones(
+    containers: ContainerInRoom[],
+    excludeId?: number
+) {
+    const buffer = 0.1 / SCALE; //10cm buffer between containers
+    return containers
+        .filter(c => c.id !== excludeId)
+        .map(c => {
+            const rotation = c.rotation || 0;
+            const rot = rotation % 180;
+            const width = rot === 90 ? c.height : c.width;
+            const height = rot === 90 ? c.width : c.height;
+
+            const centerX = c.x + c.width / 2;
+            const centerY = c.y + c.height / 2;
+
+            return {
+                x: centerX - (width + buffer * 2) / 2,
+                y: centerY - (height + buffer * 2) / 2,
+                width: width + buffer * 2,
+                height: height + buffer * 2,
+            };
+        });
+}
+
+function validateContainerPlacement(
+    newRect: { x: number; y: number; width: number; height: number },
+    doorZones: { x: number; y: number; width: number; height: number }[],
+    containerZones: { x: number; y: number; width: number; height: number }[]
+) {
+    const overlapsDoor = doorZones.some(zone => isOverlapping(newRect, zone));
+    const overlapsContainer = containerZones.some(zone => isOverlapping(newRect, zone));
+
+    return !(overlapsDoor || overlapsContainer);
+}
+
+/* ──────────────── Main Hook ──────────────── */
 export function useContainers(
   room: Room,
   setSelectedContainerId: (id: number | null) => void,
-  setSelectedDoorId: (id: number | null) => void
+  setSelectedDoorId: (id: number | null) => void,
+  doorZones: { x: number; y: number; width: number; height: number }[] = []
 ) {
 
-    /* ──────────────── Containers ──────────────── */
+    /* ──────────────── Containers State ──────────────── */
     const [containersInRoom, setContainersInRoom] = useState<ContainerInRoom[]>([]);
     const [selectedContainerInfo, setSelectedContainerInfo] = useState<ContainerDTO | null>(null);
+    const [draggedContainer, setDraggedContainer] = useState<ContainerDTO | null>(null);
+    const [availableContainers, setAvailableContainers] = useState<ContainerDTO[]>([]);
+    const [isLoadingContainers, setIsLoadingContainers] = useState(false);
 
-    /* ─────────────── Stage Drop State & Ref ──────────────── */
+    /* ─────────────── Stage State ──────────────── */
     const [isStageDropActive, setIsStageDropActive] = useState(false);
     const stageWrapperRef = useRef<HTMLDivElement | null>(null);
 
-    //Add a new container to the room (centered)
-    //TODO: change positioning logic if implementing grid/snapping
+    //Add a new container to the room
     const handleAddContainer = (container: ContainerDTO, position?: { x: number; y: number }) => {
-        //Default size if no API data is provided
-        const widthPx = mmToPixels(container.width)
-        const heightPx = mmToPixels(container.depth)
+        const { x, y } = calculateInitialPosition(room, container, position);
+        const newRect = createContainerRect(container, x, y);
 
-        //If user clicked somewhere, center container on that position
-        let targetX = position ? position.x - widthPx / 2 : room.x + room.width / 2 - widthPx / 2;
-        let targetY = position ? position.y - heightPx / 2 : room.y + room.height / 2 - heightPx / 2;
+        const containerZones = buildContainerZones(containersInRoom);
+        const isValid = validateContainerPlacement(newRect, doorZones, containerZones);
 
-        //Clamp so container cannot leave the room area
-        targetX = clamp(targetX, room.x, room.x + room.width - widthPx);
-        targetY = clamp(targetY, room.y, room.y + room.height - heightPx);
+        if(!isValid) {
+            return;
+        }
 
         const newContainer: ContainerInRoom = {
             id: Date.now(),
             container,
-            x: targetX,
-            y: targetY,
-            width: widthPx,
-            height: heightPx,
+            x,
+            y,
+            width: newRect.width,
+            height: newRect.height,
             rotation: 0,
-            };
+        };
+
         setContainersInRoom((prev) => [...prev, newContainer]);
         handleSelectContainer(newContainer.id);
     };
@@ -66,7 +138,7 @@ export function useContainers(
     //Select or deselect a container
     const handleSelectContainer = (id: number | null) => {
         setSelectedContainerId(id);
-        setSelectedDoorId(null); // Clear door selection
+        setSelectedDoorId(null);
     };
 
     //Container rotation
@@ -78,8 +150,6 @@ export function useContainers(
                 : container
             )
         );
-
-        console.log("Rotating ID " + id);
     };
 
     //Show container info in sidebar
@@ -97,21 +167,17 @@ export function useContainers(
         const data = event.dataTransfer.getData(DRAG_DATA_FORMAT);
         if (!data) return;
 
-        let container: ContainerDTO;
         try {
-            container = JSON.parse(data) as ContainerDTO;
+            const container = JSON.parse(data) as ContainerDTO;
+            const rect = stageWrapperRef.current?.getBoundingClientRect();
+            if (!rect) return;
+
+            const dropX = clamp(event.clientX - rect.left, 0, STAGE_WIDTH);
+            const dropY = clamp(event.clientY - rect.top, 0, STAGE_HEIGHT);
+            handleAddContainer(container, { x: dropX, y: dropY });
         } catch (error) {
             console.error("Failed to parse dropped container data", error);
-            return;
         }
-
-        if (!stageWrapperRef.current) return;
-
-        const rect = stageWrapperRef.current.getBoundingClientRect();
-        const dropX = clamp(event.clientX - rect.left, 0, STAGE_WIDTH);
-        const dropY = clamp(event.clientY - rect.top, 0, STAGE_HEIGHT);
-
-        handleAddContainer(container, { x: dropX, y: dropY });
     };
 
     //Handle drag over event to allow dropping
@@ -130,10 +196,7 @@ export function useContainers(
         setIsStageDropActive(false);
     };
 
-    /* ──────────────── Available container types (from API) ──────────────── */
-    const [availableContainers, setAvailableContainers] = useState<ContainerDTO[]>([]);
-    const [isLoadingContainers, setIsLoadingContainers] = useState(false);
-
+    /* ──────────────── API Fetch ──────────────── */
     const fetchAvailableContainers = async (serviceId: number) => {
         setIsLoadingContainers(true);
         try {
@@ -150,23 +213,30 @@ export function useContainers(
     /* ──────────────── Return ──────────────── */
     return {
         containersInRoom,
-        setSelectedContainerId,
+        draggedContainer,
+        setDraggedContainer,
+        availableContainers,
+        isLoadingContainers,
+
+        isStageDropActive,
+        setIsStageDropActive,
+        stageWrapperRef,
+
         handleAddContainer,
         handleRemoveContainer,
         handleDragContainer,
         handleSelectContainer,
         handleRotateContainer,
-        availableContainers,
-        isLoadingContainers,
+
         fetchAvailableContainers,
-        isStageDropActive,
-        setIsStageDropActive,
-        stageWrapperRef,
+
         handleStageDrop,
         handleStageDragOver,
         handleStageDragLeave,
         selectedContainerInfo,
         setSelectedContainerInfo,
         handleShowContainerInfo,
+
+        getContainerZones: (excludeId?: number) => buildContainerZones(containersInRoom, excludeId)
     };
 }

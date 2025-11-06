@@ -12,6 +12,19 @@ export const mmToPixels = (mm?: number): number => {
     return mmToMeter / SCALE;
 };
 
+//Check if two objects are overlapping
+export const isOverlapping = (
+    a: { x: number; y: number; width: number; height: number },
+    b: { x: number; y: number; width: number; height: number }
+) => {
+    return !(
+        a.x + a.width <= b.x ||
+        a.x >= b.x + b.width ||
+        a.y + a.height <= b.y ||
+        a.y >= b.y + b.height
+    );
+};
+
 //Scale factor: 1 pixel = 0.02 meter in real life
 export const SCALE = 0.02;
 

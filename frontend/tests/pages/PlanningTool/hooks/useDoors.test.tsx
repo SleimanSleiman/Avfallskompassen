@@ -19,6 +19,15 @@ describe("useDoors hook", () => {
             global.alert = vi.fn();
     });
 
+    beforeEach(() => {
+        let counter = 1;
+        vi.spyOn(Date, "now").mockImplementation(() => counter++);
+    });
+    afterEach(() => {
+        vi.restoreAllMocks();
+    });
+
+
     //Test adding a new door
     it("adds a new door to the room", () => {
 
@@ -97,8 +106,6 @@ describe("useDoors hook", () => {
         act(() => {
             result.current.handleAddDoor({ width: 1.2 });
         });
-
-        await new Promise(resolve => setTimeout(resolve, 1));
 
         act(() => {
             result.current.handleAddDoor({ width: 0.9 });
@@ -209,7 +216,6 @@ describe("useDoors hook", () => {
         const id = result.current.doors[0].id;
         const oldX = result.current.doors[0].x;
 
-        //Change room width → should trigger useEffect
         const newRoom = { ...mockRoom, width: 800 };
         rerender({ room: newRoom });
 
@@ -219,13 +225,8 @@ describe("useDoors hook", () => {
 
     //Test door zone generation
     it("generates door zones correctly", () => {
-        const { result } = renderHook(() =>
-            useDoors(mockRoom, mockSetSelectedDoorId, mockSetSelectedContainerId)
-        );
-
-        act(() => {
-            result.current.handleAddDoor({ width: 1.2 });
-        });
+        const { result } = renderHook(() => useDoors(mockRoom, mockSetSelectedDoorId, mockSetSelectedContainerId));
+        act(() => result.current.handleAddDoor({ width: 1.2 }));
 
         const zones = result.current.getDoorZones();
         expect(Array.isArray(zones)).toBe(true);
@@ -233,22 +234,7 @@ describe("useDoors hook", () => {
 
         const door = result.current.doors[0];
         const zone = zones[0];
-
         expect(zone.width).toBe(door.width / SCALE);
         expect(zone.height).toBe(door.width / SCALE);
-    });
-
-    //Test overlapping zone detection
-    it("detects overlapping zones", () => {
-        const { result } = renderHook(() =>
-            useDoors(mockRoom, mockSetSelectedDoorId, mockSetSelectedContainerId)
-        );
-
-        const zoneA = { x: 0, y: 0, width: 100, height: 100 };
-        const zoneB = { x: 50, y: 50, width: 100, height: 100 };
-        const zoneC = { x: 200, y: 200, width: 50, height: 50 };
-
-        expect(result.current.isOverlapping(zoneA, zoneB)).toBe(true);
-        expect(result.current.isOverlapping(zoneA, zoneC)).toBe(false);
     });
 });
