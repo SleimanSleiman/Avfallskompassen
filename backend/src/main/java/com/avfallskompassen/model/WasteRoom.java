@@ -32,7 +32,7 @@ public class WasteRoom {
     private List<ContainerPosition> containers;
 
     @OneToMany(mappedBy = "wasteRoom", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<DoorPosition> doors;
+    private List<Door> doors;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
@@ -118,11 +118,11 @@ public class WasteRoom {
         this.property = property;
     }
 
-    public List<DoorPosition> getDoors() {
+    public List<Door> getDoors() {
         return doors;
     }
 
-    public void setDoors(List<DoorPosition> doors) {
+    public void setDoors(List<Door> doors) {
         this.doors = doors;
     }
 

@@ -1,4 +1,4 @@
-package com.avfallskompassen.dto;
+package com.avfallskompassen.dto.response;
 
 /**
  * Simple DTO wrapper for returning a single error message to API consumers.

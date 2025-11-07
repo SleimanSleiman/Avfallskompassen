@@ -1,8 +1,8 @@
 package com.avfallskompassen.services.impl;
 
-import com.avfallskompassen.dto.ContainerPositionRequest;
 import com.avfallskompassen.dto.WasteRoomDTO;
-import com.avfallskompassen.dto.WasteRoomRequest;
+import com.avfallskompassen.dto.request.ContainerPositionRequest;
+import com.avfallskompassen.dto.request.WasteRoomRequest;
 import com.avfallskompassen.exception.ResourceNotFoundException;
 import com.avfallskompassen.model.ContainerPosition;
 import com.avfallskompassen.model.ContainerType;

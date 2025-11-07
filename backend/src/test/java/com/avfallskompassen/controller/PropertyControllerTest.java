@@ -1,8 +1,8 @@
 package com.avfallskompassen.controller;
 
 import com.avfallskompassen.dto.LockTypeDto;
-import com.avfallskompassen.dto.PropertyRequest;
-import com.avfallskompassen.dto.PropertyResponse;
+import com.avfallskompassen.dto.request.PropertyRequest;
+import com.avfallskompassen.dto.response.PropertyResponse;
 import com.avfallskompassen.dto.PropertyDTO;
 import com.avfallskompassen.model.LockType;
 import com.avfallskompassen.model.Municipality;

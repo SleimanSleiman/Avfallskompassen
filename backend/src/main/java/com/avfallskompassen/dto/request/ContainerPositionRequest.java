@@ -1,4 +1,4 @@
-package com.avfallskompassen.dto;
+package com.avfallskompassen.dto.request;
 
 import jakarta.validation.constraints.NotNull;
 

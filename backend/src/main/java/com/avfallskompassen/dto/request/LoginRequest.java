@@ -1,4 +1,4 @@
-package com.avfallskompassen.dto;
+package com.avfallskompassen.dto.request;
 
 /** 
  * This class encapsulates the user credentials required for authentication

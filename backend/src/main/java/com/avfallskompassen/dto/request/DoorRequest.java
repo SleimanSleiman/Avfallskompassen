@@ -1,14 +1,17 @@
-package com.avfallskompassen.dto;
+package com.avfallskompassen.dto.request;
 
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.*;
 
 /**
  * Class containing the necessary data to create doors in a wasteRoom
  * @author Anton Persson
  */
-public class DoorPositionRequest {
+public class DoorRequest {
+
     @NotNull
-    private Long id;
+    @DecimalMin("0.9")
+    @Max(12)
+    private double width;
 
     @NotNull
     private double x;
@@ -17,13 +20,25 @@ public class DoorPositionRequest {
     private double y;
 
     @NotNull
+    @Min(0)
+    @Max(360)
     private double angle;
 
-    public DoorPositionRequest(Long id, double x, double y, double angle) {
-        this.id = id;
+    public DoorRequest() {}
+
+    public DoorRequest(double width, double x, double y, double angle) {
+        this.width = width;
         this.x = x;
         this.y = y;
         this.angle = angle;
+    }
+
+    public double getWidth() {
+        return width;
+    }
+
+    public void setWidth(double width) {
+        this.width = width;
     }
 
     public double getX() {
@@ -32,14 +47,6 @@ public class DoorPositionRequest {
 
     public void setX(double x) {
         this.x = x;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
     }
 
     public double getY() {

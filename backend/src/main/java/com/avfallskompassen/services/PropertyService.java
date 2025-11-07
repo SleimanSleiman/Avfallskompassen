@@ -1,10 +1,9 @@
 package com.avfallskompassen.services;
 
-import com.avfallskompassen.dto.PropertyRequest;
+import com.avfallskompassen.dto.request.PropertyRequest;
 import com.avfallskompassen.model.LockType;
 import com.avfallskompassen.model.Property;
 
-import javax.swing.text.html.Option;
 import java.util.List;
 import java.util.Optional;
 

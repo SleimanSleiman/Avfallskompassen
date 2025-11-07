@@ -1,8 +1,7 @@
-package com.avfallskompassen.dto;
+package com.avfallskompassen.dto.request;
 
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 
 import java.util.List;
@@ -28,14 +27,14 @@ public class WasteRoomRequest {
     @NotNull
     private double y;
 
-    private List<DoorPositionRequest> doors;
+    private List<DoorRequest> doors;
     private List<ContainerPositionRequest> containers;
 
     @NotNull
     private Long propertyId;
 
     public WasteRoomRequest(double length, double width, double x,
-                            double y, List<DoorPositionRequest> doors,
+                            double y, List<DoorRequest> doors,
                             List<ContainerPositionRequest> containers,
                             Long propertyId) {
         this.length = length;
@@ -79,11 +78,11 @@ public class WasteRoomRequest {
         this.y = y;
     }
 
-    public List<DoorPositionRequest> getDoors() {
+    public List<DoorRequest> getDoors() {
         return doors;
     }
 
-    public void setDoors(List<DoorPositionRequest> doorPositionRequests) {
+    public void setDoors(List<DoorRequest> doorPositionRequests) {
         this.doors = doorPositionRequests;
     }
 

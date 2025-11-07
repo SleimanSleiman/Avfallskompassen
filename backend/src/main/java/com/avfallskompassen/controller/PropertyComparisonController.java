@@ -3,7 +3,7 @@ package com.avfallskompassen.controller;
 import com.avfallskompassen.dto.CollectionFrequencyComparisonDTO;
 import com.avfallskompassen.dto.ContainerSizeComparisonDTO;
 import com.avfallskompassen.dto.CostComparisonDTO;
-import com.avfallskompassen.dto.ErrorResponse;
+import com.avfallskompassen.dto.response.ErrorResponse;
 import com.avfallskompassen.dto.PropertyComparisonDTO;
 import com.avfallskompassen.dto.WasteAmountComparisonDTO;
 import com.avfallskompassen.services.PropertyComparisonService;
