@@ -59,6 +59,10 @@ public class ContainerController {
     private ContainerDTO mapToDTO(ContainerPlan plan) {
         var type = plan.getContainerType();
 
+        String topViewUrl = plan.getImageTopViewUrl() != null
+                ? plan.getImageTopViewUrl()
+                : type.getImageTopViewUrl();
+
         return new ContainerDTO(
                 type.getName(),
                 type.getSize(),
@@ -66,7 +70,7 @@ public class ContainerController {
                 type.getDepth(),
                 type.getHeight(),
                 type.getImageFrontViewUrl(),
-                type.getImageTopViewUrl(),
+                topViewUrl,
                 plan.getEmptyingFrequencyPerYear(),
                 plan.getCost()
         );
