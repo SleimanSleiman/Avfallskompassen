@@ -87,6 +87,7 @@ export function useContainers(
 
     /* ──────────────── Containers State ──────────────── */
     const [containersInRoom, setContainersInRoom] = useState<ContainerInRoom[]>([]);
+    const [selectedContainerInfo, setSelectedContainerInfo] = useState<ContainerDTO | null>(null);
     const [draggedContainer, setDraggedContainer] = useState<ContainerDTO | null>(null);
     const [availableContainers, setAvailableContainers] = useState<ContainerDTO[]>([]);
     const [isLoadingContainers, setIsLoadingContainers] = useState(false);
@@ -118,7 +119,7 @@ export function useContainers(
         };
 
         setContainersInRoom((prev) => [...prev, newContainer]);
-        setSelectedContainerId(newContainer.id);
+        handleSelectContainer(newContainer.id);
     };
 
     //Remove a container from the room
@@ -149,6 +150,12 @@ export function useContainers(
                 : container
             )
         );
+    };
+
+    //Show container info in sidebar
+    const handleShowContainerInfo = (id: number) => {
+        const container = containersInRoom.find(c => c.id === id);
+        if (container) setSelectedContainerInfo(container.container);
     };
 
     /* ──────────────── Drag & Drop Handlers ──────────────── */
@@ -226,6 +233,9 @@ export function useContainers(
         handleStageDrop,
         handleStageDragOver,
         handleStageDragLeave,
+        selectedContainerInfo,
+        setSelectedContainerInfo,
+        handleShowContainerInfo,
 
         getContainerZones: (excludeId?: number) => buildContainerZones(containersInRoom, excludeId)
     };

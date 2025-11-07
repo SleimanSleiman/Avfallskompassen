@@ -1,13 +1,13 @@
 import { describe, it, expect, vi } from "vitest";
 import { renderHook, act, waitFor} from "@testing-library/react";
 import { useContainers } from "../../../../src/pages/PlanningTool/hooks/UseContainers";
+import { fetchContainersByMunicipalityAndService } from "../../../../src/lib/Container";
 
-// Mock dependencies
-vi.mock("../../../lib/Container", () => ({
-  fetchContainersByMunicipalityAndService: vi.fn().mockResolvedValue([
+//Mock dependencies
+vi.mock("../../../../src/lib/Container");
+vi.mocked(fetchContainersByMunicipalityAndService).mockResolvedValue([
     { id: 1, width: 1000, depth: 800, name: "Small Bin" },
-  ]),
-}));
+]);
 
 const mockRoom = { id: 1, x: 0, y: 0, width: 500, height: 500 };
 
@@ -198,4 +198,48 @@ describe("useContainers", () => {
         //Still only 1 container — second was invalid
         expect(result.current.containersInRoom.length).toBe(1);
     });
+
+    //Test showing container info
+    it("sets selected container info when handleShowContainerInfo is called", () => {
+      const { result } = renderHook(() =>
+        useContainers(mockRoom, vi.fn(), vi.fn())
+      );
+
+      act(() => {
+        result.current.handleAddContainer({
+          name: "Info Container",
+          width: 1000,
+          depth: 800,
+          height: 1200,
+          imageFrontViewUrl: "/mock/front.png",
+          imageTopViewUrl: "/mock/top.png",
+          emptyingFrequencyPerYear: 12,
+          cost: 250,
+        });
+      });
+
+      const id = result.current.containersInRoom[0].id;
+
+      act(() => {
+        result.current.handleShowContainerInfo(id);
+      });
+
+      expect(result.current.selectedContainerInfo?.name).toBe("Info Container");
+    });
+
+    //Test fetching available containers from API
+    it("fetches available containers from API", async () => {
+      const { result } = renderHook(() =>
+        useContainers(mockRoom, vi.fn(), vi.fn())
+      );
+
+      await act(async () => {
+        await result.current.fetchAvailableContainers(5);
+      });
+
+      expect(vi.mocked(fetchContainersByMunicipalityAndService)).toHaveBeenCalledWith(1, 5);
+      expect(result.current.availableContainers.length).toBe(1);
+      expect(result.current.isLoadingContainers).toBe(false);
+    });
+
 });

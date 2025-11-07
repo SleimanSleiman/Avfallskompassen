@@ -206,11 +206,16 @@ export function useDoors(
     }, [room.x, room.y, room.width, room.height]);
 
     /* ──────────────── Rotate Door ──────────────── */
-    const handleRotateDoor = (id: number, newRotation: number, newSwing: "inward" | "outward") => {
+    const handleRotateDoor = (id: number) => {
         setDoors(prev =>
-            prev.map(
-                d => d.id === id ? { ...d, rotation: newRotation, swingDirection: newSwing } : d
-            )
+            prev.map(d => {
+                if (d.id !== id) return d;
+
+                const newRotation = (d.rotation + 180) % 360;
+                const newSwing = d.swingDirection === "inward" ? "outward" : "inward";
+
+                return { ...d, rotation: newRotation, swingDirection: newSwing };
+            })
         );
     };
 

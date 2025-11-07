@@ -8,10 +8,18 @@ import { SCALE } from "../Constants";
 
 /* ─────────────── RoomShape Props ──────────────── */
 type RoomShapeProps = {
-  room: Room;
+    room: Room;
+    handleSelectDoor: (id: number) => void;
+    handleSelectContainer: (id: number) => void;
+    setSelectedContainerInfo: (v: ContainerDTO | null) => void;
 };
 
-export default function RoomShape({ room }: RoomShapeProps) {
+export default function RoomShape({
+    room,
+    handleSelectDoor,
+    handleSelectContainer,
+    setSelectedContainerInfo,
+}: RoomShapeProps) {
     //Convert dimensions to meters for display
     const widthMeters = (room.width * SCALE).toFixed(2);
     const heightMeters = (room.height * SCALE).toFixed(2);
@@ -28,6 +36,13 @@ export default function RoomShape({ room }: RoomShapeProps) {
                 fill="#bde0fe"
                 stroke="#1e6091"
                 strokeWidth={2}
+                // Deselect when clicking on an empty area of the room
+                onMouseDown={(e) => {
+                    handleSelectContainer(null);
+                    handleSelectDoor(null);
+                    setSelectedContainerInfo(null);
+                    e.cancelBubble = true;
+                }}
             />
 
             {/* Dimension texts */}

@@ -9,8 +9,10 @@ import CornerHandles from "./CornerHandles";
 import DoorsLayer from "./DoorsLayer";
 import ContainersLayer from "./ContainersLayer";
 import DoorMeasurementLayer from "./DoorMeasurementLayer";
-import { STAGE_WIDTH, STAGE_HEIGHT } from "../Constants";
+import RoomSizePrompt from "../../../components/RoomSizePrompt";
+import { STAGE_WIDTH, STAGE_HEIGHT, SCALE } from "../Constants";
 import type { Room, ContainerInRoom, Door } from "../Types";
+import { Save, Ruler } from "lucide-react";
 
 /* ─────────────── RoomCanvas Props ──────────────── */
 type RoomCanvasProps = {
@@ -18,6 +20,7 @@ type RoomCanvasProps = {
     room: Room;
     corners: { x: number; y: number }[];
     handleDragCorner: (index: number, pos: { x: number; y: number }) => void;
+    setRoom: (room: Room) => void;
 
     //Door props
     doors: Door[];
@@ -31,6 +34,7 @@ type RoomCanvasProps = {
     selectedContainerId: number | null;
     handleDragContainer: (id: number, pos: { x: number; y: number }) => void;
     handleSelectContainer: (id: number) => void;
+    setSelectedContainerInfo: (v: ContainerDTO | null) => void;
     getContainerZones: (excludeId?: number) => { x: number; y: number; width: number; height: number }[];
     draggedContainer: ContainerDTO | null;
 
@@ -46,6 +50,7 @@ export default function RoomCanvas({
     room,
     corners,
     handleDragCorner,
+    setRoom,
     doors,
     selectedDoorId,
     handleDragDoor,
@@ -54,6 +59,7 @@ export default function RoomCanvas({
     selectedContainerId,
     handleDragContainer,
     handleSelectContainer,
+    setSelectedContainerInfo,
     stageWrapperRef,
     handleStageDrop,
     handleStageDragOver,
@@ -63,6 +69,7 @@ export default function RoomCanvas({
     getContainerZones,
     draggedContainer,
 }: RoomCanvasProps) {
+    //State to track if a container is being dragged
     const [isDraggingContainer, setIsDraggingContainer] = useState(false);
     const isDraggingExistingContainer = isDraggingContainer && selectedContainerId !== null;
 
@@ -73,23 +80,74 @@ export default function RoomCanvas({
         ? getContainerZones()
         : [];
 
+    //State to control room size prompt visibility
+    const [isRoomPromptOpen, setIsRoomPromptOpen] = useState(false);
+    const handleConfirmRoomSize = (length: number, width: number) => {
+        setRoom({
+            x: (STAGE_WIDTH - length / SCALE) / 2,
+            y: (STAGE_HEIGHT - width / SCALE) / 2,
+            width: width / SCALE,
+            height: length / SCALE,
+        });
+        setIsRoomPromptOpen(false);
+      };
+
     /* ──────────────── Render ──────────────── */
     return (
         <div
             ref={stageWrapperRef}
-            className={`w-full overflow-x-auto rounded-2xl ${isStageDropActive ? 'ring-4 ring-blue-300 ring-offset-2' : ''}`}
+            className={`relative w-full overflow-x-auto rounded-2xl ${isStageDropActive ? 'ring-4 ring-blue-300 ring-offset-2' : ''}`}
             onDrop={handleStageDrop}
             onDragOver={handleStageDragOver}
             onDragLeave={handleStageDragLeave}
         >
+            {/* Top-left action buttons */}
+            <div className="absolute top-4 left-4 flex flex-row items-center gap-2 z-50">
+                {/* Change room size */}
+                <button
+                    onClick={() => setIsRoomPromptOpen(true)}
+                    className="flex items-center justify-start bg-gray-200 hover:bg-gray-300 text-gray-800 px-2 py-1 rounded-lg transition-all duration-300 shadow-sm group overflow-hidden"
+                >
+                    <Ruler className="w-5 h-5 flex-shrink-0" />
+                    <span className="ml-2 text-sm font-medium opacity-0 w-0 group-hover:opacity-100 group-hover:w-auto transition-all duration-300 whitespace-nowrap">
+                        Ändra rumsdimensioner
+                    </span>
+                </button>
+
+                {/* Save design */}
+                <button
+                    onClick={() => alert("Spara funktionalitet kommer snart!")}
+                    className="flex items-center justify-start bg-green-50 text-green-700 hover:bg-green-100 hover:text-green-800 px-2 py-1 rounded-lg transition-all duration-300 shadow-sm group overflow-hidden"
+                >
+                    <Save className="w-5 h-5 flex-shrink-0" />
+                    <span className="ml-2 text-sm font-medium opacity-0 w-0 group-hover:opacity-100 group-hover:w-auto transition-all duration-300 whitespace-nowrap">
+                        Spara design
+                    </span>
+                </button>
+            </div>
+
+            {/* Konva Stage */}
             <Stage
                 width={STAGE_WIDTH}
                 height={STAGE_HEIGHT}
+                onMouseDown={(e) => {
+                    //Deselect when clicking on empty area
+                    if (e.target === e.target.getStage()) {
+                        handleSelectContainer(null);
+                        handleSelectDoor(null);
+                        setSelectedContainerInfo(null);
+                    }
+                }}
                 className="border border-gray-300 bg-gray-50 rounded-2xl inline-block"
             >
                 <Layer>
                     {/* Room rectangle */}
-                    <RoomShape room={room} />
+                    <RoomShape
+                        room={room}
+                        handleSelectContainer={handleSelectContainer}
+                        handleSelectDoor={handleSelectDoor}
+                        setSelectedContainerInfo={setSelectedContainerInfo}
+                    />
 
                     {/* Draggable corners for resizing the room */}
                     <CornerHandles
@@ -107,7 +165,7 @@ export default function RoomCanvas({
                         handleSelectDoor={handleSelectDoor}
                     />
 
-                    {/* Measurments between door and corners*/}
+                    {/* Measurements between door and corners*/}
                     <DoorMeasurementLayer
                         doors={doors}
                         room={room}
@@ -155,6 +213,14 @@ export default function RoomCanvas({
                     />
                 </Layer>
             </Stage>
+
+            {/* Room Size Prompt */}
+            {isRoomPromptOpen && (
+                <RoomSizePrompt
+                    onConfirm={handleConfirmRoomSize}
+                    onCancel={() => setIsRoomPromptOpen(false)}
+                />
+            )}
         </div>
     );
 }
