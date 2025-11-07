@@ -34,6 +34,13 @@ public class UserService {
     public Optional<User> findByUsername(String username) {
         return userRepository.findByUsername(username);
     }
+
+    /**
+     * Returns all users in the system.
+     */
+    public java.util.List<User> findAllUsers() {
+        return userRepository.findAll();
+    }
     
     /**
      * Validates a plain text password against an encoded password.
@@ -78,6 +85,15 @@ public class UserService {
         
         String encodedPassword = passwordEncoder.encode(password);
         User user = new User(username, encodedPassword, role);
+        return userRepository.save(user);
+    }
+
+    /**
+     * Update a user's role. Throws RuntimeException if user not found.
+     */
+    public User updateUserRole(Integer userId, String newRole) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
+        user.setRole(newRole);
         return userRepository.save(user);
     }
 }
