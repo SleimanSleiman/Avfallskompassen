@@ -82,7 +82,6 @@ export default function PlanningTool() {
     const [selectedType, setSelectedType] = useState<string | null>(null);
     const [selectedSize, setSelectedSize] = useState<{ [key: number]: number | null }>({});
     const [isAddContainersOpen, setIsAddContainersOpen] = useState(false);
-    const [showCosts, setShowCosts] = useState(false);
 
     /* ──────────────── Render ──────────────── */
     return (
@@ -155,8 +154,6 @@ export default function PlanningTool() {
                     //UI state for sidebar sections
                     isAddContainersOpen={isAddContainersOpen}
                     setIsAddContainersOpen={setIsAddContainersOpen}
-                    showCosts={showCosts}
-                    setShowCosts={setShowCosts}
                     selectedContainerInfo={selectedContainerInfo}
                     setSelectedContainerInfo={setSelectedContainerInfo}
 
