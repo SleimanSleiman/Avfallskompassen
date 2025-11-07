@@ -1,7 +1,5 @@
 package com.avfallskompassen.dto;
 
-import com.avfallskompassen.dto.ContainerPositionDTO;
-import com.avfallskompassen.dto.DoorPositionDTO;
 import com.avfallskompassen.model.WasteRoom;
 
 import java.util.List;
@@ -19,13 +17,13 @@ public class WasteRoomDTO {
     private double x;
     private double y;
     private List<ContainerPositionDTO> containers;
-    private List<DoorPositionDTO> doors;
+    private List<DoorDTO> doors;
 
     // Constructors
     public WasteRoomDTO() {}
 
     public WasteRoomDTO(Long propertyId, double length, double width, double x, double y,
-                        List<ContainerPositionDTO> containers, List<DoorPositionDTO> doors) {
+                        List<ContainerPositionDTO> containers, List<DoorDTO> doors) {
         this.propertyId = propertyId;
         this.length = length;
         this.width = width;
@@ -77,10 +75,10 @@ public class WasteRoomDTO {
         this.containers = containers;
     }
 
-    public List<DoorPositionDTO> getDoors() {
+    public List<DoorDTO> getDoors() {
         return doors;
     }
-    public void setDoors(List<DoorPositionDTO> doors) {
+    public void setDoors(List<DoorDTO> doors) {
         this.doors = doors;
     }
 
@@ -103,7 +101,7 @@ public class WasteRoomDTO {
                         : null,
                 entity.getDoors() != null
                         ? entity.getDoors().stream()
-                        .map(DoorPositionDTO::fromEntity)
+                        .map(DoorDTO::fromEntity)
                         .collect(Collectors.toList())
                         : null
         );

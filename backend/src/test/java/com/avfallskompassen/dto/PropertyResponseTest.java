@@ -1,5 +1,6 @@
 package com.avfallskompassen.dto;
 
+import com.avfallskompassen.dto.response.PropertyResponse;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;

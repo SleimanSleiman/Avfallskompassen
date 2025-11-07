@@ -1,7 +1,7 @@
 package com.avfallskompassen.dto;
 
 import com.avfallskompassen.model.ContainerPosition;
-import com.avfallskompassen.model.DoorPosition;
+import com.avfallskompassen.model.Door;
 import com.avfallskompassen.model.Property;
 import com.avfallskompassen.model.WasteRoom;
 import org.junit.jupiter.api.Test;
@@ -26,10 +26,11 @@ class WasteRoomDTOTest {
         container1.setX(2.0);
         container1.setY(3.0);
 
-        DoorPosition door1 = new DoorPosition();
+        Door door1 = new Door();
         door1.setId(20L);
         door1.setX(1.0);
         door1.setY(1.5);
+        door1.setWidth(5);
 
         WasteRoom entity = new WasteRoom();
         entity.setProperty(property);

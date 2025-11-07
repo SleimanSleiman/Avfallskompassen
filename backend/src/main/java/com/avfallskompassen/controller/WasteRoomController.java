@@ -2,7 +2,7 @@ package com.avfallskompassen.controller;
 
 import com.avfallskompassen.dto.RoomPdfDTO;
 import com.avfallskompassen.dto.WasteRoomDTO;
-import com.avfallskompassen.dto.WasteRoomRequest;
+import com.avfallskompassen.dto.request.WasteRoomRequest;
 import com.avfallskompassen.services.RoomPdfService;
 import com.avfallskompassen.services.WasteRoomService;
 import jakarta.validation.Valid;

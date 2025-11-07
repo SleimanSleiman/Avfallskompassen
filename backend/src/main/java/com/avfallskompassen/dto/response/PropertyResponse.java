@@ -1,4 +1,4 @@
-package com.avfallskompassen.dto;
+package com.avfallskompassen.dto.response;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;

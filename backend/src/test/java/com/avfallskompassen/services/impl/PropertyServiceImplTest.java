@@ -1,6 +1,6 @@
 package com.avfallskompassen.services.impl;
 
-import com.avfallskompassen.dto.PropertyRequest;
+import com.avfallskompassen.dto.request.PropertyRequest;
 import com.avfallskompassen.model.*;
 import com.avfallskompassen.repository.MunicipalityRepository;
 import com.avfallskompassen.repository.PropertyRepository;

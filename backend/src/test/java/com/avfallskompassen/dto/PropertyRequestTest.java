@@ -1,5 +1,6 @@
 package com.avfallskompassen.dto;
 
+import com.avfallskompassen.dto.request.PropertyRequest;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;

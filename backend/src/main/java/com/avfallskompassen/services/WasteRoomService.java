@@ -1,8 +1,7 @@
 package com.avfallskompassen.services;
 
 import com.avfallskompassen.dto.WasteRoomDTO;
-import com.avfallskompassen.dto.WasteRoomRequest;
-import com.avfallskompassen.model.WasteRoom;
+import com.avfallskompassen.dto.request.WasteRoomRequest;
 
 import java.util.List;
 

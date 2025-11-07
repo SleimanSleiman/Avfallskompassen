@@ -1,16 +1,14 @@
 package com.avfallskompassen.controller;
 
 import com.avfallskompassen.dto.ContainerPositionDTO;
-import com.avfallskompassen.dto.DoorPositionDTO;
+import com.avfallskompassen.dto.DoorDTO;
 import com.avfallskompassen.dto.WasteRoomDTO;
-import com.avfallskompassen.dto.WasteRoomRequest;
+import com.avfallskompassen.dto.request.WasteRoomRequest;
 import com.avfallskompassen.exception.BadRequestException;
 import com.avfallskompassen.exception.InternalServerException;
 import com.avfallskompassen.exception.ResourceNotFoundException;
 import com.avfallskompassen.services.RoomPdfService;
 import com.avfallskompassen.services.WasteRoomService;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -21,7 +19,6 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -51,9 +48,8 @@ class WasteRoomControllerTest {
                 new ContainerPositionDTO(2L,4,4,90,4L,5L)
         );
 
-        List<DoorPositionDTO> doors = List.of(
-                new DoorPositionDTO(1L,2,2,0,3L,5L),
-                new DoorPositionDTO(2L,10,10,90,10L,5L)
+        List<DoorDTO> doors = List.of(
+                new DoorDTO(1L, 0.5, 0.5, 0, 1.0, 0.1, 10L)
         );
 
         WasteRoomDTO dto = new WasteRoomDTO(2L,10,10,10,10,containers,doors);
@@ -147,9 +143,8 @@ class WasteRoomControllerTest {
                 new ContainerPositionDTO(2L, 4, 4, 90, 4L, 5L)
         );
 
-        List<DoorPositionDTO> doors = List.of(
-                new DoorPositionDTO(1L, 2, 2, 0, 3L, 5L),
-                new DoorPositionDTO(2L, 10, 10, 90, 10L, 5L)
+        List<DoorDTO> doors = List.of(
+                new DoorDTO(1L, 0.5, 0.5, 0, 1.0, 0.1, 10L)
         );
 
         WasteRoomDTO dto = new WasteRoomDTO(2L, 10, 10, 10, 10, containers, doors);

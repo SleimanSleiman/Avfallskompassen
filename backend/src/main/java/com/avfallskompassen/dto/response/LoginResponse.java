@@ -1,4 +1,4 @@
-package com.avfallskompassen.dto;
+package com.avfallskompassen.dto.response;
 
 /**
  * This class encapsulates the response information sent back to clients

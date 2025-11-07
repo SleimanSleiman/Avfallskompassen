@@ -1,6 +1,10 @@
 package com.avfallskompassen.services.impl;
 
 import com.avfallskompassen.dto.*;
+import com.avfallskompassen.dto.request.ContainerPositionRequest;
+import com.avfallskompassen.dto.request.DoorPositionRequest;
+import com.avfallskompassen.dto.request.DoorRequest;
+import com.avfallskompassen.dto.request.WasteRoomRequest;
 import com.avfallskompassen.exception.ResourceNotFoundException;
 import com.avfallskompassen.model.*;
 import com.avfallskompassen.repository.*;
@@ -54,7 +58,7 @@ public class WasteRoomServiceImpl implements WasteRoomService {
         wasteRoom.setProperty(findPropertyById(request.getPropertyId()));
 
         List<ContainerPosition> containerPositions = convertContainerRequest(request.getContainers(), wasteRoom);
-        List<DoorPosition> doorPositions = convertDoorRequest(request.getDoors(), wasteRoom);
+        List<Door> doorPositions = convertDoorRequest(request.getDoors(), wasteRoom);
         wasteRoom.setContainers(containerPositions);
         wasteRoom.setDoors(doorPositions);
 
@@ -115,10 +119,11 @@ public class WasteRoomServiceImpl implements WasteRoomService {
         updatedContainers.addAll(convertContainerRequest(request.getContainers(), wasteRoom));
         wasteRoom.setContainers(updatedContainers);
 
-        List<DoorPosition> updatedDoors = new ArrayList<>();
+        List<Door> updatedDoors = new ArrayList<>();
         if (wasteRoom.getDoors() != null) {
             updatedDoors.addAll(wasteRoom.getDoors());
         }
+
         updatedDoors.addAll(convertDoorRequest(request.getDoors(), wasteRoom));
         wasteRoom.setDoors(updatedDoors);
 
@@ -170,19 +175,16 @@ public class WasteRoomServiceImpl implements WasteRoomService {
      * @param wasteRoom The waste room to be altered or created
      * @return A list of {@link DoorPosition} with the appropriate data needed before saving it in database
      */
-    private List<DoorPosition> convertDoorRequest(List<DoorPositionRequest> doors, WasteRoom wasteRoom) {
-        if (doors == null) {
+    private List<Door> convertDoorRequest(List<DoorRequest> doors, WasteRoom wasteRoom) {
+        if (doors == null || doors.isEmpty()) {
             return Collections.emptyList();
         }
 
-        List<DoorPosition> doorPositions = new ArrayList<>();
+        List<Door> doorPositions = new ArrayList<>();
 
-        for (DoorPositionRequest request : doors) {
-            DoorPosition door = new DoorPosition();
-            door.setDoor(doorRepository.findById(request.getId())
-                    .orElseThrow(() -> new ResourceNotFoundException(
-                            "Door with ID: " + request.getId() + " can't be found"
-                    )));
+        for (DoorRequest request : doors) {
+            Door door = new Door();
+            door.setWidth(request.getWidth());
             door.setX(request.getX());
             door.setY(request.getY());
             door.setAngle(request.getAngle());
