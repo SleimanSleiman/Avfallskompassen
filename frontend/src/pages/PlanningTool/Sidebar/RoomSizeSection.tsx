@@ -26,8 +26,8 @@ export default function RoomSizeSection({
         setRoom({
             x: (STAGE_WIDTH - length / SCALE) / 2,
             y: (STAGE_HEIGHT - width / SCALE) / 2,
-            width: length / SCALE,
-            height: width / SCALE,
+            width: width / SCALE,
+            height: length / SCALE,
         });
         setIsAlterRoomSizeOpen(false);
     };
