@@ -34,8 +34,6 @@ export default function ContainersLayer({
     setIsDraggingContainer,
     getContainerZones,
 }: ContainersLayerProps) {
-    const [imageToUse] = useImage('/path/to/my/image.png');
-
     return (
         <>
             {containersInRoom.map((container) => (
@@ -45,7 +43,6 @@ export default function ContainersLayer({
                     selected={container.id === selectedContainerId}
                     room={room}
                     doorZones={doorZones}
-                    imageToUse={imageToUse}
                     getContainerZones={getContainerZones}
                     handleDragContainer={handleDragContainer}
                     handleSelectContainer={handleSelectContainer}
@@ -61,7 +58,6 @@ function ContainerItem({
     selected,
     room,
     doorZones,
-    imageToUse,
     getContainerZones,
     handleDragContainer,
     handleSelectContainer,
@@ -71,7 +67,6 @@ function ContainerItem({
     selected: boolean;
     room: Room;
     doorZones: { x: number; y: number; width: number; height: number }[];
-    imageToUse: HTMLImageElement | null;
     getContainerZones: (excludeId?: number) => { x: number; y: number; width: number; height: number }[];
     handleDragContainer: (id: number, pos: { x: number; y: number }) => void;
     handleSelectContainer: (id: number) => void;
@@ -95,6 +90,7 @@ function ContainerItem({
         return [...doorZones, ...getContainerZones(container.id)].some(zone => isOverlapping(r, zone));
     };
 
+    const [imageToUse] = useImage(`http://localhost:8081${container.container.imageTopViewUrl}`);
     return (
         <Group
             x={container.x + container.width / 2}
