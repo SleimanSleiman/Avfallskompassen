@@ -60,7 +60,7 @@ export default function ActionPanel({
         event.preventDefault();
         undo();
       }
-      if (ctrlOrCmd && (event.key === "y" || (event.shiftKey && event.key === "z"))) {
+      if (ctrlOrCmd && (event.key === "y")) {
         event.preventDefault();
         redo();
       }

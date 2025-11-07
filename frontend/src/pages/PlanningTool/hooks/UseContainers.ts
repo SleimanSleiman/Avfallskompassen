@@ -7,7 +7,7 @@ import type { ContainerInRoom, Room } from "../Types";
 import type { ContainerDTO } from "../../../lib/Container";
 import { fetchContainersByMunicipalityAndService } from "../../../lib/Container";
 import { mmToPixels, clamp, DRAG_DATA_FORMAT, STAGE_WIDTH, STAGE_HEIGHT } from "../Constants";
-import { useUndoRedo } from "../hooks/UseUndoRedo";
+import { useLayoutHistory } from "../hooks/UseLayoutHistory";
 
 export function useContainers(
   room: Room,
@@ -16,7 +16,7 @@ export function useContainers(
 ) {
 
     /* ──────────────── Containers placed in the room canvas ──────────────── */
-    const { state: containersInRoom, save: saveContainers, undo, redo } = useUndoRedo<ContainerInRoom[]>([]);
+    const { state: containersInRoom, save: saveContainers, undo, redo } = useLayoutHistory<ContainerInRoom[]>([]);
 
     /* ─────────────── Stage Drop State & Ref ──────────────── */
     const [isStageDropActive, setIsStageDropActive] = useState(false);
