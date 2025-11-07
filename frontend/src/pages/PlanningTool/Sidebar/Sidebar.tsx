@@ -57,14 +57,14 @@ export default function Sidebar({
 
     /* ─────────────── Render ─────────────── */
     return (
-        <div className="pl-0 lg:pl-8 flex flex-col h-full lg:h-[600px]">
+        <div className="pl-0 lg:pl-8 flex flex-col h-full lg:h-[750px]">
             <div className="flex flex-col gap-4 h-[750px]">
 
                 {/* ---------- Upper box: Tools (Door + Container) ---------- */}
                 <div
                     className="flex flex-col border rounded-2xl bg-white p-4 overflow-y-auto transition-all duration-300"
                     style={{
-                        flex: isAddContainersOpen ? 1 : 0.55,
+                        flex: isAddContainersOpen ? 1 : 0.60,
                         maxHeight: isAddContainersOpen ? "350px" : "230px",
                     }}
                 >
