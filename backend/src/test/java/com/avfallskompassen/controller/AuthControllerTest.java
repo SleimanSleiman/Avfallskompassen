@@ -1,7 +1,7 @@
 package com.avfallskompassen.controller;
 
-import com.avfallskompassen.dto.LoginRequest;
-import com.avfallskompassen.dto.LoginResponse;
+import com.avfallskompassen.dto.request.LoginRequest;
+import com.avfallskompassen.dto.response.LoginResponse;
 import com.avfallskompassen.model.User;
 import com.avfallskompassen.services.UserService;
 import org.junit.jupiter.api.Test;
