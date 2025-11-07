@@ -140,21 +140,27 @@ describe("useDoors hook", () => {
 
     //Test rotating a door
     it("updates door rotation and swing direction", () => {
-        const { result } = renderHook(() => useDoors(mockRoom, mockSetSelectedDoorId, mockSetSelectedContainerId))
+        const { result } = renderHook(() =>
+            useDoors(mockRoom, mockSetSelectedDoorId, mockSetSelectedContainerId)
+        );
 
         act(() => {
             result.current.handleAddDoor({ width: 1.2 });
         });
 
         const id = result.current.doors[0].id;
+        const before = result.current.doors.find(d => d.id === id)!;
 
         act(() => {
-            result.current.handleRotateDoor(id, 90, "inward");
+            result.current.handleRotateDoor(id);
         });
 
-        const door = result.current.doors.find(d => d.id === id);
-        expect(door?.rotation).toBe(90);
-        expect(door?.swingDirection).toBe("inward");
+        const after = result.current.doors.find(d => d.id === id)!;
+
+        expect(after.rotation).toBe((before.rotation + 180) % 360);
+        expect(after.swingDirection).toBe(
+            before.swingDirection === "inward" ? "outward" : "inward"
+        );
     });
 
     //Test dragging door to another wall
