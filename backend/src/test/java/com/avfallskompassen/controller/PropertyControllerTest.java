@@ -36,17 +36,16 @@ public class PropertyControllerTest {
     @InjectMocks
     private PropertyController controller;
 
-    private LockType sampleLock() {
-        LockType l = new LockType();
-        l.setId(1);
-        l.setName("L1");
-        l.setCost(new BigDecimal("12.00"));
-        return l;
+    private LockTypeDto sampleLockDto() {
+        LockTypeDto dto = new LockTypeDto();
+        dto.setId(1);
+        dto.setName("L1");
+        dto.setCost(new BigDecimal("12.00"));
+        return dto;
     }
 
     private Property sampleProperty() {
-        LockType l = sampleLock();
-        Property p = new Property("Addr", 2, l, PropertyType.FLERBOSTADSHUS, 1.0, null);
+        Property p = new Property("Addr", 2, null, PropertyType.FLERBOSTADSHUS, 1.0, null);
         p.setId(10L);
         Municipality m = new Municipality();
         m.setId(5L);
@@ -58,11 +57,11 @@ public class PropertyControllerTest {
     @Test
     void createProperty_success_returnsCreatedResponse() {
         PropertyRequest req = new PropertyRequest("A", 3, 1L, 2.0, 5L);
-        LockType lock = sampleLock();
+        LockTypeDto lockDto = sampleLockDto();
         Property created = sampleProperty();
 
-        when(lockTypeService.findLockTypeById(1L)).thenReturn(lock);
-        when(propertyService.createProperty(req, "alice", lock)).thenReturn(created);
+        when(lockTypeService.findLockTypeById(1L)).thenReturn(lockDto);
+        when(propertyService.createProperty(req, "alice", lockDto)).thenReturn(created);
 
         ResponseEntity<PropertyResponse> resp = controller.createProperty(req, "alice");
 
@@ -70,8 +69,8 @@ public class PropertyControllerTest {
         assertNotNull(resp.getBody());
         assertTrue(resp.getBody().isSuccess());
         assertEquals(created.getId(), resp.getBody().getPropertyId());
-        assertEquals(lock.getName(), resp.getBody().getLockName());
-        verify(propertyService).createProperty(req, "alice", lock);
+        assertEquals(lockDto.getName(), resp.getBody().getLockName());
+        verify(propertyService).createProperty(req, "alice", lockDto);
     }
 
     @Test
@@ -171,12 +170,12 @@ public class PropertyControllerTest {
     @Test
     void updateProperty_success_returnsOk() {
         PropertyRequest req = new PropertyRequest("New", 4, 1L, 1.0, 5L);
-        LockType lock = sampleLock();
+        LockTypeDto lockDto = sampleLockDto();
         Property updated = sampleProperty();
         updated.setAddress("New");
         when(propertyService.isPropertyOwnedByUser(10L, "alice")).thenReturn(true);
-        when(lockTypeService.findLockTypeById(1L)).thenReturn(lock);
-        when(propertyService.updateProperty(10L, req, "alice", lock)).thenReturn(updated);
+        when(lockTypeService.findLockTypeById(1L)).thenReturn(lockDto);
+        when(propertyService.updateProperty(10L, req, "alice", lockDto)).thenReturn(updated);
 
         ResponseEntity<?> resp = controller.updateProperty(10L, req, "alice");
 
@@ -201,10 +200,10 @@ public class PropertyControllerTest {
 
     @Test
     void getPropertiesByLockType_mapsAndReturns() {
-        LockType lock = sampleLock();
+        LockTypeDto lockDto = sampleLockDto();
         Property p = sampleProperty();
-        when(lockTypeService.findLockTypeById(1L)).thenReturn(lock);
-        when(propertyService.findByLockType(lock)).thenReturn(List.of(p));
+        when(lockTypeService.findLockTypeById(1L)).thenReturn(lockDto);
+        when(propertyService.findByLockType(lockDto)).thenReturn(List.of(p));
 
         ResponseEntity<List<PropertyDTO>> resp = controller.getPropertiesByLockType(1L);
 
@@ -254,16 +253,16 @@ public class PropertyControllerTest {
 
     @Test
     void testGetAllLockTypes() {
-        LockType lock1 = new LockType();
+        LockTypeDto lock1 = new LockTypeDto();
         lock1.setId(1);
         lock1.setName("Inget lås");
 
-        LockType lock2 = new LockType();
+        LockTypeDto lock2 = new LockTypeDto();
         lock2.setId(2);
         lock2.setName("Fysisk nyckel");
 
-        List<LockType> mockLocks = Arrays.asList(lock1, lock2);
-        when(lockTypeService.getAllLockTypes()).thenReturn(mockLocks);
+        List<LockTypeDto> mockLockDtos = Arrays.asList(lock1, lock2);
+        when(lockTypeService.getAllLockTypes()).thenReturn(mockLockDtos);
 
         ResponseEntity<List<LockTypeDto>> response = controller.getAllLockTypes();
 

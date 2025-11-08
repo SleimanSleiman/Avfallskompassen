@@ -138,8 +138,8 @@ public class WasteRoomController {
      * @param pdfId Id to the PDF that should be downloaded
      * @return A status code with the requested PDF file or an error message if not found
      */
-    @GetMapping
-    public ResponseEntity<byte[]> downloadPfd(@PathVariable Long pdfId) {
+    @GetMapping("/wasterooms/download/{id}")
+    public ResponseEntity<byte[]> downloadPdf(@PathVariable Long pdfId) {
         try {
             byte[] pdfData = roomPdfService.downloadPdf(pdfId);
 

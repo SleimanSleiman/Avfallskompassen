@@ -1,14 +1,12 @@
 package com.avfallskompassen.services.impl;
 
 import com.avfallskompassen.dto.RoomPdfDTO;
-import com.avfallskompassen.dto.RoomPdfDTO;
 import com.avfallskompassen.exception.ResourceNotFoundException;
 import com.avfallskompassen.model.RoomPdf;
 import com.avfallskompassen.model.WasteRoom;
 import com.avfallskompassen.repository.RoomPdfRepository;
 import com.avfallskompassen.repository.WasteRoomRepository;
 import com.avfallskompassen.services.RoomPdfService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -27,11 +25,14 @@ import java.util.stream.Collectors;
 @Transactional
 public class RoomPdfServiceImpl implements RoomPdfService {
 
-    @Autowired
-    private RoomPdfRepository roomPdfRepository;
+    private final RoomPdfRepository roomPdfRepository;
 
-    @Autowired
-    private WasteRoomRepository wasteRoomRepository;
+    private final  WasteRoomRepository wasteRoomRepository;
+
+    public RoomPdfServiceImpl(RoomPdfRepository roomPdfRepository, WasteRoomRepository wasteRoomRepository) {
+        this.roomPdfRepository = roomPdfRepository;
+        this.wasteRoomRepository = wasteRoomRepository;
+    }
 
     /**
      * Handles uploading and saving a PDF file linked to a specific waste room.

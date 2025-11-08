@@ -1,5 +1,6 @@
 package com.avfallskompassen.services;
 
+import com.avfallskompassen.dto.LockTypeDto;
 import com.avfallskompassen.dto.request.PropertyRequest;
 import com.avfallskompassen.model.LockType;
 import com.avfallskompassen.model.Property;
@@ -20,7 +21,7 @@ public class PropertyServiceTest {
 
     @Test
     void has_createProperty_method_with_expected_signature() throws NoSuchMethodException {
-        Method m = PropertyService.class.getMethod("createProperty", PropertyRequest.class, String.class, LockType.class);
+        Method m = PropertyService.class.getMethod("createProperty", PropertyRequest.class, String.class, LockTypeDto.class);
         assertEquals(Property.class, m.getReturnType(), "createProperty should return Property");
     }
 
@@ -62,7 +63,7 @@ public class PropertyServiceTest {
 
     @Test
     void has_findByLockType_method_with_expected_signature() throws NoSuchMethodException {
-        Method m = PropertyService.class.getMethod("findByLockType", LockType.class);
+        Method m = PropertyService.class.getMethod("findByLockType", LockTypeDto.class);
         assertTrue(List.class.isAssignableFrom(m.getReturnType()), "findByLockType should return a List");
     }
 
@@ -74,7 +75,7 @@ public class PropertyServiceTest {
 
     @Test
     void has_updateProperty_method_with_expected_signature() throws NoSuchMethodException {
-        Method m = PropertyService.class.getMethod("updateProperty", Long.class, PropertyRequest.class, String.class, LockType.class);
+        Method m = PropertyService.class.getMethod("updateProperty", Long.class, PropertyRequest.class, String.class, LockTypeDto.class);
         assertEquals(Property.class, m.getReturnType(), "updateProperty should return Property");
     }
 }

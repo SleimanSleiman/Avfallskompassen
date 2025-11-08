@@ -1,5 +1,6 @@
 package com.avfallskompassen.services;
 
+import com.avfallskompassen.dto.LockTypeDto;
 import com.avfallskompassen.model.LockType;
 import com.avfallskompassen.repository.LockTypeRepository;
 import com.avfallskompassen.services.impl.LockTypeServiceImpl;
@@ -39,11 +40,12 @@ class LockTypeServiceImplTest {
 
         when(lockTypeRepository.findById(1L)).thenReturn(Optional.of(lockType));
 
-        LockType result = lockTypeService.findLockTypeById(1L);
+        LockTypeDto result = lockTypeService.findLockTypeById(1L);
 
         assertNotNull(result);
         assertEquals(1L, result.getId());
         assertEquals("Sample lock", result.getName());
+        verify(lockTypeRepository, times(1)).findById(1L);
     }
 
     @Test
@@ -55,6 +57,7 @@ class LockTypeServiceImplTest {
         );
 
         assertEquals("No Locktype found with ID: 2", exception.getMessage());
+        verify(lockTypeRepository, times(1)).findById(2L);
     }
 
     @Test
@@ -71,10 +74,13 @@ class LockTypeServiceImplTest {
         List<LockType> mockList = Arrays.asList(lock1, lock2);
         when(lockTypeRepository.findAll()).thenReturn(mockList);
 
-        List<LockType> result = lockTypeService.getAllLockTypes();
+        List<LockTypeDto> result = lockTypeService.getAllLockTypes();
 
         assertThat(result).hasSize(2);
-        assertThat(result).containsExactlyElementsOf(mockList);
+        assertThat(result.get(0).getId()).isEqualTo(1L);
+        assertThat(result.get(0).getName()).isEqualTo("Inget lås");
+        assertThat(result.get(1).getId()).isEqualTo(2L);
+        assertThat(result.get(1).getName()).isEqualTo("Fysisk nyckel");
 
         verify(lockTypeRepository, times(1)).findAll();
     }
