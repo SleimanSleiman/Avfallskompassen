@@ -197,11 +197,16 @@ export function useContainers(
     };
 
     /* ──────────────── API Fetch ──────────────── */
-    const fetchAvailableContainers = async (serviceId: number) => {
+    const fetchAvailableContainers = async (service: { id: number; name: string }) => {
         setIsLoadingContainers(true);
         try {
-            const data = await fetchContainersByMunicipalityAndService(1, serviceId);
-            setAvailableContainers(data);
+            const data = await fetchContainersByMunicipalityAndService(1, service.id);
+            const enriched = data.map(container => ({
+                ...container,
+                serviceTypeId: service.id,
+                serviceTypeName: service.name,
+            }));
+            setAvailableContainers(enriched);
         } catch (error) {
             console.error("Failed to fetch available containers:", error);
             setAvailableContainers([]);

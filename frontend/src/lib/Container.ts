@@ -9,6 +9,8 @@ export interface ContainerDTO {
   imageTopViewUrl: string;
   emptyingFrequencyPerYear: number;
   cost: number;
+  serviceTypeId?: number;
+  serviceTypeName?: string;
 }
 
 export const fetchContainersByMunicipalityAndService = async (
@@ -23,5 +25,9 @@ export const fetchContainersByMunicipalityAndService = async (
     throw new Error('Failed to fetch containers by municipality and service');
   }
 
-  return response.json();
+  const data: ContainerDTO[] = await response.json();
+  return data.map(container => ({
+    ...container,
+    serviceTypeId,
+  }));
 };

@@ -14,8 +14,8 @@ type DoorMeasurementLayerProps = {
 };
 
 export default function DoorMeasurementLayer({ doors, room }: DoorMeasurementLayerProps) {
-    const baseMargin = 20; //margin from door to measurement lines
-    const textOffset = 20; //offset for the measurement text above or beside the line
+    const baseMargin = 1; //smaller margin keeps measurement guides closer to the wall
+    const textOffset = -5; //reduced offset so labels follow the shortened guides
 
     /* ──────────────── Render ──────────────── */
     return (
@@ -61,14 +61,14 @@ export default function DoorMeasurementLayer({ doors, room }: DoorMeasurementLay
 
                 switch (door.wall) {
                     case "top":
-                        line1 = [room.x, topY - margin, leftX, topY - margin];
-                        line2 = [rightX, topY - margin, room.x + room.width, topY - margin];
+                        line1 = [room.x, topY + margin, leftX, topY + margin];
+                        line2 = [rightX, topY + margin, room.x + room.width, topY + margin];
 
                         texts.push(
                             <Text
                                 key={`text-left-${door.id}`}
                                 x={(room.x + leftX) / 2}
-                                y={topY - margin - textOffset}
+                                y={topY + margin + textOffset - 14}
                                 text={`${((leftX - room.x) * SCALE).toFixed(2)} m`}
                                 fontSize={14}
                                 fill="blue"
@@ -80,7 +80,7 @@ export default function DoorMeasurementLayer({ doors, room }: DoorMeasurementLay
                             <Text
                                 key={`text-right-${door.id}`}
                                 x={(rightX + room.x + room.width) / 2}
-                                y={topY - margin - textOffset}
+                                y={topY + margin + textOffset - 14}
                                 text={`${((room.x + room.width - rightX) * SCALE).toFixed(2)} m`}
                                 fontSize={14}
                                 fill="blue"

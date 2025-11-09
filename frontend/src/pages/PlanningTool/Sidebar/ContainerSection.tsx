@@ -20,7 +20,7 @@ type ContainerSectionProps = {
     selectedSize: { [key: number]: number | null };
     setSelectedSize: React.Dispatch<React.SetStateAction<{ [key: number]: number | null }>>;
     isLoadingContainers: boolean;
-    fetchContainers: (serviceId: number) => Promise<void>;
+    fetchContainers: (service: { id: number; name: string }) => Promise<void>;
     handleAddContainer: (container: ContainerDTO, position?: { x: number; y: number }) => void;
     setDraggedContainer: React.Dispatch<React.SetStateAction<ContainerDTO | null>>;
     setIsStageDropActive: (v: boolean) => void;
@@ -92,7 +92,7 @@ export default function ContainerSection({
 
                                         setSelectedType(type.name);
                                         setSelectedSize({});
-                                        await fetchContainers(type.id);
+                                        await fetchContainers(type);
                                     }}
                                 >
                                     {type.name}
