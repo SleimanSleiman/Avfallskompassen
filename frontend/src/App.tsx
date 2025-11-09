@@ -4,6 +4,7 @@ import Footer from './components/Footer';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import PropertyPage from './pages/PropertyPage';
+import StatisticsPage from './pages/StatisticsPage';
 import NotificationCenter from './components/NotificationCenter';
 import { currentUser } from './lib/Auth';
 import PlanningTool from './pages/PlanningTool/PlanningTool';
@@ -73,9 +74,9 @@ function Dashboard() {
             <p className="brodtext text-gray-600 mb-4">
               Se detaljerade rapporter om kostnader, sortering och miljöpåverkan.
             </p>
-            <button className="btn-secondary w-full text-center opacity-50 cursor-not-allowed" disabled>
-              Kommer snart
-            </button>
+                <a href="/statistics" className="btn-secondary w-full text-center">
+                  Visa rapporter & statistik
+                </a>
           </div>
         </div>
 
@@ -133,6 +134,22 @@ export default function App() {
           } />
           <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/planningTool" element={<PlanningTool />} />
+            <Route
+              path="/statistics"
+              element={
+                <ProtectedRoute>
+                  <StatisticsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/statistics/:propertyId"
+              element={
+                <ProtectedRoute>
+                  <StatisticsPage />
+                </ProtectedRoute>
+              }
+            />
         </Routes>
       </div>
       <Footer />

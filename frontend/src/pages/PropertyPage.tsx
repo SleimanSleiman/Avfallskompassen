@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { createProperty, getMyProperties, deleteProperty, updateProperty,getMunicipalities, getLockTypes } from '../lib/Property';
 import type { Municipality, Property, PropertyRequest } from '../lib/Property';
+import { useNavigate } from 'react-router-dom';
 import { currentUser } from '../lib/auth';
 import RoomSizePrompt from '../components/RoomSizePrompt';
 import ConfirmModal from '../components/ConfirmModal';
@@ -9,6 +10,7 @@ import ConfirmModal from '../components/ConfirmModal';
 export default function PropertyPage() {
   const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
   const [msg, setMsg] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
@@ -449,7 +451,13 @@ async function handleSubmit(e: React.FormEvent) {
                 <div className="mt-4 flex flex-wrap gap-2">
                   <button className="btn-secondary-sm" onClick={() => createWasteRoom(property)}>Skapa miljörum</button>
                   <button className="btn-secondary-sm" onClick={() => handleEdit(property)}>Redigera</button>
-                  <button className="btn-secondary-sm" type="button">Se rapport</button>
+                  <button
+                    className="btn-secondary-sm"
+                    type="button"
+                    onClick={() => navigate(`/statistics/${property.id}`, { state: { propertyName: property.address } })}
+                  >
+                    Se rapport
+                  </button>
                   <button
                     className="inline-flex items-center justify-center rounded-xl2 px-3 py-1 text-sm font-medium border border-red-200 bg-red-50 text-red-700 hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-600"
                     onClick={() => requestDelete(property.id, property.address)}
