@@ -3,7 +3,7 @@ import React from 'react';
 export type ConfirmModalProps = {
   open: boolean;
   title?: string;
-  message: string;
+  message: string | React.ReactNode;
   confirmLabel?: string;
   cancelLabel?: string;
   onConfirm: () => void;
@@ -33,7 +33,7 @@ export default function ConfirmModal({
           <h3 className="text-base font-semibold text-gray-900">
             {title}
           </h3>
-          <p className="mt-2 text-sm text-gray-700">{message}</p>
+          <div className="mt-2 text-sm text-gray-700">{message}</div>
           <div className="mt-4 flex justify-end gap-2">
             <button className="btn-secondary" onClick={onCancel} disabled={loading}>
               {cancelLabel}
