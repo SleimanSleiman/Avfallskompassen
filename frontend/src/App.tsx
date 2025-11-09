@@ -7,6 +7,7 @@ import PropertyPage from './pages/PropertyPage';
 import NotificationCenter from './components/NotificationCenter';
 import { currentUser } from './lib/Auth';
 import PlanningTool from './pages/PlanningTool/PlanningTool';
+import AdminPage from './pages/AdminPage';
 
 function Dashboard() {
   const user = currentUser();
@@ -131,8 +132,16 @@ export default function App() {
               <PropertyPage />
             </ProtectedRoute>
           } />
-          <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/planningTool" element={<PlanningTool />} />
+          <Route path="/planningTool" element={
+            <ProtectedRoute>
+              <PlanningTool />
+            </ProtectedRoute>
+          } />
+          <Route path="/admin" element={
+            <ProtectedRoute>
+              <AdminPage />
+            </ProtectedRoute>
+          } />
         </Routes>
       </div>
       <Footer />

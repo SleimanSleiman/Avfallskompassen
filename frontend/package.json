@@ -13,10 +13,10 @@
   },
   "dependencies": {
     "framer-motion": "^12.23.22",
-    "konva": "^10.0.2",
+    "konva": "^10.0.8",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
-    "react-konva": "^19.0.10",
+    "react-konva": "^19.2.0",
     "react-router-dom": "^7.9.4",
     "use-image": "^1.1.4"
   },

@@ -60,6 +60,9 @@ export default function NavBar() {
               <NavLink to="/dashboard" className={({ isActive }) => `nav-link hover:text-white transition-colors ${isActive ? 'nav-link-active' : ''}`}>Dashboard</NavLink>
               <NavLink to="/properties" className={({ isActive }) => `nav-link hover:text-white transition-colors ${isActive ? 'nav-link-active' : ''}`}>Mina fastigheter</NavLink>
               <NavLink to="/planningTool" className={({ isActive }) => `nav-link hover:text-white transition-colors ${isActive ? 'nav-link-active' : ''}`}>Planeringsverktyg</NavLink>
+              {user && (
+                <NavLink to="/admin" className={({ isActive }) => `nav-link hover:text-white transition-colors ${isActive ? 'nav-link-active' : ''}`}>Admin</NavLink>
+              )}
               <div className="flex items-center gap-3">
                 {user && <span className="text-sm">Hej {user.username}!</span>}
                 {user ? (
@@ -89,6 +92,7 @@ export default function NavBar() {
             <NavLink to="/dashboard" className="text-nsr-ink">Dashboard</NavLink>
             <NavLink to="/properties" className="text-nsr-ink">Mina fastigheter</NavLink>
             <NavLink to="/planningTool" className="text-nsr-ink">Planeringsverktyg</NavLink>
+            {user && <NavLink to="/admin" className="text-nsr-ink">Admin</NavLink>}
             {user ? (
               <button onClick={handleLogout} className="text-left text-nsr-ink">Logga ut</button>
             ) : (
