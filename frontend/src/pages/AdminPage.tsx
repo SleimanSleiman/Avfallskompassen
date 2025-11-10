@@ -12,7 +12,7 @@ export type AdminUser = {
   plansCount: number;
 };
 
-type BackendUser = { id: number; username: string; role?: string };
+type BackendUser = { id: number; username: string; role?: string; createdAt?: string | null };
 type PropertyDTO = { id: number; createdByUsername?: string };
 
 export type AdminProperty = {
@@ -83,7 +83,7 @@ export default function AdminPage() {
           id: bu.id,
           username: bu.username,
           email: undefined,
-          createdAt: null,
+          createdAt: bu.createdAt || null,
           propertiesCount: (propertiesByUser.get(bu.username) || []).length,
           plansCount: plansCountByUser.get(bu.username) || 0,
         }));
