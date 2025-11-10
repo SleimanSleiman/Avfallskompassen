@@ -68,6 +68,7 @@ export default function PlanningTool() {
         handleShowContainerInfo,
         undo,
         redo,
+        getContainerZones,
     } = useContainers(room, setSelectedContainerId, setSelectedDoorId);
 
     /* ──────────────── Service Types (API data) ──────────────── */
@@ -103,6 +104,7 @@ export default function PlanningTool() {
                     selectedContainerId={selectedContainerId}
                     handleDragContainer={handleDragContainer}
                     handleSelectContainer={handleSelectContainer}
+                    getContainerZones={getContainerZones}
 
                     isStageDropActive={isStageDropActive}
                     stageWrapperRef={stageWrapperRef}
@@ -117,7 +119,7 @@ export default function PlanningTool() {
                     doors={doors}
                     selectedContainerId={selectedContainerId}
                     selectedDoorId={selectedDoorId}
-                    handleRemoveContainer={handleRemoveContainer}
+                    handleRemoveContainer={handleRemoveContainer} 
                     handleRemoveDoor={handleRemoveDoor}
                     handleRotateDoor={handleRotateDoor}
                     handleRotateContainer={handleRotateContainer} 

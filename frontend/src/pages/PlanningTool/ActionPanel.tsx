@@ -126,7 +126,7 @@ export default function ActionPanel({
             )}
 
             {/* Action buttons */}
-            <div className="flex flex-row lg:flex-col items-center justify-center gap-3 flex-wrap">
+            <div className="flex flex-row items-center justify-center gap-3 flex-wrap">
 
                 {/* Information button - only for containers */}
                 {selectedContainerId !== null && (
@@ -143,7 +143,7 @@ export default function ActionPanel({
                     
                 {/* Undo button*/}
                 <button
-                className="btn-secondary-sm flex-1"
+                className="btn-secondary-sm min-w-[100px] text-center"
                 onClick={undo}
                 title="Ångra (Ctrl+Z)"
                 >
@@ -152,7 +152,7 @@ export default function ActionPanel({
 
                 {/* Undo button*/}
                 <button
-                className="btn-secondary-sm flex-1"
+                className="btn-secondary-sm min-w-[100px] text-center"
                 onClick={redo}
                 title="Gör om (Ctrl+Y)"
                 >
