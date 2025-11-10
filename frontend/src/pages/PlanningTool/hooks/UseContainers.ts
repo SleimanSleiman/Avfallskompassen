@@ -3,10 +3,11 @@
  * types from the API.
  */
 import { useState, useRef } from "react";
+import type { DragEvent as ReactDragEvent } from "react";
 import type { ContainerInRoom, Room } from "../Types";
 import type { ContainerDTO } from "../../../lib/Container";
 import { fetchContainersByMunicipalityAndService } from "../../../lib/Container";
-import { mmToPixels, clamp, DRAG_DATA_FORMAT, STAGE_WIDTH, STAGE_HEIGHT, SCALE, isOverlapping } from "../Constants";
+import { mmToPixels, clamp, DRAG_DATA_FORMAT, SCALE, isOverlapping } from "../Constants";
 
 /* ──────────────── Helper functions ──────────────── */
 //Create rectangle for container at given position
@@ -31,8 +32,8 @@ function calculateInitialPosition(
     const widthPx = mmToPixels(container.width);
     const heightPx = mmToPixels(container.depth);
 
-    let targetX = position ? position.x - widthPx / 2 : room.x + room.width / 2 - widthPx / 2;
-    let targetY = position ? position.y - heightPx / 2 : room.y + room.height / 2 - heightPx / 2;
+    const targetX = position ? position.x - widthPx / 2 : room.x + room.width / 2 - widthPx / 2;
+    const targetY = position ? position.y - heightPx / 2 : room.y + room.height / 2 - heightPx / 2;
 
     return {
         x: clamp(targetX, room.x, room.x + room.width - widthPx),
@@ -160,7 +161,7 @@ export function useContainers(
 
     /* ──────────────── Drag & Drop Handlers ──────────────── */
     //Handle dropping a container onto the stage
-    const handleStageDrop = (event: DragEvent<HTMLDivElement>) => {
+    const handleStageDrop = (event: ReactDragEvent<HTMLDivElement>) => {
         event.preventDefault();
         setIsStageDropActive(false);
 
@@ -169,11 +170,12 @@ export function useContainers(
 
         try {
             const container = JSON.parse(data) as ContainerDTO;
-            const rect = stageWrapperRef.current?.getBoundingClientRect();
-            if (!rect) return;
+            const stageContainer = stageWrapperRef.current?.querySelector("canvas");
+            const stageRect = stageContainer?.getBoundingClientRect();
+            if (!stageRect) return;
 
-            const dropX = clamp(event.clientX - rect.left, 0, STAGE_WIDTH);
-            const dropY = clamp(event.clientY - rect.top, 0, STAGE_HEIGHT);
+            const dropX = clamp(event.clientX - stageRect.left, 0, stageRect.width);
+            const dropY = clamp(event.clientY - stageRect.top, 0, stageRect.height);
             handleAddContainer(container, { x: dropX, y: dropY });
         } catch (error) {
             console.error("Failed to parse dropped container data", error);
@@ -181,7 +183,7 @@ export function useContainers(
     };
 
     //Handle drag over event to allow dropping
-    const handleStageDragOver = (event: DragEvent<HTMLDivElement>) => {
+    const handleStageDragOver = (event: ReactDragEvent<HTMLDivElement>) => {
         if (!Array.from(event.dataTransfer.types).includes(DRAG_DATA_FORMAT)) return;
 
         event.preventDefault();
@@ -191,7 +193,7 @@ export function useContainers(
     };
 
     //Handle drag leave event to reset drop state
-    const handleStageDragLeave = (event: DragEvent<HTMLDivElement>) => {
+    const handleStageDragLeave = (event: ReactDragEvent<HTMLDivElement>) => {
         if (event.currentTarget.contains(event.relatedTarget as Node)) return;
         setIsStageDropActive(false);
     };

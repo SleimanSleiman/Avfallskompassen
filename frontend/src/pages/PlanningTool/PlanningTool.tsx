@@ -213,7 +213,25 @@ export default function PlanningTool() {
 
                     {/* ActionPanel for selected container or door */}
                     {(selectedContainerId !== null || selectedDoorId !== null) && (
-                        <div className="absolute top-4 right-4 z-50">
+                        <div className="pointer-events-none absolute left-0.5 top-40 z-50 hidden lg:flex">
+                            <div className="pointer-events-auto">
+                                <ActionPanel
+                                    containers={containersInRoom}
+                                    doors={doors}
+                                    selectedContainerId={selectedContainerId}
+                                    selectedDoorId={selectedDoorId}
+                                    handleRemoveContainer={handleRemoveContainer}
+                                    handleRemoveDoor={handleRemoveDoor}
+                                    handleRotateDoor={handleRotateDoor}
+                                    handleRotateContainer={handleRotateContainer}
+                                    handleShowContainerInfo={handleShowContainerInfo}
+                                />
+                            </div>
+                        </div>
+                    )}
+
+                    {(selectedContainerId !== null || selectedDoorId !== null) && (
+                        <div className="mt-3 flex justify-center lg:hidden">
                             <ActionPanel
                                 containers={containersInRoom}
                                 doors={doors}

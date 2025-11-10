@@ -73,7 +73,7 @@ export default function ActionPanel({
 
     /* ─────────────── Render ──────────────── */
     return (
-        <div className="flex flex-col items-center gap-3 border border-gray-300 rounded-2xl bg-white shadow-sm px-3 py-2 w-fit max-w-full mx-auto">
+    <div className="flex flex-col items-center gap-2 border border-gray-300 rounded-xl bg-white shadow-sm px-0 py-1 w-fit max-w-full mx-auto text-sm">
 
             {/* Tooltip */}
             <div className="self-end">
@@ -87,21 +87,21 @@ export default function ActionPanel({
 
             {/* Selected item name */}
             {selectedName && (
-                <div className="text-center font-semibold text-gray-800 text-base px-2 py-1 border-b border-gray-200 w-full">
+                <div className="text-center font-semibold text-gray-800 text-sm px-2 py-1 border-b border-gray-200 w-full">
                     {selectedName}
                 </div>
             )}
 
             {/* Action buttons */}
-            <div className="flex flex-row lg:flex-col items-center justify-center gap-3 flex-wrap">
+            <div className="flex flex-row lg:flex-col items-center justify-center gap-2.5 flex-wrap">
 
                 {/* Information button - only for containers */}
                 {selectedContainerId !== null && (
                     <button
                         onClick={() => handleShowContainerInfo(selectedContainerId)}
-                        className="flex flex-col items-center justify-center text-gray-700 hover:text-blue-600 transition min-w-[80px] group"
+                        className="flex flex-col items-center justify-center text-gray-700 hover:text-blue-600 transition min-w-[64px] group"
                     >
-                        <Info className="w-6 h-6" />
+                        <Info className="w-5 h-5" />
                         <span className="text-sm font-medium max-h-0 overflow-hidden transition-all duration-300 group-hover:max-h-6">
                             Information
                         </span>
@@ -111,10 +111,10 @@ export default function ActionPanel({
                 {/* Rotate button */}
                 <button
                         onClick={handleRotate}
-                        className="flex flex-col items-center justify-center text-gray-700 hover:text-blue-600 transition min-w-[80px] group"
+                        className="flex flex-col items-center justify-center text-gray-700 hover:text-blue-600 transition min-w-[64px] group"
                 >
-                    <RotateCcw className="w-6 h-6" />
-                    <span className="text-sm font-small max-h-0 overflow-hidden transition-all duration-300 group-hover:max-h-6">
+                    <RotateCcw className="w-5 h-5" />
+                    <span className="text-xs font-medium max-h-0 overflow-hidden transition-all duration-300 group-hover:max-h-6">
                         {rotateText}
                     </span>
                 </button>
@@ -122,10 +122,10 @@ export default function ActionPanel({
                 {/* Remove button */}
                 <button
                     onClick={handleRemove}
-                    className="flex flex-col items-center justify-center text-red-600 hover:text-red-700 transition min-w-[80px] group"
+                    className="flex flex-col items-center justify-center text-red-600 hover:text-red-700 transition min-w-[64px] group"
                 >
-                    <Trash2 className="w-6 h-6" />
-                    <span className="text-sm font-small max-h-0 overflow-hidden transition-all duration-300 group-hover:max-h-6">
+                    <Trash2 className="w-5 h-5" />
+                    <span className="text-xs font-medium max-h-0 overflow-hidden transition-all duration-300 group-hover:max-h-6">
                         {removeText}
                     </span>
                 </button>
