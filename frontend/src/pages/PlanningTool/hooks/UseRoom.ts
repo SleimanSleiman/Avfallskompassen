@@ -3,7 +3,7 @@
  * Handles corner dragging, constraints, and initial state from localStorage.
  */
 import { useState } from "react";
-import { SCALE, STAGE_WIDTH, STAGE_HEIGHT, MIN_WIDTH, MIN_HEIGHT, MARGIN, clamp } from "../Constants";
+import { SCALE, STAGE_WIDTH, STAGE_HEIGHT, MIN_WIDTH, MIN_HEIGHT, MARGIN, clamp, ROOM_VERTICAL_OFFSET, ROOM_HORIZONTAL_OFFSET } from "../Constants";
 import type { Room } from "../Types";
 
 export function useRoom() {
@@ -12,8 +12,8 @@ export function useRoom() {
         const savedRoom = localStorage.getItem("trashRoomData");
         const defaultWidthMeters = 10;
         const defaultHeightMeters = 8;
-        const defaultX = (STAGE_WIDTH - defaultWidthMeters / SCALE) / 2;
-        const defaultY = (STAGE_HEIGHT - defaultHeightMeters / SCALE) / 2;
+    const defaultX = (STAGE_WIDTH - defaultWidthMeters / SCALE) / 2 + ROOM_HORIZONTAL_OFFSET;
+    const defaultY = (STAGE_HEIGHT - defaultHeightMeters / SCALE) / 2 + ROOM_VERTICAL_OFFSET;
 
         if (savedRoom) {
             try {
@@ -23,8 +23,8 @@ export function useRoom() {
                 const heightMeters = parsed.height ?? defaultHeightMeters;
 
                 return {
-                    x: (STAGE_WIDTH - widthMeters / SCALE) / 2,
-                    y: (STAGE_HEIGHT - heightMeters / SCALE) / 2,
+                    x: (STAGE_WIDTH - widthMeters / SCALE) / 2 + ROOM_HORIZONTAL_OFFSET,
+                    y: (STAGE_HEIGHT - heightMeters / SCALE) / 2 + ROOM_VERTICAL_OFFSET,
                     width: widthMeters / SCALE,
                     height: heightMeters / SCALE,
                 };
@@ -33,7 +33,7 @@ export function useRoom() {
             }
         }
 
-        return { x: defaultX, y: defaultY, width: defaultWidthMeters / SCALE, height: defaultHeightMeters / SCALE };
+    return { x: defaultX, y: defaultY, width: defaultWidthMeters / SCALE, height: defaultHeightMeters / SCALE };
     })();
 
 
@@ -45,7 +45,7 @@ export function useRoom() {
         let { x, y, width, height } = room;
 
         switch (index) {
-            case 0: // Top-left
+            case 0: { // Top-left
                 const newX = clamp(pos.x, MARGIN, x + width - MIN_WIDTH);
                 const newY = clamp(pos.y, MARGIN, y + height - MIN_HEIGHT);
                 width = x + width - newX;
@@ -53,26 +53,30 @@ export function useRoom() {
                 x = newX;
                 y = newY;
                 break;
-            case 1: // Top-right
+            }
+            case 1: { // Top-right
                 const newTRX = clamp(pos.x, x + MIN_WIDTH, STAGE_WIDTH - MARGIN);
                 const newTRY = clamp(pos.y, MARGIN, y + height - MIN_HEIGHT);
                 width = newTRX - x;
                 height = y + height - newTRY;
                 y = newTRY;
                 break;
-            case 2: // Bottom-right
+            }
+            case 2: { // Bottom-right
                 const newBRX = clamp(pos.x, x + MIN_WIDTH, STAGE_WIDTH - MARGIN);
                 const newBRY = clamp(pos.y, y + MIN_HEIGHT, STAGE_HEIGHT - MARGIN);
                 width = newBRX - x;
                 height = newBRY - y;
                 break;
-            case 3: // Bottom-left
+            }
+            case 3: { // Bottom-left
                 const newBLX = clamp(pos.x, MARGIN, x + width - MIN_WIDTH);
                 const newBLY = clamp(pos.y, y + MIN_HEIGHT, STAGE_HEIGHT - MARGIN);
                 width = x + width - newBLX;
                 height = newBLY - y;
                 x = newBLX;
                 break;
+            }
         }
 
         setRoom({ x, y, width, height });

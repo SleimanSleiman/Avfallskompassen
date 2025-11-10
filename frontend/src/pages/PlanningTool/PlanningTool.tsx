@@ -12,6 +12,7 @@ import type { Property } from '../../lib/Property';
 //Components
 import RoomCanvas from './RoomCanvas/RoomCanvas';
 import Sidebar from './Sidebar/Sidebar';
+import { WasteTypeComparisonPanel } from "./Sidebar/CostSection";
 import ActionPanel from './ActionPanel';
 
 //Hooks
@@ -114,7 +115,6 @@ export default function PlanningTool() {
 
     const displayAddress = comparisonData?.address ?? selectedProperty?.address ?? null;
     const apartmentCount = comparisonData?.numberOfApartments ?? selectedProperty?.numberOfApartments ?? null;
-    const apartmentLabel = apartmentCount && apartmentCount > 0 ? `${apartmentCount} lägenheter` : "Antal lägenheter saknas";
     const comparisonGroupSize = comparisonData?.costComparison?.comparisonGroupSize
         ?? comparisonData?.containerSizeComparison?.comparisonGroupSize
         ?? 0;
@@ -128,98 +128,147 @@ export default function PlanningTool() {
                     : "Inga matchande fastigheter i jämförelsen"
             : "Jämförelsedata saknas";
 
+    const formattedApartmentCount = apartmentCount && apartmentCount > 0
+        ? apartmentCount.toLocaleString("sv-SE")
+        : null;
+    const hasComparisonPeers = Boolean(comparisonData) && comparisonGroupSize > 0;
+
+    const propertyHighlights = [
+        {
+            key: "address",
+            title: "Adress",
+            value: displayAddress ?? "Ingen fastighet vald",
+            Icon: MapPin,
+            tone: displayAddress ? "text-gray-900" : "text-gray-400",
+            helper: displayAddress ? null : "Välj en fastighet för att se detaljer",
+        },
+        {
+            key: "apartments",
+            title: "Lägenheter",
+            value: formattedApartmentCount ? `${formattedApartmentCount} st` : "Saknas",
+            Icon: Home,
+            tone: formattedApartmentCount ? "text-gray-900" : "text-gray-400",
+        },
+        {
+            key: "comparison",
+            title: "Jämförelseunderlag",
+            value: similarPropertiesLabel,
+            Icon: Users,
+            tone: hasComparisonPeers ? "text-gray-900" : "text-gray-500",
+            helper: comparisonLoading
+                ? "Data uppdateras"
+                : hasComparisonPeers
+                    ? " "
+                    : "Jämförelsedata saknas för vald fastighet",
+        },
+    ];
+
     /* ──────────────── Render ──────────────── */
     return (
-    <div className="flex w-full h-full p-3 sm:p-5 flex-col lg:flex-row gap-4 lg:gap-5">
+        <div className="flex h-full w-full flex-col gap-4 p-3 sm:p-5">
+            <div className="flex w-full flex-1 flex-col gap-4 lg:flex-row lg:gap-4">
 
-            {/* ─────────────── Canvas ──────────────── */}
-            <div className="relative flex w-full min-w-0 flex-col lg:flex-[5]">
-                {/* RoomCanvas displays the room, containers, and doors */}
-                <RoomCanvas
-                    room={room}
-                    corners={corners}
-                    handleDragCorner={handleDragCorner}
-                    setRoom={setRoom}
+                {/* ─────────────── Canvas ──────────────── */}
+                <div className="relative flex w-full min-w-0 flex-col lg:flex-[5] lg:min-w-[900px] xl:flex-[6]">
+                    {/* RoomCanvas displays the room, containers, and doors */}
+                    <RoomCanvas
+                        room={room}
+                        corners={corners}
+                        handleDragCorner={handleDragCorner}
+                        setRoom={setRoom}
 
-                    doors={doors}
-                    selectedDoorId={selectedDoorId}
-                    handleDragDoor={handleDragDoor}
-                    handleSelectDoor={handleSelectDoor}
-                    handleAddDoor={handleAddDoor}
-                    doorZones={getDoorZones()}
+                        doors={doors}
+                        selectedDoorId={selectedDoorId}
+                        handleDragDoor={handleDragDoor}
+                        handleSelectDoor={handleSelectDoor}
+                        handleAddDoor={handleAddDoor}
+                        doorZones={getDoorZones()}
 
-                    containers={containersInRoom}
-                    selectedContainerId={selectedContainerId}
-                    handleDragContainer={handleDragContainer}
-                    handleSelectContainer={handleSelectContainer}
-                    getContainerZones={getContainerZones}
-                    draggedContainer={draggedContainer}
-                    setSelectedContainerInfo={setSelectedContainerInfo}
-                    selectedContainerInfo={selectedContainerInfo}
+                        containers={containersInRoom}
+                        selectedContainerId={selectedContainerId}
+                        handleDragContainer={handleDragContainer}
+                        handleSelectContainer={handleSelectContainer}
+                        getContainerZones={getContainerZones}
+                        draggedContainer={draggedContainer}
+                        setSelectedContainerInfo={setSelectedContainerInfo}
+                        selectedContainerInfo={selectedContainerInfo}
 
-                    isStageDropActive={isStageDropActive}
-                    stageWrapperRef={stageWrapperRef}
-                    handleStageDrop={handleStageDrop}
-                    handleStageDragOver={handleStageDragOver}
-                    handleStageDragLeave={handleStageDragLeave}
-                    serviceTypes={serviceTypes}
-                    selectedType={selectedType}
-                    setSelectedType={setSelectedType}
-                    availableContainers={availableContainers}
-                    selectedSize={selectedSize}
-                    setSelectedSize={setSelectedSize}
-                    isLoadingContainers={isLoadingContainers}
-                    fetchContainers={fetchAvailableContainers}
-                    handleAddContainer={handleAddContainer}
-                    setIsStageDropActive={setIsStageDropActive}
-                    setDraggedContainer={setDraggedContainer}
-                />
+                        isStageDropActive={isStageDropActive}
+                        stageWrapperRef={stageWrapperRef}
+                        handleStageDrop={handleStageDrop}
+                        handleStageDragOver={handleStageDragOver}
+                        handleStageDragLeave={handleStageDragLeave}
+                        serviceTypes={serviceTypes}
+                        selectedType={selectedType}
+                        setSelectedType={setSelectedType}
+                        availableContainers={availableContainers}
+                        selectedSize={selectedSize}
+                        setSelectedSize={setSelectedSize}
+                        isLoadingContainers={isLoadingContainers}
+                        fetchContainers={fetchAvailableContainers}
+                        handleAddContainer={handleAddContainer}
+                        setIsStageDropActive={setIsStageDropActive}
+                        setDraggedContainer={setDraggedContainer}
+                    />
 
-                {/* ActionPanel for selected container or door */}
-                {(selectedContainerId !== null || selectedDoorId !== null) && (
-                    <div className="absolute top-4 right-4 z-50">
-                        <ActionPanel
-                            containers={containersInRoom}
-                            doors={doors}
-                            selectedContainerId={selectedContainerId}
-                            selectedDoorId={selectedDoorId}
-                            handleRemoveContainer={handleRemoveContainer}
-                            handleRemoveDoor={handleRemoveDoor}
-                            handleRotateDoor={handleRotateDoor}
-                            handleRotateContainer={handleRotateContainer}
-                            handleShowContainerInfo={handleShowContainerInfo}
+                    {/* ActionPanel for selected container or door */}
+                    {(selectedContainerId !== null || selectedDoorId !== null) && (
+                        <div className="absolute top-4 right-4 z-50">
+                            <ActionPanel
+                                containers={containersInRoom}
+                                doors={doors}
+                                selectedContainerId={selectedContainerId}
+                                selectedDoorId={selectedDoorId}
+                                handleRemoveContainer={handleRemoveContainer}
+                                handleRemoveDoor={handleRemoveDoor}
+                                handleRotateDoor={handleRotateDoor}
+                                handleRotateContainer={handleRotateContainer}
+                                handleShowContainerInfo={handleShowContainerInfo}
+                            />
+                        </div>
+                    )}
+
+                    <div className="mt-4 rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
+                        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                            {propertyHighlights.map(({ key, Icon, title, value, tone, helper }) => (
+                                <div key={key} className="flex items-center gap-3 rounded-xl border border-gray-200/70 bg-gray-50/60 p-3">
+                                    <span className="flex h-10 w-10 items-center justify-center rounded-full bg-white text-nsr-teal shadow-sm">
+                                        <Icon className="h-5 w-5" />
+                                    </span>
+                                    <div className="min-w-0">
+                                        <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-500">{title}</p>
+                                        <p className={`truncate text-sm font-medium leading-tight ${tone}`}>{value}</p>
+                                        {helper ? (
+                                            <p className="text-[11px] text-gray-400">{helper}</p>
+                                        ) : null}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
+                    <div className="mt-4">
+                        <WasteTypeComparisonPanel
+                            comparisonData={comparisonData}
+                            comparisonLoading={comparisonLoading}
+                            comparisonError={comparisonError}
+                            selectedProperty={selectedProperty}
+                            containersInRoom={containersInRoom}
                         />
                     </div>
-                )}
-
-                <div className="mt-4 rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
-                    <div className="flex flex-wrap items-center gap-3 text-sm text-gray-600">
-                        <span className="flex items-center gap-2 text-gray-700">
-                            <MapPin className="h-4 w-4 text-nsr-teal" />
-                            {displayAddress ?? "Ingen fastighet vald"}
-                        </span>
-                        <span className="flex items-center gap-2 text-gray-700">
-                            <Home className="h-4 w-4 text-nsr-teal" />
-                            {apartmentLabel}
-                        </span>
-                        <span className="flex items-center gap-2 text-gray-700">
-                            <Users className="h-4 w-4 text-nsr-teal" />
-                            {similarPropertiesLabel}
-                        </span>
-                    </div>
                 </div>
-            </div>
 
-            {/* ─────────────── Sidebar ──────────────── */}
-            <div className="w-full lg:flex-[6] lg:pl-6 flex flex-col min-w-0">
-                <Sidebar
-                    //Comparison data
-                    comparisonData={comparisonData}
-                    comparisonLoading={comparisonLoading}
-                    comparisonError={comparisonError}
-                    selectedProperty={selectedProperty}
-                    containersInRoom={containersInRoom}
-                />
+                {/* ─────────────── Sidebar ──────────────── */}
+                <div className="flex w-full min-w-0 flex-col lg:flex-[5] xl:flex-[4] lg:pl-5">
+                    <Sidebar
+                        //Comparison data
+                        comparisonData={comparisonData}
+                        comparisonLoading={comparisonLoading}
+                        comparisonError={comparisonError}
+                        selectedProperty={selectedProperty}
+                        containersInRoom={containersInRoom}
+                    />
+                </div>
             </div>
         </div>
     );

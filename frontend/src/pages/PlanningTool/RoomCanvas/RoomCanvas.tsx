@@ -4,7 +4,6 @@
  */
 import { Stage, Layer, Group, Rect } from "react-konva";
 import { useCallback, useEffect, useState, type Dispatch, type SetStateAction } from "react";
-import { createPortal } from "react-dom";
 import RoomShape from "./RoomShape";
 import CornerHandles from "./CornerHandles";
 import DoorsLayer from "./DoorsLayer";
@@ -115,7 +114,6 @@ export default function RoomCanvas({
     const [isRoomPromptOpen, setIsRoomPromptOpen] = useState(false);
     const [isDoorPromptOpen, setIsDoorPromptOpen] = useState(false);
     const [isContainerPanelOpen, setIsContainerPanelOpen] = useState(false);
-    const [isDomReady, setIsDomReady] = useState(false);
 
     const handleConfirmRoomSize = (length: number, width: number) => {
         setRoom({
@@ -125,11 +123,7 @@ export default function RoomCanvas({
             height: length / SCALE,
         });
         setIsRoomPromptOpen(false);
-      };
-
-    useEffect(() => {
-        setIsDomReady(true);
-    }, []);
+            };
 
     const handleAddDoorWithPrompt = (width: number) => {
         const success = handleAddDoor({ width });
@@ -214,8 +208,146 @@ export default function RoomCanvas({
             onDragOver={handleStageDragOver}
             onDragLeave={handleStageDragLeave}
         >
-            {/* Top-left action buttons */}
-            <div className="absolute top-4 left-4 flex flex-row items-center gap-2 z-50">
+            <div className="flex flex-col gap-4">
+                <div
+                    className={`transition-all duration-300 ease-out overflow-hidden ${isContainerPanelOpen ? "max-h-[75vh] opacity-100" : "max-h-0 opacity-0 pointer-events-none"}`}
+                >
+                    <div className="relative rounded-2xl border border-gray-200 bg-white shadow-xl">
+                        <div className="flex items-start justify-between gap-5 px-4 py-4 sm:px-6">
+                            <div>
+                                <h3 className="text-sm font-semibold text-gray-900">Välj sopkärl</h3>
+                                <p className="text-xs text-gray-500">Öppna en tjänst nedan, filtrera på volym och dra kärlet till ritningen eller använd Lägg till.</p>
+                            </div>
+                            <button
+                                onClick={closeContainerPanel}
+                                className="p-1 rounded-full text-gray-500 hover:text-gray-700 hover:bg-gray-100"
+                                aria-label="Stäng sopkärlspanelen"
+                            >
+                                <X className="w-4 h-4" />
+                            </button>
+                        </div>
+
+                        <div className="px-4 pb-6 sm:px-6">
+                            {serviceTypes.length === 0 ? (
+                                <p className="text-sm text-gray-500">Inga avfallstjänster kunde hämtas just nu.</p>
+                            ) : (
+                                <div className="mb-3">
+                                    <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-9 xl:grid-cols-13">
+                                        {serviceTypes.map((type) => {
+                                            const isSelected = selectedType === type.name;
+                                            const initials = getServiceIconLabel(type.name);
+
+                                            return (
+                                                <button
+                                                    key={type.id}
+                                                    title={type.name}
+                                                    onClick={() => handleSelectServiceType(type)}
+                                                    className="flex flex-col items-center gap-1 text-xs font-medium text-gray-600 focus:outline-none"
+                                                >
+                                                    <span
+                                                        className={`flex h-12 w-full items-center justify-center rounded-xl border text-sm font-semibold transition ${isSelected ? "bg-nsr-teal text-white border-nsr-teal" : "bg-white text-gray-700 border-gray-300 hover:bg-nsr-teal/10"}`}
+                                                    >
+                                                        {initials}
+                                                    </span>
+                                                    <span className={`text-[11px] leading-tight text-center ${isSelected ? "text-nsr-teal" : "text-gray-600"}`}>
+                                                        {type.name}
+                                                    </span>
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+                            )}
+
+                            <div className="max-h-[50vh] overflow-y-auto pr-1">
+                                {!activeType ? (
+                                    <p className="text-sm text-gray-500">Välj en avfallstjänst för att visa tillgängliga sopkärl.</p>
+                                ) : isLoadingContainers ? (
+                                    <div className="flex items-center justify-center py-10">
+                                        <div className="h-10 w-10 animate-spin rounded-full border-4 border-gray-300 border-t-transparent" />
+                                    </div>
+                                ) : containersForActiveType.length === 0 ? (
+                                    <p className="text-sm text-gray-500">Inga kärl hittades för {activeType.name}.</p>
+                                ) : (
+                                    <div className="space-y-4">
+                                        {sizeOptions.length > 0 && (
+                                            <div className="flex flex-wrap gap-2">
+                                                {sizeOptions.map((size) => (
+                                                    <button
+                                                        key={`${activeType.id}-${size}`}
+                                                        onClick={() => handleToggleSize(activeType.id, size)}
+                                                        className={`rounded-lg border px-3 py-1 text-xs font-semibold transition ${activeSize === size ? "bg-nsr-teal text-white border-nsr-teal" : "bg-white text-gray-700 hover:bg-nsr-teal/10"}`}
+                                                    >
+                                                        {size} L
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        )}
+
+                                        <div className="max-h-[165px] overflow-y-auto pr-1">
+                                            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                                                {filteredContainers.length === 0 && (
+                                                    <p className="col-span-full text-xs text-gray-500">Ingen matchande volym. Välj en annan volym.</p>
+                                                )}
+
+                                                {filteredContainers.map((container) => (
+                                                    <div
+                                                        key={container.id}
+                                                        className="flex flex-col rounded-2xl border border-gray-200 bg-white p-3 shadow-sm"
+                                                    >
+                                                        <div className="flex items-start gap-3">
+                                                            <img
+                                                                src={`http://localhost:8081${container.imageFrontViewUrl}`}
+                                                                alt={container.name}
+                                                                className="h-16 w-16 flex-shrink-0 object-contain cursor-move"
+                                                                draggable
+                                                                onDragStart={(event) => {
+                                                                    event.dataTransfer.effectAllowed = "copy";
+                                                                    event.dataTransfer.setData(DRAG_DATA_FORMAT, JSON.stringify(container));
+                                                                    event.dataTransfer.setData("text/plain", container.name);
+                                                                    setIsStageDropActive(true);
+                                                                    setDraggedContainer(container);
+                                                                }}
+                                                                onDragEnd={() => {
+                                                                    setIsStageDropActive(false);
+                                                                    setDraggedContainer(null);
+                                                                }}
+                                                            />
+                                                            <div className="flex flex-1 flex-col gap-1 text-xs text-gray-600">
+                                                                <p className="text-sm font-semibold text-gray-900">{container.name}</p>
+                                                                <p>{container.width} × {container.height} × {container.depth} mm</p>
+                                                                <p>Tömningsfrekvens: {container.emptyingFrequencyPerYear}/år</p>
+                                                                <p>Kostnad: {container.cost} kr/år</p>
+                                                            </div>
+                                                        </div>
+                                                        <div className="mt-3 flex gap-2">
+                                                            <button
+                                                                onClick={() => handleAddContainer(container)}
+                                                                className="flex-1 rounded-lg border border-emerald-600 px-3 py-2 text-xs font-semibold text-emerald-700 hover:bg-emerald-50 transition"
+                                                            >
+                                                                Lägg till
+                                                            </button>
+                                                            <button
+                                                                onClick={() => setSelectedContainerInfo(container)}
+                                                                className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-xs font-semibold text-gray-600 hover:bg-gray-100 transition"
+                                                            >
+                                                                Info
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="relative inline-block">
+                    {/* Top-left action buttons */}
+                    <div className="absolute top-4 left-4 flex flex-row items-center gap-2 z-50">
                 {/* Change room size */}
                 <button
                     onClick={() => setIsRoomPromptOpen(true)}
@@ -267,8 +399,8 @@ export default function RoomCanvas({
                 </button>
             </div>
 
-            {/* Konva Stage */}
-            <Stage
+                    {/* Konva Stage */}
+                    <Stage
                 width={STAGE_WIDTH}
                 height={STAGE_HEIGHT}
                 onMouseDown={(e) => {
@@ -353,170 +485,11 @@ export default function RoomCanvas({
                         setIsDraggingContainer={setIsDraggingContainer}
                     />
                 </Layer>
-            </Stage>
+                    </Stage>
 
-            {/* Room Size Prompt */}
-            {isRoomPromptOpen && (
-                <RoomSizePrompt
-                    onConfirm={handleConfirmRoomSize}
-                    onCancel={() => setIsRoomPromptOpen(false)}
-                />
-            )}
-
-            {/* Door Width Prompt */}
-            {isDoorPromptOpen && (
-                <DoorWidthPrompt
-                    onConfirm={handleAddDoorWithPrompt}
-                    onCancel={() => setIsDoorPromptOpen(false)}
-                />
-            )}
-
-            {/* Container palette rendered as bottom drawer */}
-            {isDomReady &&
-                createPortal(
-                    <div className={`fixed inset-x-0 bottom-0 z-[60] ${isContainerPanelOpen ? "pointer-events-auto" : "pointer-events-none"}`}>
-                        <div className={`w-full transform transition-transform duration-300 ease-out ${isContainerPanelOpen ? "translate-y-0" : "translate-y-full"}`}>
-                            <div className="border-t border-gray-200 bg-white shadow-2xl">
-                                <div className="mx-auto w-full px-4 sm:px-6 lg:px-8 py-3">
-                                    <div className="flex items-start justify-between gap-5">
-                                        <div>
-                                            <h3 className="text-sm font-semibold text-gray-900">Välj sopkärl</h3>
-                                            <p className="text-xs text-gray-500">Öppna en tjänst nedan, filtrera på volym och dra kärlet till ritningen eller använd Lägg till.</p>
-                                        </div>
-                                        <button
-                                            onClick={closeContainerPanel}
-                                            className="p-1 rounded-full text-gray-500 hover:text-gray-700 hover:bg-gray-100"
-                                            aria-label="Stäng sopkärlspanelen"
-                                        >
-                                            <X className="w-4 h-4" />
-                                        </button>
-                                    </div>
-                                </div>
-
-                                <div className="mx-auto w-full px-4 sm:px-6 lg:px-8 pb-30">
-                                    {serviceTypes.length === 0 ? (
-                                        <p className="text-sm text-gray-500">Inga avfallstjänster kunde hämtas just nu.</p>
-                                    ) : (
-                                        <div className="mb-3">
-                                            <div className="grid grid-cols-3 gap-9 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-9 xl:grid-cols-13">
-                                                {serviceTypes.map((type) => {
-                                                    const isSelected = selectedType === type.name;
-                                                    const initials = getServiceIconLabel(type.name);
-
-                                                    return (
-                                                        <button
-                                                            key={type.id}
-                                                            title={type.name}
-                                                            onClick={() => handleSelectServiceType(type)}
-                                                            className="flex flex-col items-center gap-1 text-xs font-medium text-gray-600 focus:outline-none"
-                                                        >
-                                                            <span
-                                                                className={`flex h-12 w-full items-center justify-center rounded-xl border text-sm font-semibold transition ${isSelected ? "bg-nsr-teal text-white border-nsr-teal" : "bg-white text-gray-700 border-gray-300 hover:bg-nsr-teal/10"}`}
-                                                            >
-                                                                {initials}
-                                                            </span>
-                                                            <span className={`text-[11px] leading-tight text-center ${isSelected ? "text-nsr-teal" : "text-gray-600"}`}>
-                                                                {type.name}
-                                                            </span>
-                                                        </button>
-                                                    );
-                                                })}
-                                            </div>
-                                        </div>
-                                    )}
-
-                                    <div className="max-h-[50vh] overflow-y-auto pr-1">
-                                        {!activeType ? (
-                                            <p className="text-sm text-gray-500">Välj en avfallstjänst för att visa tillgängliga sopkärl.</p>
-                                        ) : isLoadingContainers ? (
-                                            <div className="flex items-center justify-center py-10">
-                                                <div className="h-10 w-10 animate-spin rounded-full border-4 border-gray-300 border-t-transparent" />
-                                            </div>
-                                        ) : containersForActiveType.length === 0 ? (
-                                            <p className="text-sm text-gray-500">Inga kärl hittades för {activeType.name}.</p>
-                                        ) : (
-                                            <div className="space-y-4">
-                                                {sizeOptions.length > 0 && (
-                                                    <div className="flex flex-wrap gap-2">
-                                                        {sizeOptions.map((size) => (
-                                                            <button
-                                                                key={`${activeType.id}-${size}`}
-                                                                onClick={() => handleToggleSize(activeType.id, size)}
-                                                                className={`rounded-lg border px-3 py-1 text-xs font-semibold transition ${activeSize === size ? "bg-nsr-teal text-white border-nsr-teal" : "bg-white text-gray-700 hover:bg-nsr-teal/10"}`}
-                                                            >
-                                                                {size} L
-                                                            </button>
-                                                        ))}
-                                                    </div>
-                                                )}
-
-                                                <div className="max-h-[165px] overflow-y-auto pr-1">
-                                                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                                                        {filteredContainers.length === 0 && (
-                                                            <p className="col-span-full text-xs text-gray-500">Ingen matchande volym. Välj en annan volym.</p>
-                                                        )}
-
-                                                        {filteredContainers.map((container) => (
-                                                            <div
-                                                                key={container.id}
-                                                                className="flex flex-col rounded-2xl border border-gray-200 bg-white p-3 shadow-sm"
-                                                            >
-                                                                <div className="flex items-start gap-3">
-                                                                    <img
-                                                                        src={`http://localhost:8081${container.imageFrontViewUrl}`}
-                                                                        alt={container.name}
-                                                                        className="h-16 w-16 flex-shrink-0 object-contain cursor-move"
-                                                                        draggable
-                                                                        onDragStart={(event) => {
-                                                                            event.dataTransfer.effectAllowed = "copy";
-                                                                            event.dataTransfer.setData(DRAG_DATA_FORMAT, JSON.stringify(container));
-                                                                            event.dataTransfer.setData("text/plain", container.name);
-                                                                            setIsStageDropActive(true);
-                                                                            setDraggedContainer(container);
-                                                                        }}
-                                                                        onDragEnd={() => {
-                                                                            setIsStageDropActive(false);
-                                                                            setDraggedContainer(null);
-                                                                        }}
-                                                                    />
-                                                                    <div className="flex flex-1 flex-col gap-1 text-xs text-gray-600">
-                                                                        <p className="text-sm font-semibold text-gray-900">{container.name}</p>
-                                                                        <p>{container.width} × {container.height} × {container.depth} mm</p>
-                                                                        <p>Tömningsfrekvens: {container.emptyingFrequencyPerYear}/år</p>
-                                                                        <p>Kostnad: {container.cost} kr/år</p>
-                                                                    </div>
-                                                                </div>
-                                                                <div className="mt-3 flex gap-2">
-                                                                    <button
-                                                                        onClick={() => handleAddContainer(container)}
-                                                                        className="flex-1 rounded-lg border border-emerald-600 px-3 py-2 text-xs font-semibold text-emerald-700 hover:bg-emerald-50 transition"
-                                                                    >
-                                                                        Lägg till
-                                                                    </button>
-                                                                    <button
-                                                                        onClick={() => setSelectedContainerInfo(container)}
-                                                                        className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-xs font-semibold text-gray-600 hover:bg-gray-100 transition"
-                                                                    >
-                                                                        Info
-                                                                    </button>
-                                                                </div>
-                                                            </div>
-                                                        ))}
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        )}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>,
-                    document.body
-                )}
-
-            {/* Selected container information */}
-            {selectedContainerInfo && (
-                <div className="absolute bottom-4 left-4 z-40 w-[320px] sm:w-[360px] rounded-2xl border border-gray-200 bg-white shadow-xl p-4">
+                    {/* Selected container information */}
+                    {selectedContainerInfo && (
+                        <div className="absolute bottom-4 left-4 z-40 w-[320px] sm:w-[360px] rounded-2xl border border-gray-200 bg-white shadow-xl p-4">
                     <div className="flex items-start justify-between">
                         <div>
                             <h3 className="text-sm font-semibold text-gray-900">{selectedContainerInfo.name}</h3>
@@ -547,7 +520,25 @@ export default function RoomCanvas({
                             )}
                         </div>
                     </div>
+                        </div>
+                    )}
                 </div>
+            </div>
+
+            {/* Room Size Prompt */}
+            {isRoomPromptOpen && (
+                <RoomSizePrompt
+                    onConfirm={handleConfirmRoomSize}
+                    onCancel={() => setIsRoomPromptOpen(false)}
+                />
+            )}
+
+            {/* Door Width Prompt */}
+            {isDoorPromptOpen && (
+                <DoorWidthPrompt
+                    onConfirm={handleAddDoorWithPrompt}
+                    onCancel={() => setIsDoorPromptOpen(false)}
+                />
             )}
         </div>
     );

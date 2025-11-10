@@ -28,11 +28,11 @@ export default function Sidebar({
 
     /* ─────────────── Render ─────────────── */
     return (
-        <div className="pl-0 lg:pl-0 flex flex-col min-w-0">
-            <div className="flex flex-col gap-4">
+        <div className="pl-0 lg:pl-0 flex flex-col min-w-0 flex-1">
+            <div className="flex flex-col gap-4 flex-1">
 
                 {/* ---------- Lower box: Costs ---------- */}
-                <div className="flex flex-col border rounded-2xl bg-white px-3 py-3 sm:p-4 transition-all duration-300 min-w-0">
+                <div className="flex flex-col border rounded-2xl bg-white px-3 py-3 sm:p-4 transition-all duration-300 min-w-0 flex-1">
                     <CostSection
                         comparisonData={comparisonData}
                         comparisonLoading={comparisonLoading}

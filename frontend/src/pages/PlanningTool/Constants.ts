@@ -39,9 +39,12 @@ export const MIN_WIDTH = 2.5 / SCALE;
 export const MIN_HEIGHT = 2.5 / SCALE;
 
 //Canvas dimensions and margins
-export const MARGIN = 45;
-export const STAGE_WIDTH = 620;
-export const STAGE_HEIGHT = 450;
+export const MARGIN = 70;
+export const STAGE_WIDTH = 880;
+export const STAGE_HEIGHT = 570;
+
+export const ROOM_VERTICAL_OFFSET = 35;
+export const ROOM_HORIZONTAL_OFFSET = 0;
 
 //Drag-and-drop data format for containers
 export const DRAG_DATA_FORMAT = 'application/avfallskompassen-container';
