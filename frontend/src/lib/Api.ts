@@ -2,7 +2,10 @@ import { currentUser } from './Auth';
 
 export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
 
-const API_BASE_URL = 'http://localhost:8081'; // Add this line
+// empty base URL in development so Vite's dev server proxy (configured in vite.config.ts)
+// can forward /api requests to the backend and avoid CORS issues. For production, replace
+// this with the real backend URL via an environment variable (VITE_API_BASE_URL).
+const API_BASE_URL = '';
 
 export async function api<T>(
   url: string,
@@ -26,7 +29,22 @@ export async function api<T>(
     credentials: 'omit',
   });
 
-  const text = await res.text();
+  // Some test mocks (and possibly non-standard fetch implementations) may not
+  // provide a `text()` method. Try `text()` first, and fall back to `json()`
+  // if `text` isn't available. If `json()` returns an object, stringify it so
+  // the rest of the logic can parse it the same way.
+  let text = '';
+  if (res && typeof (res as any).text === 'function') {
+    text = await (res as any).text();
+  } else if (res && typeof (res as any).json === 'function') {
+    try {
+      const j = await (res as any).json();
+      text = typeof j === 'string' ? j : JSON.stringify(j);
+    } catch {
+      text = '';
+    }
+  }
+
   const data = text ? (() => { try { return JSON.parse(text) } catch { return text } })() : null;
 
   if (!res.ok) {

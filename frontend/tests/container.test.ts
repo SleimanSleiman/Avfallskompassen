@@ -1,16 +1,17 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { fetchContainersByMunicipalityAndService, ContainerDTO } from '../src/lib/container';
+import * as api from '../src/lib/api';
 
-//Mocking fetch API
+// Mocking api.get
 describe('fetchContainersByMunicipalityAndService', () => {
     beforeEach(() => {
         vi.restoreAllMocks();
     });
 
-    //Test for successful fetch
-    it('should return a list of containers when fetch succeeds', async () => {
+    it('should return a list of containers when api.get succeeds', async () => {
         const mockData: ContainerDTO[] = [
             {
+                id: 1,
                 name: 'Container1',
                 size: 100,
                 width: 50,
@@ -22,6 +23,7 @@ describe('fetchContainersByMunicipalityAndService', () => {
                 cost: 200,
             },
             {
+                id: 2,
                 name: 'Container2',
                 size: 200,
                 width: 80,
@@ -34,24 +36,16 @@ describe('fetchContainersByMunicipalityAndService', () => {
             },
         ];
 
-        vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
-            ok: true,
-            json: async () => mockData,
-        }));
+        vi.spyOn(api, 'get').mockResolvedValue(mockData as any);
 
         const result = await fetchContainersByMunicipalityAndService(1, 2);
 
         expect(result).toEqual(mockData);
     });
 
-    //Test for failed fetch
-    it('should throw an error when fetch fails', async () => {
-        vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
-            ok: false,
-        }));
+    it('should throw when api.get rejects', async () => {
+        vi.spyOn(api, 'get').mockRejectedValue(new Error('network error'));
 
-        await expect(fetchContainersByMunicipalityAndService(1, 2))
-            .rejects
-            .toThrow('Failed to fetch containers by municipality and service');
+        await expect(fetchContainersByMunicipalityAndService(1, 2)).rejects.toThrow('network error');
     });
 });
