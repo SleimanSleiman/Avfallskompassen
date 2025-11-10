@@ -1,12 +1,12 @@
 import { describe, it, expect, vi } from "vitest";
-import { renderHook, act, waitFor} from "@testing-library/react";
-import { useContainers } from "../../../../src/pages/PlanningTool/hooks/UseContainers";
+import { renderHook, act } from "@testing-library/react";
+import { useContainers } from "../../../../src/pages/PlanningTool/hooks/useContainers";
 import { fetchContainersByMunicipalityAndService } from "../../../../src/lib/Container";
 
 //Mock dependencies
 vi.mock("../../../../src/lib/Container");
 vi.mocked(fetchContainersByMunicipalityAndService).mockResolvedValue([
-    { id: 1, width: 1000, depth: 800, name: "Small Bin" },
+    { id: 1, width: 1000, depth: 800, name: "Small Bin", size: 10, height: 1200, imageFrontViewUrl: "", imageTopViewUrl: "", emptyingFrequencyPerYear: 12, cost: 100 },
 ]);
 
 const mockRoom = { id: 1, x: 0, y: 0, width: 500, height: 500 };
@@ -24,6 +24,7 @@ describe("useContainers", () => {
 
         act(() => {
             result.current.handleAddContainer({
+                id: 1,
                 name: "Test Container",
                 size: 15,
                 width: 1000,
@@ -52,6 +53,7 @@ describe("useContainers", () => {
 
         act(() => {
             result.current.handleAddContainer({
+            id: 1,
                 name: "Test Container",
                 size: 15,
                 width: 1000,
@@ -85,6 +87,7 @@ describe("useContainers", () => {
 
         act(() => {
         result.current.handleAddContainer({
+            id: 1,
             name: "Test Container",
             size: 15,
             width: 1000,
@@ -137,6 +140,7 @@ describe("useContainers", () => {
 
         act(() => {
             result.current.handleAddContainer({
+                id: 1,
             name: "Rotating Container",
             size: 10,
             width: 500,
@@ -179,12 +183,18 @@ describe("useContainers", () => {
         const mockContainer = {
             id: 1,
             name: "Overlap Test",
+            size: 15,
             width: 1000,
             depth: 800,
+            height: 1200,
+            imageFrontViewUrl: "/mock/front.png",
+            imageTopViewUrl: "/mock/top.png",
+            emptyingFrequencyPerYear: 12,
+            cost: 250,
         };
 
         act(() => {
-            result.current.handleAddContainer(mockContainer);
+        result.current.handleAddContainer(mockContainer);
         });
 
         //Try to add another container at same position
@@ -207,14 +217,16 @@ describe("useContainers", () => {
 
       act(() => {
         result.current.handleAddContainer({
-          name: "Info Container",
-          width: 1000,
-          depth: 800,
-          height: 1200,
-          imageFrontViewUrl: "/mock/front.png",
-          imageTopViewUrl: "/mock/top.png",
-          emptyingFrequencyPerYear: 12,
-          cost: 250,
+            id: 1,
+            name: "Info Container",
+            size: 15,
+            width: 1000,
+            depth: 800,
+            height: 1200,
+            imageFrontViewUrl: "/mock/front.png",
+            imageTopViewUrl: "/mock/top.png",
+            emptyingFrequencyPerYear: 12,
+            cost: 250,
         });
       });
 
@@ -234,11 +246,11 @@ describe("useContainers", () => {
       );
 
       await act(async () => {
-        await result.current.fetchAvailableContainers(5);
+                await result.current.fetchAvailableContainers({ id: 5, name: "Restavfall" });
       });
 
       expect(vi.mocked(fetchContainersByMunicipalityAndService)).toHaveBeenCalledWith(1, 5);
-      expect(result.current.availableContainers.length).toBe(1);
+            expect(result.current.availableContainers.length).toBe(1);
       expect(result.current.isLoadingContainers).toBe(false);
     });
 
