@@ -5,7 +5,6 @@ import com.avfallskompassen.model.CollectionFee;
 import com.avfallskompassen.repository.CollectionFeeRepository;
 import com.avfallskompassen.services.CollectionFeeService;
 import com.avfallskompassen.services.PropertyService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,10 +19,14 @@ import java.math.BigDecimal;
 @Transactional
 public class CollectionFeeServiceImpl implements CollectionFeeService {
 
-    @Autowired
-    private CollectionFeeRepository collectionFeeRepository;
-    @Autowired
-    private PropertyService propertyService;
+    private final CollectionFeeRepository collectionFeeRepository;
+    private final PropertyService propertyService;
+
+    public CollectionFeeServiceImpl(CollectionFeeRepository collectionFeeRepository,
+                                    PropertyService propertyService) {
+        this.collectionFeeRepository = collectionFeeRepository;
+        this.propertyService = propertyService;
+    }
 
     /**
      * Method that returns a DTO based on userInput distance and municipality.

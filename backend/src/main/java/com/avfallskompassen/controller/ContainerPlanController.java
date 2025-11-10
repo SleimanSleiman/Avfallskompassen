@@ -2,8 +2,6 @@ package com.avfallskompassen.controller;
 
 import com.avfallskompassen.dto.CollectionFeeDTO;
 import com.avfallskompassen.services.CollectionFeeService;
-import com.avfallskompassen.services.impl.CollectionFeeServiceImpl;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,8 +17,11 @@ import org.springframework.web.server.ResponseStatusException;
 @RequestMapping("/api/containerPlan")
 public class ContainerPlanController {
 
-    @Autowired
-    private CollectionFeeService collectionFeeService;
+    private final CollectionFeeService collectionFeeService;
+
+    private ContainerPlanController(CollectionFeeService collectionFeeService) {
+        this.collectionFeeService = collectionFeeService;
+    }
 
     /**
      * Handles requests for fetching the collection fee based on municipality and distance.
@@ -32,7 +33,11 @@ public class ContainerPlanController {
      * @throws ResponseStatusException if no fee could be found for the given municipality or distance
      */
     @GetMapping("/collectionFeeInput/{municipalityId}")
-    public ResponseEntity<CollectionFeeDTO> getCollectionFeeByMunicalityId(@PathVariable Long municipalityId, @RequestParam(name = "distance") double distance){
+    public ResponseEntity<CollectionFeeDTO> getCollectionFeeByMunicipalityId(@PathVariable Long municipalityId, @RequestParam(name = "distance") double distance){
+
+        if(municipalityId == null || municipalityId <= 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Municipality ID must be valid");
+        }
         CollectionFeeDTO collectionFeeDTO = collectionFeeService.findCollectionFeeByMunicipalityId(municipalityId, distance);
 
         if(collectionFeeDTO == null) {

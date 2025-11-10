@@ -2,6 +2,7 @@ package com.avfallskompassen.services;
 
 import com.avfallskompassen.dto.CollectionFeeDTO;
 import com.avfallskompassen.dto.GeneralPropertyCostDTO;
+import com.avfallskompassen.dto.LockTypeDto;
 import com.avfallskompassen.model.ContainerPlan;
 import com.avfallskompassen.model.LockType;
 import com.avfallskompassen.model.Property;
@@ -53,16 +54,23 @@ public class PropertyCostServiceImplTest {
         property.setAddress("Testgatan 123");
         property.setNumberOfApartments(10);
 
+        LockType lockType = new LockType();
+        lockType.setId(1);
+        lockType.setName("Standardlås");
+        lockType.setCost(BigDecimal.valueOf(200));
+        property.setLockType(lockType);
+
         when(propertyService.findById(propertyId)).thenReturn(Optional.of(property));
 
         var collectionFeeDTO = new CollectionFeeDTO();
         collectionFeeDTO.setCost(BigDecimal.valueOf(1000));
         when(collectionFeeService.findCollectionFeeByPropertyId(propertyId)).thenReturn(collectionFeeDTO);
 
-        LockType lockType = new LockType();
-        lockType.setCost(BigDecimal.valueOf(200));
-        property.setLockType(lockType);
-        when(lockTypeService.findLockTypeById(propertyId)).thenReturn(lockType);
+        LockTypeDto lockTypeDto = new LockTypeDto();
+        lockTypeDto.setId(1L);
+        lockTypeDto.setName("Standardlås");
+        lockTypeDto.setCost(BigDecimal.valueOf(200));
+        when(lockTypeService.findLockTypeById(propertyId)).thenReturn(lockTypeDto);
 
         ContainerPlan plan = new ContainerPlan();
         plan.setCost(BigDecimal.valueOf(150));
@@ -109,10 +117,22 @@ public class PropertyCostServiceImplTest {
         property1.setAddress("Lundväg 1");
         property1.setNumberOfApartments(5);
 
+        LockType lockType1 = new LockType();
+        lockType1.setId(1);
+        lockType1.setName("Standardlås");
+        lockType1.setCost(BigDecimal.valueOf(200));
+        property1.setLockType(lockType1);
+
         Property property2 = new Property();
         property2.setId(2L);
         property2.setAddress("Lundväg 2");
         property2.setNumberOfApartments(10);
+
+        LockType lockType2 = new LockType();
+        lockType2.setId(1);
+        lockType2.setName("Standardlås");
+        lockType2.setCost(BigDecimal.valueOf(200));
+        property2.setLockType(lockType2);
 
         when(propertyService.getPropertiesByUser(username))
                 .thenReturn(List.of(property1, property2));
@@ -126,11 +146,11 @@ public class PropertyCostServiceImplTest {
                     return new CollectionFeeDTO(id, BigDecimal.valueOf(1000 + id));
                 });
 
-        LockType lockType = new LockType();
-        lockType.setCost(BigDecimal.valueOf(200));
-        property1.setLockType(lockType);
-        property2.setLockType(lockType);
-        when(lockTypeService.findLockTypeById(anyLong())).thenReturn(lockType);
+        LockTypeDto lockTypeDto = new LockTypeDto();
+        lockTypeDto.setId(1L);
+        lockTypeDto.setCost(BigDecimal.valueOf(200));
+        lockTypeDto.setName("Standardlås");
+        when(lockTypeService.findLockTypeById(anyLong())).thenReturn(lockTypeDto);
 
         ContainerPlan plan = new ContainerPlan();
         plan.setCost(BigDecimal.valueOf(100));

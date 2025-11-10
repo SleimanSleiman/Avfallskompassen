@@ -1,5 +1,6 @@
 package com.avfallskompassen.services.impl;
 
+import com.avfallskompassen.dto.LockTypeDto;
 import com.avfallskompassen.dto.request.PropertyRequest;
 import com.avfallskompassen.model.*;
 import com.avfallskompassen.repository.MunicipalityRepository;
@@ -37,17 +38,17 @@ public class PropertyServiceImplTest {
     private PropertyServiceImpl service;
 
     private User user;
-    private LockType lockType;
+    private LockTypeDto lockTypeDto;
 
     @BeforeEach
     void setup() {
         user = new User("tester", "pw");
         user.setId(1);
 
-        lockType = new LockType();
-        lockType.setId(2);
-        lockType.setName("L1");
-        lockType.setCost(new BigDecimal("5.0"));
+        lockTypeDto = new LockTypeDto();
+        lockTypeDto.setId(2);
+        lockTypeDto.setName("L1");
+        lockTypeDto.setCost(new BigDecimal("5.0"));
     }
 
     @Test
@@ -68,7 +69,7 @@ public class PropertyServiceImplTest {
         saved.setId(99L);
         when(propertyRepository.save(any())).thenReturn(saved);
 
-        Property result = service.createProperty(req, "tester", lockType);
+        Property result = service.createProperty(req, "tester", lockTypeDto);
 
         assertNotNull(result);
         assertEquals(99L, result.getId());
@@ -77,15 +78,19 @@ public class PropertyServiceImplTest {
         Property toSave = cap.getValue();
         assertEquals("A1", toSave.getAddress());
         assertEquals(PropertyType.SMAHUS, toSave.getPropertyType());
+
+        assertEquals(lockTypeDto.getId(), toSave.getLockType().getId());
+        assertEquals(lockTypeDto.getName(), toSave.getLockType().getName());
+        assertEquals(lockTypeDto.getCost(), toSave.getLockType().getCost());
+
         assertSame(m, toSave.getMunicipality());
-        assertSame(lockType, toSave.getLockType());
     }
 
     @Test
     void createProperty_userNotFound_throws() {
         PropertyRequest req = new PropertyRequest(); req.setAddress("A");
         when(userService.findByUsername("nope")).thenReturn(Optional.empty());
-        RuntimeException ex = assertThrows(RuntimeException.class, () -> service.createProperty(req, "nope", lockType));
+        RuntimeException ex = assertThrows(RuntimeException.class, () -> service.createProperty(req, "nope", lockTypeDto));
         assertTrue(ex.getMessage().contains("User not found"));
     }
 
@@ -94,7 +99,7 @@ public class PropertyServiceImplTest {
         PropertyRequest req = new PropertyRequest(); req.setAddress("A");
         when(userService.findByUsername("tester")).thenReturn(Optional.of(user));
         when(propertyRepository.existsByAddress("A")).thenReturn(true);
-        RuntimeException ex = assertThrows(RuntimeException.class, () -> service.createProperty(req, "tester", lockType));
+        RuntimeException ex = assertThrows(RuntimeException.class, () -> service.createProperty(req, "tester", lockTypeDto));
         assertTrue(ex.getMessage().contains("already exists"));
     }
 
@@ -110,7 +115,7 @@ public class PropertyServiceImplTest {
         when(propertyRepository.existsByAddress("A2")).thenReturn(false);
         when(propertyRepository.save(any())).thenAnswer(i -> i.getArgument(0));
 
-        Property saved = service.createProperty(req, "tester", lockType);
+        Property saved = service.createProperty(req, "tester", lockTypeDto);
         assertEquals(PropertyType.FLERBOSTADSHUS, saved.getPropertyType());
     }
 
@@ -164,7 +169,7 @@ public class PropertyServiceImplTest {
     void updateProperty_notFound_throws() {
         when(propertyRepository.findById(100L)).thenReturn(Optional.empty());
         PropertyRequest req = new PropertyRequest();
-        RuntimeException ex = assertThrows(RuntimeException.class, () -> service.updateProperty(100L, req, "tester", lockType));
+        RuntimeException ex = assertThrows(RuntimeException.class, () -> service.updateProperty(100L, req, "tester", lockTypeDto));
         assertTrue(ex.getMessage().contains("Property not found"));
     }
 
@@ -176,7 +181,7 @@ public class PropertyServiceImplTest {
         when(propertyRepository.existsByIdAndCreatedBy(20L, user)).thenReturn(false);
 
         PropertyRequest req = new PropertyRequest();
-        RuntimeException ex = assertThrows(RuntimeException.class, () -> service.updateProperty(20L, req, "tester", lockType));
+        RuntimeException ex = assertThrows(RuntimeException.class, () -> service.updateProperty(20L, req, "tester", lockTypeDto));
         assertTrue(ex.getMessage().contains("access denied") || ex.getMessage().contains("not found"));
     }
 
@@ -189,7 +194,7 @@ public class PropertyServiceImplTest {
         when(propertyRepository.existsByAddress("NewAddr")).thenReturn(true);
 
         PropertyRequest req = new PropertyRequest(); req.setAddress("NewAddr");
-        RuntimeException ex = assertThrows(RuntimeException.class, () -> service.updateProperty(30L, req, "tester", lockType));
+        RuntimeException ex = assertThrows(RuntimeException.class, () -> service.updateProperty(30L, req, "tester", lockTypeDto));
         assertTrue(ex.getMessage().contains("already exists"));
     }
 
@@ -207,11 +212,13 @@ public class PropertyServiceImplTest {
         req.setNumberOfApartments(9);
         req.setAccessPathLength(4.5);
 
-        Property updated = service.updateProperty(40L, req, "tester", lockType);
+        Property updated = service.updateProperty(40L, req, "tester", lockTypeDto);
         assertEquals("Other", updated.getAddress());
         assertEquals(Integer.valueOf(9), updated.getNumberOfApartments());
         assertEquals(Double.valueOf(4.5), updated.getAccessPathLength());
-        assertSame(lockType, updated.getLockType());
+        assertEquals(lockTypeDto.getId(), updated.getLockType().getId());
+        assertEquals(lockTypeDto.getName(), updated.getLockType().getName());
+        assertEquals(lockTypeDto.getCost(), updated.getLockType().getCost());
     }
 
     @Test
@@ -223,7 +230,7 @@ public class PropertyServiceImplTest {
         when(propertyRepository.save(any())).thenThrow(new DataIntegrityViolationException("boom"));
 
         PropertyRequest req = new PropertyRequest();
-        RuntimeException ex = assertThrows(RuntimeException.class, () -> service.updateProperty(50L, req, "tester", lockType));
+        RuntimeException ex = assertThrows(RuntimeException.class, () -> service.updateProperty(50L, req, "tester", lockTypeDto));
         assertTrue(ex.getMessage().contains("Failed to update property"));
     }
 }
