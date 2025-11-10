@@ -126,7 +126,7 @@ export default function ActionPanel({
             )}
 
             {/* Action buttons */}
-            <div className="flex flex-row items-center justify-center gap-3 flex-wrap">
+            <div className="flex flex-col items-center justify-center gap-3 flex-wrap">
 
                 {/* Information button - only for containers */}
                 {selectedContainerId !== null && (
