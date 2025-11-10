@@ -14,8 +14,8 @@ type DoorMeasurementLayerProps = {
 };
 
 export default function DoorMeasurementLayer({ doors, room }: DoorMeasurementLayerProps) {
-    const baseMargin = 1; //smaller margin keeps measurement guides closer to the wall
-    const textOffset = -5; //reduced offset so labels follow the shortened guides
+    const baseMargin = 1; 
+    const textOffset = -5; 
 
     /* ──────────────── Render ──────────────── */
     return (
