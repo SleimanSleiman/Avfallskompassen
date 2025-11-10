@@ -31,7 +31,7 @@ export const isOverlapping = (
     );
 };
 
-//Scale factor: 1 pixel is about 0.032 meter in real life 
+//Scale factor: 1 pixel is about 0.03 meter in real life 
 export const SCALE = 0.03;
 
 //Minimum room dimensions in pixels
