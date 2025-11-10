@@ -7,9 +7,9 @@ import type { Door, Room } from "../Types";
 import { SCALE, clamp } from "../Constants";
 
 export function useDoors(
-  room: Room,
-  setSelectedDoorId: (id: number | null) => void,
-  setSelectedContainerId: (id: number | null) => void,
+    room: Room | null,
+    setSelectedDoorId: (id: number | null) => void,
+    setSelectedContainerId: (id: number | null) => void,
 ) {
 
     /* ──────────────── Door state ──────────────── */

@@ -21,19 +21,20 @@ import { useContainers } from './hooks/UseContainers';
 import { useServiceTypes } from './hooks/UseServiceTypes';
 
 export default function PlanningTool() {
-    
+
+    /* ──────────────── Door & Container state ──────────────── */
+    const [selectedContainerId, setSelectedContainerId] = useState<number | null>(null);
+    const [selectedDoorId, setSelectedDoorId] = useState<number | null>(null);
+    const [containersInRoom, setContainersInRoom] = useState<ContainerInRoom[]>([]);
+
     /* ──────────────── Room state & logic ──────────────── */
     const {
         room,
         corners,
         handleDragCorner,
-        setRoom
-    } = useRoom();
-
-
-    /* ──────────────── Door & Container state ──────────────── */
-    const [selectedContainerId, setSelectedContainerId] = useState<number | null>(null);
-    const [selectedDoorId, setSelectedDoorId] = useState<number | null>(null);
+        setRoom,
+        getContainersBoundingBox,
+    } = useRoom(containersInRoom, setContainersInRoom);
 
     /* ──────────────── Door logic ──────────────── */
     const {
@@ -48,7 +49,6 @@ export default function PlanningTool() {
 
     /* ──────────────── Container logic ──────────────── */
     const {
-        containersInRoom,
         setDraggedContainer,
         draggedContainer,
         availableContainers,
@@ -73,7 +73,7 @@ export default function PlanningTool() {
         setSelectedContainerInfo,
         handleShowContainerInfo,
         getContainerZones,
-    } = useContainers(room, setSelectedContainerId, setSelectedDoorId, getDoorZones());
+    } = useContainers(room, containersInRoom, setContainersInRoom,setSelectedContainerId, setSelectedDoorId, getDoorZones());
 
     /* ──────────────── Service Types (API data) ──────────────── */
     const serviceTypes = useServiceTypes();
@@ -109,6 +109,8 @@ export default function PlanningTool() {
                     getContainerZones={getContainerZones}
                     draggedContainer={draggedContainer}
                     setSelectedContainerInfo={setSelectedContainerInfo}
+                    getContainersBoundingBox={getContainersBoundingBox}
+                    setContainersInRoom={setContainersInRoom}
 
                     isStageDropActive={isStageDropActive}
                     stageWrapperRef={stageWrapperRef}

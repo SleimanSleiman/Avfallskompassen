@@ -4,9 +4,12 @@
  */
 import { useState } from "react";
 import { SCALE, STAGE_WIDTH, STAGE_HEIGHT, MIN_WIDTH, MIN_HEIGHT, MARGIN, clamp } from "../Constants";
-import type { Room } from "../Types";
+import type { Room, ContainerInRoom } from "../Types";
 
-export function useRoom() {
+export function useRoom(
+    containersInRoom: ContainerInRoom[],
+    setContainersInRoom: React.Dispatch<React.SetStateAction<ContainerInRoom[]>>
+) {
     /* ──────────────── Initial Room State ──────────────── */
     const initialRoom = (() => {
         const savedRoom = localStorage.getItem("trashRoomData");
@@ -40,42 +43,79 @@ export function useRoom() {
     /* ──────────────── Room State ──────────────── */
     const [room, setRoom] = useState<Room>(initialRoom);
 
+    /* ──────────────── Helpers ──────────────── */
+    //Get bounding box of all containers in the room to enforce constraints during resizing
+    function getContainersBoundingBox() {
+        if (containersInRoom.length === 0) {
+            return {
+                minX: room.x + MIN_WIDTH,
+                minY: room.y + MIN_HEIGHT,
+                maxX: room.x + room.width - MIN_WIDTH,
+                maxY: room.y + room.height - MIN_HEIGHT
+            };
+        }
+
+        const minX = Math.min(...containersInRoom.map(c => c.x));
+        const minY = Math.min(...containersInRoom.map(c => c.y));
+        const maxX = Math.max(...containersInRoom.map(c => c.x + c.width));
+        const maxY = Math.max(...containersInRoom.map(c => c.y + c.height));
+
+        return { minX, minY, maxX, maxY };
+    }
+
+    //Ensure containers stay within room bounds after resizing
+    function keepContainersInside(newRoom: Room) {
+        setContainersInRoom(prev => prev.map(c => {
+            let newX = c.x;
+            let newY = c.y;
+
+            if (c.x < newRoom.x) newX = newRoom.x;
+            if (c.y < newRoom.y) newY = newRoom.y;
+            if (c.x + c.width > newRoom.x + newRoom.width) newX = newRoom.x + newRoom.width - c.width;
+            if (c.y + c.height > newRoom.y + newRoom.height) newY = newRoom.y + newRoom.height - c.height;
+
+            return { ...c, x: newX, y: newY };
+        }) );
+    }
+
     //Resize logic
     const handleDragCorner = (index: number, pos: { x: number; y: number }) => {
         let { x, y, width, height } = room;
-
+        const bounds = getContainersBoundingBox();
         switch (index) {
             case 0: // Top-left
-                const newX = clamp(pos.x, MARGIN, x + width - MIN_WIDTH);
-                const newY = clamp(pos.y, MARGIN, y + height - MIN_HEIGHT);
+                const newX = clamp(pos.x, MARGIN, x + width - MIN_WIDTH, bounds.minX);
+                const newY = clamp(pos.y, MARGIN, y + height - MIN_HEIGHT, bounds.minY);
                 width = x + width - newX;
                 height = y + height - newY;
                 x = newX;
                 y = newY;
                 break;
             case 1: // Top-right
-                const newTRX = clamp(pos.x, x + MIN_WIDTH, STAGE_WIDTH - MARGIN);
-                const newTRY = clamp(pos.y, MARGIN, y + height - MIN_HEIGHT);
+                const newTRX = clamp(pos.x, x + MIN_WIDTH, STAGE_WIDTH - MARGIN, bounds.maxX);
+                const newTRY = clamp(pos.y, MARGIN, y + height - MIN_HEIGHT, bounds.minY);
                 width = newTRX - x;
                 height = y + height - newTRY;
                 y = newTRY;
                 break;
             case 2: // Bottom-right
-                const newBRX = clamp(pos.x, x + MIN_WIDTH, STAGE_WIDTH - MARGIN);
-                const newBRY = clamp(pos.y, y + MIN_HEIGHT, STAGE_HEIGHT - MARGIN);
+                const newBRX = clamp(pos.x, x + MIN_WIDTH, STAGE_WIDTH - MARGIN, bounds.maxX);
+                const newBRY = clamp(pos.y, y + MIN_HEIGHT, STAGE_HEIGHT - MARGIN, bounds.maxY);
                 width = newBRX - x;
                 height = newBRY - y;
                 break;
             case 3: // Bottom-left
-                const newBLX = clamp(pos.x, MARGIN, x + width - MIN_WIDTH);
-                const newBLY = clamp(pos.y, y + MIN_HEIGHT, STAGE_HEIGHT - MARGIN);
+                const newBLX = clamp(pos.x, MARGIN, x + width - MIN_WIDTH, bounds.minX);
+                const newBLY = clamp(pos.y, y + MIN_HEIGHT, STAGE_HEIGHT - MARGIN, bounds.maxY);
                 width = x + width - newBLX;
                 height = newBLY - y;
                 x = newBLX;
                 break;
         }
 
-        setRoom({ x, y, width, height });
+        const newRoom = { x, y, width, height };
+        setRoom(newRoom);
+        keepContainersInside(newRoom);
     };
 
 
@@ -92,6 +132,7 @@ export function useRoom() {
         room,
         setRoom,
         corners,
-        handleDragCorner
+        handleDragCorner,
+        getContainersBoundingBox
     };
 }

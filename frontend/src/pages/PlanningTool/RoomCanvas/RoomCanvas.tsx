@@ -37,6 +37,7 @@ type RoomCanvasProps = {
     setSelectedContainerInfo: (v: ContainerDTO | null) => void;
     getContainerZones: (excludeId?: number) => { x: number; y: number; width: number; height: number }[];
     draggedContainer: ContainerDTO | null;
+    getContainersBoundingBox: () => { minX: number; minY: number; maxX: number; maxY: number };
 
     //Drag & Drop props
     stageWrapperRef: React.RefObject<HTMLDivElement>;
@@ -68,6 +69,7 @@ export default function RoomCanvas({
     doorZones,
     getContainerZones,
     draggedContainer,
+    getContainersBoundingBox
 }: RoomCanvasProps) {
     //State to track if a container is being dragged
     const [isDraggingContainer, setIsDraggingContainer] = useState(false);
@@ -105,7 +107,11 @@ export default function RoomCanvas({
             <div className="absolute top-4 left-4 flex flex-row items-center gap-2 z-50">
                 {/* Change room size */}
                 <button
-                    onClick={() => setIsRoomPromptOpen(true)}
+                    onClick={() => {
+                        setIsRoomPromptOpen(true);
+                        handleSelectContainer(null);
+                        handleSelectDoor(null);
+                    }}
                     className="flex items-center justify-start bg-gray-200 hover:bg-gray-300 text-gray-800 px-2 py-1 rounded-lg transition-all duration-300 shadow-sm group overflow-hidden"
                 >
                     <Ruler className="w-5 h-5 flex-shrink-0" />
@@ -154,6 +160,7 @@ export default function RoomCanvas({
                         corners={corners}
                         room={room}
                         handleDragCorner={handleDragCorner}
+                        getContainersBoundingBox={getContainersBoundingBox}
                     />
 
                     {/* Door layer*/}

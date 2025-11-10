@@ -11,12 +11,14 @@ type CornerHandlesProps = {
   corners: { x: number; y: number }[];
   room: Room;
   handleDragCorner: (index: number, pos: { x: number; y: number }) => void;
+  getContainersBoundingBox: () => { minX: number; minY: number; maxX: number; maxY: number };
 };
 
 export default function CornerHandles({
     corners,
     room,
-    handleDragCorner
+    handleDragCorner,
+    getContainersBoundingBox,
 }: CornerHandlesProps) {
 
     /* ──────────────── Render ──────────────── */
@@ -34,24 +36,28 @@ export default function CornerHandles({
                     //Constrain corner movement to maintain room size and stay within canvas
                     dragBoundFunc={(pos) => {
                         let newPos = { x: pos.x, y: pos.y };
-                        switch (index) {
-                            case 0: //top-left corner
-                                newPos.x = clamp(pos.x, MARGIN, room.x + room.width - MIN_WIDTH);
-                                newPos.y = clamp(pos.y, MARGIN, room.y + room.height - MIN_HEIGHT);
-                                break;
-                            case 1: //top-right corner
-                                newPos.x = clamp(pos.x, room.x + MIN_WIDTH, STAGE_WIDTH - MARGIN);
-                                newPos.y = clamp(pos.y, MARGIN, room.y + room.height - MIN_HEIGHT);
-                                break;
-                            case 2: //bottom-right corner
-                                newPos.x = clamp(pos.x, room.x + MIN_WIDTH, STAGE_WIDTH - MARGIN);
-                                newPos.y = clamp(pos.y, room.y + MIN_HEIGHT, STAGE_HEIGHT - MARGIN);
-                                break;
-                            case 3: //bottom-left corner
-                                newPos.x = clamp(pos.x, MARGIN, room.x + room.width - MIN_WIDTH);
-                                newPos.y = clamp(pos.y, room.y + MIN_HEIGHT, STAGE_HEIGHT - MARGIN);
-                                break;
-                        }
+                        const bounds = getContainersBoundingBox();
+
+                       const { x, y, width, height } = room;
+
+                           switch (index) {
+                               case 0: // top-left
+                                   newPos.x = clamp(pos.x, MARGIN, Math.min(x + width - MIN_WIDTH, bounds.minX));
+                                   newPos.y = clamp(pos.y, MARGIN, Math.min(y + height - MIN_HEIGHT, bounds.minY));
+                                   break;
+                               case 1: // top-right
+                                   newPos.x = clamp(pos.x, Math.max(x + MIN_WIDTH, bounds.maxX), STAGE_WIDTH - MARGIN);
+                                   newPos.y = clamp(pos.y, MARGIN, Math.min(y + height - MIN_HEIGHT, bounds.minY));
+                                   break;
+                               case 2: // bottom-right
+                                   newPos.x = clamp(pos.x, Math.max(x + MIN_WIDTH, bounds.maxX), STAGE_WIDTH - MARGIN);
+                                   newPos.y = clamp(pos.y, Math.max(y + MIN_HEIGHT, bounds.maxY), STAGE_HEIGHT - MARGIN);
+                                   break;
+                               case 3: // bottom-left
+                                   newPos.x = clamp(pos.x, MARGIN, Math.min(x + width - MIN_WIDTH, bounds.minX));
+                                   newPos.y = clamp(pos.y, Math.max(y + MIN_HEIGHT, bounds.maxY), STAGE_HEIGHT - MARGIN);
+                                   break;
+                           }
 
                         return newPos;
                     }}
