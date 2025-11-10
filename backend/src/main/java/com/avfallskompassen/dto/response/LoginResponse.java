@@ -12,6 +12,7 @@ public class LoginResponse {
     private String message;
     private String username;
     private String role;
+    private String token;
     
     /**
      * Default constructor for JSON serialization.
@@ -33,6 +34,13 @@ public class LoginResponse {
         this.role = role;
     }
     
+    public LoginResponse(boolean success, String message, String username, String role, String token) {
+        this.success = success;
+        this.message = message;
+        this.username = username;
+        this.role = role;
+        this.token = token;
+    }
     // Getters and Setters
     public boolean isSuccess() { return success; }
     public void setSuccess(boolean success) { this.success = success; }
@@ -45,4 +53,7 @@ public class LoginResponse {
     
     public String getRole() { return role; }
     public void setRole(String role) { this.role = role; }
+
+    public String getToken() { return token; }
+    public void setToken(String token) { this.token = token; }
 }
