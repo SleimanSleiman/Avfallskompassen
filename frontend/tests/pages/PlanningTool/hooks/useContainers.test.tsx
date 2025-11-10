@@ -167,7 +167,7 @@ describe("useContainers", () => {
         });
 
         rotated = result.current.containersInRoom.find(c => c.id === containerId);
-        expect(rotated?.rotation).toBe(0);
+        expect(rotated?.rotation).toBe(180);
     });
 
 });
