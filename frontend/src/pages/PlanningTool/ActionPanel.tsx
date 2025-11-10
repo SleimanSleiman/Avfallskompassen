@@ -1,8 +1,9 @@
 /**
  * ActionPanel component for managing bins and doors in the planning tool.
- * Displays the selected item and provides buttons to move, rotate, or remove it.
+ * Displays the selected item and provides buttons to move, rotate, or remove it, Undo/Redo container actions.
  */
 
+import { useEffect } from "react";
 import InfoTooltip from "./components/InfoTooltip";
 import type { ContainerInRoom as Container, Door } from "./Types";
 import { RotateCcw, Trash2, Info } from "lucide-react";
@@ -18,6 +19,8 @@ type ActionPanelProps = {
     handleRotateDoor: (id: number, newRotation: number, newSwing: "inward" | "outward") => void;
     handleRotateContainer: (id: number) => void;
     handleShowContainerInfo: (id: number) => void;
+    undo: () => void;
+    redo: () => void;
 };
 
 export default function ActionPanel({
@@ -30,6 +33,8 @@ export default function ActionPanel({
     handleRotateDoor,
     handleRotateContainer,
     handleShowContainerInfo,
+    undo,
+    redo,
 }: ActionPanelProps) {
 
     //Display action panel if an object is selected
@@ -40,11 +45,12 @@ export default function ActionPanel({
     const selectedName = (() => {
         if (selectedContainerId !== null) {
             const container = containers.find((c) => c.id === selectedContainerId);
-            return container.container.size + " L";
+            return container ? container.container.name : "Inget objekt valt";
         } else if (selectedDoorId !== null) {
             const door = doors.find((d) => d.id === selectedDoorId);
-            return door.width*100 + " cm";
+            return door ? "Dörr " + door.width * 100 + "cm" : "Inget objekt valt";
         }
+        return "Inget objekt valt";
     })();
 
     //Determine button texts based on selection
@@ -56,7 +62,13 @@ export default function ActionPanel({
     //Handle rotate action
     const handleRotate = () => {
         if (selectedDoorId !== null) {
-            handleRotateDoor(selectedDoorId)
+            const door = doors.find((d) => d.id === selectedDoorId);
+            if (!door) return;
+
+            const newRotation = (door.rotation + 180) % 360;
+            const newSwing =
+            door.swingDirection === "inward" ? "outward" : "inward";
+            handleRotateDoor(door.id, newRotation, newSwing);
         } else if (selectedContainerId !== null) {
             handleRotateContainer(selectedContainerId);
         }
@@ -71,10 +83,31 @@ export default function ActionPanel({
         }
     }
 
+    /* ─────────────── Keyboard shortcuts (Ctrl+Z / Ctrl+Y) ─────────────── */
+    useEffect(() => {
+        const handleKeyDown = (event: KeyboardEvent) => {
+            const isMac = navigator.platform.toUpperCase().includes("MAC");
+            const ctrlOrCmd = isMac ? event.metaKey : event.ctrlKey;
+
+            if (ctrlOrCmd && event.key === "z") {
+                event.preventDefault();
+                undo();
+            }
+            if (ctrlOrCmd && (event.key === "y")) {
+                event.preventDefault();
+                redo();
+            }
+        };
+
+        window.addEventListener("keydown", handleKeyDown);
+        return () => window.removeEventListener("keydown", handleKeyDown);
+    }, [undo, redo]);
+
+
     /* ─────────────── Render ──────────────── */
     return (
         <div className="flex flex-col items-center gap-3 border border-gray-300 rounded-2xl bg-white shadow-sm px-3 py-2 w-fit max-w-full mx-auto">
-
+            
             {/* Tooltip */}
             <div className="self-end">
                 <InfoTooltip
@@ -107,6 +140,25 @@ export default function ActionPanel({
                         </span>
                     </button>
                 )}
+                    
+                {/* Undo button*/}
+                <button
+                className="btn-secondary-sm flex-1"
+                onClick={undo}
+                title="Ångra (Ctrl+Z)"
+                >
+                ⟲ Ångra
+                </button>
+
+                {/* Undo button*/}
+                <button
+                className="btn-secondary-sm flex-1"
+                onClick={redo}
+                title="Gör om (Ctrl+Y)"
+                >
+                ⟳ Gör om
+                </button>
+
 
                 {/* Rotate button */}
                 <button
