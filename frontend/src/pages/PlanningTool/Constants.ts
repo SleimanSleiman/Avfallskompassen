@@ -6,7 +6,7 @@
 export const clamp = (value: number, min: number, max: number) =>
   Math.max(min, Math.min(value, max));
 
-export const CONTAINER_PIXEL_SCALE = 1.5;
+export const CONTAINER_PIXEL_SCALE = 2;
 
 //Convert millimeters to pixels based on SCALE
 export const mmToPixels = (mm?: number): number => {
