@@ -13,6 +13,7 @@ export async function api<T>(
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
     ...(user?.username ? { 'X-Username': user.username } : {}),
+    ...(user?.token ? { Authorization: `Bearer ${user.token}` } : {}),
     ...(opts.headers || {}),
   };
 

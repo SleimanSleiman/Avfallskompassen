@@ -1,8 +1,9 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import type { AdminUser } from '../AdminPage';
 import AdminPlanningEditor from './AdminPlanningEditor';
+import { get } from '../../lib/api';
 
-// Mock data types
+// Data types
 export type AdminProperty = {
   id: number;
   userId: number;
@@ -38,191 +39,6 @@ export type RoomPlan = {
   selectedVersion?: number; // Optional: which version is currently being edited
 };
 
-// Mock data 
-const getMockProperties = (userId: number): AdminProperty[] => {
-  const baseProperties: AdminProperty[] = [
-    {
-      id: userId * 10 + 1,
-      userId,
-      address: 'Storgatan 123',
-      numberOfApartments: 12,
-      municipalityName: 'Helsingborg',
-      lockName: 'Standard',
-      accessPathLength: 5.5,
-      createdAt: '2024-01-20T10:00:00Z',
-    },
-    {
-      id: userId * 10 + 2,
-      userId,
-      address: 'Kungsgatan 45',
-      numberOfApartments: 8,
-      municipalityName: 'Helsingborg',
-      lockName: 'Electronic',
-      accessPathLength: 3.2,
-      createdAt: '2024-02-15T14:30:00Z',
-    },
-    {
-      id: userId * 10 + 3,
-      userId,
-      address: 'Drottninggatan 78',
-      numberOfApartments: 20,
-      municipalityName: 'Höganäs',
-      lockName: 'SuperLock',
-      accessPathLength: 8.0,
-      createdAt: '2024-03-10T09:15:00Z',
-    },
-  ];
-  return baseProperties.slice(0, Math.min(3, userId % 3 + 1));
-};
-
-const getMockRoomPlans = (propertyId: number, userId: number): RoomPlan[] => {
-  return [
-    {
-      id: propertyId * 100 + 1,
-      propertyId,
-      userId,
-      name: 'Miljörum 1',
-      versions: [
-        {
-          versionNumber: 1,
-          roomWidth: 10,
-          roomHeight: 8,
-          doors: [],
-          containers: [],
-          createdBy: 'user',
-          createdAt: '2024-01-25T10:00:00Z',
-        },
-        {
-          versionNumber: 2,
-          roomWidth: 10,
-          roomHeight: 8,
-          doors: [],
-          containers: [],
-          createdBy: 'admin',
-          adminUsername: 'admin.smith',
-          createdAt: '2024-02-10T14:30:00Z',
-          versionName: 'Optimerad layout',
-        },
-        {
-          versionNumber: 3,
-          roomWidth: 11,
-          roomHeight: 8,
-          doors: [],
-          containers: [],
-          createdBy: 'admin',
-          adminUsername: 'admin.erl',
-          createdAt: '2024-03-05T09:00:00Z',
-          versionName: 'Extra kärl',
-        },
-        {
-          versionNumber: 4,
-          roomWidth: 11,
-          roomHeight: 8.5,
-          doors: [],
-          containers: [],
-          createdBy: 'user',
-          createdAt: '2024-03-18T16:20:00Z',
-        },
-        {
-          versionNumber: 5,
-          roomWidth: 12,
-          roomHeight: 8.5,
-          doors: [],
-          containers: [],
-          createdBy: 'admin',
-          adminUsername: 'admin.karin',
-          createdAt: '2024-04-02T11:45:00Z',
-          versionName: 'Breddad passage',
-        },
-        {
-          versionNumber: 6,
-          roomWidth: 12,
-          roomHeight: 9,
-          doors: [],
-          containers: [],
-          createdBy: 'admin',
-          adminUsername: 'admin.smith',
-          createdAt: '2024-04-22T08:10:00Z',
-          versionName: 'Aktiv lösning',
-        },
-      ],
-      createdAt: '2024-01-25T10:00:00Z',
-      updatedAt: '2024-02-10T14:30:00Z',
-      activeVersionNumber: 6,
-    },
-    {
-      id: propertyId * 100 + 2,
-      propertyId,
-      userId,
-      name: 'Miljörum 2',
-      versions: [
-        {
-          versionNumber: 1,
-          roomWidth: 12,
-          roomHeight: 10,
-          doors: [],
-          containers: [],
-          createdBy: 'user',
-          createdAt: '2024-02-20T11:00:00Z',
-        },
-        {
-          versionNumber: 2,
-          roomWidth: 12,
-          roomHeight: 10.5,
-          doors: [],
-          containers: [],
-          createdBy: 'admin',
-          adminUsername: 'admin.louise',
-          createdAt: '2024-03-12T13:30:00Z',
-          versionName: 'Sopsug test',
-        },
-        {
-          versionNumber: 3,
-          roomWidth: 12.5,
-          roomHeight: 10.5,
-          doors: [],
-          containers: [],
-          createdBy: 'admin',
-          adminUsername: 'admin.smith',
-          createdAt: '2024-04-01T08:45:00Z',
-        },
-        {
-          versionNumber: 4,
-          roomWidth: 13,
-          roomHeight: 10.5,
-          doors: [],
-          containers: [],
-          createdBy: 'user',
-          createdAt: '2024-04-18T17:05:00Z',
-        },
-        {
-          versionNumber: 5,
-          roomWidth: 13,
-          roomHeight: 11,
-          doors: [],
-          containers: [],
-          createdBy: 'admin',
-          adminUsername: 'admin.karin',
-          createdAt: '2024-05-03T09:15:00Z',
-        },
-        {
-          versionNumber: 6,
-          roomWidth: 13.5,
-          roomHeight: 11,
-          doors: [],
-          containers: [],
-          createdBy: 'admin',
-          adminUsername: 'admin.louise',
-          createdAt: '2024-05-24T15:25:00Z',
-          versionName: 'Slutlig lösning',
-        },
-      ],
-      createdAt: '2024-02-20T11:00:00Z',
-      updatedAt: '2024-02-20T11:00:00Z',
-      activeVersionNumber: 6,
-    },
-  ];
-};
 
 type AdminUserDetailProps = {
   user: AdminUser;
@@ -231,14 +47,78 @@ type AdminUserDetailProps = {
 
 export default function AdminUserDetail({ user, onBack }: AdminUserDetailProps) {
   const [selectedPlan, setSelectedPlan] = useState<RoomPlan | null>(null);
-  const [properties] = useState<AdminProperty[]>(() => getMockProperties(user.id));
-  const [roomPlans, setRoomPlans] = useState<RoomPlan[]>(() => {
-    const allPlans: RoomPlan[] = [];
-    properties.forEach((prop) => {
-      allPlans.push(...getMockRoomPlans(prop.id, user.id));
-    });
-    return allPlans;
-  });
+  const [properties, setProperties] = useState<AdminProperty[]>([]);
+  const [roomPlans, setRoomPlans] = useState<RoomPlan[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let mounted = true;
+    async function load() {
+      setLoading(true);
+      try {
+        // Fetch all properties (admin endpoint) and filter by creator username
+        const allProps = await get<any[]>('/api/properties');
+        const userProps = allProps.filter((p) => p.createdByUsername === user.username);
+
+        const mappedProps: AdminProperty[] = userProps.map((p) => ({
+          id: Number(p.id),
+          userId: user.id,
+          address: p.address || '',
+          numberOfApartments: p.numberOfApartments || 0,
+          municipalityName: p.municipalityName || p.municipality || '',
+          lockName: (p.lockTypeDto && p.lockTypeDto.name) || p.lockName || '',
+          accessPathLength: p.accessPathLength || 0,
+          createdAt: p.createdAt || new Date().toISOString(),
+        }));
+
+        // For each property, fetch waste rooms and build simple RoomPlan objects
+        const plans: RoomPlan[] = [];
+        await Promise.all(
+          mappedProps.map(async (prop) => {
+            try {
+              const rooms = await get<any[]>(`/api/properties/${prop.id}/wasterooms`);
+              (rooms || []).forEach((r: any, idx: number) => {
+                const planId = prop.id * 1000 + (idx + 1);
+                const plan: RoomPlan = {
+                  id: planId,
+                  propertyId: prop.id,
+                  userId: user.id,
+                  name: r.name || `Miljörum ${idx + 1}`,
+                  versions: [
+                    {
+                      versionNumber: 1,
+                      roomWidth: r.length || r.roomWidth || 0,
+                      roomHeight: r.width || r.roomHeight || 0,
+                      doors: r.doors || [],
+                      containers: r.containers || [],
+                      createdBy: 'user',
+                      createdAt: r.createdAt || new Date().toISOString(),
+                    },
+                  ],
+                  createdAt: prop.createdAt,
+                  updatedAt: new Date().toISOString(),
+                  activeVersionNumber: 1,
+                };
+                plans.push(plan);
+              });
+            } catch (e) {
+              console.warn('Failed to fetch wasterooms for property', prop.id, e);
+            }
+          })
+        );
+
+        if (!mounted) return;
+        setProperties(mappedProps);
+        setRoomPlans(plans);
+      } catch (e) {
+        console.error('Failed to load properties/room plans for admin detail', e);
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    }
+    load();
+    return () => { mounted = false };
+  }, [user]);
 
   const plansByProperty = useMemo(() => {
     const map = new Map<number, RoomPlan[]>();
@@ -337,6 +217,14 @@ export default function AdminUserDetail({ user, onBack }: AdminUserDetailProps) 
     );
   }
 
+  if (loading) {
+    return (
+      <main className="mx-auto max-w-7xl px-4 py-8">
+        <div className="rounded-2xl border bg-white p-6 shadow-soft text-center">Laddar fastigheter och planeringar…</div>
+      </main>
+    );
+  }
+
   return (
     <main className="mx-auto max-w-7xl px-4 py-8">
       {/* Header */}
@@ -352,7 +240,7 @@ export default function AdminUserDetail({ user, onBack }: AdminUserDetailProps) 
         </button>
         <div className="mb-3">
           <h1 className="h1 rubriktext">Användarinformation</h1>
-          <div className="mt-4 flex items-center gap-4">
+              <div className="mt-4 flex items-center gap-4">
             <div className="w-16 h-16 bg-nsr-teal/10 rounded-full flex items-center justify-center">
               <span className="text-2xl text-nsr-teal font-black">
                 {user.username.charAt(0).toUpperCase()}
@@ -362,7 +250,7 @@ export default function AdminUserDetail({ user, onBack }: AdminUserDetailProps) 
               <p className="text-xl font-black text-nsr-ink">{user.username}</p>
               {user.email && <p className="text-gray-600 brodtext">{user.email}</p>}
               <p className="mt-1 text-sm text-gray-500">
-                Registrerad: {new Date(user.createdAt).toLocaleDateString('sv-SE')}
+                Registrerad: {user.createdAt ? new Date(user.createdAt).toLocaleDateString('sv-SE') : '-'}
               </p>
             </div>
           </div>

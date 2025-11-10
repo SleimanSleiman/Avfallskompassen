@@ -1,15 +1,19 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import AdminUserDetail from './Admin/AdminUserDetail';
+import { get } from '../lib/api';
 
-// Mock data types
+// Data types
 export type AdminUser = {
   id: number;
   username: string;
   email?: string;
-  createdAt: string;
+  createdAt?: string | null;
   propertiesCount: number;
   plansCount: number;
 };
+
+type BackendUser = { id: number; username: string; role?: string };
+type PropertyDTO = { id: number; createdByUsername?: string };
 
 export type AdminProperty = {
   id: number;
@@ -35,57 +39,71 @@ export type RoomPlan = {
   activeVersionNumber: number;
 };
 
-// Mock data - will be replaced with API calls later
-const mockUsers: AdminUser[] = [
-  {
-    id: 1,
-    username: 'anna.svensson',
-    email: 'anna@example.com',
-    createdAt: '2024-01-15T10:00:00Z',
-    propertiesCount: 3,
-    plansCount: 5,
-  },
-  {
-    id: 2,
-    username: 'erik.nilsson',
-    email: 'erik@example.com',
-    createdAt: '2024-02-20T14:30:00Z',
-    propertiesCount: 2,
-    plansCount: 3,
-  },
-  {
-    id: 3,
-    username: 'maria.larsson',
-    email: 'maria@example.com',
-    createdAt: '2024-03-10T09:15:00Z',
-    propertiesCount: 1,
-    plansCount: 2,
-  },
-  {
-    id: 4,
-    username: 'johan.andersson',
-    email: 'johan@example.com',
-    createdAt: '2024-01-05T11:45:00Z',
-    propertiesCount: 4,
-    plansCount: 8,
-  },
-];
+// Component state will hold live data fetched from backend
+const EMPTY_USERS: AdminUser[] = [];
 
 export default function AdminPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedUser, setSelectedUser] = useState<AdminUser | null>(null);
+  const [users, setUsers] = useState<AdminUser[]>(EMPTY_USERS);
+  const [properties, setProperties] = useState<PropertyDTO[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function load() {
+      setLoading(true);
+      try {
+        const backendUsers = await get<BackendUser[]>('/api/admin/users');
+        const props = await get<PropertyDTO[]>('/api/properties');
+
+        // Map properties to their creators
+        const propertiesByUser = new Map<string, PropertyDTO[]>();
+        props.forEach((p) => {
+          const username = p.createdByUsername || '';
+          if (!propertiesByUser.has(username)) propertiesByUser.set(username, []);
+          propertiesByUser.get(username)!.push(p);
+        });
+
+        // For each property, fetch wasterooms and accumulate plans count per user
+        const plansCountByUser = new Map<string, number>();
+        await Promise.all(
+          props.map(async (p) => {
+            try {
+              const rooms = await get<any[]>(`/api/properties/${p.id}/wasterooms`);
+              const username = p.createdByUsername || '';
+              plansCountByUser.set(username, (plansCountByUser.get(username) || 0) + (rooms?.length || 0));
+            } catch (e) {
+              // if fetch fails for a property, ignore and continue
+              console.warn('Failed to fetch wasterooms for property', p.id, e);
+            }
+          })
+        );
+
+        const mapped: AdminUser[] = backendUsers.map((bu) => ({
+          id: bu.id,
+          username: bu.username,
+          email: undefined,
+          createdAt: null,
+          propertiesCount: (propertiesByUser.get(bu.username) || []).length,
+          plansCount: plansCountByUser.get(bu.username) || 0,
+        }));
+
+        setUsers(mapped);
+        setProperties(props);
+      } catch (e) {
+        console.error('Failed to load admin data', e);
+      } finally {
+        setLoading(false);
+      }
+    }
+    load();
+  }, []);
 
   const filteredUsers = useMemo(() => {
-    if (!searchQuery.trim()) {
-      return mockUsers;
-    }
-    const query = searchQuery.toLowerCase();
-    return mockUsers.filter(
-      (user) =>
-        user.username.toLowerCase().includes(query) ||
-        user.email?.toLowerCase().includes(query)
-    );
-  }, [searchQuery]);
+    if (!searchQuery.trim()) return users;
+    const q = searchQuery.toLowerCase();
+    return users.filter((u) => u.username.toLowerCase().includes(q) || (u.email || '').toLowerCase().includes(q));
+  }, [searchQuery, users]);
 
   const handleUserSelect = (user: AdminUser) => {
     setSelectedUser(user);
@@ -101,6 +119,14 @@ export default function AdminPage() {
         user={selectedUser}
         onBack={handleBackToList}
       />
+    );
+  }
+
+  if (loading) {
+    return (
+      <main className="mx-auto max-w-7xl px-4 py-8">
+        <div className="rounded-2xl border bg-white p-6 shadow-soft text-center">Laddar användardata…</div>
+      </main>
     );
   }
 
@@ -122,7 +148,7 @@ export default function AdminPage() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-600 brodtext">Totalt antal användare</p>
-              <p className="mt-2 text-3xl font-black text-nsr-ink">{mockUsers.length}</p>
+              <p className="mt-2 text-3xl font-black text-nsr-ink">{users.length}</p>
             </div>
             <div className="w-12 h-12 bg-nsr-teal/10 rounded-xl flex items-center justify-center">
               <svg className="w-6 h-6 text-nsr-teal" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -137,7 +163,7 @@ export default function AdminPage() {
             <div>
               <p className="text-sm text-gray-600 brodtext">Totalt antal fastigheter</p>
               <p className="mt-2 text-3xl font-black text-nsr-ink">
-                {mockUsers.reduce((sum, u) => sum + u.propertiesCount, 0)}
+                {properties.length}
               </p>
             </div>
             <div className="w-12 h-12 bg-nsr-accent/10 rounded-xl flex items-center justify-center">
@@ -153,7 +179,7 @@ export default function AdminPage() {
             <div>
               <p className="text-sm text-gray-600 brodtext">Totalt antal planeringar</p>
               <p className="mt-2 text-3xl font-black text-nsr-ink">
-                {mockUsers.reduce((sum, u) => sum + u.plansCount, 0)}
+                {users.reduce((sum, u) => sum + u.plansCount, 0)}
               </p>
             </div>
             <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
@@ -252,7 +278,7 @@ export default function AdminPage() {
                       <p className="text-gray-600 brodtext">Planeringar</p>
                     </div>
                     <div className="text-gray-500 text-xs">
-                      {new Date(user.createdAt).toLocaleDateString('sv-SE')}
+                      {user.createdAt ? new Date(user.createdAt).toLocaleDateString('sv-SE') : '-'}
                     </div>
                     <svg
                       className="w-5 h-5 text-gray-400"
