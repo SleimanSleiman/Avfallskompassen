@@ -8,13 +8,9 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 /**
- * Service class for container-related operations.
+ * Interface for the ContainerServiceImpl class.
  */
-@Service
-public class ContainerService {
-
-    @Autowired
-    private ContainerPlanRepository containerPlanRepository;
+public interface ContainerService {
 
     /**
      * Get containers by municipality ID and service type ID.
@@ -23,13 +19,5 @@ public class ContainerService {
      * @return List of ContainerPlan
      * @throws IllegalArgumentException if municipalityId or serviceTypeId is null
      */
-    public List<ContainerPlan> getContainersByMunicipalityAndService(Long municipalityId, Long serviceTypeId) {
-        if (municipalityId == null || serviceTypeId == null) {
-            throw new IllegalArgumentException("Municipality ID and Service Type ID must not be null");
-        }
-
-        return containerPlanRepository.findByMunicipalityService_Municipality_IdAndMunicipalityService_ServiceType_Id(
-                municipalityId, serviceTypeId
-        );
-    }
+    List<ContainerPlan> getContainersByMunicipalityAndService(Long municipalityId, Long serviceTypeId);
 }

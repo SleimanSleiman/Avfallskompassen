@@ -1,7 +1,8 @@
-package com.avfallskompassen.services;
+package com.avfallskompassen.services.impl;
 
 import com.avfallskompassen.model.ContainerPlan;
 import com.avfallskompassen.repository.ContainerPlanRepository;
+import com.avfallskompassen.services.ContainerService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -14,16 +15,16 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 /**
- * Unit tests for ContainerService.
+ * Unit tests for ContainerServiceImpl class.
  */
 @ExtendWith(MockitoExtension.class)
-public class ContainerServiceTest {
+public class ContainerServiceImplTest {
 
     @Mock
     private ContainerPlanRepository repository;
 
     @InjectMocks
-    private ContainerService service;
+    private ContainerServiceImpl service;
 
     /**
      * Test getContainersByMunicipalityAndService method to ensure it returns a list of ContainerPlan
