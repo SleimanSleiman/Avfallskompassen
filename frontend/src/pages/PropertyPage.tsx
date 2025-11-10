@@ -1,12 +1,13 @@
 import { useState, useEffect, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { createProperty, getMyProperties, deleteProperty, updateProperty,getMunicipalities, getLockTypes } from '../lib/Property';
 import type { Municipality, Property, PropertyRequest } from '../lib/Property';
 import { currentUser } from '../lib/auth';
 import RoomSizePrompt from '../components/RoomSizePrompt';
 import ConfirmModal from '../components/ConfirmModal';
-// SoftButton not used directly here
 
 export default function PropertyPage() {
+  const navigate = useNavigate();
   const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
@@ -26,7 +27,6 @@ export default function PropertyPage() {
       Electronic: 2,
       SuperLock: 3
       };
-  // Removed unused lockMapReverse
 
   // Form state
   const [formData, setFormData] = useState<PropertyRequest>({
@@ -38,7 +38,7 @@ export default function PropertyPage() {
   });
 
  const [municipalities, setMunicipalities] = useState<Municipality[]>([]);
-  
+
   const user = currentUser();
 
   function getMunicipalityName(id?: number) {
@@ -62,7 +62,7 @@ export default function PropertyPage() {
       setError('Kunde inte ladda kommuner: ' + err.message);
     }
   }
-  
+
   const allowedMunicipalityNames = useMemo(() => (
     new Set([
       'bjuv',
@@ -95,7 +95,7 @@ export default function PropertyPage() {
       setError("Kunde inte ladda låstyper: " + err.message);
     }
   }
-  
+
   const filteredProperties = useMemo(() => {
     const q = query.trim().toLowerCase();
     let list = properties.filter(p =>
@@ -116,7 +116,7 @@ export default function PropertyPage() {
     }
     return list;
   }, [properties, query, sortBy, municipalities]);
-  
+
 async function handleSubmit(e: React.FormEvent) {
   e.preventDefault();
   setMsg(null);
@@ -160,7 +160,7 @@ async function handleSubmit(e: React.FormEvent) {
     setLoading(false);
   }
 }
-  
+
   function requestDelete(id: number, address: string) {
     setPendingDelete({ id, address });
   }
@@ -203,14 +203,20 @@ async function handleSubmit(e: React.FormEvent) {
     setSelectedProperty(p);
     setIsCreateRoomOpen(true);
   }
-  
+
+  function viewStatistics(p: Property) {
+    navigate(`/statistics/${p.id}`, {
+      state: { propertyName: p.address }
+    });
+  }
+
   function handleInputChange(field: keyof PropertyRequest, value: string | number) {
     setFormData(prev => ({
       ...prev,
       [field]: value
     }));
   }
-  
+
   return (
     <main className="mx-auto max-w-7xl px-4 py-8">
       <ConfirmModal
@@ -279,16 +285,14 @@ async function handleSubmit(e: React.FormEvent) {
           {error}
         </div>
       )}
-      
-      {/* Removed duplicate controls (now included in the header section above) */}
-      
+
       {/* Property Form */}
       {showForm && (
         <div className="mb-8 rounded-2xl border bg-white p-6 shadow-soft">
           <h2 className="mb-6 text-xl font-semibold">
             {editingId ? 'Redigera fastighet' : 'Lägg till ny fastighet'}
           </h2>
-          
+
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="grid gap-6 md:grid-cols-2">
               <div>
@@ -318,7 +322,6 @@ async function handleSubmit(e: React.FormEvent) {
                   onChange={(e) => handleInputChange('municipalityId', parseInt(e.target.value))}
                 >
                   <option value={0}>Välj kommun</option>
-                  {/* Ensure current value remains visible when editing even if not allowed */}
                   {formData.municipalityId !== 0 && !allowedMunicipalities.some(m => m.id === formData.municipalityId) && (
                     <option value={formData.municipalityId}>{getMunicipalityName(formData.municipalityId)}</option>
                   )}
@@ -327,7 +330,7 @@ async function handleSubmit(e: React.FormEvent) {
                   ))}
                 </select>
               </div>
-              
+
               <div>
                 <label htmlFor="apartments" className="block text-sm font-medium mb-2">
                   Antal lägenheter *
@@ -342,7 +345,7 @@ async function handleSubmit(e: React.FormEvent) {
                   onChange={(e) => handleInputChange('numberOfApartments', parseInt(e.target.value))}
                 />
               </div>
-              
+
               <div>
                 <label htmlFor="lockType" className="block text-sm font-medium mb-2">
                   Typ av lås för miljörum *
@@ -362,7 +365,7 @@ async function handleSubmit(e: React.FormEvent) {
                       ))}
                 </select>
               </div>
-              
+
               <div>
                 <label htmlFor="accessPath" className="block text-sm font-medium mb-2">
                   Dragvägslängd (meter) *
@@ -380,15 +383,15 @@ async function handleSubmit(e: React.FormEvent) {
                 />
               </div>
             </div>
-            
+
             <div className="flex gap-3">
               <button
                 type="submit"
                 disabled={loading}
                 className="btn-primary disabled:opacity-60"
               >
-                  {loading 
-                  ? editingId ? 'Uppdaterar...' : 'Skapar...' 
+                  {loading
+                  ? editingId ? 'Uppdaterar...' : 'Skapar...'
                   : editingId ? 'Uppdatera fastighet' : 'Skapa fastighet'}
               </button>
               <button
@@ -413,13 +416,13 @@ async function handleSubmit(e: React.FormEvent) {
           </form>
         </div>
       )}
-      
+
       {/* Properties List */}
       <div className="rounded-2xl border bg-white shadow-soft">
         <div className="border-b px-6 py-4">
           <h2 className="text-xl font-semibold">Dina fastigheter ({filteredProperties.length})</h2>
         </div>
-        
+
         {filteredProperties.length === 0 ? (
           <div className="p-8 text-center text-gray-500">
             <div className="mb-4">
@@ -449,7 +452,13 @@ async function handleSubmit(e: React.FormEvent) {
                 <div className="mt-4 flex flex-wrap gap-2">
                   <button className="btn-secondary-sm" onClick={() => createWasteRoom(property)}>Skapa miljörum</button>
                   <button className="btn-secondary-sm" onClick={() => handleEdit(property)}>Redigera</button>
-                  <button className="btn-secondary-sm" type="button">Se rapport</button>
+                  <button
+                    className="btn-secondary-sm"
+                    type="button"
+                    onClick={() => viewStatistics(property)}
+                  >
+                    Se rapport
+                  </button>
                   <button
                     className="inline-flex items-center justify-center rounded-xl2 px-3 py-1 text-sm font-medium border border-red-200 bg-red-50 text-red-700 hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-600"
                     onClick={() => requestDelete(property.id, property.address)}

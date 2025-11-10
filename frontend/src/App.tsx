@@ -4,6 +4,7 @@ import Footer from './components/Footer';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import PropertyPage from './pages/PropertyPage';
+import StatisticsPage from './pages/StatisticsPage';
 import NotificationCenter from './components/NotificationCenter';
 import { currentUser } from './lib/Auth';
 import PlanningTool from './pages/PlanningTool/PlanningTool';
@@ -131,8 +132,12 @@ export default function App() {
               <PropertyPage />
             </ProtectedRoute>
           } />
-          <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/planningTool" element={<PlanningTool />} />
+          <Route path="/statistics/:propertyId" element={
+            <ProtectedRoute>
+              <StatisticsPage />
+            </ProtectedRoute>
+          } />
+          <Route path="/planningTool" element={<PlanningTool />} />
         </Routes>
       </div>
       <Footer />
