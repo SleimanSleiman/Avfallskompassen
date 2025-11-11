@@ -111,6 +111,8 @@ export default function PlanningTool() {
                     handleStageDrop={handleStageDrop}
                     handleStageDragOver={handleStageDragOver}
                     handleStageDragLeave={handleStageDragLeave}
+                    undo={undo}
+                    redo={redo}
                 />
 
                 {/* ActionPanel for moving/rotating/removing selected items */}
@@ -124,8 +126,6 @@ export default function PlanningTool() {
                     handleRotateDoor={handleRotateDoor}
                     handleRotateContainer={handleRotateContainer} 
                     handleShowContainerInfo={handleShowContainerInfo}
-                    undo={undo}
-                    redo={redo} 
                 />
             </div>
 
