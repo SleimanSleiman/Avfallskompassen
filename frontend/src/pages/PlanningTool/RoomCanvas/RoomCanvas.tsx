@@ -37,7 +37,6 @@ type RoomCanvasProps = {
     setSelectedContainerInfo: (v: ContainerDTO | null) => void;
     getContainerZones: (excludeId?: number) => { x: number; y: number; width: number; height: number }[];
     draggedContainer: ContainerDTO | null;
-    getContainersBoundingBox: () => { minX: number; minY: number; maxX: number; maxY: number };
 
     //Drag & Drop props
     stageWrapperRef: React.RefObject<HTMLDivElement>;
@@ -69,7 +68,6 @@ export default function RoomCanvas({
     doorZones,
     getContainerZones,
     draggedContainer,
-    getContainersBoundingBox
 }: RoomCanvasProps) {
     //State to track if a container is being dragged
     const [isDraggingContainer, setIsDraggingContainer] = useState(false);
@@ -160,7 +158,6 @@ export default function RoomCanvas({
                         corners={corners}
                         room={room}
                         handleDragCorner={handleDragCorner}
-                        getContainersBoundingBox={getContainersBoundingBox}
                     />
 
                     {/* Door layer*/}

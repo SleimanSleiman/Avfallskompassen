@@ -147,4 +147,40 @@ describe("ContainersLayer", () => {7
 
         expect(mockDrag).toHaveBeenCalled();
     });
+
+    //Test opacity when container is outside the room
+    it("sets opacity to 0.5 when container is outside the room", async () => {
+        const mockImg = {};
+        const useImage = await import("use-image");
+        vi.spyOn(useImage, "default").mockReturnValueOnce([mockImg]);
+
+        const outsideContainer = [
+            {
+                id: 3,
+                x: 480,
+                y: 50,
+                width: 40,
+                height: 40,
+                rotation: 0,
+                container: { imageTopViewUrl: "/images/test.png" },
+            },
+        ];
+
+        render(
+            <ContainersLayer
+                containersInRoom={outsideContainer}
+                selectedContainerId={null}
+                handleDragContainer={() => {}}
+                handleSelectContainer={() => {}}
+                room={room}
+                doors={doors}
+                doorZones={doorZones}
+                getContainerZones={() => []}
+                setIsDraggingContainer={() => {}}
+            />
+        );
+
+        const image = screen.getByTestId("image");
+        expect(image).toHaveAttribute("opacity", "0.5");
+    });
 });

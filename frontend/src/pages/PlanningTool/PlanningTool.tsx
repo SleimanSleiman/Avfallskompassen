@@ -33,7 +33,6 @@ export default function PlanningTool() {
         corners,
         handleDragCorner,
         setRoom,
-        getContainersBoundingBox,
     } = useRoom(containersInRoom, setContainersInRoom);
 
     /* ──────────────── Door logic ──────────────── */
@@ -109,7 +108,6 @@ export default function PlanningTool() {
                     getContainerZones={getContainerZones}
                     draggedContainer={draggedContainer}
                     setSelectedContainerInfo={setSelectedContainerInfo}
-                    getContainersBoundingBox={getContainersBoundingBox}
                     setContainersInRoom={setContainersInRoom}
 
                     isStageDropActive={isStageDropActive}

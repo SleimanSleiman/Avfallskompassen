@@ -87,37 +87,6 @@ describe("useRoom", () => {
         expect(newRoom.height).toBeGreaterThanOrEqual(MIN_HEIGHT);
     });
 
-    //Test that containers remain within room bounds after resizing
-    it("keeps containers inside bounds when room shrinks", () => {
-        const initialContainer = {
-            id: 1,
-            x: 500,
-            y: 500,
-            width: 200,
-            height: 200,
-        };
-
-        let containersInRoom = [initialContainer];
-
-        const { result } = renderHook(() => {
-            const [containers, setContainers] = useState<any[]>(containersInRoom);
-            return useRoom(containers, setContainers);
-        });
-
-        const initialRoom = result.current.room;
-
-        act(() => {
-            result.current.handleDragCorner(0, {
-                x: initialRoom.x + 100,
-                y: initialRoom.y + 100,
-            });
-        });
-
-        const newContainer = result.current.getContainersBoundingBox();
-        expect(newContainer.minX).toBeDefined();
-        expect(result.current.room.width).toBeLessThan(initialRoom.width);
-    });
-
     //Test calculation of corners for resizing handles
     it("returns correct corners for resizing handles", () => {
         const { result } = renderHook(() => {

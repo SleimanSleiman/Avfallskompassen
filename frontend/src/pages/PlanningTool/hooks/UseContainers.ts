@@ -79,12 +79,12 @@ function validateContainerPlacement(
 
 /* ──────────────── Main Hook ──────────────── */
 export function useContainers(
-  room: Room | null,
-  containersInRoom: ContainerInRoom[],
-   setContainersInRoom: React.Dispatch<React.SetStateAction<ContainerInRoom[]>>,
-  setSelectedContainerId: (id: number | null) => void,
-  setSelectedDoorId: (id: number | null) => void,
-  doorZones: { x: number; y: number; width: number; height: number }[] = []
+    room: Room | null,
+    containersInRoom: ContainerInRoom[],
+    setContainersInRoom: React.Dispatch<React.SetStateAction<ContainerInRoom[]>>,
+    setSelectedContainerId: (id: number | null) => void,
+    setSelectedDoorId: (id: number | null) => void,
+    doorZones: { x: number; y: number; width: number; height: number }[] = []
 ) {
 
     /* ──────────────── Containers State ──────────────── */
