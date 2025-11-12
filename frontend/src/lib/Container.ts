@@ -1,3 +1,5 @@
+import { get } from './api';
+
 export interface ContainerDTO {
   id: number;
   name: string;
@@ -13,21 +15,13 @@ export interface ContainerDTO {
   serviceTypeName?: string;
 }
 
-import { get } from './api';
-
 export const fetchContainersByMunicipalityAndService = async (
   municipalityId: number,
   serviceTypeId: number
 ): Promise<ContainerDTO[]> => {
-  const response = await fetch(
+  const data = await get<ContainerDTO[]>(
     `/api/containers/municipality/${municipalityId}/service/${serviceTypeId}`
   );
-
-  if (!response.ok) {
-    throw new Error('Failed to fetch containers by municipality and service');
-  }
-
-  const data: ContainerDTO[] = await response.json();
   return data.map(container => ({
     ...container,
     serviceTypeId,

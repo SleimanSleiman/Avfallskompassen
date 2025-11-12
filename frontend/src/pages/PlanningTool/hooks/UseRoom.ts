@@ -3,37 +3,126 @@
  * Handles corner dragging, constraints, and initial state from localStorage.
  */
 import { useState } from "react";
-import { SCALE, STAGE_WIDTH, STAGE_HEIGHT, MIN_WIDTH, MIN_HEIGHT, MARGIN, clamp, ROOM_VERTICAL_OFFSET, ROOM_HORIZONTAL_OFFSET } from "../Constants";
-import type { Room } from "../Types";
+import { SCALE, STAGE_WIDTH, STAGE_HEIGHT, MIN_WIDTH, MIN_HEIGHT, MARGIN, clamp, mmToPixels, ROOM_VERTICAL_OFFSET, ROOM_HORIZONTAL_OFFSET } from "../Constants";
+import type { Room, Door } from "../Types";
+
+type StoredContainerDTO = {
+    imageTopViewUrl?: string;
+    imageFrontViewUrl?: string;
+    width?: number;
+    depth?: number;
+    height?: number;
+    name?: string;
+    size?: number;
+};
+
+type StoredContainer = {
+    id?: number;
+    x?: number;
+    y?: number;
+    width?: number;
+    height?: number;
+    angle?: number;
+    rotation?: number;
+    containerDTO?: StoredContainerDTO;
+};
+
+type StoredDoor = {
+    id?: number;
+    x?: number;
+    y?: number;
+    width?: number;
+    wall?: Door["wall"];
+    rotation?: number;
+    swingDirection?: Door["swingDirection"];
+};
+
+type StoredRoom = {
+    width?: number;
+    height?: number;
+    x?: number;
+    y?: number;
+    containers?: StoredContainer[];
+    doors?: StoredDoor[];
+};
 
 export function useRoom() {
     /* ──────────────── Initial Room State ──────────────── */
     const initialRoom = (() => {
-        const savedRoom = localStorage.getItem("trashRoomData");
+        const savedRoom = localStorage.getItem("enviormentRoomData") ?? localStorage.getItem("trashRoomData");
         const defaultWidthMeters = 10;
         const defaultHeightMeters = 8;
-    const defaultX = (STAGE_WIDTH - defaultWidthMeters / SCALE) / 2 + ROOM_HORIZONTAL_OFFSET;
-    const defaultY = (STAGE_HEIGHT - defaultHeightMeters / SCALE) / 2 + ROOM_VERTICAL_OFFSET;
+        const defaultX = (STAGE_WIDTH - defaultWidthMeters / SCALE) / 2 + ROOM_HORIZONTAL_OFFSET;
+        const defaultY = (STAGE_HEIGHT - defaultHeightMeters / SCALE) / 2 + ROOM_VERTICAL_OFFSET;
 
-        if (savedRoom) {
-            try {
-                const parsed = JSON.parse(savedRoom);
+        const defaultRoom = {
+            x: defaultX,
+            y: defaultY,
+            width: defaultWidthMeters / SCALE,
+            height: defaultHeightMeters / SCALE,
+        } satisfies Room;
 
-                const widthMeters = parsed.width ?? defaultWidthMeters;
-                const heightMeters = parsed.height ?? defaultHeightMeters;
-
-                return {
-                    x: (STAGE_WIDTH - widthMeters / SCALE) / 2 + ROOM_HORIZONTAL_OFFSET,
-                    y: (STAGE_HEIGHT - heightMeters / SCALE) / 2 + ROOM_VERTICAL_OFFSET,
-                    width: widthMeters / SCALE,
-                    height: heightMeters / SCALE,
-                };
-            } catch {
-                return { x: defaultX, y: defaultY, width: defaultWidthMeters / SCALE, height: defaultHeightMeters / SCALE };
-            }
+        if (!savedRoom) {
+            return defaultRoom;
         }
 
-    return { x: defaultX, y: defaultY, width: defaultWidthMeters / SCALE, height: defaultHeightMeters / SCALE };
+        try {
+            const parsed = JSON.parse(savedRoom) as StoredRoom;
+
+            const widthMeters = parsed?.width ?? defaultWidthMeters;
+            const heightMeters = parsed?.height ?? defaultHeightMeters;
+
+            const x = parsed?.x ?? defaultX;
+            const y = parsed?.y ?? defaultY;
+
+            const containers = Array.isArray(parsed?.containers)
+                ? parsed.containers.map((container) => {
+                    const containerInfo = container?.containerDTO ?? {
+                        imageTopViewUrl: "/images/containers/tempTopView.png",
+                        imageFrontViewUrl: "/images/containers/tempFrontView.png",
+                        width: 1,
+                        depth: 1,
+                        height: 1,
+                        name: "Unknown",
+                        size: 0,
+                    };
+
+                    return {
+                        ...container,
+                        x: container?.x ?? 0,
+                        y: container?.y ?? 0,
+                        width: mmToPixels(containerInfo.width),
+                        height: mmToPixels(containerInfo.depth),
+                        container: containerInfo,
+                        rotation: container?.angle ?? container?.rotation ?? 0,
+                    };
+                })
+                : [];
+
+            const doors = Array.isArray(parsed?.doors)
+                ? parsed.doors.map((door) => ({
+                    id: door?.id ?? Date.now(),
+                    x: door?.x ?? 0,
+                    y: door?.y ?? 0,
+                    width: door?.width ?? 1.2,
+                    wall: door?.wall ?? "bottom",
+                    rotation: door?.rotation ?? 0,
+                    swingDirection: door?.swingDirection ?? "inward",
+                }))
+                : [];
+
+            return {
+                x,
+                y,
+                width: widthMeters / SCALE,
+                height: heightMeters / SCALE,
+                doors,
+                containers,
+            };
+        } catch (error) {
+            console.warn("Failed to parse stored room data", error);
+            return defaultRoom;
+        }
     })();
 
 

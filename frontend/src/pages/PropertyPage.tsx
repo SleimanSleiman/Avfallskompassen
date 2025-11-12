@@ -4,6 +4,7 @@ import type { Municipality, Property, PropertyRequest } from '../lib/Property';
 import { currentUser } from '../lib/auth';
 import RoomSizePrompt from '../components/RoomSizePrompt';
 import ConfirmModal from '../components/ConfirmModal';
+import { getWasteRoomsByPropertyId } from '../lib/WasteRoom';
 // SoftButton not used directly here
 
 export default function PropertyPage() {
@@ -81,7 +82,16 @@ export default function PropertyPage() {
   async function loadProperties() {
     try {
       const data = await getMyProperties();
-      setProperties(data);
+
+      const propertiesWithRooms = await Promise.all(
+      data.map(async (property) => {
+        const wasteRooms = await getWasteRoomsByPropertyId(property.id);
+        console.log(`Property ${property.id} waste rooms:`, wasteRooms);
+        return { ...property, wasteRooms };
+      })
+    );
+
+      setProperties(propertiesWithRooms);
     } catch (err: any) {
       setError('Kunde inte ladda fastigheter: ' + err.message);
     }
@@ -444,6 +454,37 @@ async function handleSubmit(e: React.FormEvent) {
                       <div><span className="text-gray-500">Dragväg:</span> {property.accessPathLength}</div>
                     </div>
                     <div className="mt-3 text-xs text-gray-500">Skapad: {new Date(property.createdAt).toLocaleDateString('sv-SE')}</div>
+                      {/* ===== Waste Rooms Section ===== */}
+                      <div className="mt-3">
+                        <span className="text-gray-500 text-sm font-medium">Miljörum:</span>
+                        <div className="mt-1 space-y-1">
+                          {property.wasteRooms && property.wasteRooms.length > 0
+                            ? property.wasteRooms.map((room, index) => (
+                                <button
+                                  key={room.id ?? index}
+                                  className="w-full text-left rounded border border-gray-200 px-2 py-1 text-sm text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-gray-400"
+                                  onClick={() => {
+                                    const fullRoomData = {
+                                      ...room,
+                                      containers: (room.containers ?? []).map(c => ({
+                                        ...c,
+                                        containerType: c.containerType ?? { imageTopViewUrl: "", width: 1, depth: 1 },
+                                      })),
+                                      doors: room.doors ?? [],
+                                    };
+
+                                    localStorage.setItem("enviormentRoomData", JSON.stringify(fullRoomData));
+                                    window.location.href = '/planningTool';
+                                  }}
+                                >
+                                  {room.name ?? `Miljörum ${index + 1}`}
+                                </button>
+                              ))
+                            : <p className="text-gray-400 text-sm">Inga miljörum tillgängliga.</p>
+                          }
+                        </div>
+                      </div>
+                      {/* ===== End Waste Rooms Section ===== */}
                   </div>
                 </div>
                 <div className="mt-4 flex flex-wrap gap-2">
@@ -467,7 +508,7 @@ async function handleSubmit(e: React.FormEvent) {
         <RoomSizePrompt
         onConfirm={(length: number, width: number) => {
           localStorage.setItem(
-            'trashRoomData',
+            'enviormentRoomData',
             JSON.stringify({ height: length, width: width, property : selectedProperty})
           );
 
