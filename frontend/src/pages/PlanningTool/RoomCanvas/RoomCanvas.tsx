@@ -94,7 +94,9 @@ type RoomCanvasProps = {
     handleAddContainer: (container: ContainerDTO, position?: { x: number; y: number }) => void;
     setIsStageDropActive: (v: boolean) => void;
     setDraggedContainer: Dispatch<SetStateAction<ContainerDTO | null>>;
-    onContainerPanelHeightChange: (height: number) => void;
+    onContainerPanelHeightChange?: (height: number) => void;
+    undo?: () => void;
+    redo?: () => void;
 };
 
 type ServiceTypeIconRule = {
@@ -127,8 +129,6 @@ const getServiceTypeIcon = (name: string): LucideIcon => {
         rule.keywords.some(keyword => normalized.includes(keyword))
     );
     return match?.Icon ?? Package2;
-    undo: () => void;
-    redo: () => void;
 };
 
 export default function RoomCanvas({
@@ -167,12 +167,24 @@ export default function RoomCanvas({
     setIsStageDropActive,
     setDraggedContainer,
     onContainerPanelHeightChange,
-    redo,
     undo,
+    redo,
 }: RoomCanvasProps) {
     //State to track if a container is being dragged
     const [isDraggingContainer, setIsDraggingContainer] = useState(false);
     const isDraggingExistingContainer = isDraggingContainer && selectedContainerId !== null;
+
+    const safeUndo = useCallback(() => {
+        if (typeof undo === "function") {
+            undo();
+        }
+    }, [undo]);
+
+    const safeRedo = useCallback(() => {
+        if (typeof redo === "function") {
+            redo();
+        }
+    }, [redo]);
 
     //Determine which container zones to show
     const containerZonesToShow = isDraggingExistingContainer
@@ -190,12 +202,12 @@ export default function RoomCanvas({
     useEffect(() => {
         const element = containerPanelRef.current;
         if (!element) {
-            onContainerPanelHeightChange(0);
+            onContainerPanelHeightChange?.(0);
             return;
         }
 
         const updateHeight = () => {
-            onContainerPanelHeightChange(element.getBoundingClientRect().height);
+            onContainerPanelHeightChange?.(element.getBoundingClientRect().height);
         };
 
         updateHeight();
@@ -517,7 +529,7 @@ export default function RoomCanvas({
                 
                 {/* Undo */}
                 <button
-                    onClick={undo}
+                    onClick={safeUndo}
                     className="flex items-center justify-start bg-blue-50 text-blue-700 hover:bg-blue-100 hover:text-blue-800 px-2 py-1 rounded-lg transition-all duration-300 shadow-sm group overflow-hidden"
                     title="Ångra (Ctrl+Z)"
                 >
@@ -531,7 +543,7 @@ export default function RoomCanvas({
 
                 {/* Redo */}
                 <button
-                    onClick={redo}
+                    onClick={safeRedo}
                     className="flex items-center justify-start bg-blue-50 text-blue-700 hover:bg-blue-100 hover:text-blue-800 px-2 py-1 rounded-lg transition-all duration-300 shadow-sm group overflow-hidden"
                     title="Gör om (Ctrl+Y)"
                 >

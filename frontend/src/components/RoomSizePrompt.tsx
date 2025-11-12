@@ -57,6 +57,7 @@ export default function RoomSizePrompt({
                 setLength(event.target.value);
                 setError(null);
               }}
+              placeholder="Längd (m)"
               className="w-full border border-gray-300 rounded-xl2 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-nsr-teal focus:border-nsr-teal"
             />
           </label>
@@ -69,6 +70,7 @@ export default function RoomSizePrompt({
                 setWidth(event.target.value);
                 setError(null);
               }}
+              placeholder="Bredd (m)"
               className="w-full border border-gray-300 rounded-xl2 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-nsr-teal focus:border-nsr-teal"
             />
           </label>

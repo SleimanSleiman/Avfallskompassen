@@ -56,6 +56,8 @@ export default function PlanningTool() {
         handleRemoveContainer,
         handleDragContainer,
         handleSelectContainer,  
+        draggedContainer,
+        setDraggedContainer,
 
         availableContainers,
         isLoadingContainers,
@@ -68,6 +70,8 @@ export default function PlanningTool() {
         handleStageDragLeave,
         handleRotateContainer,
         handleShowContainerInfo,
+        selectedContainerInfo,
+        setSelectedContainerInfo,
         undo,
         redo,
         getContainerZones,
@@ -211,6 +215,8 @@ export default function PlanningTool() {
                         setIsStageDropActive={setIsStageDropActive}
                         setDraggedContainer={setDraggedContainer}
                         onContainerPanelHeightChange={setContainerPanelHeight}
+                        undo={undo}
+                        redo={redo}
                     />
 
                     {/* ActionPanel for selected container or door */}
@@ -230,6 +236,8 @@ export default function PlanningTool() {
                                     handleRotateDoor={handleRotateDoor}
                                     handleRotateContainer={handleRotateContainer}
                                     handleShowContainerInfo={handleShowContainerInfo}
+                                    undo={undo}
+                                    redo={redo}
                                 />
                             </div>
                         </div>
@@ -247,6 +255,8 @@ export default function PlanningTool() {
                                 handleRotateDoor={handleRotateDoor}
                                 handleRotateContainer={handleRotateContainer}
                                 handleShowContainerInfo={handleShowContainerInfo}
+                                undo={undo}
+                                redo={redo}
                             />
                         </div>
                     )}
