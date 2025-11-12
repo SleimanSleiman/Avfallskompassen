@@ -1,5 +1,6 @@
 import { api, post } from './api';
 import { currentUser } from './auth';
+import type { WasteRoom } from './WasteRoom.ts';
 
 export type Property = {
   id: number;
@@ -13,6 +14,7 @@ export type Property = {
   lastNotifiedAt?: string;
   municipalityId?: number;
   municipalityName?: string;
+  wasteRooms?: WasteRoom[];
 };
 
 export type LockType = {

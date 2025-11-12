@@ -30,7 +30,8 @@ export default function PlanningTool() {
         setRoom
     } = useRoom();
 
-
+    console.log("THIS IS THE ROOM");
+    console.log(room);
     /* ──────────────── Door & Container state ──────────────── */
     const [selectedContainerId, setSelectedContainerId] = useState<number | null>(null);
     const [selectedDoorId, setSelectedDoorId] = useState<number | null>(null);
@@ -38,6 +39,7 @@ export default function PlanningTool() {
     /* ──────────────── Door logic ──────────────── */
     const {
         doors,
+        setDoors,
         handleAddDoor,
         handleDragDoor,
         handleRotateDoor,
@@ -49,6 +51,7 @@ export default function PlanningTool() {
     /* ──────────────── Container logic ──────────────── */
     const {
         containersInRoom,
+        setContainersInRoom,
         setDraggedContainer,
         draggedContainer,
         availableContainers,
@@ -74,6 +77,12 @@ export default function PlanningTool() {
         handleShowContainerInfo,
         getContainerZones,
     } = useContainers(room, setSelectedContainerId, setSelectedDoorId, getDoorZones());
+
+    useEffect(() => {
+    if (room.doors) setDoors(room.doors);
+    if (room.containers) setContainersInRoom(room.containers);
+    }, [room, setDoors, setContainersInRoom]);
+
 
     /* ──────────────── Service Types (API data) ──────────────── */
     const serviceTypes = useServiceTypes();

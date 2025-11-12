@@ -8,13 +8,16 @@ import com.avfallskompassen.dto.request.WasteRoomRequest;
 import com.avfallskompassen.exception.ResourceNotFoundException;
 import com.avfallskompassen.model.*;
 import com.avfallskompassen.repository.*;
+import com.avfallskompassen.services.ContainerService;
 import com.avfallskompassen.services.WasteRoomService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 
 /**
@@ -29,21 +32,27 @@ public class WasteRoomServiceImpl implements WasteRoomService {
     private final PropertyRepository propertyRepository;
     private final ContainerTypeRepository containerTypeRepository;
     private final DoorRepository doorRepository;
+    private ContainerPlanRepository containerPlanRepository;
+    @Autowired
+    private ContainerService containerService;
 
     public WasteRoomServiceImpl(
             WasteRoomRepository wasteRoomRepository,
             PropertyRepository propertyRepository,
             ContainerTypeRepository containerTypeRepository,
-            DoorRepository doorRepository
+            DoorRepository doorRepository,
+            ContainerPlanRepository containerPlanRepository
     ) {
         this.wasteRoomRepository = wasteRoomRepository;
         this.propertyRepository = propertyRepository;
         this.containerTypeRepository = containerTypeRepository;
         this.doorRepository = doorRepository;
+        this.containerPlanRepository = containerPlanRepository;
     }
 
     /**
      * Processes the data from a request to save a waste room and saves it in the database
+     *
      * @param request The request containing the information about the waste room
      * @return A DTO containing the information about the waste room that was stored in the database
      */
@@ -68,6 +77,7 @@ public class WasteRoomServiceImpl implements WasteRoomService {
 
     /**
      * Collects a specific waste room based on an id
+     *
      * @param id The id of the waste room
      * @return A DTO containing the information about the waste room from the database
      */
@@ -82,6 +92,7 @@ public class WasteRoomServiceImpl implements WasteRoomService {
 
     /**
      * Collects list of waste rooms that are connected to a certain property
+     *
      * @param propertyId The id of the property whose waste rooms are to be collected
      * @return A list of DTO containing the information about the waste room from the database
      */
@@ -90,14 +101,15 @@ public class WasteRoomServiceImpl implements WasteRoomService {
         List<WasteRoom> rooms = wasteRoomRepository.findByPropertyId(propertyId);
 
         return rooms.stream()
-                .map(WasteRoomDTO::fromEntity)
+                .map(this::mapWasteRoomToDTO)
                 .toList();
     }
 
     /**
      * Processes the data from a request to update a waste room and saves the updated version in the database
+     *
      * @param wasteRoomId Id to the waste room to be updated
-     * @param request The request containing the information about the waste room
+     * @param request     The request containing the information about the waste room
      * @return A DTO containing the information about the waste room that was updated in the database
      */
     @Override
@@ -142,21 +154,23 @@ public class WasteRoomServiceImpl implements WasteRoomService {
      * Helper method that converts the data from a request containing information about containers. Transfers
      * the data from {@link ContainerPositionRequest} to {@link ContainerPosition} which must be done before saving
      * the containers in the database
+     *
      * @param containers A list containing requests of containers
-     * @param wasteRoom The waste room to be altered or created
+     * @param wasteRoom  The waste room to be altered or created
      * @return A list of {@link ContainerPosition} with the appropriate data needed before saving it in database
      */
     private List<ContainerPosition> convertContainerRequest(List<ContainerPositionRequest> containers, WasteRoom wasteRoom) {
         if (containers == null) {
             return Collections.emptyList();
         }
+
         List<ContainerPosition> containerPositions = new ArrayList<>();
 
         for (ContainerPositionRequest request : containers) {
             ContainerPosition container = new ContainerPosition();
-            container.setContainerType(containerTypeRepository.findById(request.getId())
+            container.setContainerPlan(containerPlanRepository.findById(request.getId())
                     .orElseThrow(() -> new ResourceNotFoundException(
-                            "Container with ID: " + request.getId() + " can't be found"
+                            "ContainerPlan with ID: " + request.getId() + " can't be found"
                     )));
             container.setX(request.getX());
             container.setY(request.getY());
@@ -164,16 +178,18 @@ public class WasteRoomServiceImpl implements WasteRoomService {
             container.setWasteRoom(wasteRoom);
             containerPositions.add(container);
         }
+
         return containerPositions;
     }
 
     /**
      * Helper method that converts the data from a request containing information about doors. Transfers
-     * the data from {@link DoorPositionRequest} to {@link DoorPosition} which must be done before saving
+     * the data from {@link DoorPositionRequest} to {@link Door} which must be done before saving
      * the doors in the database
-     * @param doors A list containing requests of doors
+     *
+     * @param doors     A list containing requests of doors
      * @param wasteRoom The waste room to be altered or created
-     * @return A list of {@link DoorPosition} with the appropriate data needed before saving it in database
+     * @return A list of {@link Door} with the appropriate data needed before saving it in database
      */
     private List<Door> convertDoorRequest(List<DoorRequest> doors, WasteRoom wasteRoom) {
         if (doors == null || doors.isEmpty()) {
@@ -198,6 +214,7 @@ public class WasteRoomServiceImpl implements WasteRoomService {
 
     /**
      * Collects a property from the database and returns it.
+     *
      * @param id The id of the property to be collected
      * @return The property matching the id
      */
@@ -210,6 +227,7 @@ public class WasteRoomServiceImpl implements WasteRoomService {
 
     /**
      * Collects a waste room from the database and returns it
+     *
      * @param id the id of the waste room to be collected
      * @return The waste room matching the id
      */
@@ -218,5 +236,25 @@ public class WasteRoomServiceImpl implements WasteRoomService {
                 () -> new ResourceNotFoundException(
                         "WasteRoom with id: " + id + " can't be found"
                 ));
+    }
+
+    private WasteRoomDTO mapWasteRoomToDTO(WasteRoom entity) {
+        List<ContainerPositionDTO> containers =
+                containerService.getContainersByWasteRoomId(entity.getId());
+
+        List<DoorDTO> doors = entity.getDoors() != null
+                ? entity.getDoors().stream().map(DoorDTO::fromEntity).toList()
+                : new ArrayList<>();
+
+        return new WasteRoomDTO(
+                entity.getProperty().getId(),
+                entity.getLength(),
+                entity.getWidth(),
+                entity.getX(),
+                entity.getY(),
+                containers,
+                doors
+        );
+
     }
 }

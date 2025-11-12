@@ -17,6 +17,8 @@ public class ContainerDTO {
     private int emptyingFrequencyPerYear;
     private BigDecimal cost;
 
+    public ContainerDTO() {}
+
     public ContainerDTO(
             String name,
             int size,

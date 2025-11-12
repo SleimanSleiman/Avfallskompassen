@@ -173,7 +173,9 @@ export default function RoomCanvas({
 
                     {/* Highlighted zones a container cannot be placed */}
                     {(isDraggingContainer || draggedContainer) &&
-                        [...doorZones, ...containerZonesToShow].map((zone, i) => (
+                        [...doorZones, ...containerZonesToShow]
+                        .filter(Boolean) // <— remove undefined or null
+                        .map((zone, i) => (
                             <Group key={`zone-${i}`} x={zone.x} y={zone.y} listening={false} data-testid={`zone-${i}`}>
                                 <Rect
                                      x={0}

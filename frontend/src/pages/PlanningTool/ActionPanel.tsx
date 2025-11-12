@@ -40,10 +40,10 @@ export default function ActionPanel({
     const selectedName = (() => {
         if (selectedContainerId !== null) {
             const container = containers.find((c) => c.id === selectedContainerId);
-            return container.container.size + " L";
+            return container ? container.container.size + " L" : "-";
         } else if (selectedDoorId !== null) {
             const door = doors.find((d) => d.id === selectedDoorId);
-            return door.width*100 + " cm";
+            return door ? door.width * 100 + " cm" : "-";
         }
     })();
 

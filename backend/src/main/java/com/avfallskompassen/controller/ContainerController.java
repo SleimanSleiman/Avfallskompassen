@@ -41,38 +41,10 @@ public class ContainerController {
         }
 
         try {
-            var containers = containerService.getContainersByMunicipalityAndService(municipalityId, serviceTypeId)
-                    .stream()
-                    .map(this::mapToDTO)
-                    .collect(Collectors.toList());
+            var containers = containerService.getContainersByMunicipalityAndService(municipalityId, serviceTypeId);
             return ResponseEntity.ok(containers);
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
-    }
-
-    /**
-     * Help method to map ContainerPlan to ContainerDTO.
-     * @param plan the ContainerPlan entity
-     * @return the mapped ContainerDTO
-     */
-    private ContainerDTO mapToDTO(ContainerPlan plan) {
-        var type = plan.getContainerType();
-
-        String topViewUrl = plan.getImageTopViewUrl() != null
-                ? plan.getImageTopViewUrl()
-                : type.getImageTopViewUrl();
-
-        return new ContainerDTO(
-                type.getName(),
-                type.getSize(),
-                type.getWidth(),
-                type.getDepth(),
-                type.getHeight(),
-                type.getImageFrontViewUrl(),
-                topViewUrl,
-                plan.getEmptyingFrequencyPerYear(),
-                plan.getCost()
-        );
     }
 }
