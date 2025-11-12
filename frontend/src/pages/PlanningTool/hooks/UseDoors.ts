@@ -257,6 +257,7 @@ export function useDoors(
     /* ──────────────── Return ──────────────── */
     return {
         doors,
+        setDoors,
         setSelectedDoorId,
         handleAddDoor,
         handleDragDoor,

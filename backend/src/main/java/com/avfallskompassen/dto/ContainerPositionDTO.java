@@ -11,16 +11,17 @@ public class ContainerPositionDTO {
     private double x;
     private double y;
     private double angle;
-    private Long containerTypeId;
+    ContainerDTO containerDTO;
+    private Long containerPlanId;
     private Long wasteRoomId;
 
     // Doesn't serve any real purpose for the server. Just put this here to simply the testing -- Anton
-    public ContainerPositionDTO(Long id, double x, double y, double angle, Long containerTypeId, Long wasteRoomId) {
+    public ContainerPositionDTO(Long id, double x, double y, double angle, Long containerPlanId, Long wasteRoomId) {
         this.id = id;
         this.x = x;
         this.y = y;
         this.angle = angle;
-        this.containerTypeId = containerTypeId;
+        this.containerPlanId = containerPlanId;
         this.wasteRoomId = wasteRoomId;
     }
 
@@ -38,11 +39,15 @@ public class ContainerPositionDTO {
     public double getAngle() { return angle; }
     public void setAngle(double angle) { this.angle = angle; }
 
-    public Long getContainerTypeId() { return containerTypeId; }
-    public void setContainerTypeId(Long containerTypeId) { this.containerTypeId = containerTypeId; }
+    public Long getContainerPlanId() { return containerPlanId; }
+    public void setContainerPlanId(Long containerPlanId) { this.containerPlanId = containerPlanId; }
 
     public Long getWasteRoomId() { return wasteRoomId; }
     public void setWasteRoomId(Long wasteRoomId) { this.wasteRoomId = wasteRoomId; }
+
+    public ContainerDTO getContainerDTO() { return containerDTO; }
+
+    public void setContainerDTO(ContainerDTO containerDTO) { this.containerDTO = containerDTO; }
 
     /**
      * Method for converting an entity object to a DTO object
@@ -55,7 +60,7 @@ public class ContainerPositionDTO {
         dto.setX(entity.getX());
         dto.setY(entity.getY());
         dto.setAngle(entity.getAngle());
-        dto.setContainerTypeId(entity.getContainerType() != null ? entity.getContainerType().getId() : null);
+        dto.setContainerPlanId(entity.getContainerPlan() != null ? entity.getContainerPlan().getId() : null);
         dto.setWasteRoomId(entity.getWasteRoom() != null ? entity.getWasteRoom().getId() : null);
         return dto;
     }

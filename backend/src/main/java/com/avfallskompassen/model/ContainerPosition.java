@@ -30,8 +30,8 @@ public class ContainerPosition {
     private double angle;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "container_type_id", nullable = false)
-    private ContainerType containerType;
+    @JoinColumn(name = "container_plan_id", nullable = false)
+    private ContainerPlan containerPlan;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "waste_room_id", nullable = false)
@@ -77,11 +77,11 @@ public class ContainerPosition {
         this.wasteRoom = wasteRoom;
     }
 
-    public ContainerType getContainerType() {
-        return containerType;
+    public ContainerPlan getContainerPlan() {
+        return containerPlan;
     }
 
-    public void setContainerType(ContainerType containerType) {
-        this.containerType = containerType;
+    public void setContainerPlan(ContainerPlan containerPlan) {
+        this.containerPlan = containerPlan;
     }
 }
