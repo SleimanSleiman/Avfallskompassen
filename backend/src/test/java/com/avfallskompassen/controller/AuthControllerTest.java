@@ -58,7 +58,7 @@ class AuthControllerTest {
     assertEquals(400, resp.getStatusCode().value());
     LoginResponse body2 = Objects.requireNonNull(resp.getBody());
     assertFalse(body2.isSuccess());
-    assertEquals("Invalid password", body2.getMessage());
+    assertEquals("Ogiltigt lösenord", body2.getMessage());
     }
 
     @Test
@@ -72,7 +72,7 @@ class AuthControllerTest {
     assertEquals(400, resp.getStatusCode().value());
     LoginResponse body3 = Objects.requireNonNull(resp.getBody());
     assertFalse(body3.isSuccess());
-    assertEquals("User not found", body3.getMessage());
+    assertEquals("Användaren hittades inte", body3.getMessage());
     }
 
     @Test
