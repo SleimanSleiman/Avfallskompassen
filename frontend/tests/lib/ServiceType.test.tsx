@@ -3,6 +3,10 @@ import { fetchServiceTypes } from '../../src/lib/ServiceType';
 
 describe('fetchServiceTypes', () => {
     beforeEach(() => {
+        vi.resetAllMocks();
+        localStorage.clear();
+        localStorage.setItem('auth_user', JSON.stringify({ token: 'mock-token' }));
+
         global.fetch = vi.fn();
     });
 
@@ -18,7 +22,9 @@ describe('fetchServiceTypes', () => {
         const result = await fetchServiceTypes();
 
         expect(result).toEqual(mockData);
-        expect(fetch).toHaveBeenCalledWith('/api/serviceTypes/all');
+        expect(fetch).toHaveBeenCalledWith('/api/serviceTypes/all', {
+            headers: { Authorization: 'Bearer mock-token' },
+        });
     });
 
     //Test error handling for failed fetch

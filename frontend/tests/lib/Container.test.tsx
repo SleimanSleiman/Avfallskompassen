@@ -3,6 +3,9 @@ import { fetchContainersByMunicipalityAndService } from '../../src/lib/Container
 
 describe('fetchContainersByMunicipalityAndService', () => {
     beforeEach(() => {
+        vi.resetAllMocks();
+        localStorage.clear();
+        localStorage.setItem('auth_user', JSON.stringify({ token: 'mock-token' }));
         global.fetch = vi.fn();
     });
 
@@ -29,7 +32,9 @@ describe('fetchContainersByMunicipalityAndService', () => {
         const result = await fetchContainersByMunicipalityAndService(1, 2);
 
         expect(result).toEqual(mockData);
-        expect(fetch).toHaveBeenCalledWith('/api/containers/municipality/1/service/2');
+        expect(fetch).toHaveBeenCalledWith('/api/containers/municipality/1/service/2', {
+            headers: { Authorization: 'Bearer mock-token' },
+        });
     });
 
     //Test error handling for failed fetch
