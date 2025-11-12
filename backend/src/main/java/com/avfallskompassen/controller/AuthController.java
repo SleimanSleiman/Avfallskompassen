@@ -41,7 +41,7 @@ public class AuthController {
                 if (userService.validatePassword(loginRequest.getPassword(), user.getPassword())) {
                     LoginResponse response = new LoginResponse(
                         true, 
-                        "Login successful", 
+                        "Inloggning lyckades",
                         user.getUsername(), 
                         user.getRole()
                     );
@@ -49,7 +49,7 @@ public class AuthController {
                 } else {
                     LoginResponse response = new LoginResponse(
                         false, 
-                        "Invalid password", 
+                        "Ogiltigt lösenord",
                         null, 
                         null
                     );
@@ -58,7 +58,7 @@ public class AuthController {
             } else {
                 LoginResponse response = new LoginResponse(
                     false, 
-                    "User not found", 
+                    "Användaren hittades inte",
                     null, 
                     null
                 );
@@ -67,7 +67,7 @@ public class AuthController {
         } catch (Exception e) {
             LoginResponse response = new LoginResponse(
                 false, 
-                "Login failed: " + e.getMessage(), 
+                "Inloggning misslyckades: " + e.getMessage(),
                 null, 
                 null
             );
@@ -88,7 +88,7 @@ public class AuthController {
             
             LoginResponse response = new LoginResponse(
                 true, 
-                "Registration successful", 
+                "Registrering lyckades",
                 newUser.getUsername(), 
                 newUser.getRole()
             );
@@ -105,7 +105,7 @@ public class AuthController {
         } catch (Exception e) {
             LoginResponse response = new LoginResponse(
                 false, 
-                "Registration failed: " + e.getMessage(), 
+                "Registrering misslyckades: " + e.getMessage(),
                 null, 
                 null
             );

@@ -15,7 +15,7 @@ type ActionPanelProps = {
     selectedDoorId: number | null;
     handleRemoveContainer: (id: number) => void;
     handleRemoveDoor: (id: number) => void;
-    handleRotateDoor: (id: number, newRotation: number, newSwing: "inward" | "outward") => void;
+    handleRotateDoor: (id: number) => void;
     handleRotateContainer: (id: number) => void;
     handleShowContainerInfo: (id: number) => void;
 };
