@@ -2,9 +2,9 @@ package com.avfallskompassen.services;
 
 import com.avfallskompassen.dto.ContainerDTO;
 import com.avfallskompassen.dto.ContainerPositionDTO;
+import com.avfallskompassen.exception.ResourceNotFoundException;
 import com.avfallskompassen.model.ContainerPlan;
 import com.avfallskompassen.model.ContainerPosition;
-import com.avfallskompassen.model.ContainerType;
 import com.avfallskompassen.repository.ContainerPlanRepository;
 import com.avfallskompassen.repository.ContainerPositionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,6 +44,11 @@ public class ContainerService {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Get containers for a certain waste room.
+     * @param wasteRoomId Id to the waste room whose containers are to be fetched
+     * @return List of containers in a specific waste room
+     */
     public List<ContainerPositionDTO> getContainersByWasteRoomId(Long wasteRoomId) {
         List<ContainerPosition> positions = containerPositionRepository.findByWasteRoomId(wasteRoomId);
 
@@ -52,6 +57,23 @@ public class ContainerService {
                 .toList();
     }
 
+    /**
+     * Gets container plan based on ID, or throw {@link ResourceNotFoundException}
+     * @param id Id to the container plan
+     * @return {@link ContainerPlan} matching id
+     */
+    public ContainerPlan getContainerPlanById(Long id) {
+        return containerPlanRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "ContainerPlan with ID: " + id + " can't be found"
+                ));
+    }
+
+    /**
+     * Help method to map ContainerPosition to a DTO
+     * @param position The {@link ContainerPosition} to transform into DTO
+     * @return {@link ContainerPositionDTO}
+     */
     private ContainerPositionDTO mapPositionToDTO(ContainerPosition position) {
         ContainerPositionDTO dto = new ContainerPositionDTO();
         dto.setId(position.getId());
@@ -63,20 +85,7 @@ public class ContainerService {
         ContainerPlan plan = position.getContainerPlan();
         dto.setContainerPlanId(plan.getId());
 
-        // map plan to ContainerDTO
-        ContainerType type = plan.getContainerType();
-        ContainerDTO containerDTO = new ContainerDTO(
-                type.getName(),
-                type.getSize(),
-                type.getWidth(),
-                type.getDepth(),
-                type.getHeight(),
-                type.getImageFrontViewUrl(),
-                plan.getImageTopViewUrl() != null ? plan.getImageTopViewUrl() : type.getImageTopViewUrl(),
-                plan.getEmptyingFrequencyPerYear(),
-                plan.getCost()
-        );
-        dto.setContainerDTO(containerDTO);
+        dto.setContainerDTO(mapToDTO(plan));
 
         return dto;
     }

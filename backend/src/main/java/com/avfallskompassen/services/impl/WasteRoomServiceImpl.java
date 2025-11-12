@@ -10,15 +10,12 @@ import com.avfallskompassen.model.*;
 import com.avfallskompassen.repository.*;
 import com.avfallskompassen.services.ContainerService;
 import com.avfallskompassen.services.WasteRoomService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
-
 
 /**
  * Service class for handling waste rooms.
@@ -30,24 +27,16 @@ import java.util.stream.Collectors;
 public class WasteRoomServiceImpl implements WasteRoomService {
     private final WasteRoomRepository wasteRoomRepository;
     private final PropertyRepository propertyRepository;
-    private final ContainerTypeRepository containerTypeRepository;
-    private final DoorRepository doorRepository;
-    private ContainerPlanRepository containerPlanRepository;
-    @Autowired
-    private ContainerService containerService;
+    private final ContainerService containerService;
 
     public WasteRoomServiceImpl(
             WasteRoomRepository wasteRoomRepository,
             PropertyRepository propertyRepository,
-            ContainerTypeRepository containerTypeRepository,
-            DoorRepository doorRepository,
-            ContainerPlanRepository containerPlanRepository
+            ContainerService containerService
     ) {
         this.wasteRoomRepository = wasteRoomRepository;
         this.propertyRepository = propertyRepository;
-        this.containerTypeRepository = containerTypeRepository;
-        this.doorRepository = doorRepository;
-        this.containerPlanRepository = containerPlanRepository;
+        this.containerService = containerService;
     }
 
     /**
@@ -82,12 +71,13 @@ public class WasteRoomServiceImpl implements WasteRoomService {
      * @return A DTO containing the information about the waste room from the database
      */
     @Override
+    @Deprecated
     public WasteRoomDTO getWasteRoomById(Long id) {
         WasteRoom wasteRoom = wasteRoomRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Waste room not found with id: " + id));
 
-        return WasteRoomDTO.fromEntity(wasteRoom);
+        return mapWasteRoomToDTO(wasteRoom);
     }
 
     /**
@@ -168,10 +158,7 @@ public class WasteRoomServiceImpl implements WasteRoomService {
 
         for (ContainerPositionRequest request : containers) {
             ContainerPosition container = new ContainerPosition();
-            container.setContainerPlan(containerPlanRepository.findById(request.getId())
-                    .orElseThrow(() -> new ResourceNotFoundException(
-                            "ContainerPlan with ID: " + request.getId() + " can't be found"
-                    )));
+            container.setContainerPlan(containerService.getContainerPlanById(request.getId()));
             container.setX(request.getX());
             container.setY(request.getY());
             container.setAngle(request.getAngle());
@@ -255,6 +242,5 @@ public class WasteRoomServiceImpl implements WasteRoomService {
                 containers,
                 doors
         );
-
     }
 }
