@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { ChevronDown, ChevronUp } from "lucide-react";
 import { useParams, useLocation, Link } from 'react-router-dom';
 import { currentUser } from '../lib/auth';
 import ConfirmModal from '../components/ConfirmModal';
@@ -24,6 +25,7 @@ export default function StatisticsPage() {
   const location = useLocation();
   const {state} = location as {state?: {propertyName: string} };
   const propertyName = state?.propertyName || '';
+  const numberOfApartments = state?.numberOfApartments ?? 0;
 
   const [data, setData] = useState<PropertyComparisonDTO | null>(null);
   const [loading, setLoading] = useState(true);
@@ -39,12 +41,21 @@ export default function StatisticsPage() {
     containers: true,
   });
 
+   const [openWasteGroups, setOpenWasteGroups] = useState<Record<string, boolean>>({});
+
   // Test container data
   const testContainers: ContainerData[] = [
     { type: 'Restavfall', size: 660, quantity: 3, collectionFrequency: 52 },
+    { type: "Restavfall", size: 190, quantity: 5, collectionFrequency: 52 },
     { type: 'Papper', size: 370, quantity: 2, collectionFrequency: 26 },
     { type: 'Plast', size: 370, quantity: 2, collectionFrequency: 26 },
   ];
+
+    const groupedContainers = testContainers.reduce((acc, container) => {
+      if (!acc[container.type]) acc[container.type] = [];
+      acc[container.type].push(container);
+      return acc;
+    }, {} as Record<string, ContainerData[]>);
 
   useEffect(() => {
     if (!propertyId) return;
@@ -78,6 +89,9 @@ export default function StatisticsPage() {
     fetchData();
   }, [propertyId]);
 
+    const toggleWasteGroup = (type: string) =>
+      setOpenWasteGroups((prev) => ({ ...prev, [type]: !prev[type] }));
+
   if (loading) return <main className="mx-auto max-w-7xl px-4 py-8"><p className="text-gray-600">Laddar statistik...</p></main>;
   if (error) return <main className="mx-auto max-w-7xl px-4 py-8"><div className="rounded-lg border border-red-200 bg-red-50 p-4 text-red-700">{error}</div></main>;
   if (!data) return <main className="mx-auto max-w-7xl px-4 py-8"><p className="text-gray-600">Ingen statistik hittades.</p></main>;
@@ -100,10 +114,16 @@ export default function StatisticsPage() {
           <Link to="/properties" className="btn-secondary text-sm self-end">← Tillbaka till fastigheter</Link>
         </div>
       </div>
+
       <section className="mb-8 rounded-2xl border bg-white p-6 shadow-soft overflow-x-auto">
-        <h2 className="text-xl font-semibold mb-4">Avfall & Kostnadsstatistik</h2>
+        <h2 className="text-xl font-semibold mb-4">
+          Avfall & Kostnadsstatistik
+        </h2>
+        <p className="text-gray-500 mb-4">
+            Antal lägenheter: <span className="font-medium text-gray-700">{numberOfApartments}</span>
+        </p>
         <table className="min-w-full border border-gray-200 text-sm text-gray-700">
-          <thead className="bg-gray-100">
+          <thead className="bg-gray-100 text-left">
             <tr>
               <th className="px-3 py-2 border">Fraktion</th>
               <th className="px-3 py-2 border">Volym (L)</th>
@@ -116,56 +136,107 @@ export default function StatisticsPage() {
             </tr>
           </thead>
           <tbody>
-            {testContainers.map((container, idx) => {
-
-              const wasteData = data?.wasteAmountComparisons?.find(w => w.wasteType === container.type);
+            {Object.entries(groupedContainers).map(([type, containers]) => {
+              const wasteData = data?.wasteAmountComparisons?.find(
+                (w) => w.wasteType === type
+              );
               const diff = wasteData?.percentageDifference ?? 0;
               const diffColor =
-                diff < 0 ? 'text-green-600' : diff > 0 ? 'text-red-600' : 'text-yellow-600';
+                diff < 0
+                  ? "text-green-600"
+                  : diff > 0
+                  ? "text-red-600"
+                  : "text-yellow-600";
 
-              const annualVolume = container.size * container.quantity * container.collectionFrequency;
-              const litersPerWeek = annualVolume / 52;
-
+              const totalAnnualVolume = containers.reduce(
+                (sum, c) => sum + c.size * c.quantity * c.collectionFrequency,
+                0
+              );
               const costPerYear = data?.costComparison?.propertyCost ?? 0;
 
               return (
-                <tr key={idx} className="even:bg-gray-50">
-                  <td className="px-3 py-2 border font-semibold">{container.type}</td>
-                  <td className="px-3 py-2 border">{container.size}</td>
-                  <td className="px-3 py-2 border">{container.quantity}</td>
-                  <td className="px-3 py-2 border">{container.collectionFrequency}</td>
-                  <td className="px-3 py-2 border">{annualVolume}</td>
-                  <td className={`px-3 py-2 border font-semibold ${diffColor}`}>{diff.toFixed(2)}%</td>
-                  <td className="px-3 py-2 border">{litersPerWeek.toFixed(1)}</td>
-                  <td className="px-3 py-2 border font-semibold">{costPerYear}</td>
-                </tr>
+                <>
+                  <tr
+                    key={type}
+                    onClick={() => toggleWasteGroup(type)}
+                    className="cursor-pointer bg-gray-50 hover:bg-gray-100 transition"
+                  >
+                    <td className="px-3 py-3 border font-semibold flex items-center gap-2">
+
+                      {/*Här finns statusfärgen*/}
+
+                      <span
+                        className={`inline-block w-3 h-3 rounded-full ring-2 ring-offset-1 ${
+                          diff < -10
+                            ? "bg-green-500 ring-green-300"
+                            : diff > 10
+                            ? "bg-red-500 ring-red-300"
+                            : "bg-yellow-400 ring-yellow-200"
+                        }`}
+                        title={
+                          diff < -10
+                            ? "Bra nivå"
+                            : diff > 10
+                            ? "Dålig nivå"
+                            : "OK nivå"
+                        }
+                      ></span>
+
+                      <span>{type}</span>
+
+                      {openWasteGroups[type] ? (
+                        <ChevronUp className="w-4 h-4" />
+                      ) : (
+                        <ChevronDown className="w-4 h-4" />
+                      )}
+                    </td>
+                    <td colSpan={3}></td>
+                    <td className="px-3 py-2 border font-semibold">
+                      {totalAnnualVolume.toLocaleString()}
+                    </td>
+                    <td
+                      className={`px-3 py-2 border font-semibold ${diffColor}`}
+                    >
+                      {diff.toFixed(2)}%
+                    </td>
+                    <td className="px-3 py-2 border">
+                      {(totalAnnualVolume / 52).toFixed(1)}
+                    </td>
+                    <td className="px-3 py-2 border font-semibold">
+                      {costPerYear.toLocaleString()}
+                    </td>
+                  </tr>
+
+                  {openWasteGroups[type] &&
+                    containers.map((container, idx) => {
+                      const annualVolume =
+                        container.size *
+                        container.quantity *
+                        container.collectionFrequency;
+                      const litersPerWeek = annualVolume / 52;
+
+                      return (
+                        <tr
+                          key={`${type}-${idx}`}
+                          className="bg-white text-gray-600 text-sm"
+                        >
+
+                          <td className="border px-3 py-2"></td>
+
+                          <td className="px-6 py-2 border">{container.size.toLocaleString()} L</td>
+                          <td className="px-3 py-2 border">{container.quantity.toLocaleString()}</td>
+                          <td className="px-3 py-2 border">{container.collectionFrequency.toLocaleString()}</td>
+                          <td className="px-3 py-2 border">{annualVolume.toLocaleString()}</td>
+                          <td colSpan={2}></td>
+                          <td className="px-3 py-2 border text-gray-700">{costPerYear.toLocaleString('sv-SE')}</td>
+                        </tr>
+                      );
+                    })}
+                </>
               );
             })}
           </tbody>
         </table>
-      </section>
-      <section className="mb-8 rounded-2xl border bg-white shadow-soft">
-        <h2
-          className="text-xl font-semibold p-6 cursor-pointer flex justify-between items-center"
-          onClick={() => toggleSection('containers')}
-        >
-          Behållare
-          <span>{openSections.containers ? '▲' : '▼'}</span>
-        </h2>
-        {openSections.containers && (
-          <div className="space-y-2 text-gray-700 p-6 pt-0">
-            {testContainers.map((container, idx) => (
-              <div key={idx} className="p-3 rounded-lg bg-gray-50">
-                <p className="font-semibold">{container.type}</p>
-                <p>
-                  Storlek: <span className="font-semibold">{container.size} L</span><br/>
-                  Antal: <span className="font-semibold">{container.quantity} st</span><br/>
-                  Hämtas: <span className="font-semibold">{container.collectionFrequency} ggr/år</span>
-                </p>
-              </div>
-            ))}
-          </div>
-        )}
       </section>
     </main>
   );

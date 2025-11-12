@@ -206,7 +206,8 @@ async function handleSubmit(e: React.FormEvent) {
 
   function viewStatistics(p: Property) {
     navigate(`/statistics/${p.id}`, {
-      state: { propertyName: p.address }
+      state: { propertyName: p.address,
+          numberOfApartments: p.numberOfApartments}
     });
   }
 
