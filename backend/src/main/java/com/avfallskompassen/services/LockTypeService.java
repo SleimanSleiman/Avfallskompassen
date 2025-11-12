@@ -1,6 +1,6 @@
 package com.avfallskompassen.services;
 
-import com.avfallskompassen.model.LockType;
+import com.avfallskompassen.dto.LockTypeDto;
 
 import java.util.List;
 
@@ -10,6 +10,6 @@ import java.util.List;
  */
 
 public interface LockTypeService {
-    public LockType findLockTypeById(Long id);
-    public List<LockType> getAllLockTypes();
+    public LockTypeDto findLockTypeById(Long id);
+    public List<LockTypeDto> getAllLockTypes();
 }

@@ -1,5 +1,6 @@
 package com.avfallskompassen.services.impl;
 
+import com.avfallskompassen.dto.LockTypeDto;
 import com.avfallskompassen.model.LockType;
 import com.avfallskompassen.repository.LockTypeRepository;
 import com.avfallskompassen.services.LockTypeService;
@@ -7,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Service class that serves DTO's to the controller layer.
@@ -31,9 +33,10 @@ public class LockTypeServiceImpl implements LockTypeService {
      * @throws RuntimeException if no lock type is found with the given ID
      */
     @Transactional(readOnly = true)
-    public LockType findLockTypeById(Long lockTypeId) {
-        return lockTypeRepository.findById(lockTypeId)
+    public LockTypeDto findLockTypeById(Long lockTypeId) {
+        LockType lockType = lockTypeRepository.findById(lockTypeId)
                 .orElseThrow(() -> new RuntimeException("No Locktype found with ID: " + lockTypeId));
+        return new LockTypeDto(lockType);
     }
 
     /**
@@ -41,7 +44,10 @@ public class LockTypeServiceImpl implements LockTypeService {
      * @author Christian Storck
      * @return A list of {@link LockType} entity.
      */
-    public List<LockType> getAllLockTypes() {
-        return lockTypeRepository.findAll();
+    public List<LockTypeDto> getAllLockTypes() {
+        return lockTypeRepository.findAll()
+                .stream()
+                .map(LockTypeDto::new)
+                .collect(Collectors.toList());
     }
 }

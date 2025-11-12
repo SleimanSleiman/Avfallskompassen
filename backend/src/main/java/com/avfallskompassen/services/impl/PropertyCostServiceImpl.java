@@ -5,11 +5,9 @@ import com.avfallskompassen.model.Property;
 import com.avfallskompassen.model.PropertyContainer;
 import com.avfallskompassen.repository.PropertyContainerRepository;
 import com.avfallskompassen.services.CollectionFeeService;
-import com.avfallskompassen.services.LockTypeService;
 import com.avfallskompassen.services.PropertyCostService;
 import com.avfallskompassen.services.PropertyService;
 import jakarta.persistence.EntityNotFoundException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,14 +25,19 @@ import java.util.stream.Collectors;
 @Transactional
 public class PropertyCostServiceImpl implements PropertyCostService {
 
-    @Autowired
-    private  PropertyService propertyService;
-    @Autowired
-    private  PropertyContainerRepository propertyContainerRepository;
-    @Autowired
-    private  LockTypeService lockTypeService;
-    @Autowired
-    private  CollectionFeeService collectionFeeService;
+    private final PropertyService propertyService;
+    private final PropertyContainerRepository propertyContainerRepository;
+    private final CollectionFeeService collectionFeeService;
+
+    public PropertyCostServiceImpl(
+            PropertyService propertyService,
+            PropertyContainerRepository propertyContainerRepository,
+            CollectionFeeService collectionFeeService
+    ) {
+        this.propertyService = propertyService;
+        this.propertyContainerRepository = propertyContainerRepository;
+        this.collectionFeeService = collectionFeeService;
+    }
 
     /**
      * Calculates the total annual cost for a specific property.

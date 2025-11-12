@@ -14,6 +14,10 @@ public class LockTypeDto {
     private String name;
     private BigDecimal cost;
 
+    public LockTypeDto() {
+
+    }
+
     public LockTypeDto(LockType lockType) {
         this.id = lockType.getId();
         this.name = lockType.getName();
