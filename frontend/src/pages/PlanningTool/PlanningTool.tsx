@@ -71,6 +71,8 @@ export default function PlanningTool() {
         selectedContainerInfo,
         setSelectedContainerInfo,
         handleShowContainerInfo,
+        undo,
+        redo,
         getContainerZones,
     } = useContainers(room, containersInRoom, setContainersInRoom,setSelectedContainerId, setSelectedDoorId, getDoorZones());
 
@@ -115,6 +117,8 @@ export default function PlanningTool() {
                     handleStageDrop={handleStageDrop}
                     handleStageDragOver={handleStageDragOver}
                     handleStageDragLeave={handleStageDragLeave}
+                    undo={undo}
+                    redo={redo}
                 />
 
                 {/* ActionPanel for selected container or door */}

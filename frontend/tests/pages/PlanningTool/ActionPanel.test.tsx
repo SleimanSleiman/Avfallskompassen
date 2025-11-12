@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import ActionPanel from "../../../src/pages/PlanningTool/ActionPanel";
 
@@ -8,8 +8,16 @@ vi.mock("../../../src/pages/PlanningTool/components/InfoTooltip", () => ({
 }));
 
 describe("ActionPanel", () => {
-    const mockContainer = { id: 1, container: { size: 240 }, x: 0, y: 0, width: 100, height: 100, rotation: 0 };
-    const mockDoor = { id: 2, width: 0.9, rotation: 0, swing: "inward" as const };
+      const mockContainer = {
+        id: 1,
+        container: { name: "240 L" },
+        x: 0,
+        y: 0,
+        width: 100,
+        height: 100,
+        rotation: 0,
+    };
+    const mockDoor = { id: 2, width: 0.9, rotation: 0, swingDirection: "inward" as const };
 
     const mockHandlers = {
         handleRemoveContainer: vi.fn(),
@@ -17,7 +25,13 @@ describe("ActionPanel", () => {
         handleRotateDoor: vi.fn(),
         handleRotateContainer: vi.fn(),
         handleShowContainerInfo: vi.fn(),
+        undo: vi.fn(),
+        redo: vi.fn(),
     };
+
+    beforeEach(() => {
+        vi.clearAllMocks();
+    });
 
     //Test rendering for selected container
     it("renders correctly for a selected container", () => {
@@ -53,9 +67,9 @@ describe("ActionPanel", () => {
             />
         );
 
-        expect(screen.getByText(`${mockDoor.width * 100} cm`)).toBeDefined();
+        expect(screen.getByText(`Dörr ${mockDoor.width * 100}cm`)).toBeDefined();
         fireEvent.click(screen.getByText("Rotera dörr"));
-        expect(mockHandlers.handleRotateDoor).toHaveBeenCalledWith(mockDoor.id);
+        expect(mockHandlers.handleRotateDoor).toHaveBeenCalledWith(mockDoor.id, 180, "outward");
         fireEvent.click(screen.getByText("Ta bort dörr"));
         expect(mockHandlers.handleRemoveDoor).toHaveBeenCalledWith(mockDoor.id);
         expect(screen.queryByText("Information")).toBeNull();
@@ -74,4 +88,30 @@ describe("ActionPanel", () => {
         );
         expect(container.firstChild).toBeNull();
     });
+
+      // ─────────────── Test Keyboard shortcuts ───────────────
+    it("calls undo and redo handlers on keyboard shortcuts", () => {
+        render(
+        <ActionPanel
+            containers={[mockContainer]}
+            doors={[]}
+            selectedContainerId={mockContainer.id}
+            selectedDoorId={null}
+            {...mockHandlers}
+        />
+        );
+
+    // Simulate Ctrl+Z (undo)
+    fireEvent.keyDown(window, { key: "z", ctrlKey: true });
+    expect(mockHandlers.undo).toHaveBeenCalledTimes(1);
+
+    // Simulate Ctrl+Y (redo)
+    fireEvent.keyDown(window, { key: "y", ctrlKey: true });
+    expect(mockHandlers.redo).toHaveBeenCalledTimes(1);
+
+    // Also test Mac CMD behavior
+    Object.defineProperty(navigator, "platform", {value: "MacIntel", configurable: true,});
+    fireEvent.keyDown(window, { key: "z", metaKey: true });
+    expect(mockHandlers.undo).toHaveBeenCalledTimes(2);
+  });
 });

@@ -15,7 +15,7 @@ vi.mock("react-konva", () => ({
 
 // ─────────────── Mock use-image ───────────────
 vi.mock("use-image", () => ({
-    default: () => [null],
+  default: () => [{}, "loaded"],
 }));
 
 afterEach(cleanup);
@@ -69,9 +69,13 @@ describe("ContainersLayer", () => {7
             />
         );
 
-        const selectedGroup = screen.getByTestId("2");
-        const rect = selectedGroup.querySelector('[data-testid="rect"]');
-        expect(rect).toHaveAttribute("fill", "#7fd97f");
+        // Find the selected container’s <Image> element
+        const selectedImage = screen.getAllByTestId("image").find(
+            (img) => img.getAttribute("shadowcolor") === "#256029"
+        );
+
+        expect(selectedImage).toBeInTheDocument();
+        expect(selectedImage).toHaveAttribute("opacity", "0.9");
     });
 
     //Test clicking container to select

@@ -91,8 +91,10 @@ function ContainerItem({
         return [...doorZones, ...getContainerZones(container.id)].some(zone => isOverlapping(r, zone));
     };
 
-    const [imageToUse] = useImage(`http://localhost:8081${container.container.imageTopViewUrl}`);
-
+    const [imageToUse, status] = useImage(`http://localhost:8081${container.container.imageTopViewUrl}`);
+        if (status !== "loaded") {
+            return null;
+        }
     //Determine if container is outside room bounds
     const isOutsideRoom =
         container.x < room.x ||

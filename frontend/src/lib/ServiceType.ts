@@ -1,15 +1,15 @@
-export const fetchServiceTypes = async (): Promise<{ id: number; name: string }[]> => {
-    const response = await fetch('/api/serviceTypes/all');
+import { get } from './api';
+import { currentUser } from './Auth';
 
-    if (!response.ok) {
-        throw new Error('Failed to fetch service types');
-    }
+export const fetchServiceTypes = async () => {
+  // Debug: print whether a token exists (only a short prefix)
+  try {
+    const user = currentUser();
+    console.debug('fetchServiceTypes -> currentUser:', user ? { username: user.username, tokenPreview: user.token ? user.token.slice(0, 10) + '...' : null } : null);
+  } catch (e) {
+    // ignore logging errors in environments without console
+  }
 
-    const data = await response.json();
-
-    if (!Array.isArray(data)) {
-        throw new Error('Service types response is not an array');
-    }
-
-    return response.json();
+  // central API helper so Authorization header and base URL are applied.
+  return await get('/api/serviceTypes/all');
 };
