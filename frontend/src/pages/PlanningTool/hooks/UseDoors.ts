@@ -232,6 +232,7 @@ export function useDoors(
         }
 
         setDoors((prev) => prev.filter((d) => d.id !== id));
+        setSelectedDoorId(null);
     };
 
     /* ──────────────── Select Door ──────────────── */
