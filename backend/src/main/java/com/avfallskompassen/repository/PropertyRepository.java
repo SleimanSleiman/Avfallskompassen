@@ -1,6 +1,5 @@
 package com.avfallskompassen.repository;
 
-import com.avfallskompassen.model.LockType;
 import com.avfallskompassen.model.Municipality;
 import com.avfallskompassen.model.Property;
 import com.avfallskompassen.model.PropertyType;
@@ -42,10 +41,10 @@ public interface PropertyRepository extends JpaRepository<Property, Long> {
 
     /**
      * Find properties by lock type.
-     * @param lockType the lock type
+     * @param lockTypeId the lock type
      * @return list of properties with the specified lock type
      */
-    List<Property> findByLockType(LockType lockType);
+    List<Property> findByLockType_id(Long lockTypeId);
     /**
      * 
      * Find properties created by a specific user.

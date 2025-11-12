@@ -33,11 +33,10 @@ export default function PlanningTool() {
     } = useRoom();
 
 
-    /* ──────────────── Door & Container state ──────────────── */
+    /* ──────────────── Door state & logic ──────────────── */
     const [selectedContainerId, setSelectedContainerId] = useState<number | null>(null);
     const [selectedDoorId, setSelectedDoorId] = useState<number | null>(null);
 
-    /* ──────────────── Door logic ──────────────── */
     const {
         doors,
         handleAddDoor,
@@ -46,36 +45,33 @@ export default function PlanningTool() {
         handleRemoveDoor,
         handleSelectDoor,
         getDoorZones,
+        isOverlapping,
     } = useDoors(room, setSelectedDoorId, setSelectedContainerId);
 
-    /* ──────────────── Container logic ──────────────── */
+    /* ──────────────── Container state & logic ──────────────── */
+    
     const {
         containersInRoom,
-        setDraggedContainer,
-        draggedContainer,
-        availableContainers,
-        isLoadingContainers,
-
-        isStageDropActive,
-        setIsStageDropActive,
-        stageWrapperRef,
-
         handleAddContainer,
         handleRemoveContainer,
         handleDragContainer,
-        handleSelectContainer,
+        handleSelectContainer,  
 
+        availableContainers,
+        isLoadingContainers,
         fetchAvailableContainers,
-
+        isStageDropActive,
+        setIsStageDropActive,
+        stageWrapperRef,
         handleStageDrop,
         handleStageDragOver,
         handleStageDragLeave,
         handleRotateContainer,
-        selectedContainerInfo,
-        setSelectedContainerInfo,
         handleShowContainerInfo,
+        undo,
+        redo,
         getContainerZones,
-    } = useContainers(room, setSelectedContainerId, setSelectedDoorId, getDoorZones());
+    } = useContainers(room, setSelectedContainerId, setSelectedDoorId);
 
     /* ──────────────── Service Types (API data) ──────────────── */
     const serviceTypes = useServiceTypes();

@@ -127,6 +127,8 @@ const getServiceTypeIcon = (name: string): LucideIcon => {
         rule.keywords.some(keyword => normalized.includes(keyword))
     );
     return match?.Icon ?? Package2;
+    undo: () => void;
+    redo: () => void;
 };
 
 export default function RoomCanvas({
@@ -165,6 +167,8 @@ export default function RoomCanvas({
     setIsStageDropActive,
     setDraggedContainer,
     onContainerPanelHeightChange,
+    redo,
+    undo,
 }: RoomCanvasProps) {
     //State to track if a container is being dragged
     const [isDraggingContainer, setIsDraggingContainer] = useState(false);
@@ -508,6 +512,34 @@ export default function RoomCanvas({
                     <Save className="w-5 h-5 flex-shrink-0" />
                     <span className="ml-2 text-sm font-medium opacity-0 w-0 group-hover:opacity-100 group-hover:w-auto transition-all duration-300 whitespace-nowrap">
                         Spara design
+                    </span>
+                </button>
+                
+                {/* Undo */}
+                <button
+                    onClick={undo}
+                    className="flex items-center justify-start bg-blue-50 text-blue-700 hover:bg-blue-100 hover:text-blue-800 px-2 py-1 rounded-lg transition-all duration-300 shadow-sm group overflow-hidden"
+                    title="Ångra (Ctrl+Z)"
+                >
+                    <span className="flex items-center">
+                    ⟲
+                    <span className="ml-2 text-sm font-medium opacity-0 w-0 group-hover:opacity-100 group-hover:w-auto transition-all duration-300 whitespace-nowrap">
+                        Ångra
+                    </span>
+                    </span>
+                </button>
+
+                {/* Redo */}
+                <button
+                    onClick={redo}
+                    className="flex items-center justify-start bg-blue-50 text-blue-700 hover:bg-blue-100 hover:text-blue-800 px-2 py-1 rounded-lg transition-all duration-300 shadow-sm group overflow-hidden"
+                    title="Gör om (Ctrl+Y)"
+                >
+                    <span className="flex items-center">
+                    ⟳
+                    <span className="ml-2 text-sm font-medium opacity-0 w-0 group-hover:opacity-100 group-hover:w-auto transition-all duration-300 whitespace-nowrap">
+                        Gör om
+                    </span>
                     </span>
                 </button>
             </div>

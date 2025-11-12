@@ -2,11 +2,15 @@ package com.avfallskompassen.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import com.avfallskompassen.security.JwtAuthFilter;
 
 /**
  * This class configures Spring Security to:
@@ -19,7 +23,9 @@ import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity
 public class SecurityConfig {
+
 
     /**
      * Provides BCrypt password encoder bean for secure password hashing.
@@ -39,16 +45,23 @@ public class SecurityConfig {
      * @throws Exception if security configuration fails
      */
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http, JwtAuthFilter jwtAuthFilter) throws Exception {
         http
             .csrf(csrf -> csrf.disable()) // Disable CSRF for REST API
+            .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(authz -> authz
-                    .requestMatchers(
-                            "/api/**",
-                            "/images/**"
-                    ).permitAll()
-                .anyRequest().authenticated() // Require auth for other endpoints
-            );
+                    // authentication endpoints must remain public
+                    .requestMatchers("/api/auth/**", "/images/**").permitAll()
+                    // admin endpoints require ADMIN role
+                    .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                    // other API endpoints require authentication
+                    .requestMatchers("/api/**").authenticated()
+                    .anyRequest().authenticated()
+            )
+            ;
+
+        // add JWT filter before the username/password filter
+        http.addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 }

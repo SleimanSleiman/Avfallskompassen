@@ -18,6 +18,7 @@ public class PropertyDTO {
     private LockTypeDto lockTypeDto;
     private Long municipalityId;
     private String municipalityName;
+    private String createdByUsername;
     
     // Constructors
     public PropertyDTO() {}
@@ -34,6 +35,7 @@ public class PropertyDTO {
     this.lastNotifiedAt = property.getLastNotifiedAt() != null ? property.getLastNotifiedAt().toString() : null;
         this.municipalityId = property.getMunicipality() != null ? property.getMunicipality().getId() : null;
         this.municipalityName = property.getMunicipality() != null ? property.getMunicipality().getName() : null;
+        this.createdByUsername = property.getCreatedBy() != null ? property.getCreatedBy().getUsername() : null;
     }
     
     // Getters and Setters
@@ -82,6 +84,14 @@ public class PropertyDTO {
 
     public void setMunicipalityName(String municipalityName) {
         this.municipalityName = municipalityName;
+    }
+
+    public String getCreatedByUsername() {
+        return createdByUsername;
+    }
+
+    public void setCreatedByUsername(String createdByUsername) {
+        this.createdByUsername = createdByUsername;
     }
 
     public String getLockName() {

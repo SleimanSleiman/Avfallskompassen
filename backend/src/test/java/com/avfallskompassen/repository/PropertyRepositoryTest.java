@@ -82,11 +82,11 @@ public class PropertyRepositoryTest {
         Property p1 = createProperty("A1", 2, l1, PropertyType.FLERBOSTADSHUS, mun, u, 0.5);
         Property p2 = createProperty("A2", 3, l2, PropertyType.FLERBOSTADSHUS, mun, u, 0.5);
 
-        List<Property> byL1 = propertyRepository.findByLockType(l1);
+        List<Property> byL1 = propertyRepository.findByLockType_id(l1.getId());
         assertEquals(1, byL1.size());
         assertEquals(p1.getId(), byL1.get(0).getId());
 
-        List<Property> byL2 = propertyRepository.findByLockType(l2);
+        List<Property> byL2 = propertyRepository.findByLockType_id(l2.getId());
         assertEquals(1, byL2.size());
         assertEquals(p2.getId(), byL2.get(0).getId());
     }

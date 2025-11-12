@@ -72,7 +72,10 @@ vi.mock("../../../src/pages/PlanningTool/Sidebar/Sidebar", () => ({
 }));
 
 vi.mock("../../../src/pages/PlanningTool/ActionPanel", () => ({
-    default: () => <div data-testid="mock-action-panel">ActionPanel</div>,
+  default: ({ selectedContainerId, selectedDoorId }: any) =>
+    selectedContainerId !== null || selectedDoorId !== null
+      ? <div data-testid="mock-action-panel">ActionPanel</div>
+      : null,
 }));
 
 describe("PlanningTool", () => {

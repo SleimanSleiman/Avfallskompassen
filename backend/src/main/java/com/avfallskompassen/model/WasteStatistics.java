@@ -1,15 +1,11 @@
 package com.avfallskompassen.model;
 
-import com.fasterxml.jackson.databind.annotation.JsonAppend;
 import jakarta.persistence.*;
-import org.hibernate.type.descriptor.jdbc.TinyIntJdbcType;
-import org.springframework.transaction.annotation.Transactional;
-
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Entity
-@Table(name = "waste_statistics", uniqueConstraints = @UniqueConstraint(columnNames = {"property_id", "year", "month"}))
+@Table(name = "waste_statistics")
 public class WasteStatistics {
 
     @Id

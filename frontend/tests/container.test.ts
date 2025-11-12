@@ -1,18 +1,18 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import { fetchContainersByMunicipalityAndService, type ContainerDTO } from "../src/lib/Container";
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { fetchContainersByMunicipalityAndService, ContainerDTO } from '../src/lib/container';
+import * as api from '../src/lib/api';
 
-//Mocking fetch API
-describe("fetchContainersByMunicipalityAndService", () => {
+// Mocking api.get
+describe('fetchContainersByMunicipalityAndService', () => {
     beforeEach(() => {
         vi.restoreAllMocks();
     });
 
-    //Test for successful fetch
-    it("should return a list of containers when fetch succeeds", async () => {
+    it('should return a list of containers when api.get succeeds', async () => {
         const mockData: ContainerDTO[] = [
             {
                 id: 1,
-                name: "Container1",
+                name: 'Container1',
                 size: 100,
                 width: 50,
                 depth: 60,
@@ -24,7 +24,7 @@ describe("fetchContainersByMunicipalityAndService", () => {
             },
             {
                 id: 2,
-                name: "Container2",
+                name: 'Container2',
                 size: 200,
                 width: 80,
                 depth: 90,

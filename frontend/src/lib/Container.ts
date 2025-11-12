@@ -13,6 +13,8 @@ export interface ContainerDTO {
   serviceTypeName?: string;
 }
 
+import { get } from './api';
+
 export const fetchContainersByMunicipalityAndService = async (
   municipalityId: number,
   serviceTypeId: number

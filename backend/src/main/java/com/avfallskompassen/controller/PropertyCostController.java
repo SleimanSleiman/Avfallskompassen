@@ -1,13 +1,10 @@
 package com.avfallskompassen.controller;
 
 import com.avfallskompassen.dto.GeneralPropertyCostDTO;
-import com.avfallskompassen.dto.PropertyCostDTO;
 import com.avfallskompassen.services.PropertyCostService;
 import jakarta.persistence.EntityNotFoundException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -25,8 +22,11 @@ import java.util.Map;
 @RequestMapping("/api/propertycost")
 public class PropertyCostController {
 
-    @Autowired
-    private PropertyCostService propertyCostService;
+    private final PropertyCostService propertyCostService;
+
+    public PropertyCostController(PropertyCostService propertyCostService) {
+        this.propertyCostService = propertyCostService;
+    }
 
     /**
      * Handles requests for calculating the total annual cost of a specific property.
