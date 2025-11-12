@@ -1,6 +1,7 @@
 package com.avfallskompassen.model;
 
 import jakarta.persistence.*;
+import java.time.Instant;
 
 /**
  * This class maps to the "users" table in the PostgreSQL database and
@@ -27,6 +28,12 @@ public class User {
     
     @Column(nullable = false, length = 50)
     private String role = "USER";
+
+    /**
+     * Timestamp when the user was created. Set automatically on persist.
+     */
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private Instant createdAt;
     
     /**
      * Default constructor for JPA.
@@ -57,6 +64,13 @@ public class User {
         this.password = password;
         this.role = role;
     }
+
+    @PrePersist
+    protected void onCreate() {
+        if (this.createdAt == null) {
+            this.createdAt = Instant.now();
+        }
+    }
     
     // Getters and Setters
     public Integer getId() { return id; }
@@ -70,4 +84,7 @@ public class User {
     
     public String getRole() { return role; }
     public void setRole(String role) { this.role = role; }
+
+    public Instant getCreatedAt() { return createdAt; }
+    public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
 }

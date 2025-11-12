@@ -7,9 +7,11 @@ import PropertyPage from './pages/PropertyPage';
 import NotificationCenter from './components/NotificationCenter';
 import { currentUser } from './lib/Auth';
 import PlanningTool from './pages/PlanningTool/PlanningTool';
+import AdminPage from './pages/AdminPage';
 
 function Dashboard() {
   const user = currentUser();
+  const isAdmin = String(user?.role || '').toUpperCase().includes('ADMIN');
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -26,7 +28,9 @@ function Dashboard() {
         </div>
 
         {/* Quick Actions Grid */}
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 mb-12">
+        {!isAdmin && (
+          <>
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 mb-12">
           <div className="bg-white rounded-2xl p-6 shadow-soft hover:shadow-lg transition-shadow">
             <div className="flex items-center mb-4">
               <div className="w-12 h-12 bg-nsr-accent/10 rounded-xl flex items-center justify-center mr-4">
@@ -77,9 +81,11 @@ function Dashboard() {
               Kommer snart
             </button>
           </div>
-        </div>
+          </div>
 
-        <NotificationCenter />
+          <NotificationCenter />
+          </>
+        )}  
 
         {/* Recent Activity Section */}
         <div className="bg-white rounded-2xl p-6 shadow-soft">
@@ -131,8 +137,16 @@ export default function App() {
               <PropertyPage />
             </ProtectedRoute>
           } />
-          <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/planningTool" element={<PlanningTool />} />
+          <Route path="/planningTool" element={
+            <ProtectedRoute>
+              <PlanningTool />
+            </ProtectedRoute>
+          } />
+          <Route path="/admin" element={
+            <ProtectedRoute>
+              <AdminPage />
+            </ProtectedRoute>
+          } />
         </Routes>
       </div>
       <Footer />
