@@ -140,25 +140,6 @@ export default function ActionPanel({
                         </span>
                     </button>
                 )}
-                    
-                {/* Undo button*/}
-                <button
-                className="btn-secondary-sm min-w-[100px] text-center"
-                onClick={undo}
-                title="Ångra (Ctrl+Z)"
-                >
-                ⟲ Ångra
-                </button>
-
-                {/* Undo button*/}
-                <button
-                className="btn-secondary-sm min-w-[100px] text-center"
-                onClick={redo}
-                title="Gör om (Ctrl+Y)"
-                >
-                ⟳ Gör om
-                </button>
-
 
                 {/* Rotate button */}
                 <button
