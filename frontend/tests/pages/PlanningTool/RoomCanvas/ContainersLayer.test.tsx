@@ -156,7 +156,7 @@ describe("ContainersLayer", () => {7
     it("sets opacity to 0.5 when container is outside the room", async () => {
         const mockImg = {};
         const useImage = await import("use-image");
-        vi.spyOn(useImage, "default").mockReturnValueOnce([mockImg]);
+        vi.spyOn(useImage, "default").mockReturnValueOnce([mockImg, "loaded"]);
 
         const outsideContainer = [
             {

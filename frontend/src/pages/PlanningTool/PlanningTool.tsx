@@ -19,13 +19,19 @@ import { useRoom } from './hooks/UseRoom';
 import { useDoors } from './hooks/UseDoors';
 import { useContainers } from './hooks/UseContainers';
 import { useServiceTypes } from './hooks/UseServiceTypes';
+import { useLayoutHistory } from './hooks/UseLayoutHistory';
 
 export default function PlanningTool() {
 
     /* ──────────────── Door & Container state ──────────────── */
     const [selectedContainerId, setSelectedContainerId] = useState<number | null>(null);
     const [selectedDoorId, setSelectedDoorId] = useState<number | null>(null);
-    const [containersInRoom, setContainersInRoom] = useState<ContainerInRoom[]>([]);
+    const {
+      state: containersInRoom,
+      save: setContainersInRoom,
+      undo,
+      redo
+    } = useLayoutHistory<ContainerInRoom[]>([]);
 
     /* ──────────────── Room state & logic ──────────────── */
     const {
@@ -71,8 +77,6 @@ export default function PlanningTool() {
         selectedContainerInfo,
         setSelectedContainerInfo,
         handleShowContainerInfo,
-        undo,
-        redo,
         getContainerZones,
     } = useContainers(room, containersInRoom, setContainersInRoom,setSelectedContainerId, setSelectedDoorId, getDoorZones());
 

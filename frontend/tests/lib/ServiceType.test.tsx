@@ -1,32 +1,40 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { fetchServiceTypes } from '../../src/lib/ServiceType';
+import * as api from '../../src/lib/api';
+import * as Auth from '../../src/lib/Auth';
 
 describe('fetchServiceTypes', () => {
     beforeEach(() => {
-        global.fetch = vi.fn();
+        vi.resetAllMocks();
     });
 
-    //Test successful data fetch
-    it('should return service types when response is ok', async () => {
+    it('should return service types when the API call succeeds', async () => {
         const mockData = [{ id: 1, name: 'Waste Collection' }];
 
-        (fetch as unknown as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-            ok: true,
-            json: async () => mockData,
+        vi.spyOn(Auth, 'currentUser').mockReturnValue({
+            username: 'testuser',
+            token: 'abc1234567890',
         });
+
+        const getSpy = vi.spyOn(api, 'get').mockResolvedValueOnce(mockData);
 
         const result = await fetchServiceTypes();
 
         expect(result).toEqual(mockData);
-        expect(fetch).toHaveBeenCalledWith('/api/serviceTypes/all');
+        expect(getSpy).toHaveBeenCalledWith('/api/serviceTypes/all');
     });
 
-    //Test error handling for failed fetch
-    it('should throw an error if response is not ok', async () => {
-        (fetch as unknown as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-            ok: false,
-        });
+    it('should throw an error when the API call fails', async () => {
+        vi.spyOn(Auth, 'currentUser').mockReturnValue(null);
 
-        await expect(fetchServiceTypes()).rejects.toThrow('Failed to fetch service types');
+        const getSpy = vi
+            .spyOn(api, 'get')
+            .mockRejectedValueOnce(new Error('Failed to fetch service types'));
+
+        await expect(fetchServiceTypes()).rejects.toThrow(
+            'Failed to fetch service types'
+        );
+
+        expect(getSpy).toHaveBeenCalledWith('/api/serviceTypes/all');
     });
 });

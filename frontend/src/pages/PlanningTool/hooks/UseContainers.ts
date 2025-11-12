@@ -7,7 +7,6 @@ import type { ContainerInRoom, Room } from "../Types";
 import type { ContainerDTO } from "../../../lib/Container";
 import { fetchContainersByMunicipalityAndService } from "../../../lib/Container";
 import { mmToPixels, clamp, DRAG_DATA_FORMAT, STAGE_WIDTH, STAGE_HEIGHT, SCALE, isOverlapping } from "../Constants";
-import { useLayoutHistory } from "./UseLayoutHistory";
 
 /* ──────────────── Helper functions ──────────────── */
 //Create rectangle for container at given position
@@ -89,7 +88,6 @@ export function useContainers(
 ) {
 
     /* ──────────────── Containers State ──────────────── */
-    const { state: containersInRoom, save: saveContainers, undo, redo } = useLayoutHistory<ContainerInRoom[]>([]);
     const [selectedContainerInfo, setSelectedContainerInfo] = useState<ContainerDTO | null>(null);
     const [draggedContainer, setDraggedContainer] = useState<ContainerDTO | null>(null);
     const [availableContainers, setAvailableContainers] = useState<ContainerDTO[]>([]);
@@ -149,13 +147,13 @@ export function useContainers(
 
         handleSelectContainer(newContainer.id);
         const newState = [...containersInRoom, newContainer];
-        saveContainers(newState);
+        setContainersInRoom(newState);
     };
 
     //Remove a container from the room
     const handleRemoveContainer = (id: number) => {
         const newState = containersInRoom.filter(c => c.id !== id);
-        saveContainers(newState);
+        setContainersInRoom(newState);
         setSelectedContainerId(null);
     };
 
@@ -164,7 +162,7 @@ export function useContainers(
         const newState = containersInRoom.map(c =>
             c.id === id ? { ...c, ...pos } : c
         );
-        saveContainers(newState);
+        setContainersInRoom(newState);
     };
 
     //Select or deselect a container
@@ -178,7 +176,7 @@ export function useContainers(
         const newState = containersInRoom.map(c =>
             c.id === id ? { ...c, rotation: ((c.rotation || 0) + 90) % 360 } : c
         );
-        saveContainers(newState);
+        setContainersInRoom(newState);
     };
 
     //Show container info in sidebar
@@ -268,8 +266,5 @@ export function useContainers(
         handleShowContainerInfo,
 
         getContainerZones: (excludeId?: number) => buildContainerZones(containersInRoom, excludeId),
-
-        undo,
-        redo,
     };
 }
