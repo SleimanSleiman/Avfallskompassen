@@ -23,6 +23,8 @@ public class AuthController {
     
     @Autowired
     private UserService userService;
+    @Autowired(required = false)
+    private com.avfallskompassen.security.JwtUtil jwtUtil;
     
     /**
      * Handles user login requests.
@@ -39,11 +41,17 @@ public class AuthController {
                 User user = userOptional.get();
                 
                 if (userService.validatePassword(loginRequest.getPassword(), user.getPassword())) {
+                    // generate JWT token 
+                    String token = null;
+                    if (jwtUtil != null) {
+                        token = jwtUtil.generateToken(user.getUsername(), user.getRole());
+                    }
                     LoginResponse response = new LoginResponse(
-                        true, 
-                        "Login successful", 
-                        user.getUsername(), 
-                        user.getRole()
+                        true,
+                        "Login successful",
+                        user.getUsername(),
+                        user.getRole(),
+                        token
                     );
                     return ResponseEntity.ok(response);
                 } else {
@@ -85,12 +93,17 @@ public class AuthController {
     public ResponseEntity<LoginResponse> register(@RequestBody LoginRequest loginRequest) {
         try {
             User newUser = userService.createUser(loginRequest.getUsername(), loginRequest.getPassword());
-            
+            // produce token for the newly registered user if JwtUtil available
+            String token = null;
+            if (jwtUtil != null) {
+                token = jwtUtil.generateToken(newUser.getUsername(), newUser.getRole());
+            }
             LoginResponse response = new LoginResponse(
-                true, 
-                "Registration successful", 
-                newUser.getUsername(), 
-                newUser.getRole()
+                true,
+                "Registration successful",
+                newUser.getUsername(),
+                newUser.getRole(),
+                token
             );
             return ResponseEntity.ok(response);
             

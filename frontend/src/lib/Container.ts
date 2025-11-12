@@ -11,17 +11,12 @@ export interface ContainerDTO {
   cost: number;
 }
 
+import { get } from './api';
+
 export const fetchContainersByMunicipalityAndService = async (
   municipalityId: number,
   serviceTypeId: number
 ): Promise<ContainerDTO[]> => {
-  const response = await fetch(
-    `/api/containers/municipality/${municipalityId}/service/${serviceTypeId}`
-  );
-
-  if (!response.ok) {
-    throw new Error('Failed to fetch containers by municipality and service');
-  }
-
-  return response.json();
+  // central API helper which attaches auth headers and respects dev proxy
+  return await get<ContainerDTO[]>(`/api/containers/municipality/${municipalityId}/service/${serviceTypeId}`);
 };

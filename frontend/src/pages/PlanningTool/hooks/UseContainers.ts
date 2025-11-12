@@ -7,6 +7,7 @@ import type { ContainerInRoom, Room } from "../Types";
 import type { ContainerDTO } from "../../../lib/Container";
 import { fetchContainersByMunicipalityAndService } from "../../../lib/Container";
 import { mmToPixels, clamp, DRAG_DATA_FORMAT, STAGE_WIDTH, STAGE_HEIGHT, SCALE, isOverlapping } from "../Constants";
+import { useLayoutHistory } from "./UseLayoutHistory";
 
 /* ──────────────── Helper functions ──────────────── */
 //Create rectangle for container at given position
@@ -86,7 +87,7 @@ export function useContainers(
 ) {
 
     /* ──────────────── Containers State ──────────────── */
-    const [containersInRoom, setContainersInRoom] = useState<ContainerInRoom[]>([]);
+    const { state: containersInRoom, save: saveContainers, undo, redo } = useLayoutHistory<ContainerInRoom[]>([]);
     const [selectedContainerInfo, setSelectedContainerInfo] = useState<ContainerDTO | null>(null);
     const [draggedContainer, setDraggedContainer] = useState<ContainerDTO | null>(null);
     const [availableContainers, setAvailableContainers] = useState<ContainerDTO[]>([]);
@@ -118,21 +119,24 @@ export function useContainers(
             rotation: 0,
         };
 
-        setContainersInRoom((prev) => [...prev, newContainer]);
         handleSelectContainer(newContainer.id);
+        const newState = [...containersInRoom, newContainer];
+        saveContainers(newState);
     };
 
     //Remove a container from the room
     const handleRemoveContainer = (id: number) => {
-        setContainersInRoom((prev) => prev.filter((c) => c.id !== id));
+        const newState = containersInRoom.filter(c => c.id !== id);
+        saveContainers(newState);
         setSelectedContainerId(null);
     };
 
     //Handle dragging a container within the room
     const handleDragContainer = (id: number, pos: { x: number; y: number }) => {
-        setContainersInRoom((prev) =>
-            prev.map((c) => (c.id === id ? { ...c, ...pos } : c))
+        const newState = containersInRoom.map(c =>
+            c.id === id ? { ...c, ...pos } : c
         );
+        saveContainers(newState);
     };
 
     //Select or deselect a container
@@ -143,13 +147,10 @@ export function useContainers(
 
     //Container rotation
     const handleRotateContainer = (id: number) => {
-        setContainersInRoom((prev) =>
-        prev.map((container) =>
-            container.id === id
-                ? { ...container, rotation: ((container.rotation || 0) + 90) % 360 }
-                : container
-            )
+        const newState = containersInRoom.map(c =>
+            c.id === id ? { ...c, rotation: ((c.rotation || 0) + 90) % 360 } : c
         );
+        saveContainers(newState);
     };
 
     //Show container info in sidebar
@@ -160,7 +161,7 @@ export function useContainers(
 
     /* ──────────────── Drag & Drop Handlers ──────────────── */
     //Handle dropping a container onto the stage
-    const handleStageDrop = (event: DragEvent<HTMLDivElement>) => {
+    const handleStageDrop = (event: React.DragEvent<HTMLDivElement>) => {
         event.preventDefault();
         setIsStageDropActive(false);
 
@@ -181,7 +182,7 @@ export function useContainers(
     };
 
     //Handle drag over event to allow dropping
-    const handleStageDragOver = (event: DragEvent<HTMLDivElement>) => {
+    const handleStageDragOver = (event: React.DragEvent<HTMLDivElement>) => {
         if (!Array.from(event.dataTransfer.types).includes(DRAG_DATA_FORMAT)) return;
 
         event.preventDefault();
@@ -191,7 +192,7 @@ export function useContainers(
     };
 
     //Handle drag leave event to reset drop state
-    const handleStageDragLeave = (event: DragEvent<HTMLDivElement>) => {
+    const handleStageDragLeave = (event: React.DragEvent<HTMLDivElement>) => {
         if (event.currentTarget.contains(event.relatedTarget as Node)) return;
         setIsStageDropActive(false);
     };
@@ -238,6 +239,9 @@ export function useContainers(
         setSelectedContainerInfo,
         handleShowContainerInfo,
 
-        getContainerZones: (excludeId?: number) => buildContainerZones(containersInRoom, excludeId)
+        getContainerZones: (excludeId?: number) => buildContainerZones(containersInRoom, excludeId),
+
+        undo,
+        redo,
     };
 }

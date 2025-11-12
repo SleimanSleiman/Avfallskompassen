@@ -4,7 +4,6 @@ import com.avfallskompassen.dto.LockTypeDto;
 import com.avfallskompassen.dto.request.PropertyRequest;
 import com.avfallskompassen.dto.response.PropertyResponse;
 import com.avfallskompassen.dto.PropertyDTO;
-import com.avfallskompassen.model.LockType;
 import com.avfallskompassen.model.Property;
 import com.avfallskompassen.services.LockTypeService;
 import com.avfallskompassen.services.PropertyService;
@@ -50,15 +49,15 @@ public class PropertyController {
         }
         
         try {
-            LockType lockType = lockTypeService.findLockTypeById(request.getLockTypeId());
-            Property property = propertyService.createProperty(request, username, lockType);
+            LockTypeDto lockTypeDto = lockTypeService.findLockTypeById(request.getLockTypeId());
+            Property property = propertyService.createProperty(request, username, lockTypeDto);
             
             PropertyResponse response = new PropertyResponse(true, "Property created successfully");
             response.setPropertyId(property.getId());
             response.setAddress(property.getAddress());
             response.setNumberOfApartments(property.getNumberOfApartments());
-            response.setLockName(lockType.getName());
-            response.setLockPrice(lockType.getCost());
+            response.setLockName(lockTypeDto.getName());
+            response.setLockPrice(lockTypeDto.getCost());
             response.setAccessPathLength(property.getAccessPathLength());
             response.setCreatedAt(property.getCreatedAt());
             if (property.getMunicipality() != null) {
@@ -158,8 +157,8 @@ public class PropertyController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
         }
         try {
-            LockType lockType = lockTypeService.findLockTypeById(request.getLockTypeId());
-            Property updated = propertyService.updateProperty(id, request, username, lockType);
+            LockTypeDto lockTypeDto = lockTypeService.findLockTypeById(request.getLockTypeId());
+            Property updated = propertyService.updateProperty(id, request, username, lockTypeDto);
 
             // Return a DTO instead of exposing the entity
             PropertyDTO propertyDTO = new PropertyDTO(updated);
@@ -208,12 +207,8 @@ public class PropertyController {
      */
     @GetMapping("/lock-type")
     public ResponseEntity<List<LockTypeDto>> getAllLockTypes() {
-        List<LockType> lockTypes = lockTypeService.getAllLockTypes();
-
-        List<LockTypeDto> lockTypeDTO = lockTypes.stream()
-                .map(LockTypeDto::new)
-                .collect(Collectors.toList());
-        return ResponseEntity.ok(lockTypeDTO);
+        List<LockTypeDto> lockTypeDtos = lockTypeService.getAllLockTypes();
+        return ResponseEntity.ok(lockTypeDtos);
     }
     /**
      * Delete property by ID (only if owned by current user).

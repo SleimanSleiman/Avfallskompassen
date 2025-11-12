@@ -1,5 +1,6 @@
 package com.avfallskompassen.services.impl;
 
+import com.avfallskompassen.dto.LockTypeDto;
 import com.avfallskompassen.dto.request.PropertyRequest;
 import com.avfallskompassen.model.LockType;
 import com.avfallskompassen.model.Property;
@@ -42,7 +43,7 @@ public class PropertyServiceImpl implements PropertyService {
      * @return the created property
      * @throws RuntimeException if property with same address already exists
      */
-    public Property createProperty(PropertyRequest request, String username, LockType lockType) {
+    public Property createProperty(PropertyRequest request, String username, LockTypeDto lockType) {
         Optional<User> userOptional = userService.findByUsername(username);
         if (userOptional.isEmpty()) {
             throw new RuntimeException("User not found: " + username);
@@ -68,16 +69,21 @@ public class PropertyServiceImpl implements PropertyService {
                     // Invalid property type, use default
                 }
             }
-            
+
             Municipality municipality = null;
             if (request.getMunicipalityId() != null) {
                 municipality = municipalityRepository.findById(request.getMunicipalityId()).orElse(null);
             }
 
+            LockType lockType1 = new LockType();
+            lockType1.setId(lockType.getId());
+            lockType1.setName(lockType.getName());
+            lockType1.setCost(lockType.getCost());
+
             Property property = new Property(
                 request.getAddress(),
                 request.getNumberOfApartments(),
-                lockType,
+                lockType1,
                 propertyType,
                 request.getAccessPathLength(),
                 user  
@@ -147,11 +153,11 @@ public class PropertyServiceImpl implements PropertyService {
     
     /**
      * Find properties by lock type.
-     * @param lockType the lock type
+     * @param lockTypeDto the lock type
      * @return list of properties with the specified lock type
      */
-    public List<Property> findByLockType(LockType lockType) {
-        return propertyRepository.findByLockType(lockType);
+    public List<Property> findByLockType(LockTypeDto lockTypeDto) {
+        return propertyRepository.findByLockType_id(lockTypeDto.getId());
     }
     
     /**
@@ -167,7 +173,7 @@ public class PropertyServiceImpl implements PropertyService {
         return false;
     }
 
-     public Property updateProperty(Long id, PropertyRequest request, String username, LockType lockType) {
+     public Property updateProperty(Long id, PropertyRequest request, String username, LockTypeDto lockTypeDto) {
         Optional<Property> existingOpt = propertyRepository.findById(id);
         if (existingOpt.isEmpty()) {
             throw new RuntimeException("Property not found");
@@ -191,8 +197,12 @@ public class PropertyServiceImpl implements PropertyService {
             property.setNumberOfApartments(request.getNumberOfApartments());
         }
 
-        if (lockType != null) {
-            property.setLockType(lockType);
+        if (lockTypeDto != null) {
+            LockType lockType1 = new LockType();
+            lockType1.setId(lockTypeDto.getId());
+            lockType1.setName(lockTypeDto.getName());
+            lockType1.setCost(lockTypeDto.getCost());
+            property.setLockType(lockType1);
         }
 
         if (request.getAccessPathLength() != null) {

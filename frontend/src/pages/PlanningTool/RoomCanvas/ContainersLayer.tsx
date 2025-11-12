@@ -87,7 +87,11 @@ function ContainerItem({
 };
 
 
-    const [imageToUse] = useImage(`http://localhost:8081${container.container.imageTopViewUrl}`);
+    const [imageToUse, status] = useImage(`http://localhost:8081${container.container.imageTopViewUrl}`);
+    if (status !== "loaded") {
+        return null;
+    }
+    
     return (
         <Group
             x={container.x + container.width / 2}

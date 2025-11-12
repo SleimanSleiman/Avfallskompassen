@@ -1,6 +1,6 @@
 import { Link, NavLink } from 'react-router-dom';
 import { useState, useEffect } from 'react';
-import { currentUser, logout } from '../lib/auth';
+import { currentUser, logout } from '../lib/Auth';
 
 export default function NavBar() {
   const [open, setOpen] = useState(false);
@@ -57,27 +57,47 @@ export default function NavBar() {
             </button>
 
             <nav className="hidden md:flex items-center gap-6 text-white font-black text-lg">
-              <NavLink to="/dashboard" className={({ isActive }) => `nav-link hover:text-white transition-colors ${isActive ? 'nav-link-active' : ''}`}>Dashboard</NavLink>
-              <NavLink to="/properties" className={({ isActive }) => `nav-link hover:text-white transition-colors ${isActive ? 'nav-link-active' : ''}`}>Mina fastigheter</NavLink>
-              <NavLink to="/planningTool" className={({ isActive }) => `nav-link hover:text-white transition-colors ${isActive ? 'nav-link-active' : ''}`}>Planeringsverktyg</NavLink>
-              <div className="flex items-center gap-3">
-                {user && <span className="text-sm">Hej {user.username}!</span>}
-                {user ? (
-                  <button
-                    onClick={handleLogout}
-                    className="rounded-xl2 bg-nsr-accent px-4 py-2 text-sm text-[#121212] hover:bg-nsr-accent/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-nsr-accent transition-colors"
-                  >
-                    Logga ut
-                  </button>
-                ) : (
-                  <Link
-                    to="/login"
-                    className="rounded-xl2 bg-nsr-accent px-4 py-2 text-sm text-[#121212] hover:bg-nsr-accent/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-nsr-accent transition-colors"
-                  >
-                    Logga in
-                  </Link>
-                )}
-              </div>
+              {user?.role === 'ADMIN' ? (
+                <>
+                  <NavLink to="/admin" className={({ isActive }) => `nav-link hover:text-white transition-colors ${isActive ? 'nav-link-active' : ''}`}>Admin</NavLink>
+                  <div className="flex items-center gap-3">
+                    {user && <span className="text-sm">Hej {user.username}!</span>}
+                    <button
+                      onClick={handleLogout}
+                      className="rounded-xl2 bg-nsr-accent px-4 py-2 text-sm text-[#121212] hover:bg-nsr-accent/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-nsr-accent transition-colors"
+                    >
+                      Logga ut
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <NavLink to="/dashboard" className={({ isActive }) => `nav-link hover:text-white transition-colors ${isActive ? 'nav-link-active' : ''}`}>Dashboard</NavLink>
+                  <NavLink to="/properties" className={({ isActive }) => `nav-link hover:text-white transition-colors ${isActive ? 'nav-link-active' : ''}`}>Mina fastigheter</NavLink>
+                  <NavLink to="/planningTool" className={({ isActive }) => `nav-link hover:text-white transition-colors ${isActive ? 'nav-link-active' : ''}`}>Planeringsverktyg</NavLink>
+                  {user?.role === 'ADMIN' && (
+                    <NavLink to="/admin" className={({ isActive }) => `nav-link hover:text-white transition-colors ${isActive ? 'nav-link-active' : ''}`}>Admin</NavLink>
+                  )}
+                  <div className="flex items-center gap-3">
+                    {user && <span className="text-sm">Hej {user.username}!</span>}
+                    {user ? (
+                      <button
+                        onClick={handleLogout}
+                        className="rounded-xl2 bg-nsr-accent px-4 py-2 text-sm text-[#121212] hover:bg-nsr-accent/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-nsr-accent transition-colors"
+                      >
+                        Logga ut
+                      </button>
+                    ) : (
+                      <Link
+                        to="/login"
+                        className="rounded-xl2 bg-nsr-accent px-4 py-2 text-sm text-[#121212] hover:bg-nsr-accent/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-nsr-accent transition-colors"
+                      >
+                        Logga in
+                      </Link>
+                    )}
+                  </div>
+                </>
+              )}
             </nav>
           </div>
         </div>
@@ -86,13 +106,23 @@ export default function NavBar() {
       {open && (
         <div className="md:hidden bg-white border-b">
           <nav className="mx-auto max-w-7xl px-4 py-3 flex flex-col gap-3 font-black">
-            <NavLink to="/dashboard" className="text-nsr-ink">Dashboard</NavLink>
-            <NavLink to="/properties" className="text-nsr-ink">Mina fastigheter</NavLink>
-            <NavLink to="/planningTool" className="text-nsr-ink">Planeringsverktyg</NavLink>
-            {user ? (
-              <button onClick={handleLogout} className="text-left text-nsr-ink">Logga ut</button>
+            {user?.role === 'ADMIN' ? (
+              <>
+                <NavLink to="/admin" className="text-nsr-ink">Admin</NavLink>
+                <button onClick={handleLogout} className="text-left text-nsr-ink">Logga ut</button>
+              </>
             ) : (
-              <Link to="/login" className="text-left text-nsr-ink">Logga in</Link>
+              <>
+                <NavLink to="/dashboard" className="text-nsr-ink">Dashboard</NavLink>
+                <NavLink to="/properties" className="text-nsr-ink">Mina fastigheter</NavLink>
+                <NavLink to="/planningTool" className="text-nsr-ink">Planeringsverktyg</NavLink>
+                {user?.role === 'ADMIN' && <NavLink to="/admin" className="text-nsr-ink">Admin</NavLink>}
+                {user ? (
+                  <button onClick={handleLogout} className="text-left text-nsr-ink">Logga ut</button>
+                ) : (
+                  <Link to="/login" className="text-left text-nsr-ink">Logga in</Link>
+                )}
+              </>
             )}
           </nav>
         </div>

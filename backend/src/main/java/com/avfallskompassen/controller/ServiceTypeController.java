@@ -1,7 +1,6 @@
 package com.avfallskompassen.controller;
 
 import com.avfallskompassen.dto.ServiceTypeDTO;
-import com.avfallskompassen.repository.ServiceTypeRepository;
 import com.avfallskompassen.services.ServiceTypeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
