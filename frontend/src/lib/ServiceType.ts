@@ -1,14 +1,5 @@
 export const fetchServiceTypes = async (): Promise<{ id: number; name: string }[]> => {
-    const user = localStorage.getItem('auth_user');
-    const token = user ? JSON.parse(user).token : null;
-
-    if (!token) throw new Error("JWT token missing");
-
-    const response = await fetch('/api/serviceTypes/all', {
-        headers: {
-            Authorization: `Bearer ${token}`,
-        },
-    });
+    const response = await fetch('/api/serviceTypes/all');
 
     if (!response.ok) {
         throw new Error('Failed to fetch service types');
@@ -20,5 +11,5 @@ export const fetchServiceTypes = async (): Promise<{ id: number; name: string }[
         throw new Error('Service types response is not an array');
     }
 
-    return data;
+    return response.json();
 };

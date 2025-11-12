@@ -1,5 +1,5 @@
 import { api, post } from './api';
-import { currentUser, authHeaders } from './auth';
+import { currentUser } from './auth';
 
 export type Property = {
     id: number;
@@ -46,6 +46,11 @@ export type PropertyResponse = {
     municipalityName?: string;
 };
 
+function getAuthHeaders(): Record<string, string> | undefined {
+    const user = currentUser();
+    return user?.username ? { 'X-Username': user.username } : undefined;
+}
+
 function normalizePropertyResponse(data: any): PropertyResponse | null {
     if (!data) return null;
     const id = data.id ?? data.propertyId;
@@ -75,7 +80,7 @@ export async function createProperty(property: PropertyRequest): Promise<Propert
     const data = await api<any>('/api/properties', {
         method: 'POST',
         headers: {
-            ...(authHeaders() || {}),
+            ...(getAuthHeaders() || {}),
             'Content-Type': 'application/json',
         },
         body: property,
@@ -89,7 +94,7 @@ export async function updateProperty(id: number, property: PropertyRequest): Pro
     const data = await api<any>(`/api/properties/${id}`, {
         method: 'PUT',
         headers: {
-            ...(authHeaders() || {}),
+            ...(getAuthHeaders() || {}),
             'Content-Type': 'application/json',
         },
         body: property,
@@ -102,27 +107,27 @@ export async function updateProperty(id: number, property: PropertyRequest): Pro
 export async function getMyProperties(): Promise<Property[]> {
     return await api<Property[]>('/api/properties/my-properties', {
         method: 'GET',
-        headers: authHeaders()
+        headers: getAuthHeaders()
     });
 }
 
 export async function deleteProperty(id: number): Promise<PropertyResponse> {
     return await api<PropertyResponse>(`/api/properties/${id}`, {
         method: 'DELETE',
-        headers: authHeaders()
+        headers: getAuthHeaders()
     });
 }
 
 export async function getMunicipalities(): Promise<Municipality[]> {
     return await api<Municipality[]>('/api/municipalities', {
         method: 'GET',
-        headers: authHeaders()
+        headers: getAuthHeaders()
     });
 }
 
 export async function getLockTypes(): Promise<LockType[]> {
     return await api<LockType[]>('/api/properties/lock-type', {
         method: 'GET',
-        headers: authHeaders()
+        headers: getAuthHeaders()
     });
 }
