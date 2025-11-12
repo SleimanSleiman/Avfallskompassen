@@ -214,7 +214,7 @@ export function useContainers(
     /* ──────────────── Return ──────────────── */
     return {
         containersInRoom,
-        setContainersInRoom,
+        saveContainers,
         draggedContainer,
         setDraggedContainer,
         availableContainers,
