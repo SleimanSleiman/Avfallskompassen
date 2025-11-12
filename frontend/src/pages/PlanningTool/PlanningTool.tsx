@@ -81,6 +81,7 @@ export default function PlanningTool() {
     const serviceTypes = useServiceTypes();
 
     const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
+    const [containerPanelHeight, setContainerPanelHeight] = useState(0);
 
     useEffect(() => {
         if (typeof window === 'undefined') {
@@ -163,6 +164,10 @@ export default function PlanningTool() {
         },
     ];
 
+    const ACTION_PANEL_EXTRA_OFFSET = 100;
+    const ACTION_PANEL_MIN_TOP = 160;
+    const desktopActionPanelTop = Math.max(containerPanelHeight + ACTION_PANEL_EXTRA_OFFSET, ACTION_PANEL_MIN_TOP);
+
     /* ──────────────── Render ──────────────── */
     return (
         <div className="flex h-full w-full flex-col gap-4 p-3 sm:p-5">
@@ -209,11 +214,15 @@ export default function PlanningTool() {
                         handleAddContainer={handleAddContainer}
                         setIsStageDropActive={setIsStageDropActive}
                         setDraggedContainer={setDraggedContainer}
+                        onContainerPanelHeightChange={setContainerPanelHeight}
                     />
 
                     {/* ActionPanel for selected container or door */}
                     {(selectedContainerId !== null || selectedDoorId !== null) && (
-                        <div className="pointer-events-none absolute left-0.5 top-40 z-50 hidden lg:flex">
+                        <div
+                            className="pointer-events-none absolute left-0.5 z-50 hidden lg:flex"
+                            style={{ top: `${desktopActionPanelTop}px` }}
+                        >
                             <div className="pointer-events-auto">
                                 <ActionPanel
                                     containers={containersInRoom}

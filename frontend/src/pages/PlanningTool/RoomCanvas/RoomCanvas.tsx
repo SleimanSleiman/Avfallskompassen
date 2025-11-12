@@ -3,7 +3,8 @@
  * Renders the Konva Stage with the room shape, corner handles, doors, and containers.
  */
 import { Stage, Layer, Group, Rect } from "react-konva";
-import { useCallback, useEffect, useState, type Dispatch, type SetStateAction } from "react";
+import { useCallback, useEffect, useRef, useState, type Dispatch, type SetStateAction } from "react";
+import type { LucideIcon } from "lucide-react";
 import RoomShape from "./RoomShape";
 import CornerHandles from "./CornerHandles";
 import DoorsLayer from "./DoorsLayer";
@@ -11,10 +12,42 @@ import ContainersLayer from "./ContainersLayer";
 import DoorMeasurementLayer from "./DoorMeasurementLayer";
 import RoomSizePrompt from "../../../components/RoomSizePrompt";
 import DoorWidthPrompt from "../../../components/DoorWidthPrompt";
-import { STAGE_WIDTH, STAGE_HEIGHT, SCALE, DRAG_DATA_FORMAT } from "../Constants";
+import {
+    STAGE_WIDTH,
+    STAGE_HEIGHT,
+    SCALE,
+    DRAG_DATA_FORMAT,
+    MARGIN,
+    ROOM_HORIZONTAL_OFFSET,
+    ROOM_VERTICAL_OFFSET,
+    MIN_WIDTH,
+    MIN_HEIGHT,
+    clamp,
+} from "../Constants";
 import type { Room, ContainerInRoom, Door } from "../Types";
 import type { ContainerDTO } from "../../../lib/Container";
-import { Save, Ruler, DoorOpen, Trash2, X } from "lucide-react";
+import {
+    Save,
+    Ruler,
+    DoorOpen,
+    PillBottle,
+    X,
+    Apple,
+    Battery,
+    CupSoda,
+    Droplet,
+    InspectionPanel,
+    BottleWine,
+    GlassWater,
+    Leaf,
+    Package,
+    Package2,
+    Plug,
+    Recycle,
+    Shirt,
+    Trash2,
+    TriangleAlert
+} from "lucide-react";
 
 /* ─────────────── RoomCanvas Props ──────────────── */
 type RoomCanvasProps = {
@@ -61,6 +94,39 @@ type RoomCanvasProps = {
     handleAddContainer: (container: ContainerDTO, position?: { x: number; y: number }) => void;
     setIsStageDropActive: (v: boolean) => void;
     setDraggedContainer: Dispatch<SetStateAction<ContainerDTO | null>>;
+    onContainerPanelHeightChange: (height: number) => void;
+};
+
+type ServiceTypeIconRule = {
+    keywords: string[];
+    Icon: LucideIcon;
+};
+
+const SERVICE_TYPE_ICON_RULES: ServiceTypeIconRule[] = [
+    { keywords: ["mat", "bio", "organ"], Icon: Apple },
+    { keywords: ["rest", "bränn", "hush"], Icon: Trash2 },
+    { keywords: ["plast"], Icon: CupSoda },
+    { keywords: ["papper", "kartong", "tidning"], Icon: Package },
+    { keywords: ["ofärgat", "ofarget", "uncolored", "uncoloured", "klarglas"], Icon: GlassWater },
+    { keywords: ["färgat", "farget", "colored"], Icon: BottleWine },
+    { keywords: ["glas"], Icon: GlassWater },
+    { keywords: ["metall", "skrot"], Icon: InspectionPanel },
+    { keywords: ["farl", "kem"], Icon: TriangleAlert },
+    { keywords: ["el", "elektr"], Icon: Plug },
+    { keywords: ["batter"], Icon: Battery },
+    { keywords: ["textil", "kläd"], Icon: Shirt },
+    { keywords: ["träd", "grön", "kompost"], Icon: Leaf },
+    { keywords: ["olja", "vätska"], Icon: Droplet },
+    { keywords: ["återbruk", "återvinn"], Icon: Recycle },
+    { keywords: ["förpack", "emballage"], Icon: Package2 }
+];
+
+const getServiceTypeIcon = (name: string): LucideIcon => {
+    const normalized = name.toLowerCase();
+    const match = SERVICE_TYPE_ICON_RULES.find(rule =>
+        rule.keywords.some(keyword => normalized.includes(keyword))
+    );
+    return match?.Icon ?? Package2;
 };
 
 export default function RoomCanvas({
@@ -98,6 +164,7 @@ export default function RoomCanvas({
     handleAddContainer,
     setIsStageDropActive,
     setDraggedContainer,
+    onContainerPanelHeightChange,
 }: RoomCanvasProps) {
     //State to track if a container is being dragged
     const [isDraggingContainer, setIsDraggingContainer] = useState(false);
@@ -114,16 +181,70 @@ export default function RoomCanvas({
     const [isRoomPromptOpen, setIsRoomPromptOpen] = useState(false);
     const [isDoorPromptOpen, setIsDoorPromptOpen] = useState(false);
     const [isContainerPanelOpen, setIsContainerPanelOpen] = useState(false);
+    const containerPanelRef = useRef<HTMLDivElement | null>(null);
+
+    useEffect(() => {
+        const element = containerPanelRef.current;
+        if (!element) {
+            onContainerPanelHeightChange(0);
+            return;
+        }
+
+        const updateHeight = () => {
+            onContainerPanelHeightChange(element.getBoundingClientRect().height);
+        };
+
+        updateHeight();
+
+        const win = typeof window !== "undefined" ? (window as unknown as {
+            ResizeObserver?: typeof ResizeObserver;
+            addEventListener?: (type: string, listener: EventListenerOrEventListenerObject) => void;
+            removeEventListener?: (type: string, listener: EventListenerOrEventListenerObject) => void;
+        }) : undefined;
+        if (!win) {
+            return;
+        }
+
+        if (typeof win.ResizeObserver === "function") {
+            const observer = new win.ResizeObserver(() => updateHeight());
+            observer.observe(element);
+            return () => observer.disconnect();
+        }
+
+        if (typeof win.addEventListener === "function") {
+            win.addEventListener("resize", updateHeight);
+            return () => {
+                if (typeof win.removeEventListener === "function") {
+                    win.removeEventListener("resize", updateHeight);
+                }
+            };
+        }
+    }, [onContainerPanelHeightChange, isContainerPanelOpen]);
 
     const handleConfirmRoomSize = (length: number, width: number) => {
+        const desiredWidthPx = width / SCALE;
+        const desiredHeightPx = length / SCALE;
+
+        const maxWidthPx = STAGE_WIDTH - 2 * MARGIN;
+        const maxHeightPx = STAGE_HEIGHT - 2 * MARGIN;
+
+        const newWidth = clamp(desiredWidthPx, MIN_WIDTH, maxWidthPx);
+        const newHeight = clamp(desiredHeightPx, MIN_HEIGHT, maxHeightPx);
+
+        const centeredX = (STAGE_WIDTH - newWidth) / 2 + ROOM_HORIZONTAL_OFFSET;
+        const centeredY = (STAGE_HEIGHT - newHeight) / 2 + ROOM_VERTICAL_OFFSET;
+
+        const newX = clamp(centeredX, MARGIN, STAGE_WIDTH - MARGIN - newWidth);
+        const newY = clamp(centeredY, MARGIN, STAGE_HEIGHT - MARGIN - newHeight);
+
         setRoom({
-            x: (STAGE_WIDTH - length / SCALE) / 2,
-            y: (STAGE_HEIGHT - width / SCALE) / 2,
-            width: width / SCALE,
-            height: length / SCALE,
+            x: newX,
+            y: newY,
+            width: newWidth,
+            height: newHeight,
         });
         setIsRoomPromptOpen(false);
-            };
+    };
 
     const handleAddDoorWithPrompt = (width: number) => {
         const success = handleAddDoor({ width });
@@ -170,15 +291,6 @@ export default function RoomCanvas({
         return () => window.removeEventListener("keydown", handleKeyDown);
     }, [isContainerPanelOpen, closeContainerPanel]);
 
-    const getServiceIconLabel = (name: string) => {
-        const initials = name
-            .split(/\s+/)
-            .filter(Boolean)
-            .map(part => part[0]?.toUpperCase() ?? "")
-            .join("");
-        return initials.slice(0, 3) || "?";
-    };
-
     const activeType = selectedType
         ? serviceTypes.find(type => type.name === selectedType) ?? null
         : null;
@@ -210,6 +322,7 @@ export default function RoomCanvas({
         >
             <div className="flex flex-col gap-4">
                 <div
+                    ref={containerPanelRef}
                     className={`transition-all duration-300 ease-out overflow-hidden ${isContainerPanelOpen ? "max-h-[75vh] opacity-100" : "max-h-0 opacity-0 pointer-events-none"}`}
                 >
                     <div className="relative rounded-2xl border border-gray-200 bg-white shadow-xl">
@@ -235,7 +348,7 @@ export default function RoomCanvas({
                                     <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-9 xl:grid-cols-13">
                                         {serviceTypes.map((type) => {
                                             const isSelected = selectedType === type.name;
-                                            const initials = getServiceIconLabel(type.name);
+                                            const IconComponent = getServiceTypeIcon(type.name);
 
                                             return (
                                                 <button
@@ -247,7 +360,7 @@ export default function RoomCanvas({
                                                     <span
                                                         className={`flex h-12 w-full items-center justify-center rounded-xl border text-sm font-semibold transition ${isSelected ? "bg-nsr-teal text-white border-nsr-teal" : "bg-white text-gray-700 border-gray-300 hover:bg-nsr-teal/10"}`}
                                                     >
-                                                        {initials}
+                                                        <IconComponent className="h-5 w-5" aria-hidden="true" />
                                                     </span>
                                                     <span className={`text-[11px] leading-tight text-center ${isSelected ? "text-nsr-teal" : "text-gray-600"}`}>
                                                         {type.name}
@@ -381,7 +494,7 @@ export default function RoomCanvas({
                     }}
                     className={`flex items-center justify-start px-2 py-1 rounded-lg transition-all duration-300 shadow-sm group overflow-hidden ${isContainerPanelOpen ? "bg-emerald-600 text-white hover:bg-emerald-500" : "bg-emerald-50 text-emerald-700 hover:bg-emerald-100 hover:text-emerald-800"}`}
                 >
-                    <Trash2 className="w-5 h-5 flex-shrink-0" />
+                    <PillBottle className="w-5 h-5 flex-shrink-0" />
                     <span className="ml-2 text-sm font-medium opacity-0 w-0 group-hover:opacity-100 group-hover:w-auto transition-all duration-300 whitespace-nowrap">
                         Lägg till sopkärl
                     </span>
