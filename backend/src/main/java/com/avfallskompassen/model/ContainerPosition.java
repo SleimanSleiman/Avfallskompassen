@@ -11,7 +11,7 @@ import jakarta.persistence.*;
         name = "container_position",
         indexes = {
                 @Index(name = "idx_waste_room_id", columnList = "waste_room_id"),
-                @Index(name = "idx_container_type_id", columnList = "container_type_id")
+                @Index(name = "idx_container_plan_id", columnList = "container_plan_id")
         }
 )
 public class ContainerPosition {
