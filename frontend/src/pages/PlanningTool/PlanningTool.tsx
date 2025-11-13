@@ -87,6 +87,12 @@ export default function PlanningTool() {
     /* ──────────────── Service Types (API data) ──────────────── */
     const serviceTypes = useServiceTypes();
 
+
+    const savedPropertyId = typeof window !== 'undefined' ? localStorage.getItem('selectedPropertyId') : null;
+    const propertyId = savedPropertyId && savedPropertyId !== 'undefined' && savedPropertyId !== 'null'
+        ? Number(savedPropertyId)
+        : null;
+
     const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
     const [containerPanelHeight, setContainerPanelHeight] = useState(0);
 
@@ -115,7 +121,7 @@ export default function PlanningTool() {
     }, []);
 
     /* ──────────────── Comparison data ──────────────── */
-    const { data: comparisonData, loading: comparisonLoading, error: comparisonError } = useComparison(selectedProperty?.id ?? null);
+    const { data: comparisonData, loading: comparisonLoading, error: comparisonError } = useComparison(propertyId);
 
     /* ──────────────── Sidebar state ──────────────── */
     const [selectedType, setSelectedType] = useState<string | null>(null);
