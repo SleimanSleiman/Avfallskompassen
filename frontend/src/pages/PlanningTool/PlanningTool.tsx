@@ -173,7 +173,7 @@ export default function PlanningTool() {
         },
     ];
 
-    const ACTION_PANEL_EXTRA_OFFSET = 100;
+    const ACTION_PANEL_EXTRA_OFFSET = 150;
     const ACTION_PANEL_MIN_TOP = 160;
     const desktopActionPanelTop = Math.max(containerPanelHeight + ACTION_PANEL_EXTRA_OFFSET, ACTION_PANEL_MIN_TOP);
 
@@ -245,8 +245,6 @@ export default function PlanningTool() {
                                     handleRotateDoor={handleRotateDoor}
                                     handleRotateContainer={handleRotateContainer}
                                     handleShowContainerInfo={handleShowContainerInfo}
-                                    undo={undo}
-                                    redo={redo}
                                 />
                             </div>
                         </div>
@@ -264,8 +262,6 @@ export default function PlanningTool() {
                                 handleRotateDoor={handleRotateDoor}
                                 handleRotateContainer={handleRotateContainer}
                                 handleShowContainerInfo={handleShowContainerInfo}
-                                undo={undo}
-                                redo={redo}
                             />
                         </div>
                     )}

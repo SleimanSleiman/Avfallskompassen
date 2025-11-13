@@ -6,7 +6,7 @@
 export const clamp = (value: number, min: number, max: number) =>
   Math.max(min, Math.min(value, max));
 
-export const CONTAINER_PIXEL_SCALE = 2;
+export const CONTAINER_PIXEL_SCALE = 1;
 
 //Check if two objects are overlapping
 export const isOverlapping = (
