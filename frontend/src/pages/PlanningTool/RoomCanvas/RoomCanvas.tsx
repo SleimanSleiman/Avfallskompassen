@@ -12,7 +12,7 @@ import DoorMeasurementLayer from "./DoorMeasurementLayer";
 import RoomSizePrompt from "../../../components/RoomSizePrompt";
 import { STAGE_WIDTH, STAGE_HEIGHT, SCALE } from "../Constants";
 import type { Room, ContainerInRoom, Door } from "../Types";
-import { Save, Ruler } from "lucide-react";
+import { Save, Ruler, Undo, Redo } from "lucide-react";
 
 /* ─────────────── RoomCanvas Props ──────────────── */
 type RoomCanvasProps = {
@@ -109,7 +109,11 @@ export default function RoomCanvas({
             <div className="absolute top-4 left-4 flex flex-row items-center gap-2 z-50">
                 {/* Change room size */}
                 <button
-                    onClick={() => setIsRoomPromptOpen(true)}
+                    onClick={() => {
+                        setIsRoomPromptOpen(true);
+                        handleSelectContainer(null);
+                        handleSelectDoor(null);
+                    }}
                     className="flex items-center justify-start bg-gray-200 hover:bg-gray-300 text-gray-800 px-2 py-1 rounded-lg transition-all duration-300 shadow-sm group overflow-hidden"
                 >
                     <Ruler className="w-5 h-5 flex-shrink-0" />
@@ -135,11 +139,9 @@ export default function RoomCanvas({
                     className="flex items-center justify-start bg-blue-50 text-blue-700 hover:bg-blue-100 hover:text-blue-800 px-2 py-1 rounded-lg transition-all duration-300 shadow-sm group overflow-hidden"
                     title="Ångra (Ctrl+Z)"
                 >
-                    <span className="flex items-center">
-                    ⟲
+                    <Undo className="w-5 h-5 flex-shrink-0" />
                     <span className="ml-2 text-sm font-medium opacity-0 w-0 group-hover:opacity-100 group-hover:w-auto transition-all duration-300 whitespace-nowrap">
                         Ångra
-                    </span>
                     </span>
                 </button>
 
@@ -149,11 +151,9 @@ export default function RoomCanvas({
                     className="flex items-center justify-start bg-blue-50 text-blue-700 hover:bg-blue-100 hover:text-blue-800 px-2 py-1 rounded-lg transition-all duration-300 shadow-sm group overflow-hidden"
                     title="Gör om (Ctrl+Y)"
                 >
-                    <span className="flex items-center">
-                    ⟳
+                    <Redo className="w-5 h-5 flex-shrink-0" />
                     <span className="ml-2 text-sm font-medium opacity-0 w-0 group-hover:opacity-100 group-hover:w-auto transition-all duration-300 whitespace-nowrap">
                         Gör om
-                    </span>
                     </span>
                 </button>
             </div>

@@ -1,26 +1,17 @@
 package com.avfallskompassen.services;
 
 import com.avfallskompassen.model.ServiceType;
-import com.avfallskompassen.repository.ServiceTypeRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 /**
- * Service class for managing service types.
+ * Interface for the ServiceTypeServiceImpl class.
  */
-@Service
-public class ServiceTypeService {
-
-    @Autowired
-    private ServiceTypeRepository serviceTypeRepository;
+public interface ServiceTypeService {
 
     /**
      * Get all service types.
      * @return List of ServiceType
      */
-    public List<ServiceType> getAllServiceTypes() {
-        return serviceTypeRepository.findAll();
-    }
+    List<ServiceType> getAllServiceTypes();
 }

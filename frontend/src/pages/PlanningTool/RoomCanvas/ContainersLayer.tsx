@@ -75,6 +75,7 @@ function ContainerItem({
     const [lastValidPos, setLastValidPos] = useState({ x: container.x, y: container.y });
     const [isOverZone, setIsOverZone] = useState(false);
 
+    //Check if container at (x,y) with given rotation overlaps any door or other container zones
     const checkZones = (x: number, y: number, rotation = container.rotation || 0) => {
   const rot = rotation % 180;
   const rotatedWidth = rot === 90 ? container.height : container.width;
@@ -88,10 +89,16 @@ function ContainerItem({
 
 
     const [imageToUse, status] = useImage(`http://localhost:8081${container.container.imageTopViewUrl}`);
-    if (status !== "loaded") {
-        return null;
-    }
-    
+        if (status !== "loaded") {
+            return null;
+        }
+    //Determine if container is outside room bounds
+    const isOutsideRoom =
+        container.x < room.x ||
+        container.y < room.y ||
+        container.x + container.width > room.x + room.width ||
+        container.y + container.height > room.y + room.height;
+
     return (
         <Group
             x={container.x + container.width / 2}
@@ -153,7 +160,7 @@ function ContainerItem({
                     image={imageToUse}
                     width={container.width}
                     height={container.height}
-                    opacity={selected ? 0.9 : 1}
+                    opacity={isOutsideRoom ? 0.5 : selected ? 0.9 : 1} //Dim if outside room, highlight if selected
                     shadowColor={selected ? "#256029" : undefined}
                     perfectDrawEnabled={false}
                 />

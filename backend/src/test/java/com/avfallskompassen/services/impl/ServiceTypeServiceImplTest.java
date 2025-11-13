@@ -1,7 +1,8 @@
-package com.avfallskompassen.services;
+package com.avfallskompassen.services.impl;
 
 import com.avfallskompassen.model.ServiceType;
 import com.avfallskompassen.repository.ServiceTypeRepository;
+import com.avfallskompassen.services.ServiceTypeService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -15,16 +16,16 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 /**
- * Unit tests for ServiceTypeService.
+ * Unit tests for ServiceTypeServiceImpl class.
  */
 @ExtendWith(MockitoExtension.class)
-public class ServiceTypeServiceTest {
+public class ServiceTypeServiceImplTest {
 
     @Mock
     private ServiceTypeRepository repository;
 
     @InjectMocks
-    private ServiceTypeService service;
+    private ServiceTypeServiceImpl service;
 
     /**
      * Test getAllServiceTypes method to ensure it returns a list of ServiceType

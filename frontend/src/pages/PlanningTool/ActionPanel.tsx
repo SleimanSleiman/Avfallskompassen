@@ -16,7 +16,7 @@ type ActionPanelProps = {
     selectedDoorId: number | null;
     handleRemoveContainer: (id: number) => void;
     handleRemoveDoor: (id: number) => void;
-    handleRotateDoor: (id: number, newRotation: number, newSwing: "inward" | "outward") => void;
+    handleRotateDoor: (id: number) => void;
     handleRotateContainer: (id: number) => void;
     handleShowContainerInfo: (id: number) => void;
     undo: () => void;
@@ -140,25 +140,6 @@ export default function ActionPanel({
                         </span>
                     </button>
                 )}
-                    
-                {/* Undo button*/}
-                <button
-                className="btn-secondary-sm min-w-[100px] text-center"
-                onClick={undo}
-                title="Ångra (Ctrl+Z)"
-                >
-                ⟲ Ångra
-                </button>
-
-                {/* Undo button*/}
-                <button
-                className="btn-secondary-sm min-w-[100px] text-center"
-                onClick={redo}
-                title="Gör om (Ctrl+Y)"
-                >
-                ⟳ Gör om
-                </button>
-
 
                 {/* Rotate button */}
                 <button

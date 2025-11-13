@@ -3,11 +3,14 @@
  * Handles corner dragging, constraints, and initial state from localStorage.
  */
 import { useState } from "react";
-import { SCALE, STAGE_WIDTH, STAGE_HEIGHT, MIN_WIDTH, MIN_HEIGHT, MARGIN, clamp, mmToPixels } from "../Constants";
-import type { Room } from "../Types";
 import { Scale } from "lucide-react";
+import { SCALE, mmToPixels, STAGE_WIDTH, STAGE_HEIGHT, MIN_WIDTH, MIN_HEIGHT, MARGIN, clamp } from "../Constants";
+import type { Room, ContainerInRoom } from "../Types";
 
-export function useRoom() {
+export function useRoom(
+    containersInRoom: ContainerInRoom[],
+    setContainersInRoom: React.Dispatch<React.SetStateAction<ContainerInRoom[]>>
+) {
     /* ──────────────── Initial Room State ──────────────── */
     const initialRoom = (() => {
         const savedRoom = localStorage.getItem("enviormentRoomData");
@@ -23,11 +26,11 @@ export function useRoom() {
                 const widthMeters = parsed.width ?? defaultWidthMeters;
                 const heightMeters = parsed.height ?? defaultHeightMeters;
                 const x = parsed.x !== undefined ? parsed.x : defaultX;
-                const y = parsed.y !== undefined ? parsed.y : defaultY;  
+                const y = parsed.y !== undefined ? parsed.y : defaultY;
                 console.log(parsed.containers);
-                
+
                 const containers = (parsed.containers ?? []).map(c => {
-                const containerInfo = c.containerDTO ?? {  
+                const containerInfo = c.containerDTO ?? {
                 imageTopViewUrl: "/images/containers/tempTopView.png",
                 imageFrontViewUrl: "/images/containers/tempFrontView.png",
                 width: 1,
@@ -53,7 +56,7 @@ export function useRoom() {
                 id: d.id ?? Date.now(),
                 x: d.x ?? 0,
                 y: d.y ?? 0,
-                width: d.width ?? 1.2,        
+                width: d.width ?? 1.2,
                 wall: d.wall ?? "bottom",
                 rotation: d.rotation ?? 0,
                 swingDirection: d.swingDirection ?? "inward",
@@ -78,7 +81,6 @@ export function useRoom() {
 })();
 
 
-
     /* ──────────────── Room State ──────────────── */
     const [room, setRoom] = useState<Room>(initialRoom);
 
@@ -87,7 +89,7 @@ export function useRoom() {
         let { x, y, width, height } = room;
 
         switch (index) {
-            case 0: // Top-left
+            case 0: //top-left corner
                 const newX = clamp(pos.x, MARGIN, x + width - MIN_WIDTH);
                 const newY = clamp(pos.y, MARGIN, y + height - MIN_HEIGHT);
                 width = x + width - newX;
@@ -95,20 +97,20 @@ export function useRoom() {
                 x = newX;
                 y = newY;
                 break;
-            case 1: // Top-right
+            case 1: //top-right corner
                 const newTRX = clamp(pos.x, x + MIN_WIDTH, STAGE_WIDTH - MARGIN);
                 const newTRY = clamp(pos.y, MARGIN, y + height - MIN_HEIGHT);
                 width = newTRX - x;
                 height = y + height - newTRY;
                 y = newTRY;
                 break;
-            case 2: // Bottom-right
+            case 2: //bottom-right corner
                 const newBRX = clamp(pos.x, x + MIN_WIDTH, STAGE_WIDTH - MARGIN);
                 const newBRY = clamp(pos.y, y + MIN_HEIGHT, STAGE_HEIGHT - MARGIN);
                 width = newBRX - x;
                 height = newBRY - y;
                 break;
-            case 3: // Bottom-left
+            case 3: //bottom-left corner
                 const newBLX = clamp(pos.x, MARGIN, x + width - MIN_WIDTH);
                 const newBLY = clamp(pos.y, y + MIN_HEIGHT, STAGE_HEIGHT - MARGIN);
                 width = x + width - newBLX;
@@ -134,6 +136,6 @@ export function useRoom() {
         room,
         setRoom,
         corners,
-        handleDragCorner
+        handleDragCorner,
     };
 }

@@ -178,7 +178,7 @@ export default function RegisterPage() {
               <div className="rounded-2xl bg-nsr-sky p-8 h-full">
                 <h2 className="text-xl font-semibold">Kom igång direkt</h2>
                 <p className="mt-3 text-gray-700">
-                  Efter registrering får du direkt tillgång till alla planeringsverktyg och kan börja designa dina avfallsrum.
+                  Efter registrering får du direkt tillgång till alla planeringsverktyg och kan börja designa dina miljörum.
                 </p>
                 
                 <div className="mt-6 space-y-3">
@@ -188,7 +188,7 @@ export default function RegisterPage() {
                   </div>
                   <div className="flex items-center gap-2">
                     <div className="w-2 h-2 bg-nsr-teal rounded-full"></div>
-                    <span className="text-sm">Designa avfallsrum</span>
+                    <span className="text-sm">Designa miljörum</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <div className="w-2 h-2 bg-nsr-teal rounded-full"></div>
