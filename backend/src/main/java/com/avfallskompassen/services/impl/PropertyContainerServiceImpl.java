@@ -3,9 +3,13 @@ package com.avfallskompassen.services.impl;
 import com.avfallskompassen.dto.PropertyContainerDTO;
 import com.avfallskompassen.repository.PropertyContainerRepository;
 import com.avfallskompassen.services.PropertyContainerService;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+@Service
+@Transactional
 public class PropertyContainerServiceImpl implements PropertyContainerService {
 
     private final PropertyContainerRepository propertyContainerRepository;
