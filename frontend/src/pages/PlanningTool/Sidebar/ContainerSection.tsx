@@ -100,7 +100,10 @@ export default function ContainerSection({
 
                                 {/* Loading overlay */}
                                 {isLoadingContainers && selectedType === type.name && (
-                                    <div className="absolute inset-0 flex items-center justify-center bg-white/70 rounded z-10">
+                                    <div
+                                        role="status"
+                                        className="absolute inset-0 flex items-center justify-center bg-white/70 rounded z-10"
+                                    >
                                         <div className="animate-spin rounded-full h-8 w-8 border-4 border-gray-400 border-t-transparent" />
                                     </div>
                                 )}

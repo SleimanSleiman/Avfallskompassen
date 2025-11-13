@@ -132,7 +132,7 @@ export default function LoginPage() {
               <div className="rounded-2xl bg-nsr-sky p-8 h-full">
                 <h2 className="text-xl font-semibold">Design & Planeringsverktyg</h2>
                 <p className="mt-3 text-gray-700">
-                  Placera, ta bort, ändra och byt kärl i ett avfallsrum och se hur det i realtid påverkar kostnaderna.
+                  Placera, ta bort, ändra och byt kärl i ett miljörum och se hur det i realtid påverkar kostnaderna.
                 </p>
                 
                 <div className="mt-6 space-y-3">
@@ -142,7 +142,7 @@ export default function LoginPage() {
                   </div>
                   <div className="flex items-center gap-2">
                     <div className="w-2 h-2 bg-nsr-teal rounded-full"></div>
-                    <span className="text-sm">Designa avfallsrum</span>
+                    <span className="text-sm">Designa miljörum</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <div className="w-2 h-2 bg-nsr-teal rounded-full"></div>

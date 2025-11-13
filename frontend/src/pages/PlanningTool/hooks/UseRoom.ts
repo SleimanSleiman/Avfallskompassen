@@ -56,8 +56,8 @@ export function useRoom() {
     /* ──────────────── Initial Room State ──────────────── */
     const initialRoom = (() => {
         const savedRoom = localStorage.getItem("enviormentRoomData") ?? localStorage.getItem("trashRoomData");
-    const defaultWidthMeters = 5;
-    const defaultHeightMeters = 5;
+        const defaultWidthMeters = 5;
+        const defaultHeightMeters = 5;
         const defaultX = (STAGE_WIDTH - defaultWidthMeters / SCALE) / 2 + ROOM_HORIZONTAL_OFFSET;
         const defaultY = (STAGE_HEIGHT - defaultHeightMeters / SCALE) / 2 + ROOM_VERTICAL_OFFSET;
 
@@ -93,7 +93,8 @@ export function useRoom() {
 
             const legacyDefaultSizes = (
                 (parsedWidth === 12 && parsedHeight === 9) ||
-                (parsedWidth === 10 && parsedHeight === 8)
+                (parsedWidth === 10 && parsedHeight === 8) ||
+                (parsedWidth === 8 && parsedHeight === 7)
             );
 
             const widthMeters = legacyDefaultSizes
@@ -165,7 +166,6 @@ export function useRoom() {
             return defaultRoom;
         }
     })();
-
 
     /* ──────────────── Room State ──────────────── */
     const [room, setRoom] = useState<Room>(initialRoom);

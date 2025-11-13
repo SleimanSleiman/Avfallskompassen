@@ -14,7 +14,7 @@ type ActionPanelProps = {
     selectedDoorId: number | null;
     handleRemoveContainer: (id: number) => void;
     handleRemoveDoor: (id: number) => void;
-    handleRotateDoor: (id: number, newRotation: number, newSwing: "inward" | "outward") => void;
+    handleRotateDoor: (id: number) => void;
     handleRotateContainer: (id: number) => void;
     handleShowContainerInfo: (id: number) => void;
 };
@@ -58,11 +58,7 @@ export default function ActionPanel({
         if (selectedDoorId !== null) {
             const door = doors.find((d) => d.id === selectedDoorId);
             if (!door) return;
-
-            const newRotation = (door.rotation + 180) % 360;
-            const newSwing =
-            door.swingDirection === "inward" ? "outward" : "inward";
-            handleRotateDoor(door.id, newRotation, newSwing);
+            handleRotateDoor(door.id);
         } else if (selectedContainerId !== null) {
             handleRotateContainer(selectedContainerId);
         }
@@ -113,7 +109,6 @@ export default function ActionPanel({
                         </span>
                     </button>
                 )}
-                    
                 {/* Rotate button */}
                 <button
                         onClick={handleRotate}

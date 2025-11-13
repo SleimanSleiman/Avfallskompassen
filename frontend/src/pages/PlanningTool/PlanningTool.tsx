@@ -23,7 +23,7 @@ import { useServiceTypes } from './hooks/UseServiceTypes';
 import { useComparison } from './hooks/useComparison';
 
 export default function PlanningTool() {
-    
+
     /* ──────────────── Room state & logic ──────────────── */
     const {
         room,
@@ -46,11 +46,9 @@ export default function PlanningTool() {
         handleRemoveDoor,
         handleSelectDoor,
         getDoorZones,
-        isOverlapping,
     } = useDoors(room, setSelectedDoorId, setSelectedContainerId);
 
     /* ──────────────── Container state & logic ──────────────── */
-    
     const {
         containersInRoom,
         saveContainers,
@@ -78,11 +76,11 @@ export default function PlanningTool() {
         undo,
         redo,
         getContainerZones,
-    } = useContainers(room, setSelectedContainerId, setSelectedDoorId);
+    } = useContainers(room, setSelectedContainerId, setSelectedDoorId, getDoorZones());
 
     useEffect(() => {
-    if (room.doors) setDoors(room.doors);
-    if (room.containers) saveContainers(room.containers);
+        if (room.doors) setDoors(room.doors);
+        if (room.containers) saveContainers(room.containers);
     }, [room, setDoors, saveContainers]);
 
 
