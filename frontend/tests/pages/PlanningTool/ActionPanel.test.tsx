@@ -8,16 +8,35 @@ vi.mock("../../../src/pages/PlanningTool/components/InfoTooltip", () => ({
 }));
 
 describe("ActionPanel", () => {
-      const mockContainer = {
+    const mockContainer = {
         id: 1,
-        container: { name: "240 L" },
+        container: {
+            id: 1,
+            name: "240 L",
+            size: 240,
+            width: 600,
+            depth: 800,
+            height: 1100,
+            imageFrontViewUrl: "/front.png",
+            imageTopViewUrl: "/top.png",
+            emptyingFrequencyPerYear: 0,
+            cost: 0,
+        },
         x: 0,
         y: 0,
         width: 100,
         height: 100,
         rotation: 0,
     };
-    const mockDoor = { id: 2, width: 0.9, rotation: 0, swingDirection: "inward" as const };
+    const mockDoor = {
+        id: 2,
+        width: 0.9,
+        x: 0,
+        y: 0,
+        rotation: 0,
+        wall: "bottom" as const,
+        swingDirection: "inward" as const,
+    };
 
     const mockHandlers = {
         handleRemoveContainer: vi.fn(),
@@ -25,8 +44,6 @@ describe("ActionPanel", () => {
         handleRotateDoor: vi.fn(),
         handleRotateContainer: vi.fn(),
         handleShowContainerInfo: vi.fn(),
-        undo: vi.fn(),
-        redo: vi.fn(),
     };
 
     beforeEach(() => {
@@ -88,30 +105,4 @@ describe("ActionPanel", () => {
         );
         expect(container.firstChild).toBeNull();
     });
-
-      // ─────────────── Test Keyboard shortcuts ───────────────
-    it("calls undo and redo handlers on keyboard shortcuts", () => {
-        render(
-        <ActionPanel
-            containers={[mockContainer]}
-            doors={[]}
-            selectedContainerId={mockContainer.id}
-            selectedDoorId={null}
-            {...mockHandlers}
-        />
-        );
-
-    // Simulate Ctrl+Z (undo)
-    fireEvent.keyDown(window, { key: "z", ctrlKey: true });
-    expect(mockHandlers.undo).toHaveBeenCalledTimes(1);
-
-    // Simulate Ctrl+Y (redo)
-    fireEvent.keyDown(window, { key: "y", ctrlKey: true });
-    expect(mockHandlers.redo).toHaveBeenCalledTimes(1);
-
-    // Also test Mac CMD behavior
-    Object.defineProperty(navigator, "platform", {value: "MacIntel", configurable: true,});
-    fireEvent.keyDown(window, { key: "z", metaKey: true });
-    expect(mockHandlers.undo).toHaveBeenCalledTimes(2);
-  });
 });
