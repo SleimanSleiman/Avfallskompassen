@@ -77,19 +77,16 @@ function ContainerItem({
 
     //Check if container at (x,y) with given rotation overlaps any door or other container zones
     const checkZones = (x: number, y: number, rotation = container.rotation || 0) => {
-        const rot = rotation % 180;
-        const rotatedWidth = rot === 90 ? container.height : container.width;
-        const rotatedHeight = rot === 90 ? container.width : container.height;
+  const rot = rotation % 180;
+  const rotatedWidth = rot === 90 ? container.height : container.width;
+  const rotatedHeight = rot === 90 ? container.width : container.height;
 
-        const r = {
-            x,
-            y,
-            width: rotatedWidth,
-            height: rotatedHeight,
-        };
+  const r = { x, y, width: rotatedWidth, height: rotatedHeight };
 
-        return [...doorZones, ...getContainerZones(container.id)].some(zone => isOverlapping(r, zone));
-    };
+  const zones = [...(doorZones ?? []), ...(getContainerZones(container.id) ?? [])];
+  return zones.some(zone => zone && isOverlapping(r, zone));
+};
+
 
     const [imageToUse, status] = useImage(`http://localhost:8081${container.container.imageTopViewUrl}`);
         if (status !== "loaded") {

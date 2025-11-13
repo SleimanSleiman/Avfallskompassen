@@ -1,18 +1,20 @@
 import { api, post } from './api';
 import { currentUser } from './auth';
+import type { WasteRoom } from './WasteRoom.ts';
 
 export type Property = {
-    id: number;
-    address: string;
-    numberOfApartments: number;
-    lockName?: string;
-    lockPrice?: number;
-    accessPathLength: number;
-    createdAt: string;
-    updatedAt?: string;
-    lastNotifiedAt?: string;
-    municipalityId?: number;
-    municipalityName?: string;
+  id: number;
+  address: string;
+  numberOfApartments: number;
+  lockName?: string;
+  lockPrice?: number;
+  accessPathLength: number;
+  createdAt: string;
+  updatedAt?: string;
+  lastNotifiedAt?: string;
+  municipalityId?: number;
+  municipalityName?: string;
+  wasteRooms?: WasteRoom[];
 };
 
 export type LockType = {

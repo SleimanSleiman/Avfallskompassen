@@ -4,6 +4,7 @@ import type { Municipality, Property, PropertyRequest } from '../lib/Property';
 import { currentUser } from '../lib/auth';
 import RoomSizePrompt from '../components/RoomSizePrompt';
 import ConfirmModal from '../components/ConfirmModal';
+import { getWasteRoomsByPropertyId } from '../lib/WasteRoom';
 
 export default function PropertyPage() {
     const [properties, setProperties] = useState<Property[]>([]);
@@ -82,6 +83,16 @@ export default function PropertyPage() {
             setLoadingProperties(true);
             const data = await getMyProperties();
             setProperties(data);
+
+            const propertiesWithRooms = await Promise.all(
+                data.map(async (property) => {
+                    const wasteRooms = await getWasteRoomsByPropertyId(property.id);
+                    console.log(`Property ${property.id} waste rooms:`, wasteRooms);
+                    return { ...property, wasteRooms };
+                })
+            );
+
+            setProperties(propertiesWithRooms);
         } catch (err: any) {
             setError('Kunde inte ladda fastigheter: ' + err.message);
         } finally {
@@ -307,173 +318,205 @@ export default function PropertyPage() {
                                 />
                             </div>
 
-                            <div>
-                                <label htmlFor="municipalityId" className="block text-sm font-medium mb-2">
-                                    Kommun *
-                                </label>
-                                <select
-                                    id="municipalityId"
-                                    required
-                                    className="w-full rounded-xl border-gray-300 shadow-sm focus:border-nsr-teal focus:ring-nsr-teal"
-                                    value={formData.municipalityId}
-                                    onChange={(e) => handleInputChange('municipalityId', parseInt(e.target.value))}
-                                >
-                                    <option value={0}>Välj kommun</option>
-                                    {/* Ensure current value remains visible when editing even if not allowed */}
-                                    {formData.municipalityId !== 0 && !allowedMunicipalities.some(m => m.id === formData.municipalityId) && (
-                                        <option value={formData.municipalityId}>{getMunicipalityName(formData.municipalityId)}</option>
-                                    )}
-                                    {allowedMunicipalities.map((m) => (
-                                        <option key={m.id} value={m.id}>{m.name}</option>
-                                    ))}
-                                </select>
-                            </div>
-
-                            <div>
-                                <label htmlFor="apartments" className="block text-sm font-medium mb-2">
-                                    Antal lägenheter *
-                                </label>
-                                <input
-                                    id="apartments"
-                                    type="number"
-                                    required
-                                    min="1"
-                                    className="w-full rounded-xl border-gray-300 shadow-sm focus:border-nsr-teal focus:ring-nsr-teal"
-                                    value={formData.numberOfApartments}
-                                    onChange={(e) => handleInputChange('numberOfApartments', parseInt(e.target.value))}
-                                />
-                            </div>
-
-                            <div>
-                                <label htmlFor="lockType" className="block text-sm font-medium mb-2">
-                                    Typ av lås för miljörum *
-                                </label>
-                                <select
-                                    id="lockTypeId"
-                                    required
-                                    className="w-full rounded-xl border-gray-300 shadow-sm focus:border-nsr-teal focus:ring-nsr-teal"
-                                    value={formData.lockTypeId}
-                                    onChange={(e) => handleInputChange('lockTypeId', parseInt(e.target.value))}
-                                >
-                                    <option value={0}> Välj låstyp</option>
-                                    {lockTypes.map((lt) => (
-                                        <option key={lt.id} value={lt.id}>
-                                            {lt.name}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
-
-                            <div>
-                                <label htmlFor="accessPath" className="block text-sm font-medium mb-2">
-                                    Dragvägslängd (meter) *
-                                </label>
-                                <input
-                                    id="accessPath"
-                                    type="number"
-                                    required
-                                    min="0"
-                                    step="0.1"
-                                    className="w-full rounded-xl border-gray-300 shadow-sm focus:border-nsr-teal focus:ring-nsr-teal"
-                                    value={formData.accessPathLength}
-                                    onChange={(e) => handleInputChange('accessPathLength', parseFloat(e.target.value))}
-                                    placeholder="0.0"
-                                />
-                            </div>
-                        </div>
-
-                        <div className="flex gap-3">
-                            <button
-                                type="submit"
-                                disabled={loading}
-                                className="btn-primary disabled:opacity-60"
-                            >
-                                {loading
-                                    ? editingId ? 'Uppdaterar...' : 'Skapar...'
-                                    : editingId ? 'Uppdatera fastighet' : 'Skapa fastighet'
-                                }
-                            </button>
-                            <button
-                                type="button"
-                                onClick={() => {
-                                    setShowForm(false);
-                                    setEditingId(null);
-                                    setFormData({
-                                        address: '',
-                                        numberOfApartments: 1,
-                                        lockTypeId: 1,
-                                        accessPathLength: 0,
-                                        municipalityId: municipalities.length > 0 ? municipalities[0].id : 0
-                                    });
-                                }}
-                                className="btn-secondary"
-                            >
-                                Avbryt
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            )}
-
-            {/* Properties List */}
-            <div className="rounded-2xl border bg-white shadow-soft">
-                <div className="border-b px-6 py-4">
-                    <h2 className="text-xl font-semibold">Dina fastigheter ({filteredProperties.length})</h2>
-                </div>
-
-                <div className="grid grid-cols-1 gap-6 p-6 sm:grid-cols-2 lg:grid-cols-3">
-                    {loadingProperties ? (
-                        <div className="col-span-full flex flex-col items-center justify-center py-16">
-                            <div className="animate-spin rounded-full h-12 w-12 border-4 border-gray-300 border-t-nsr-teal mb-4" />
-                            <p className="text-gray-600">Laddar fastigheter...</p>
-                        </div>
-                    ) : filteredProperties.length === 0 ? (
-                        <div className="col-span-full flex flex-col items-center justify-center py-16 text-center text-gray-500">
-                            <div className="mb-4">
-                                <svg className="mx-auto h-12 w-12 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                                </svg>
-                            </div>
-                            <p className="text-lg font-medium">Inga fastigheter ännu</p>
-                            <p className="mt-1">Klicka på "Lägg till fastighet" för att komma igång.</p>
-                        </div>
-                    ) : (
-                        filteredProperties.map((property) => (
-                            <div key={property.id} className="rounded-xl border border-gray-200 p-5 hover:shadow-md transition-shadow">
-                                <div className="flex items-start justify-between gap-3">
-                                    <div className="min-w-0">
-                                        <h3 className="truncate text-base font-semibold text-gray-900">{property.address}</h3>
-                                        <div className="mt-2 grid gap-y-1 text-sm text-gray-700">
-                                            <div><span className="text-gray-500">Kommun:</span> {getMunicipalityName(property.municipalityId)}</div>
-                                            <div><span className="text-gray-500">Lägenheter:</span> {property.numberOfApartments}</div>
-                                            <div><span className="text-gray-500">Lås:</span> {property.lockName ?? 'Ingen'}</div>
-                                            <div><span className="text-gray-500">Dragväg:</span> {property.accessPathLength}</div>
-                                        </div>
-                                        <div className="mt-3 text-xs text-gray-500">Skapad: {new Date(property.createdAt).toLocaleDateString('sv-SE')}</div>
-                                    </div>
-                                </div>
-                                <div className="mt-4 flex flex-wrap gap-2">
-                                    <button className="btn-secondary-sm" onClick={() => createWasteRoom(property)}>Skapa miljörum</button>
-                                    <button className="btn-secondary-sm" onClick={() => handleEdit(property)}>Redigera</button>
-                                    <button className="btn-secondary-sm" type="button">Se rapport</button>
-                                    <button
-                                        className="inline-flex items-center justify-center rounded-xl2 px-3 py-1 text-sm font-medium border border-red-200 bg-red-50 text-red-700 hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-600"
-                                        onClick={() => requestDelete(property.id, property.address)}
-                                    >
-                                        Ta bort
-                                    </button>
-                                </div>
-                            </div>
-                        ))
-                    )}
-                </div>
+              <div>
+                <label htmlFor="municipalityId" className="block text-sm font-medium mb-2">
+                  Kommun *
+                </label>
+                <select
+                  id="municipalityId"
+                  required
+                  className="w-full rounded-xl border-gray-300 shadow-sm focus:border-nsr-teal focus:ring-nsr-teal"
+                  value={formData.municipalityId}
+                  onChange={(e) => handleInputChange('municipalityId', parseInt(e.target.value))}
+                >
+                  <option value={0}>Välj kommun</option>
+                  {/* Ensure current value remains visible when editing even if not allowed */}
+                  {formData.municipalityId !== 0 && !allowedMunicipalities.some(m => m.id === formData.municipalityId) && (
+                    <option value={formData.municipalityId}>{getMunicipalityName(formData.municipalityId)}</option>
+                  )}
+                  {allowedMunicipalities.map((m) => (
+                    <option key={m.id} value={m.id}>{m.name}</option>
+                  ))}
+                </select>
+              </div>
+              
+              <div>
+                <label htmlFor="apartments" className="block text-sm font-medium mb-2">
+                  Antal lägenheter *
+                </label>
+                <input
+                  id="apartments"
+                  type="number"
+                  required
+                  min="1"
+                  className="w-full rounded-xl border-gray-300 shadow-sm focus:border-nsr-teal focus:ring-nsr-teal"
+                  value={formData.numberOfApartments}
+                  onChange={(e) => handleInputChange('numberOfApartments', parseInt(e.target.value))}
+                />
+              </div>
+              
+              <div>
+                <label htmlFor="lockType" className="block text-sm font-medium mb-2">
+                  Typ av lås för miljörum *
+                </label>
+                <select
+                  id="lockTypeId"
+                  required
+                  className="w-full rounded-xl border-gray-300 shadow-sm focus:border-nsr-teal focus:ring-nsr-teal"
+                  value={formData.lockTypeId}
+                  onChange={(e) => handleInputChange('lockTypeId', parseInt(e.target.value))}
+                >
+                  <option value={0}> Välj låstyp</option>
+                  {lockTypes.map((lt) => (
+                      <option key={lt.id} value={lt.id}>
+                      {lt.name}
+                      </option>
+                      ))}
+                </select>
+              </div>
+              
+              <div>
+                <label htmlFor="accessPath" className="block text-sm font-medium mb-2">
+                  Dragvägslängd (meter) *
+                </label>
+                <input
+                  id="accessPath"
+                  type="number"
+                  required
+                  min="0"
+                  step="0.1"
+                  className="w-full rounded-xl border-gray-300 shadow-sm focus:border-nsr-teal focus:ring-nsr-teal"
+                  value={formData.accessPathLength}
+                  onChange={(e) => handleInputChange('accessPathLength', parseFloat(e.target.value))}
+                  placeholder="0.0"
+                />
+              </div>
             </div>
+            
+            <div className="flex gap-3">
+              <button
+                type="submit"
+                disabled={loading}
+                className="btn-primary disabled:opacity-60"
+              >
+                  {loading 
+                      ? editingId ? 'Uppdaterar...' : 'Skapar...'
+                      : editingId ? 'Uppdatera fastighet' : 'Skapa fastighet'
+                  }
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                    setShowForm(false);
+                    setEditingId(null);
+                    setFormData({
+                      address: '',
+                      numberOfApartments: 1,
+                      lockTypeId: 1,
+                      accessPathLength: 0,
+                      municipalityId: municipalities.length > 0 ? municipalities[0].id : 0
+                    });
+                  }}
+                className="btn-secondary"
+              >
+                Avbryt
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+      
+      {/* Properties List */}
+      <div className="rounded-2xl border bg-white shadow-soft">
+        <div className="border-b px-6 py-4">
+          <h2 className="text-xl font-semibold">Dina fastigheter ({filteredProperties.length})</h2>
+        </div>
+        
+       <div className="grid grid-cols-1 gap-6 p-6 sm:grid-cols-2 lg:grid-cols-3">
+                           {loadingProperties ? (
+                               <div className="col-span-full flex flex-col items-center justify-center py-16">
+                                   <div className="animate-spin rounded-full h-12 w-12 border-4 border-gray-300 border-t-nsr-teal mb-4" />
+                                   <p className="text-gray-600">Laddar fastigheter...</p>
+                               </div>
+                           ) : filteredProperties.length === 0 ? (
+                               <div className="col-span-full flex flex-col items-center justify-center py-16 text-center text-gray-500">
+                                   <div className="mb-4">
+                                       <svg className="mx-auto h-12 w-12 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                       </svg>
+                                   </div>
+                                   <p className="text-lg font-medium">Inga fastigheter ännu</p>
+                                   <p className="mt-1">Klicka på "Lägg till fastighet" för att komma igång.</p>
+                               </div>
+                           ) : (
+                               filteredProperties.map((property) => (
+                                  <div key={property.id} className="rounded-xl border border-gray-200 p-5 hover:shadow-md transition-shadow">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <h3 className="truncate text-base font-semibold text-gray-900">{property.address}</h3>
+                    <div className="mt-2 grid gap-y-1 text-sm text-gray-700">
+                      <div><span className="text-gray-500">Kommun:</span> {getMunicipalityName(property.municipalityId)}</div>
+                      <div><span className="text-gray-500">Lägenheter:</span> {property.numberOfApartments}</div>
+                      <div><span className="text-gray-500">Lås:</span> {property.lockName ?? 'Ingen'}</div>
+                      <div><span className="text-gray-500">Dragväg:</span> {property.accessPathLength}</div>
+                    </div>
+                    <div className="mt-3 text-xs text-gray-500">Skapad: {new Date(property.createdAt).toLocaleDateString('sv-SE')}</div>
+                      {/* ===== Waste Rooms Section ===== */}
+                      <div className="mt-3">
+                        <span className="text-gray-500 text-sm font-medium">Miljörum:</span>
+                        <div className="mt-1 space-y-1">
+                          {property.wasteRooms && property.wasteRooms.length > 0
+                            ? property.wasteRooms.map((room, index) => (
+                                <button
+                                  key={room.id ?? index}
+                                  className="w-full text-left rounded border border-gray-200 px-2 py-1 text-sm text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-gray-400"
+                                  onClick={() => {
+                                    const fullRoomData = {
+                                      ...room,
+                                      containers: (room.containers ?? []).map(c => ({
+                                        ...c,
+                                        containerType: c.containerType ?? { imageTopViewUrl: "", width: 1, depth: 1 },
+                                      })),
+                                      doors: room.doors ?? [],
+                                    };
+
+                                    localStorage.setItem("enviormentRoomData", JSON.stringify(fullRoomData));
+                                    window.location.href = '/planningTool';
+                                  }}
+                                >
+                                  {room.name ?? `Miljörum ${index + 1}`}
+                                </button>
+                              ))
+                            : <p className="text-gray-400 text-sm">Inga miljörum tillgängliga.</p>
+                          }
+                        </div>
+                      </div>
+                      {/* ===== End Waste Rooms Section ===== */}
+                  </div>
+                </div>
+                <div className="mt-4 flex flex-wrap gap-2">
+                  <button className="btn-secondary-sm" onClick={() => createWasteRoom(property)}>Skapa miljörum</button>
+                  <button className="btn-secondary-sm" onClick={() => handleEdit(property)}>Redigera</button>
+                  <button className="btn-secondary-sm" type="button">Se rapport</button>
+                  <button
+                    className="inline-flex items-center justify-center rounded-xl2 px-3 py-1 text-sm font-medium border border-red-200 bg-red-50 text-red-700 hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-600"
+                    onClick={() => requestDelete(property.id, property.address)}
+                  >
+                    Ta bort
+                  </button>
+                </div>
+              </div>
+            ))
+        )}
+          </div>
+
+      </div>
 
             {isCreateRoomOpen && (
                 <RoomSizePrompt
                     onConfirm={(length: number, width: number) => {
                         localStorage.setItem(
-                            'trashRoomData',
+                            'enviormentRoomData',
                             JSON.stringify({ height: length, width: width, property : selectedProperty})
                         );
 

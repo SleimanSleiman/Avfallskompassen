@@ -3,6 +3,7 @@
  * Handles corner dragging, constraints, and initial state from localStorage.
  */
 import { useState } from "react";
+import { Scale } from "lucide-react";
 import { SCALE, STAGE_WIDTH, STAGE_HEIGHT, MIN_WIDTH, MIN_HEIGHT, MARGIN, clamp } from "../Constants";
 import type { Room, ContainerInRoom } from "../Types";
 
@@ -12,7 +13,7 @@ export function useRoom(
 ) {
     /* ──────────────── Initial Room State ──────────────── */
     const initialRoom = (() => {
-        const savedRoom = localStorage.getItem("trashRoomData");
+        const savedRoom = localStorage.getItem("enviormentRoomData");
         const defaultWidthMeters = 10;
         const defaultHeightMeters = 8;
         const defaultX = (STAGE_WIDTH - defaultWidthMeters / SCALE) / 2;
@@ -24,20 +25,60 @@ export function useRoom(
 
                 const widthMeters = parsed.width ?? defaultWidthMeters;
                 const heightMeters = parsed.height ?? defaultHeightMeters;
+                const x = parsed.x !== undefined ? parsed.x : defaultX;
+                const y = parsed.y !== undefined ? parsed.y : defaultY;
+                console.log(parsed.containers);
 
-                return {
-                    x: (STAGE_WIDTH - widthMeters / SCALE) / 2,
-                    y: (STAGE_HEIGHT - heightMeters / SCALE) / 2,
-                    width: widthMeters / SCALE,
-                    height: heightMeters / SCALE,
-                };
-            } catch {
-                return { x: defaultX, y: defaultY, width: defaultWidthMeters / SCALE, height: defaultHeightMeters / SCALE };
-            }
+                const containers = (parsed.containers ?? []).map(c => {
+                const containerInfo = c.containerDTO ?? {
+                imageTopViewUrl: "/images/containers/tempTopView.png",
+                imageFrontViewUrl: "/images/containers/tempFrontView.png",
+                width: 1,
+                depth: 1,
+                height: 1,
+                name: "Unknown",
+                size: 0,
+            };
+
+            return {
+                ...c,
+                x: c.x ?? 0,
+                y: c.y ?? 0,
+                width: mmToPixels(containerInfo.width),
+                height: mmToPixels(containerInfo.depth),
+
+                container: containerInfo,
+                rotation: c.angle ?? 0,
+            };
+            });
+
+            const doors = (parsed.doors ?? []).map(d => ({
+                id: d.id ?? Date.now(),
+                x: d.x ?? 0,
+                y: d.y ?? 0,
+                width: d.width ?? 1.2,
+                wall: d.wall ?? "bottom",
+                rotation: d.rotation ?? 0,
+                swingDirection: d.swingDirection ?? "inward",
+            }));
+
+
+
+            return {
+                x,
+                y,
+                width: widthMeters / SCALE,
+                height: heightMeters / SCALE,
+                doors,
+                containers,
+            };
+        } catch {
+            return { x: defaultX, y: defaultY, width: defaultWidthMeters / SCALE, height: defaultHeightMeters / SCALE };
         }
+    }
 
-        return { x: defaultX, y: defaultY, width: defaultWidthMeters / SCALE, height: defaultHeightMeters / SCALE };
-    })();
+    return { x: defaultX, y: defaultY, width: defaultWidthMeters / SCALE, height: defaultHeightMeters / SCALE };
+})();
 
 
     /* ──────────────── Room State ──────────────── */
@@ -80,6 +121,7 @@ export function useRoom(
 
         setRoom({ x, y, width, height });
     };
+
 
     //Define corners for resizing handles
     const corners = [

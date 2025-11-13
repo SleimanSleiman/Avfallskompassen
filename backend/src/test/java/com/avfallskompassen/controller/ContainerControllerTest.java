@@ -1,5 +1,6 @@
 package com.avfallskompassen.controller;
 
+import com.avfallskompassen.dto.ContainerDTO;
 import com.avfallskompassen.model.ContainerPlan;
 import com.avfallskompassen.model.ContainerType;
 import com.avfallskompassen.services.ContainerService;
@@ -47,8 +48,20 @@ public class ContainerControllerTest {
         ContainerPlan plan = new ContainerPlan();
         plan.setContainerType(type);
 
+        ContainerDTO dto = new ContainerDTO(
+                type.getName(),
+                200,     // size
+                0.5,     // width
+                0.5,     // depth
+                1.0,     // height
+                "frontUrl",
+                "topUrl",
+                12,      // emptyingFrequencyPerYear
+                new BigDecimal("100.0")    // cost
+        );
+
         when(service.getContainersByMunicipalityAndService(1L, 2L))
-                .thenReturn(List.of(plan));
+                .thenReturn(List.of(dto));
 
         mockMvc.perform(get("/api/containers/municipality/1/service/2"))
                 .andExpect(status().isOk())

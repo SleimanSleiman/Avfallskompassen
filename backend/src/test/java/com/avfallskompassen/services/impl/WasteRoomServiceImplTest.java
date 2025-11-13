@@ -9,9 +9,9 @@ import com.avfallskompassen.model.ContainerType;
 import com.avfallskompassen.model.Property;
 import com.avfallskompassen.model.WasteRoom;
 import com.avfallskompassen.repository.ContainerTypeRepository;
-import com.avfallskompassen.repository.DoorRepository;
 import com.avfallskompassen.repository.PropertyRepository;
 import com.avfallskompassen.repository.WasteRoomRepository;
+import com.avfallskompassen.services.ContainerService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -37,11 +37,9 @@ class WasteRoomServiceImplTest {
 
     @Mock
     private PropertyRepository propertyRepository;
-    @Mock
-    private ContainerTypeRepository containerTypeRepository;
 
     @Mock
-    private DoorRepository doorRepository;
+    private ContainerService containerService;
 
     @InjectMocks
     private WasteRoomServiceImpl wasteRoomService;
@@ -284,7 +282,6 @@ class WasteRoomServiceImplTest {
 
         ContainerType containerType = new ContainerType();
         containerType.setId(1L);
-        when(containerTypeRepository.findById(1L)).thenReturn(Optional.of(containerType));
 
         WasteRoom updatedRoom = new WasteRoom();
         updatedRoom.setId(wasteRoomId);
@@ -311,7 +308,6 @@ class WasteRoomServiceImplTest {
         assertEquals(0, result.getDoors().size());
 
         verify(wasteRoomRepository, times(1)).save(any(WasteRoom.class));
-        verify(containerTypeRepository, times(1)).findById(1L);
     }
 
     @Test
