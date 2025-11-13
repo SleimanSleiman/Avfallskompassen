@@ -8,6 +8,7 @@ import type { ContainerInRoom, Room } from "../Types";
 import type { ContainerDTO } from "../../../lib/Container";
 import { fetchContainersByMunicipalityAndService } from "../../../lib/Container";
 import { mmToPixels, clamp, DRAG_DATA_FORMAT, STAGE_WIDTH, STAGE_HEIGHT, SCALE, isOverlapping } from "../Constants";
+import { useLayoutHistory } from "./UseLayoutHistory";
 
 /* ──────────────── Helper functions ──────────────── */
 //Create rectangle for container at given position
@@ -80,15 +81,14 @@ function validateContainerPlacement(
 
 /* ──────────────── Main Hook ──────────────── */
 export function useContainers(
-    room: Room | null,
-    containersInRoom: ContainerInRoom[],
-    setContainersInRoom: React.Dispatch<React.SetStateAction<ContainerInRoom[]>>,
+    room: Room,
     setSelectedContainerId: (id: number | null) => void,
     setSelectedDoorId: (id: number | null) => void,
     doorZones: { x: number; y: number; width: number; height: number }[] = []
 ) {
 
     /* ──────────────── Containers State ──────────────── */
+    const { state: containersInRoom, save: saveContainers, undo, redo } = useLayoutHistory<ContainerInRoom[]>([]);
     const [selectedContainerInfo, setSelectedContainerInfo] = useState<ContainerDTO | null>(null);
     const [draggedContainer, setDraggedContainer] = useState<ContainerDTO | null>(null);
     const [availableContainers, setAvailableContainers] = useState<ContainerDTO[]>([]);
@@ -100,39 +100,13 @@ export function useContainers(
 
     //Add a new container to the room
     const handleAddContainer = (container: ContainerDTO, position?: { x: number; y: number }) => {
-        let { x, y } = calculateInitialPosition(room, container, position);
+        const { x, y } = calculateInitialPosition(room, container, position);
         const newRect = createContainerRect(container, x, y);
 
         const containerZones = buildContainerZones(containersInRoom);
         const isValid = validateContainerPlacement(newRect, doorZones, containerZones);
 
-        //If initial position is invalid, try to find a valid spot
-        if (!isValid && !position) {
-            const widthPx = mmToPixels(container.width);
-            const heightPx = mmToPixels(container.depth);
-
-            const step = 20;
-            let foundSpot = false;
-
-            for (let tryY = room.y; tryY < room.y + room.height - heightPx; tryY += step) {
-                for (let tryX = room.x; tryX < room.x + room.width - widthPx; tryX += step) {
-                    const testRect = { x: tryX, y: tryY, width: widthPx, height: heightPx };
-                    if (validateContainerPlacement(testRect, doorZones, containerZones)) {
-                        x = tryX;
-                        y = tryY;
-                        foundSpot = true;
-                        break;
-                    }
-                }
-                if (foundSpot) break;
-            }
-
-            //If no valid spot found, alert user and exit
-            if (!foundSpot) {
-                alert("Det finns ingen ledig plats för att lägga till detta kärl i rummet.");
-                return;
-            }
-        } else if (!isValid) {
+        if(!isValid) {
             return;
         }
 
@@ -148,13 +122,13 @@ export function useContainers(
 
         handleSelectContainer(newContainer.id);
         const newState = [...containersInRoom, newContainer];
-        setContainersInRoom(newState);
+        saveContainers(newState);
     };
 
     //Remove a container from the room
     const handleRemoveContainer = (id: number) => {
         const newState = containersInRoom.filter(c => c.id !== id);
-        setContainersInRoom(newState);
+        saveContainers(newState);
         setSelectedContainerId(null);
     };
 
@@ -163,7 +137,7 @@ export function useContainers(
         const newState = containersInRoom.map(c =>
             c.id === id ? { ...c, ...pos } : c
         );
-        setContainersInRoom(newState);
+        saveContainers(newState);
     };
 
     //Select or deselect a container
@@ -177,7 +151,7 @@ export function useContainers(
         const newState = containersInRoom.map(c =>
             c.id === id ? { ...c, rotation: ((c.rotation || 0) + 90) % 360 } : c
         );
-        setContainersInRoom(newState);
+        saveContainers(newState);
     };
 
     //Show container info in sidebar
@@ -247,7 +221,7 @@ export function useContainers(
     /* ──────────────── Return ──────────────── */
     return {
         containersInRoom,
-        setContainersInRoom,
+        saveContainers,
         draggedContainer,
         setDraggedContainer,
         availableContainers,
@@ -273,5 +247,8 @@ export function useContainers(
         handleShowContainerInfo,
 
         getContainerZones: (excludeId?: number) => buildContainerZones(containersInRoom, excludeId),
+
+        undo,
+        redo,
     };
 }

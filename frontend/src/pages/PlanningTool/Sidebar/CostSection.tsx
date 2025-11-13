@@ -139,9 +139,9 @@ const SUMMARY_SIZE_STYLES: Record<SummarySize, {
     compact: {
         container: "gap-1.5 p-2",
         headerGap: "gap-2",
-        title: "text-[10px]",
+        title: "text-[13px]",
         value: "text-sm",
-        description: "text-[10px] leading-snug",
+        description: "text-[13px] leading-snug",
     },
 };
 
@@ -184,7 +184,7 @@ const TREND_BADGE_SIZE_STYLES: Record<TrendBadgeSize, {
         icon: "h-3.5 w-3.5",
     },
     compact: {
-        wrapper: "gap-1 px-2 py-0.5 text-[10px]",
+        wrapper: "gap-1 px-2 py-0.5 text-[12px]",
         icon: "h-3 w-3",
     },
 };
@@ -705,7 +705,7 @@ export default function CostSection({
     }, [designHasContainers, designStats]);
 
     const containerStatsDescription = designHasContainers ? (
-        <div className="grid gap-1.5 text-[10px] leading-snug text-gray-500">
+        <div className="grid gap-1.5 text-[12px] leading-snug text-gray-500">
             <div className="flex items-center justify-between gap-2">
                 <span>Fraktioner</span>
                 <span className="font-semibold text-gray-900">{designStats.typeMap.size}</span>
@@ -724,7 +724,7 @@ export default function CostSection({
             )}
         </div>
     ) : (
-        <div className="text-[10px] leading-snug text-gray-500">
+        <div className="text-[12px] leading-snug text-gray-500">
             Lägg till kärl i ritningen för att se hur kostnaderna fördelas mellan fraktioner.
         </div>
     );
@@ -786,7 +786,7 @@ export default function CostSection({
                             size="compact"
                             badge={<TrendBadge trend={costTrend} size="compact">{TREND_CONFIG[costTrend].label}</TrendBadge>}
                             description={(
-                                <div className="grid gap-1.5 text-[10px] leading-snug text-gray-500">
+                                <div className="grid gap-1.5 text-[12px] leading-snug text-gray-500">
                                     <div className="flex items-center justify-between gap-2">
                                         <span>Snitt i gruppen</span>
                                         <span className="font-semibold text-gray-900">{formatCurrency(costAverage)}</span>
@@ -810,7 +810,7 @@ export default function CostSection({
                             size="compact"
                             badge={<TrendBadge trend={containerTrend} size="compact">{containerLabel}</TrendBadge>}
                             description={(
-                                <div className="grid gap-1.5 text-[10px] leading-snug text-gray-500">
+                                <div className="grid gap-1.5 text-[12px] leading-snug text-gray-500">
                                     <div className="flex items-center justify-between gap-2">
                                         <span>Snitt i gruppen</span>
                                         <span className="font-semibold text-gray-900">{containerAverageVolume != null ? `${formatNumber(containerAverageVolume, { maximumFractionDigits: 0 })} L` : "—"}</span>
@@ -837,7 +837,7 @@ export default function CostSection({
                             tone={co2Tone}
                             size="compact"
                             description={co2HasData ? (
-                                <div className="grid gap-1.5 text-[10px] leading-snug text-gray-500">
+                                <div className="grid gap-1.5 text-[12px] leading-snug text-gray-500">
                                     <div className="flex items-center justify-between gap-2">
                                         <span>Per lägenhet</span>
                                         <span className="font-semibold text-gray-900">{co2PerApartmentLabel}</span>
@@ -852,7 +852,7 @@ export default function CostSection({
                                     </div>
                                 </div>
                             ) : (
-                                <div className="text-[10px] leading-snug text-gray-500">
+                                <div className="text-[12px] leading-snug text-gray-500">
                                     Lägg till sorterade fraktioner för att uppskatta klimatvinsten.
                                 </div>
                             )}
@@ -898,31 +898,31 @@ export default function CostSection({
                                         tone={statusTone}
                                         size="compact"
                                         badge={(
-                                            <span className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-tight ${statusClassName}`}>
+                                            <span className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[12px] font-semibold uppercase tracking-tight ${statusClassName}`}>
                                                 <StatusIcon className="h-3 w-3" />
                                                 {statusLabel}
                                             </span>
                                         )}
                                         description={(
-                                            <div className="flex h-full flex-col justify-end gap-1.5 text-[10px]">
+                                            <div className="flex h-full flex-col justify-end gap-1.5 text-[12px]">
                                                 <div className="flex items-center justify-between gap-4">
                                                     <span className="text-gray-500">Snitt i gruppen</span>
-                                                    <span className="text-[10px] font-semibold text-gray-900">{formatLitersPerWeek(averageValue)}</span>
+                                                    <span className="text-[12px] font-semibold text-gray-900">{formatLitersPerWeek(averageValue)}</span>
                                                 </div>
                                                 <div className="flex items-center justify-between gap-4">
                                                     <span className="text-gray-500">Riktmärke</span>
-                                                    <span className="text-[10px] font-semibold text-gray-900">{def.benchmark} L</span>
+                                                    <span className="text-[12px] font-semibold text-gray-900">{def.benchmark} L</span>
                                                 </div>
                                                 {hasData ? (
                                                     <>
                                                         <BenchmarkBar className="mt-1" value={propertyValue} benchmark={def.benchmark} />
                                                         <div className="flex items-center justify-between gap-4">
                                                             <span className="text-gray-500">Avvikelse</span>
-                                                            <span className="text-[10px] font-semibold text-gray-900">{formatPercentage(row?.wasteDiff ?? null)}</span>
+                                                            <span className="text-[12px] font-semibold text-gray-900">{formatPercentage(row?.wasteDiff ?? null)}</span>
                                                         </div>
                                                     </>
                                                 ) : (
-                                                    <p className="text-[10px] text-gray-500">Lägg till kärl i ritningen för att se riktmärket.</p>
+                                                    <p className="text-[12px] text-gray-500">Lägg till kärl i ritningen för att se riktmärket.</p>
                                                 )}
                                             </div>
                                         )}
@@ -1024,8 +1024,8 @@ export function WasteTypeComparisonPanel({
 
             {!comparisonLoading && !comparisonError && hasComparison && designHasContainers && combinedRows.length > 0 && (
                 <div className="mt-6 overflow-x-auto">
-                    <table className="min-w-full text-left text-xs text-gray-600">
-                        <thead className="bg-gray-50/80 text-[11px] uppercase tracking-wide text-gray-500">
+                    <table className="min-w-full text-left text-sm text-gray-600">
+                        <thead className="bg-gray-50/80 text-sm uppercase tracking-wide text-gray-500">
                             <tr>
                                 <th className="py-2 pr-4">Avfallstyp</th>
                                 <th className="py-2 pr-4">Kostnad (andel)</th>
@@ -1039,31 +1039,31 @@ export function WasteTypeComparisonPanel({
                         <tbody className="divide-y divide-gray-100">
                             {combinedRows.map((row) => (
                                 <tr key={row.key} className="odd:bg-gray-50/40">
-                                    <td className="py-2 pr-4 text-gray-800">{row.displayName}</td>
-                                    <td className="py-2 pr-4">
+                                    <td className="py-2 pr-4 text-sm font-medium text-gray-800">{row.displayName}</td>
+                                    <td className="py-2 pr-4 text-sm">
                                         {row.totalCost != null ? (
                                             <div className="flex flex-col">
-                                                <span className="font-semibold text-gray-900">{formatCurrency(row.totalCost)}</span>
+                                                <span className="text-base font-semibold text-gray-900">{formatCurrency(row.totalCost)}</span>
                                                 {row.costPercentage != null && (
-                                                    <span className="text-gray-500">{formatPercentage(row.costPercentage)}</span>
+                                                    <span className="text-sm text-gray-500">{formatPercentage(row.costPercentage)}</span>
                                                 )}
                                             </div>
                                         ) : (
                                             <span className="text-gray-400">—</span>
                                         )}
                                     </td>
-                                    <td className="py-2 pr-4">{row.containerCount != null ? row.containerCount : "—"}</td>
-                                    <td className="py-2 pr-4">
+                                    <td className="py-2 pr-4 text-sm font-medium text-gray-800">{row.containerCount != null ? row.containerCount : "—"}</td>
+                                    <td className="py-2 pr-4 text-sm">
                                         {row.propertyFrequency != null || row.averageFrequency != null ? (
                                             <div className="flex items-center gap-2">
                                                 <div className="flex flex-col">
                                                     {row.propertyFrequency != null && (
-                                                        <span className="text-gray-800">
+                                                        <span className="text-sm text-gray-800">
                                                             {formatNumber(row.propertyFrequency, { maximumFractionDigits: 1 })} ggr/år
                                                         </span>
                                                     )}
                                                     {row.averageFrequency != null && (
-                                                        <span className="text-gray-500">
+                                                        <span className="text-sm text-gray-500">
                                                             Snitt {formatNumber(row.averageFrequency, { maximumFractionDigits: 1 })} ggr/år
                                                         </span>
                                                     )}
@@ -1078,9 +1078,9 @@ export function WasteTypeComparisonPanel({
                                             <span className="text-gray-400">—</span>
                                         )}
                                     </td>
-                                    <td className="py-2 pr-4">{formatVolume(row.propertyAnnualVolume)}</td>
-                                    <td className="py-2 pr-4">{formatLitersPerWeek(row.propertyPerWeek)}</td>
-                                    <td className="py-2 pr-4">{formatLitersPerWeek(row.averagePerWeek)}</td>
+                                    <td className="py-2 pr-4 text-sm font-medium text-gray-800">{formatVolume(row.propertyAnnualVolume)}</td>
+                                    <td className="py-2 pr-4 text-sm font-medium text-gray-800">{formatLitersPerWeek(row.propertyPerWeek)}</td>
+                                    <td className="py-2 pr-4 text-sm font-medium text-gray-800">{formatLitersPerWeek(row.averagePerWeek)}</td>
                                 </tr>
                             ))}
                         </tbody>

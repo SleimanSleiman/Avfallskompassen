@@ -181,7 +181,7 @@ export default function PlanningTool() {
             <div className="flex w-full flex-1 flex-col gap-4 lg:flex-row lg:gap-4">
 
                 {/* ─────────────── Canvas ──────────────── */}
-                <div className="relative flex w-full min-w-0 flex-col lg:flex-[5] lg:min-w-[900px] xl:flex-[6]">
+                <div className="relative flex w-full min-w-0 flex-col lg:flex-[4] lg:min-w-[820px] xl:flex-[5]">
                     {/* RoomCanvas displays the room, containers, and doors */}
                     <RoomCanvas
                         room={room}
@@ -283,7 +283,7 @@ export default function PlanningTool() {
                         </div>
                     </div>
 
-                    <div className="mt-4">
+                    <div className="mt-4    ">
                         <WasteTypeComparisonPanel
                             comparisonData={comparisonData}
                             comparisonLoading={comparisonLoading}

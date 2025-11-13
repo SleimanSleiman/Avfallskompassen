@@ -23,7 +23,7 @@ export const isOverlapping = (
 
 //Canvas dimensions and margins
 export const MARGIN = 70;
-export const STAGE_WIDTH = 880;
+export const STAGE_WIDTH = 880  ;
 export const STAGE_HEIGHT = 695;
 
 //Scale factor selected så att rummets maxyta motsvarar 12 m × 9 m (givet marginalerna)
