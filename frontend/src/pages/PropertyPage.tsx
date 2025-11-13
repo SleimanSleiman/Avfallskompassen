@@ -481,7 +481,7 @@ export default function PropertyPage() {
                                     };
 
                                     localStorage.setItem("enviormentRoomData", JSON.stringify(fullRoomData));
-                                    window.location.href = '/planningTool';
+                                    localStorage.setItem("selectedPropertyId", String(property.id));
                                   }}
                                 >
                                   {room.name ?? `Miljörum ${index + 1}`}
@@ -517,7 +517,9 @@ export default function PropertyPage() {
                     onConfirm={(length: number, width: number) => {
                         localStorage.setItem(
                             'enviormentRoomData',
-                            JSON.stringify({ height: length, width: width, property : selectedProperty})
+                            JSON.stringify({ height: length, width: width})
+                        );
+                        localStorage.setItem('selectedPropertyId', String(selectedProperty?.id)
                         );
 
                         setIsCreateRoomOpen(false);
@@ -528,4 +530,4 @@ export default function PropertyPage() {
             )}
         </main>
     );
-}
+} 
