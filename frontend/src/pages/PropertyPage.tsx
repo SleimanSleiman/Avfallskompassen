@@ -472,27 +472,30 @@ export default function PropertyPage() {
                         <span className="text-gray-500 text-sm font-medium">Miljörum:</span>
                         <div className="mt-1 space-y-1">
                           {property.wasteRooms && property.wasteRooms.length > 0
-                            ? property.wasteRooms.map((room, index) => (
-                                <button
-                                  key={room.id ?? index}
-                                  className="w-full text-left rounded border border-gray-200 px-2 py-1 text-sm text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-gray-400"
-                                  onClick={() => {
-                                    const fullRoomData = {
-                                      ...room,
-                                      containers: (room.containers ?? []).map(c => ({
-                                        ...c,
-                                        containerType: c.containerType ?? { imageTopViewUrl: "", width: 1, depth: 1 },
-                                      })),
-                                      doors: room.doors ?? [],
-                                    };
+                                                                ?
+                                                                property.wasteRooms.map((room: any, index: number) => (
+                                                                <button
+                                                                    key={room.id ?? index}
+                                                                    type="button"
+                                                                    className="w-full text-left rounded border border-gray-200 px-2 py-1 text-sm text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-gray-400"
+                                                                    onClick={() => {
+                                                                        const fullRoomData = {
+                                                                            ...room,
+                                                                              containers: (room.containers ?? []).map((c: any) => ({
+                                                                                ...c,
+                                                                                containerType: c.containerType ?? { imageTopViewUrl: "", width: 1, depth: 1 },
+                                                                            })),
+                                                                            doors: room.doors ?? [],
+                                                                        };
 
-                                    localStorage.setItem("enviormentRoomData", JSON.stringify(fullRoomData));
-                                    localStorage.setItem("selectedPropertyId", String(property.id));
-                                  }}
-                                >
-                                  {room.name ?? `Miljörum ${index + 1}`}
-                                </button>
-                              ))
+                                                                        localStorage.setItem("enviormentRoomData", JSON.stringify(fullRoomData));
+                                                                        localStorage.setItem("selectedPropertyId", String(property.id));
+                                                                        window.location.href = '/planningTool';
+                                                                    }}
+                                                                >
+                                                                    {room.name ?? `Miljörum ${index + 1}`}
+                                                                </button>
+                                                            ))
                             : <p className="text-gray-400 text-sm">Inga miljörum tillgängliga.</p>
                           }
                         </div>
