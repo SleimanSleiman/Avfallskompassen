@@ -110,7 +110,9 @@ export default function PropertyPage() {
     }
 
     const savedProperty = localStorage.getItem('selectedPropertyId');
-    const propertyId = savedProperty ? JSON.parse(savedProperty).propertyId : null;
+    const propertyId = savedProperty && savedProperty !== 'undefined' && savedProperty !== 'null'
+        ? Number(savedProperty)
+        : null;
     console.log('Selected Property ID from localStorage:', propertyId);
     
     const filteredProperties = useMemo(() => {
