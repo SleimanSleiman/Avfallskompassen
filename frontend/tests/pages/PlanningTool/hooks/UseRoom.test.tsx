@@ -32,7 +32,7 @@ describe("useRoom", () => {
     //Test restoration of room from localStorage
     it("restores room from localStorage when data exists", () => {
         localStorage.setItem(
-            "trashRoomData",
+            "enviormentRoomData",
             JSON.stringify({ width: 12, height: 9 })
         );
 
