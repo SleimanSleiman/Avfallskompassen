@@ -19,11 +19,17 @@ export const fetchContainersByMunicipalityAndService = async (
   municipalityId: number,
   serviceTypeId: number
 ): Promise<ContainerDTO[]> => {
-  const data = await get<ContainerDTO[]>(
-    `/api/containers/municipality/${municipalityId}/service/${serviceTypeId}`
-  );
-  return data.map(container => ({
-    ...container,
-    serviceTypeId,
-  }));
+  try {
+    const data = await get<ContainerDTO[]>(
+      `/api/containers/municipality/${municipalityId}/service/${serviceTypeId}`
+    );
+
+    return data.map(container => ({
+      ...container,
+      serviceTypeId,
+    }));
+  } catch (error) {
+    const reason = error instanceof Error ? error.message : String(error);
+    throw new Error(`Failed to fetch containers by municipality and service${reason ? `: ${reason}` : ''}`);
+  }
 };

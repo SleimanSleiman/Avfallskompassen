@@ -4,9 +4,11 @@
  */
 import { useState } from "react";
 import { SCALE, STAGE_WIDTH, STAGE_HEIGHT, MIN_WIDTH, MIN_HEIGHT, MARGIN, clamp, mmToPixels, ROOM_VERTICAL_OFFSET, ROOM_HORIZONTAL_OFFSET } from "../Constants";
-import type { Room, Door } from "../Types";
+import type { Room, Door, ContainerInRoom } from "../Types";
+import type { ContainerDTO } from "../../../lib/Container";
 
 type StoredContainerDTO = {
+    id?: number;
     imageTopViewUrl?: string;
     imageFrontViewUrl?: string;
     width?: number;
@@ -14,6 +16,10 @@ type StoredContainerDTO = {
     height?: number;
     name?: string;
     size?: number;
+    emptyingFrequencyPerYear?: number;
+    cost?: number;
+    serviceTypeId?: number;
+    serviceTypeName?: string;
 };
 
 type StoredContainer = {
@@ -50,8 +56,8 @@ export function useRoom() {
     /* ──────────────── Initial Room State ──────────────── */
     const initialRoom = (() => {
         const savedRoom = localStorage.getItem("enviormentRoomData") ?? localStorage.getItem("trashRoomData");
-        const defaultWidthMeters = 10;
-        const defaultHeightMeters = 8;
+    const defaultWidthMeters = 5;
+    const defaultHeightMeters = 5;
         const defaultX = (STAGE_WIDTH - defaultWidthMeters / SCALE) / 2 + ROOM_HORIZONTAL_OFFSET;
         const defaultY = (STAGE_HEIGHT - defaultHeightMeters / SCALE) / 2 + ROOM_VERTICAL_OFFSET;
 
@@ -69,31 +75,66 @@ export function useRoom() {
         try {
             const parsed = JSON.parse(savedRoom) as StoredRoom;
 
-            const widthMeters = parsed?.width ?? defaultWidthMeters;
-            const heightMeters = parsed?.height ?? defaultHeightMeters;
+            const toMeters = (value?: number) => {
+                if (typeof value !== "number" || !Number.isFinite(value) || value <= 0) {
+                    return undefined;
+                }
+
+                // Legacy data might come in millimetres
+                if (value > 100) {
+                    return value / 1000;
+                }
+
+                return value;
+            };
+
+            const parsedWidth = toMeters(parsed?.width);
+            const parsedHeight = toMeters(parsed?.height);
+
+            const legacyDefaultSizes = (
+                (parsedWidth === 12 && parsedHeight === 9) ||
+                (parsedWidth === 10 && parsedHeight === 8)
+            );
+
+            const widthMeters = legacyDefaultSizes
+                ? defaultWidthMeters
+                : parsedWidth ?? defaultWidthMeters;
+
+            const heightMeters = legacyDefaultSizes
+                ? defaultHeightMeters
+                : parsedHeight ?? defaultHeightMeters;
 
             const x = parsed?.x ?? defaultX;
             const y = parsed?.y ?? defaultY;
 
-            const containers = Array.isArray(parsed?.containers)
-                ? parsed.containers.map((container) => {
-                    const containerInfo = container?.containerDTO ?? {
-                        imageTopViewUrl: "/images/containers/tempTopView.png",
-                        imageFrontViewUrl: "/images/containers/tempFrontView.png",
-                        width: 1,
-                        depth: 1,
-                        height: 1,
-                        name: "Unknown",
-                        size: 0,
+            const containers: ContainerInRoom[] = Array.isArray(parsed?.containers)
+                ? parsed.containers.map((container, index): ContainerInRoom => {
+                    const seed = Date.now() + index;
+                    const storedContainer = container?.containerDTO ?? {};
+                    const fallbackId = storedContainer.id ?? container?.id ?? seed;
+
+                    const normalizedContainer: ContainerDTO = {
+                        id: fallbackId,
+                        name: storedContainer.name ?? "Unknown",
+                        size: storedContainer.size ?? 0,
+                        width: storedContainer.width ?? 1,
+                        depth: storedContainer.depth ?? 1,
+                        height: storedContainer.height ?? 1,
+                        imageFrontViewUrl: storedContainer.imageFrontViewUrl ?? "/images/containers/tempFrontView.png",
+                        imageTopViewUrl: storedContainer.imageTopViewUrl ?? "/images/containers/tempTopView.png",
+                        emptyingFrequencyPerYear: storedContainer.emptyingFrequencyPerYear ?? 0,
+                        cost: storedContainer.cost ?? 0,
+                        serviceTypeId: storedContainer.serviceTypeId,
+                        serviceTypeName: storedContainer.serviceTypeName,
                     };
 
                     return {
-                        ...container,
+                        id: fallbackId,
                         x: container?.x ?? 0,
                         y: container?.y ?? 0,
-                        width: mmToPixels(containerInfo.width),
-                        height: mmToPixels(containerInfo.depth),
-                        container: containerInfo,
+                        width: mmToPixels(normalizedContainer.width),
+                        height: mmToPixels(normalizedContainer.depth),
+                        container: normalizedContainer,
                         rotation: container?.angle ?? container?.rotation ?? 0,
                     };
                 })
