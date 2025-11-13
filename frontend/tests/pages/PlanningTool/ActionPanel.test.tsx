@@ -86,7 +86,7 @@ describe("ActionPanel", () => {
 
         expect(screen.getByText(`Dörr ${mockDoor.width * 100}cm`)).toBeDefined();
         fireEvent.click(screen.getByText("Rotera dörr"));
-        expect(mockHandlers.handleRotateDoor).toHaveBeenCalledWith(mockDoor.id, 180, "outward");
+        expect(mockHandlers.handleRotateDoor).toHaveBeenCalledWith(mockDoor.id);
         fireEvent.click(screen.getByText("Ta bort dörr"));
         expect(mockHandlers.handleRemoveDoor).toHaveBeenCalledWith(mockDoor.id);
         expect(screen.queryByText("Information")).toBeNull();
