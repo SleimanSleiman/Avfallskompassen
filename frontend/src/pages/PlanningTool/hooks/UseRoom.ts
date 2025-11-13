@@ -4,7 +4,7 @@
  */
 import { useState } from "react";
 import { Scale } from "lucide-react";
-import { SCALE, STAGE_WIDTH, STAGE_HEIGHT, MIN_WIDTH, MIN_HEIGHT, MARGIN, clamp } from "../Constants";
+import { SCALE, mmToPixels, STAGE_WIDTH, STAGE_HEIGHT, MIN_WIDTH, MIN_HEIGHT, MARGIN, clamp } from "../Constants";
 import type { Room, ContainerInRoom } from "../Types";
 
 export function useRoom(
