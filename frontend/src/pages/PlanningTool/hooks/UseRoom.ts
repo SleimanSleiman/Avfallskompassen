@@ -71,9 +71,10 @@ export function useRoom(
                 height: heightMeters / SCALE,
                 doors,
                 containers,
+                propertyId: parsed.property?.id ?? null,
             };
         } catch {
-            return { x: defaultX, y: defaultY, width: defaultWidthMeters / SCALE, height: defaultHeightMeters / SCALE };
+            return { x: defaultX, y: defaultY, width: defaultWidthMeters / SCALE, height: defaultHeightMeters / SCALE, propertyId: null, };
         }
     }
 

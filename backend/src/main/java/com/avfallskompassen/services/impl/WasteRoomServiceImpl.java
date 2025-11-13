@@ -2,7 +2,6 @@ package com.avfallskompassen.services.impl;
 
 import com.avfallskompassen.dto.*;
 import com.avfallskompassen.dto.request.ContainerPositionRequest;
-import com.avfallskompassen.dto.request.DoorPositionRequest;
 import com.avfallskompassen.dto.request.DoorRequest;
 import com.avfallskompassen.dto.request.WasteRoomRequest;
 import com.avfallskompassen.exception.ResourceNotFoundException;
@@ -171,7 +170,7 @@ public class WasteRoomServiceImpl implements WasteRoomService {
 
     /**
      * Helper method that converts the data from a request containing information about doors. Transfers
-     * the data from {@link DoorPositionRequest} to {@link Door} which must be done before saving
+     * the data from {@link DoorRequest} to {@link Door} which must be done before saving
      * the doors in the database
      *
      * @param doors     A list containing requests of doors
@@ -192,6 +191,8 @@ public class WasteRoomServiceImpl implements WasteRoomService {
             door.setY(request.getY());
             door.setAngle(request.getAngle());
             door.setWasteRoom(wasteRoom);
+            door.setWall(request.getWall());
+            door.setSwingDirection(request.getSwingDirection());
 
             doorPositions.add(door);
         }

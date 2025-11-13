@@ -8,6 +8,8 @@ import { useState, useEffect } from 'react';
 //Lib
 import { fetchServiceTypes } from '../../lib/ServiceType';
 import type { ContainerDTO } from '../../lib/Container';
+import type { RoomRequest } from '../../lib/WasteRoomRequest';
+
 
 //Components
 import RoomCanvas from './RoomCanvas/RoomCanvas';
@@ -20,6 +22,7 @@ import { useDoors } from './hooks/UseDoors';
 import { useContainers } from './hooks/UseContainers';
 import { useServiceTypes } from './hooks/UseServiceTypes';
 import { useLayoutHistory } from './hooks/UseLayoutHistory';
+import { useSaveRoom, useWasteRoomRequestBuilder } from './hooks/UseSaveRoom';
 
 export default function PlanningTool() {
 
@@ -95,6 +98,19 @@ export default function PlanningTool() {
     const [selectedSize, setSelectedSize] = useState<{ [key: number]: number | null }>({});
     const [isAddContainersOpen, setIsAddContainersOpen] = useState(false);
 
+    /* ──────────────── Save room ──────────────── */
+    const savedProperty = localStorage.getItem("selectedProperty");
+    const propertyId = savedProperty ? JSON.parse(savedProperty).propertyId : null;
+    console.log("THIS IS THE PROPERTY ID ---------------", propertyId)
+
+    const { saveRoom, isSaving, error } = useSaveRoom();
+    const { buildWasteRoomRequest } = useWasteRoomRequestBuilder();
+
+    const handleSaveRoom = () => {
+        const roomRequest = buildWasteRoomRequest(room, doors, containersInRoom, propertyId);
+        saveRoom(roomRequest);
+    };
+
     /* ──────────────── Render ──────────────── */
     return (
         <div className="flex w-full h-full p-4 sm:p-6 flex-col lg:flex-row gap-4 lg:gap-6">
@@ -130,6 +146,7 @@ export default function PlanningTool() {
                     handleStageDragLeave={handleStageDragLeave}
                     undo={undo}
                     redo={redo}
+                    saveRoom={handleSaveRoom}
                 />
 
                 {/* ActionPanel for selected container or door */}
