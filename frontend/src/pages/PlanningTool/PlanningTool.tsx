@@ -57,7 +57,6 @@ export default function PlanningTool() {
     const {
         setDraggedContainer,
         draggedContainer,
-        saveContainers,
         availableContainers,
         isLoadingContainers,
 
@@ -84,8 +83,8 @@ export default function PlanningTool() {
 
     useEffect(() => {
     if (room.doors) setDoors(room.doors);
-    if (room.containers) saveContainers(room.containers);
-    }, [room, setDoors, saveContainers]);
+    if (room.containers) setContainersInRoom(room.containers);
+    }, [room, setDoors, setContainersInRoom]);
 
 
     /* ──────────────── Service Types (API data) ──────────────── */
