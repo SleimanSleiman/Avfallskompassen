@@ -25,7 +25,7 @@ public class AuthController {
     private UserService userService;
     @Autowired(required = false)
     private com.avfallskompassen.security.JwtUtil jwtUtil;
-    
+
     /**
      * Handles user login requests.
      * 
@@ -41,14 +41,14 @@ public class AuthController {
                 User user = userOptional.get();
                 
                 if (userService.validatePassword(loginRequest.getPassword(), user.getPassword())) {
-                    // generate JWT token 
+                    // generate JWT token
                     String token = null;
                     if (jwtUtil != null) {
                         token = jwtUtil.generateToken(user.getUsername(), user.getRole());
                     }
                     LoginResponse response = new LoginResponse(
-                        true,
-                        "Login successful",
+                        true, 
+                        "Inloggning lyckades",
                         user.getUsername(),
                         user.getRole(),
                         token
@@ -57,7 +57,7 @@ public class AuthController {
                 } else {
                     LoginResponse response = new LoginResponse(
                         false, 
-                        "Invalid password", 
+                        "Ogiltigt lösenord",
                         null, 
                         null
                     );
@@ -66,7 +66,7 @@ public class AuthController {
             } else {
                 LoginResponse response = new LoginResponse(
                     false, 
-                    "User not found", 
+                    "Användaren hittades inte",
                     null, 
                     null
                 );
@@ -75,7 +75,7 @@ public class AuthController {
         } catch (Exception e) {
             LoginResponse response = new LoginResponse(
                 false, 
-                "Login failed: " + e.getMessage(), 
+                "Inloggning misslyckades: " + e.getMessage(),
                 null, 
                 null
             );
@@ -100,7 +100,7 @@ public class AuthController {
             }
             LoginResponse response = new LoginResponse(
                 true,
-                "Registration successful",
+                "Registrering lyckades",
                 newUser.getUsername(),
                 newUser.getRole(),
                 token
@@ -118,7 +118,7 @@ public class AuthController {
         } catch (Exception e) {
             LoginResponse response = new LoginResponse(
                 false, 
-                "Registration failed: " + e.getMessage(), 
+                "Registrering misslyckades: " + e.getMessage(),
                 null, 
                 null
             );

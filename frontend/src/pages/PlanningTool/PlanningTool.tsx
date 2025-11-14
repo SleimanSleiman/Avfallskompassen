@@ -19,57 +19,73 @@ import { useRoom } from './hooks/UseRoom';
 import { useDoors } from './hooks/UseDoors';
 import { useContainers } from './hooks/UseContainers';
 import { useServiceTypes } from './hooks/UseServiceTypes';
+import { useLayoutHistory } from './hooks/UseLayoutHistory';
 
 export default function PlanningTool() {
-    
+
+    /* ──────────────── Door & Container state ──────────────── */
+    const [selectedContainerId, setSelectedContainerId] = useState<number | null>(null);
+    const [selectedDoorId, setSelectedDoorId] = useState<number | null>(null);
+    const {
+      state: containersInRoom,
+      save: setContainersInRoom,
+      undo,
+      redo
+    } = useLayoutHistory<ContainerInRoom[]>([]);
+
     /* ──────────────── Room state & logic ──────────────── */
     const {
         room,
         corners,
         handleDragCorner,
-        setRoom
-    } = useRoom();
+        setRoom,
+    } = useRoom(containersInRoom, setContainersInRoom);
 
-
-    /* ──────────────── Door state & logic ──────────────── */
-    const [selectedContainerId, setSelectedContainerId] = useState<number | null>(null);
-    const [selectedDoorId, setSelectedDoorId] = useState<number | null>(null);
-
+    /* ──────────────── Door logic ──────────────── */
     const {
         doors,
+        setDoors,
         handleAddDoor,
         handleDragDoor,
         handleRotateDoor,
         handleRemoveDoor,
         handleSelectDoor,
         getDoorZones,
-        isOverlapping,
     } = useDoors(room, setSelectedDoorId, setSelectedContainerId);
 
-    /* ──────────────── Container state & logic ──────────────── */
-    
+    /* ──────────────── Container logic ──────────────── */
     const {
-        containersInRoom,
-        handleAddContainer,
-        handleRemoveContainer,
-        handleDragContainer,
-        handleSelectContainer,  
-
+        setDraggedContainer,
+        draggedContainer,
         availableContainers,
         isLoadingContainers,
-        fetchAvailableContainers,
+
         isStageDropActive,
         setIsStageDropActive,
         stageWrapperRef,
+
+        handleAddContainer,
+        handleRemoveContainer,
+        handleDragContainer,
+        handleSelectContainer,
+
+        fetchAvailableContainers,
+
         handleStageDrop,
         handleStageDragOver,
         handleStageDragLeave,
         handleRotateContainer,
+        selectedContainerInfo,
+        setSelectedContainerInfo,
         handleShowContainerInfo,
-        undo,
-        redo,
         getContainerZones,
-    } = useContainers(room, setSelectedContainerId, setSelectedDoorId);
+    } = useContainers(room, containersInRoom, setContainersInRoom,setSelectedContainerId, setSelectedDoorId, getDoorZones());
+
+    useEffect(() => {
+    if (room.doors) setDoors(room.doors);
+    if (room.containers) setContainersInRoom(room.containers);
+    }, [room, setDoors, setContainersInRoom]);
+
 
     /* ──────────────── Service Types (API data) ──────────────── */
     const serviceTypes = useServiceTypes();
@@ -78,33 +94,34 @@ export default function PlanningTool() {
     const [selectedType, setSelectedType] = useState<string | null>(null);
     const [selectedSize, setSelectedSize] = useState<{ [key: number]: number | null }>({});
     const [isAddContainersOpen, setIsAddContainersOpen] = useState(false);
-    const [showCosts, setShowCosts] = useState(false);
-    const [isAlterRoomSizeOpen, setIsAlterRoomSizeOpen] = useState(false);
 
     /* ──────────────── Render ──────────────── */
     return (
         <div className="flex w-full h-full p-4 sm:p-6 flex-col lg:flex-row gap-4 lg:gap-6">
 
-            {/* ─────────────── Canvas & Action Panel ──────────────── */}
-            <div className="flex flex-col items-center w-full lg:w-3/5 gap-4">
+            {/* ─────────────── Canvas ──────────────── */}
+            <div className="relative flex w-full lg:w-4/6">
                 {/* RoomCanvas displays the room, containers, and doors */}
                 <RoomCanvas
                     room={room}
                     corners={corners}
                     handleDragCorner={handleDragCorner}
+                    setRoom={setRoom}
 
                     doors={doors}
                     selectedDoorId={selectedDoorId}
                     handleDragDoor={handleDragDoor}
                     handleSelectDoor={handleSelectDoor}
                     doorZones={getDoorZones()}
-                    isOverlapping={isOverlapping}
 
                     containers={containersInRoom}
                     selectedContainerId={selectedContainerId}
                     handleDragContainer={handleDragContainer}
                     handleSelectContainer={handleSelectContainer}
                     getContainerZones={getContainerZones}
+                    draggedContainer={draggedContainer}
+                    setSelectedContainerInfo={setSelectedContainerInfo}
+                    setContainersInRoom={setContainersInRoom}
 
                     isStageDropActive={isStageDropActive}
                     stageWrapperRef={stageWrapperRef}
@@ -115,18 +132,22 @@ export default function PlanningTool() {
                     redo={redo}
                 />
 
-                {/* ActionPanel for moving/rotating/removing selected items */}
-                <ActionPanel
-                    containers={containersInRoom}
-                    doors={doors}
-                    selectedContainerId={selectedContainerId}
-                    selectedDoorId={selectedDoorId}
-                    handleRemoveContainer={handleRemoveContainer} 
-                    handleRemoveDoor={handleRemoveDoor}
-                    handleRotateDoor={handleRotateDoor}
-                    handleRotateContainer={handleRotateContainer} 
-                    handleShowContainerInfo={handleShowContainerInfo}
-                />
+                {/* ActionPanel for selected container or door */}
+                {(selectedContainerId !== null || selectedDoorId !== null) && (
+                    <div className="absolute top-4 right-4 z-50">
+                        <ActionPanel
+                            containers={containersInRoom}
+                            doors={doors}
+                            selectedContainerId={selectedContainerId}
+                            selectedDoorId={selectedDoorId}
+                            handleRemoveContainer={handleRemoveContainer}
+                            handleRemoveDoor={handleRemoveDoor}
+                            handleRotateDoor={handleRotateDoor}
+                            handleRotateContainer={handleRotateContainer}
+                            handleShowContainerInfo={handleShowContainerInfo}
+                        />
+                    </div>
+                )}
             </div>
 
             {/* ─────────────── Sidebar ──────────────── */}
@@ -143,14 +164,13 @@ export default function PlanningTool() {
                     fetchContainers={fetchAvailableContainers}
                     handleAddContainer={handleAddContainer}
                     setIsStageDropActive={setIsStageDropActive}
+                    setDraggedContainer={setDraggedContainer}
 
                     //UI state for sidebar sections
                     isAddContainersOpen={isAddContainersOpen}
                     setIsAddContainersOpen={setIsAddContainersOpen}
-                    showCosts={showCosts}
-                    setShowCosts={setShowCosts}
-                    isAlterRoomSizeOpen={isAlterRoomSizeOpen}
-                    setIsAlterRoomSizeOpen={setIsAlterRoomSizeOpen}
+                    selectedContainerInfo={selectedContainerInfo}
+                    setSelectedContainerInfo={setSelectedContainerInfo}
 
                     //Room and door management
                     setRoom={setRoom}

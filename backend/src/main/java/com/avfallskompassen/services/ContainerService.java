@@ -1,35 +1,20 @@
 package com.avfallskompassen.services;
 
+import com.avfallskompassen.dto.ContainerDTO;
+import com.avfallskompassen.dto.ContainerPositionDTO;
 import com.avfallskompassen.model.ContainerPlan;
-import com.avfallskompassen.repository.ContainerPlanRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 /**
- * Service class for container-related operations.
+ * Interface for the ContainerServiceImpl class.
  */
-@Service
-public class ContainerService {
+public interface ContainerService {
 
-    @Autowired
-    private ContainerPlanRepository containerPlanRepository;
+    List<ContainerDTO> getContainersByMunicipalityAndService(Long municipalityId, Long serviceTypeId);
 
-    /**
-     * Get containers by municipality ID and service type ID.
-     * @param municipalityId
-     * @param serviceTypeId
-     * @return List of ContainerPlan
-     * @throws IllegalArgumentException if municipalityId or serviceTypeId is null
-     */
-    public List<ContainerPlan> getContainersByMunicipalityAndService(Long municipalityId, Long serviceTypeId) {
-        if (municipalityId == null || serviceTypeId == null) {
-            throw new IllegalArgumentException("Municipality ID and Service Type ID must not be null");
-        }
+    List<ContainerPositionDTO> getContainersByWasteRoomId(Long wasteRoomId);
 
-        return containerPlanRepository.findByMunicipalityService_Municipality_IdAndMunicipalityService_ServiceType_Id(
-                municipalityId, serviceTypeId
-        );
-    }
+    ContainerPlan getContainerPlanById(Long id);
+
 }

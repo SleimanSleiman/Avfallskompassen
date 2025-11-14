@@ -35,7 +35,7 @@ export function currentUser() {
 }
 
 export function logout() {
-  localStorage.removeItem('auth_user');
-  // Dispatch event to notify components of auth change
-  window.dispatchEvent(new Event('auth-change'));
+    localStorage.removeItem('auth_user');
+    // Dispatch event to notify components of auth change
+    window.dispatchEvent(new Event('auth-change'));
 }

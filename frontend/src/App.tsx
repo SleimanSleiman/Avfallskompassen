@@ -25,7 +25,7 @@ function Dashboard() {
             Du är inloggad som <span className="font-black text-nsr-teal">{user?.username}</span>
           </p>
           <p className="mt-2 text-lg brodtext text-gray-600">
-            Här kan du hantera dina fastigheter, planera avfallsrum och optimera kostnader.
+            Här kan du hantera dina fastigheter, planera miljörum och optimera kostnader.
           </p>
         </div>
 
@@ -60,7 +60,7 @@ function Dashboard() {
               <h3 className="text-lg font-black text-nsr-ink">Planeringsverktyg</h3>
             </div>
             <p className="brodtext text-gray-600 mb-4">
-              Designa avfallsrum, placera kärl och se kostnader i realtid.
+              Designa miljörum, placera kärl och se kostnader i realtid.
             </p>
             <a href="/planningTool" className="btn-secondary w-full text-center">
               Öppna planeringsverktyg
@@ -126,7 +126,12 @@ export default function App() {
       <NavBar />
       <div className="flex-1">
         <Routes>
-          <Route path="/" element={<Navigate to="/login" replace />} />
+          <Route
+            path="/"
+            element={
+              currentUser() ? <Navigate to="/dashboard" replace /> : <Navigate to="/login" replace />
+            }
+          />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/dashboard" element={
