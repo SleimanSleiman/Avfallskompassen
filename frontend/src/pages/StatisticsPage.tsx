@@ -2,22 +2,10 @@ import { useEffect, useState } from 'react';
 import React from 'react';
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { useParams, useLocation, Link } from 'react-router-dom';
-import { currentUser } from '../lib/auth';
-import ConfirmModal from '../components/ConfirmModal';
 import {getCostComparison, getAnnualCost, getPropertyContainers} from '../lib/Statistics'
 
 //TODO: Ändra hårdkodade uträkningen av grön/gul/röd till riktiga värden som kan ändras via admin panel.
-//TODO: Bryt ut delar och bygga komponenter av dem istället samt ta b ort propertyComparisonDTO om jag inte ska ha någon jämförelsediagram.
-//TODO: Skapa antingen en helt ny sida eller gör en frame-switch så att man kommer in på en användares "översikt" av fastigheter.
-// Denna sidan eller frame-switch start-sida ska vara kopplat till "se statistik" på dashboarden.
-
-interface PropertyComparisonDTO {
-  propertyId: number;
-  propertyName?: string;
-  costComparison?: any;
-  containerSizeComparison?: any;
-  wasteAmountComparisons?: any[];
-}
+//TODO: Bryt ut delar och bygga komponenter av dem istället samt ta bort propertyComparisonDTO om jag inte ska ha någon jämförelsediagram.
 
 interface ContainerData {
   type: string;
@@ -102,7 +90,7 @@ export default function StatisticsPage() {
           <p className="mt-2 text-gray-600">Här visas statistik för fastigheten {propertyDisplayName}.</p>
         </div>
         <div className="flex gap-2 items-center">
-          <Link to="/properties" className="btn-secondary text-sm self-end">← Tillbaka till fastigheter</Link>
+          <Link to="/statistics" className="btn-secondary text-sm self-end">← Tillbaka till fastigheter</Link>
         </div>
       </div>
 

@@ -5,6 +5,7 @@ import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import PropertyPage from './pages/PropertyPage';
 import StatisticsPage from './pages/StatisticsPage';
+import StatisticsOverviewPage from './pages/StatisticsOverviewPage';
 import NotificationCenter from './components/NotificationCenter';
 import { currentUser } from './lib/Auth';
 import PlanningTool from './pages/PlanningTool/PlanningTool';
@@ -78,9 +79,9 @@ function Dashboard() {
             <p className="brodtext text-gray-600 mb-4">
               Se detaljerade rapporter om kostnader, sortering och miljöpåverkan.
             </p>
-            <button className="btn-secondary w-full text-center opacity-50 cursor-not-allowed" disabled>
-              Kommer snart
-            </button>
+            <a href="/statistics" className="btn-secondary w-full text-center">
+                Se din statistik
+            </a>
           </div>
           </div>
 
@@ -148,6 +149,11 @@ export default function App() {
               <AdminPage />
             </ProtectedRoute>
           } />
+            <Route path="/statistics" element={
+                <ProtectedRoute>
+                    <StatisticsOverviewPage/>
+                </ProtectedRoute>
+             }/>
           <Route path="/statistics/:propertyId" element={
             <ProtectedRoute>
               <StatisticsPage />

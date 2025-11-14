@@ -1,6 +1,7 @@
 package com.avfallskompassen.services.impl;
 
 import com.avfallskompassen.dto.LockTypeDto;
+import com.avfallskompassen.dto.PropertySimpleDTO;
 import com.avfallskompassen.dto.request.PropertyRequest;
 import com.avfallskompassen.model.LockType;
 import com.avfallskompassen.model.Property;
@@ -17,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * Service class for property-related operations.
@@ -101,6 +103,18 @@ public class PropertyServiceImpl implements PropertyService {
      */
     public List<Property> getPropertiesByUser(String username) {
         return propertyRepository.findByCreatedByUsername(username);
+    }
+
+    public List<PropertySimpleDTO> getSimplePropertiesByUser(String username) {
+
+        return propertyRepository.findByCreatedByUsername(username)
+                .stream()
+                .map(property -> new PropertySimpleDTO(
+                        property.getId(),
+                        property.getAddress(),
+                        property.getNumberOfApartments()
+                ))
+                .collect(Collectors.toList());
     }
 
      /**

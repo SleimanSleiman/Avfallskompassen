@@ -23,6 +23,12 @@ export type UserCostDTO = {
   totalCost: number;
 };
 
+export type SimplePropertyDTO = {
+    id: number;
+    address: String;
+    numberOfApartments: number;
+};
+
 export type PropertyContainerDTO = {
     fractionType: string,
     containerName: string,
@@ -53,5 +59,11 @@ export async function getUserCosts(username: string): Promise<UserCostDTO[]> {
 export async function getPropertyContainers(propertyId: number): Promise<PropertyContainerDTO[]> {
     return await api<PropertyContainerDTO[]>(`/api/containerPlan/${propertyId}/containers`,{
       method: 'GET',
+    });
+}
+
+export async function getPropertiesSimple(): Promise<SimplePropertyDTO[]> {
+    return await api<SimplePropertyDTO[]>(`/api/properties/my-properties/simple`, {
+        method: 'GET',
     });
 }
