@@ -90,8 +90,11 @@ export function useRoom() {
             const parsedWidth = toMeters(parsed?.width);
             const parsedHeight = toMeters(parsed?.height);
 
-            const widthMeters = parsedWidth ?? defaultWidthMeters;
-            const heightMeters = parsedHeight ?? defaultHeightMeters;
+       
+            const isLegacyFullSize = parsedWidth === 12 && parsedHeight === 9;
+
+            const widthMeters = isLegacyFullSize ? defaultWidthMeters : parsedWidth ?? defaultWidthMeters;
+            const heightMeters = isLegacyFullSize ? defaultHeightMeters : parsedHeight ?? defaultHeightMeters;
 
             const defaultX = (STAGE_WIDTH - widthMeters / SCALE) / 2 + ROOM_HORIZONTAL_OFFSET;
             const defaultY = (STAGE_HEIGHT - heightMeters / SCALE) / 2 + ROOM_VERTICAL_OFFSET;
@@ -154,7 +157,14 @@ export function useRoom() {
             };
         } catch (error) {
             console.warn("Failed to parse stored room data", error);
-            return defaultRoom;
+            const fallbackX = (STAGE_WIDTH - defaultWidthMeters / SCALE) / 2 + ROOM_HORIZONTAL_OFFSET;
+            const fallbackY = (STAGE_HEIGHT - defaultHeightMeters / SCALE) / 2 + ROOM_VERTICAL_OFFSET;
+            return {
+                x: fallbackX,
+                y: fallbackY,
+                width: defaultWidthMeters / SCALE,
+                height: defaultHeightMeters / SCALE,
+            } satisfies Room;
         }
     })();
 
