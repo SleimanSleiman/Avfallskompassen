@@ -58,18 +58,17 @@ export function useRoom() {
         const savedRoom = localStorage.getItem("enviormentRoomData") ?? localStorage.getItem("trashRoomData");
         const defaultWidthMeters = 5;
         const defaultHeightMeters = 5;
-        const defaultX = (STAGE_WIDTH - defaultWidthMeters / SCALE) / 2 + ROOM_HORIZONTAL_OFFSET;
-        const defaultY = (STAGE_HEIGHT - defaultHeightMeters / SCALE) / 2 + ROOM_VERTICAL_OFFSET;
-
-        const defaultRoom = {
-            x: defaultX,
-            y: defaultY,
-            width: defaultWidthMeters / SCALE,
-            height: defaultHeightMeters / SCALE,
-        } satisfies Room;
 
         if (!savedRoom) {
-            return defaultRoom;
+            const defaultX = (STAGE_WIDTH - defaultWidthMeters / SCALE) / 2 + ROOM_HORIZONTAL_OFFSET;
+            const defaultY = (STAGE_HEIGHT - defaultHeightMeters / SCALE) / 2 + ROOM_VERTICAL_OFFSET;
+
+            return {
+                x: defaultX,
+                y: defaultY,
+                width: defaultWidthMeters / SCALE,
+                height: defaultHeightMeters / SCALE,
+            } satisfies Room;
         }
 
         try {
@@ -91,19 +90,11 @@ export function useRoom() {
             const parsedWidth = toMeters(parsed?.width);
             const parsedHeight = toMeters(parsed?.height);
 
-            const legacyDefaultSizes = (
-                (parsedWidth === 12 && parsedHeight === 9) ||
-                (parsedWidth === 10 && parsedHeight === 8) ||
-                (parsedWidth === 8 && parsedHeight === 7)
-            );
+            const widthMeters = parsedWidth ?? defaultWidthMeters;
+            const heightMeters = parsedHeight ?? defaultHeightMeters;
 
-            const widthMeters = legacyDefaultSizes
-                ? defaultWidthMeters
-                : parsedWidth ?? defaultWidthMeters;
-
-            const heightMeters = legacyDefaultSizes
-                ? defaultHeightMeters
-                : parsedHeight ?? defaultHeightMeters;
+            const defaultX = (STAGE_WIDTH - widthMeters / SCALE) / 2 + ROOM_HORIZONTAL_OFFSET;
+            const defaultY = (STAGE_HEIGHT - heightMeters / SCALE) / 2 + ROOM_VERTICAL_OFFSET;
 
             const x = parsed?.x ?? defaultX;
             const y = parsed?.y ?? defaultY;
