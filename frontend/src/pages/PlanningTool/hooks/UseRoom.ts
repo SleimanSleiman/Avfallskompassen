@@ -88,7 +88,9 @@ export function useRoom() {
             };
 
             const parsedWidth = toMeters(parsed?.width);
-            const parsedHeight = toMeters(parsed?.height);
+            const parsedHeight =
+                toMeters(parsed?.height) ??
+                toMeters((parsed as any)?.length);
 
        
             const isLegacyFullSize = parsedWidth === 12 && parsedHeight === 9;
