@@ -46,7 +46,7 @@ export function useWasteRoomRequestBuilder() {
                 swingDirection: d.swingDirection,
             })),
             containers: containers.map(c => ({
-                id: c.id,
+                id: c.container.id,
                 x: c.x,
                 y: c.y,
                 rotation: c.rotation,

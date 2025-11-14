@@ -22,9 +22,11 @@ export function useRoom(
         if (savedRoom) {
             try {
                 const parsed = JSON.parse(savedRoom);
+                console.log("JSON ROOM ----------------");
+                console.log(savedRoom);
 
                 const widthMeters = parsed.width ?? defaultWidthMeters;
-                const heightMeters = parsed.height ?? defaultHeightMeters;
+                const heightMeters = parsed.height ?? parsed.length ?? defaultHeightMeters;
                 const x = parsed.x !== undefined ? parsed.x : defaultX;
                 const y = parsed.y !== undefined ? parsed.y : defaultY;
                 console.log(parsed.containers);
