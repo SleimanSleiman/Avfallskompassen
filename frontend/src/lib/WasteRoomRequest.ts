@@ -15,16 +15,16 @@ export type DoorRequest = {
     x: number;
     y: number;
     width: number;
-    wall?: string;
-    angle?: number;
+    wall: string;
+    angle: number;
     swingDirection?: string;
 }
 
 export type ContainerPositionRequest = {
-    id?: number;
+    id: number;
     x: number;
     y: number;
-    rotation?: number;
+    angle: number;
 }
 
 export async function createWasteRoom(roomRequest: RoomRequest): Promise<WasteRoom> {

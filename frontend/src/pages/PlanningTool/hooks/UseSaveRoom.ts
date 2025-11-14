@@ -13,6 +13,7 @@ export function useSaveRoom() {
         setError(null);
         console.log("ROOM TO BE SAVED---------------------______");
         console.log(roomRequest);
+        console.log("Bin angle");
 
         try {
             const savedRoom = await createWasteRoom(roomRequest);
@@ -40,7 +41,7 @@ export function useWasteRoomRequestBuilder() {
             doors: doors.map(d => ({
                 x: d.x,
                 y: d.y,
-                width: d.width * SCALE,
+                width: d.width,
                 angle: d.rotation,
                 wall: d.wall,
                 swingDirection: d.swingDirection,
@@ -49,7 +50,7 @@ export function useWasteRoomRequestBuilder() {
                 id: c.container.id,
                 x: c.x,
                 y: c.y,
-                rotation: c.rotation,
+                angle: c.rotation,
             })),
             propertyId
         };
