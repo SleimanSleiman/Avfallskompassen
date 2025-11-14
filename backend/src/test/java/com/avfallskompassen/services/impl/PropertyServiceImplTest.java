@@ -1,6 +1,7 @@
 package com.avfallskompassen.services.impl;
 
 import com.avfallskompassen.dto.LockTypeDto;
+import com.avfallskompassen.dto.PropertySimpleDTO;
 import com.avfallskompassen.dto.request.PropertyRequest;
 import com.avfallskompassen.model.*;
 import com.avfallskompassen.repository.MunicipalityRepository;
@@ -232,5 +233,62 @@ public class PropertyServiceImplTest {
         PropertyRequest req = new PropertyRequest();
         RuntimeException ex = assertThrows(RuntimeException.class, () -> service.updateProperty(50L, req, "tester", lockTypeDto));
         assertTrue(ex.getMessage().contains("Failed to update property"));
+    }
+
+    @Test
+    void getSimplePropertiesByUser_returnsMappedDtos() {
+
+        Property p1 = new Property();
+        p1.setId(10L);
+        p1.setAddress("Första gatan 1");
+        p1.setNumberOfApartments(5);
+
+        Property p2 = new Property();
+        p2.setId(20L);
+        p2.setAddress("Andra gatan 2");
+        p2.setNumberOfApartments(12);
+
+        when(propertyRepository.findByCreatedByUsername("tester"))
+                .thenReturn(List.of(p1, p2));
+
+        List<PropertySimpleDTO> result = service.getSimplePropertiesByUser("tester");
+
+        assertEquals(2, result.size());
+
+        PropertySimpleDTO dto1 = result.get(0);
+        assertEquals(10L, dto1.getId());
+        assertEquals("Första gatan 1", dto1.getAddress());
+        assertEquals(5, dto1.getNumberOfApartments());
+
+        PropertySimpleDTO dto2 = result.get(1);
+        assertEquals(20L, dto2.getId());
+        assertEquals("Andra gatan 2", dto2.getAddress());
+        assertEquals(12, dto2.getNumberOfApartments());
+
+        verify(propertyRepository).findByCreatedByUsername("tester");
+    }
+
+    @Test
+    void getSimplePropertiesByUser_noProperties_returnsEmptyList() {
+        when(propertyRepository.findByCreatedByUsername("emptyUser"))
+                .thenReturn(List.of());
+
+        List<PropertySimpleDTO> result = service.getSimplePropertiesByUser("emptyUser");
+
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+        verify(propertyRepository).findByCreatedByUsername("emptyUser");
+    }
+
+    @Test
+    void getSimplePropertiesByUser_nullUsername_returnsEmptyList() {
+        when(propertyRepository.findByCreatedByUsername(null))
+                .thenReturn(List.of());
+
+        List<PropertySimpleDTO> result = service.getSimplePropertiesByUser(null);
+
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+        verify(propertyRepository).findByCreatedByUsername(null);
     }
 }

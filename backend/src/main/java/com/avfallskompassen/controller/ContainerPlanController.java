@@ -42,7 +42,7 @@ public class ContainerPlanController {
     public ResponseEntity<CollectionFeeDTO> getCollectionFeeByMunicipalityId(@PathVariable Long municipalityId, @RequestParam(name = "distance") double distance){
 
         if(municipalityId == null || municipalityId <= 0) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Municipality ID must be valid");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Kommunens ID måste vara giltigt");
         }
         CollectionFeeDTO collectionFeeDTO = collectionFeeService.findCollectionFeeByMunicipalityId(municipalityId, distance);
 
@@ -73,6 +73,15 @@ public class ContainerPlanController {
         return ResponseEntity.ok(collectionFeeDTO);
     }
 
+    /**
+     * Handles a request for fetching property container data based on PropertyId.
+     *
+     * @author Christian Storck
+     * @param propertyId ID of the property
+     * @return A {@link ResponseEntity} containing a {@link PropertyContainerDTO} with collection fee details,
+     *         or a 404 response if no container is found
+     * @throws ResponseStatusException if no container data can be found for the given property
+     */
     @GetMapping("/{propertyId}/containers")
     public ResponseEntity<List<PropertyContainerDTO>> getPropertyContainers(@PathVariable Long propertyId) {
         List<PropertyContainerDTO> dtos = propertyContainerService.getContainersByPropertyId(propertyId);

@@ -522,9 +522,7 @@ export default function PropertyPage() {
             ))
         )}
           </div>
-
       </div>
-
             {isCreateRoomOpen && (
                 <RoomSizePrompt
                     onConfirm={(length: number, width: number) => {

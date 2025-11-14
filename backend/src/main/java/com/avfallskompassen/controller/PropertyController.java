@@ -120,6 +120,11 @@ public class PropertyController {
         }
     }
 
+    /**
+     * Gets all properties created by current user - Returns a simplified version of the property DTO.
+     * @param username
+     * @return PropertySimpleDTO
+     */
     @GetMapping("/my-properties/simple")
     public ResponseEntity<List<PropertySimpleDTO>> getPropertiesSimple(
             @RequestHeader(value = "X-Username", required = false) String username) {

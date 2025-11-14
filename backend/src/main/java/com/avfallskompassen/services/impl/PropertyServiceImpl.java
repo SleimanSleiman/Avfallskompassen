@@ -105,6 +105,11 @@ public class PropertyServiceImpl implements PropertyService {
         return propertyRepository.findByCreatedByUsername(username);
     }
 
+    /**
+     * Gets all properties with a simpler DTO format for a specific user:
+     * @param username
+     * @return PropertySimpleDTO
+     */
     public List<PropertySimpleDTO> getSimplePropertiesByUser(String username) {
 
         return propertyRepository.findByCreatedByUsername(username)

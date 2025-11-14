@@ -8,6 +8,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+/**
+ * Service class for handling fetching/transforming PropertyContainer entities.
+ * @Author Christian Storck
+ */
 @Service
 @Transactional
 public class PropertyContainerServiceImpl implements PropertyContainerService {
