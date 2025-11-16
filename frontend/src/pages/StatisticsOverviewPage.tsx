@@ -39,7 +39,6 @@ export default function StatisticsOverviewPage() {
     }
 
     function exportPDF(p: Property) {
-      // Placeholder — you can hook your real PDF generation here
       console.log("Export PDF for property", p.id);
     }
 
