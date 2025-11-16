@@ -60,6 +60,7 @@ export default function NavBar() {
               <NavLink to="/dashboard" className={({ isActive }) => `nav-link hover:text-white transition-colors ${isActive ? 'nav-link-active' : ''}`}>Dashboard</NavLink>
               <NavLink to="/properties" className={({ isActive }) => `nav-link hover:text-white transition-colors ${isActive ? 'nav-link-active' : ''}`}>Mina fastigheter</NavLink>
               <NavLink to="/planningTool" className={({ isActive }) => `nav-link hover:text-white transition-colors ${isActive ? 'nav-link-active' : ''}`}>Planeringsverktyg</NavLink>
+              <NavLink to="/reports" className={({ isActive }) => `nav-link hover:text-white transition-colors ${isActive ? 'nav-link-active' : ''}`}>Rapporter</NavLink>
               {user && (
                 <NavLink to="/admin" className={({ isActive }) => `nav-link hover:text-white transition-colors ${isActive ? 'nav-link-active' : ''}`}>Admin</NavLink>
               )}
@@ -92,6 +93,7 @@ export default function NavBar() {
             <NavLink to="/dashboard" className="text-nsr-ink">Dashboard</NavLink>
             <NavLink to="/properties" className="text-nsr-ink">Mina fastigheter</NavLink>
             <NavLink to="/planningTool" className="text-nsr-ink">Planeringsverktyg</NavLink>
+            <NavLink to="/reports" className="text-nsr-ink">Rapporter</NavLink>
             {user && <NavLink to="/admin" className="text-nsr-ink">Admin</NavLink>}
             {user ? (
               <button onClick={handleLogout} className="text-left text-nsr-ink">Logga ut</button>

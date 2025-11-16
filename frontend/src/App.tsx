@@ -8,6 +8,7 @@ import NotificationCenter from './components/NotificationCenter';
 import { currentUser } from './lib/Auth';
 import PlanningTool from './pages/PlanningTool/PlanningTool';
 import AdminPage from './pages/AdminPage';
+import ReportsPage from './pages/ReportsPage';
 
 function Dashboard() {
   const user = currentUser();
@@ -74,9 +75,9 @@ function Dashboard() {
             <p className="brodtext text-gray-600 mb-4">
               Se detaljerade rapporter om kostnader, sortering och miljöpåverkan.
             </p>
-            <button className="btn-secondary w-full text-center opacity-50 cursor-not-allowed" disabled>
-              Kommer snart
-            </button>
+            <a href="/reports" className="btn-secondary w-full text-center">
+              Öppna rapporter
+            </a>
           </div>
         </div>
 
@@ -140,6 +141,11 @@ export default function App() {
           <Route path="/admin" element={
             <ProtectedRoute>
               <AdminPage />
+            </ProtectedRoute>
+          } />
+          <Route path="/reports" element={
+            <ProtectedRoute>
+              <ReportsPage />
             </ProtectedRoute>
           } />
         </Routes>
