@@ -241,7 +241,8 @@ public class WasteRoomServiceImpl implements WasteRoomService {
                 entity.getX(),
                 entity.getY(),
                 containers,
-                doors
+                doors,
+                entity.getId()
         );
     }
 }

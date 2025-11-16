@@ -18,12 +18,13 @@ public class WasteRoomDTO {
     private double y;
     private List<ContainerPositionDTO> containers;
     private List<DoorDTO> doors;
+    private Long wasteRoomId;
 
     // Constructors
     public WasteRoomDTO() {}
 
     public WasteRoomDTO(Long propertyId, double length, double width, double x, double y,
-                        List<ContainerPositionDTO> containers, List<DoorDTO> doors) {
+                        List<ContainerPositionDTO> containers, List<DoorDTO> doors, Long wasteRoomId) {
         this.propertyId = propertyId;
         this.length = length;
         this.width = width;
@@ -31,6 +32,7 @@ public class WasteRoomDTO {
         this.y = y;
         this.containers = containers;
         this.doors = doors;
+        this.wasteRoomId = wasteRoomId;
     }
 
     public Long getPropertyId() {
@@ -82,6 +84,9 @@ public class WasteRoomDTO {
         this.doors = doors;
     }
 
+    public Long getWasteRoomId() { return wasteRoomId; }
+    public void setWasteRoomId(Long wasteRoomId) { this.wasteRoomId = wasteRoomId; }
+
     /**
      * Method for converting an entity object to a DTO object
      * @param entity The entity object to be converted
@@ -103,7 +108,8 @@ public class WasteRoomDTO {
                         ? entity.getDoors().stream()
                         .map(DoorDTO::fromEntity)
                         .collect(Collectors.toList())
-                        : null
+                        : null,
+                entity.getId()
         );
     }
 }

@@ -38,3 +38,9 @@ export async function createWasteRoom(roomRequest: RoomRequest): Promise<WasteRo
         headers
     });
 }
+
+export async function deleteWasteRoom(wasteRoomId: number): Promise<void> {
+    return await api<void>(`/api/wasterooms/${wasteRoomId}`, {
+        method: 'DELETE'
+    });
+}

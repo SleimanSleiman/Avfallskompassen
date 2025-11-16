@@ -49,10 +49,10 @@ class WasteRoomControllerTest {
         );
 
         List<DoorDTO> doors = List.of(
-                new DoorDTO(1L, 0.5, 0.5, 0, 1.0, 0.1, 10L)
+                new DoorDTO(1L, 0.5, 0.5, 0, 1.0, 0.1, 5L)
         );
 
-        WasteRoomDTO dto = new WasteRoomDTO(2L,10,10,10,10,containers,doors);
+        WasteRoomDTO dto = new WasteRoomDTO(2L,10,10,10,10,containers,doors, 5L);
 
         when(wasteRoomService.saveWasteRoom(any(WasteRoomRequest.class))).thenReturn(dto);
 
@@ -144,10 +144,10 @@ class WasteRoomControllerTest {
         );
 
         List<DoorDTO> doors = List.of(
-                new DoorDTO(1L, 0.5, 0.5, 0, 1.0, 0.1, 10L)
+                new DoorDTO(1L, 0.5, 0.5, 0, 1.0, 0.1, 5L)
         );
 
-        WasteRoomDTO dto = new WasteRoomDTO(2L, 10, 10, 10, 10, containers, doors);
+        WasteRoomDTO dto = new WasteRoomDTO(2L, 10, 10, 10, 10, containers, doors, 5L);
 
         when(wasteRoomService.updateWasteRoom(any(Long.class), any(WasteRoomRequest.class))).thenReturn(dto);
 
@@ -233,7 +233,7 @@ class WasteRoomControllerTest {
 
     @Test
     void getWasteRoomById_ReturnsOK() throws Exception {
-        WasteRoomDTO dto = new WasteRoomDTO(1L, 10, 10, 0, 0, List.of(), List.of());
+        WasteRoomDTO dto = new WasteRoomDTO(1L, 10, 10, 0, 0, List.of(), List.of(), 1L);
 
         when(wasteRoomService.getWasteRoomById(1L)).thenReturn(dto);
 
@@ -255,8 +255,8 @@ class WasteRoomControllerTest {
     @Test
     void getWasteRoomsByPropertyId_ReturnsOK() throws Exception {
         List<WasteRoomDTO> rooms = List.of(
-                new WasteRoomDTO(1L, 10, 10, 0, 0, List.of(), List.of()),
-                new WasteRoomDTO(1L, 12, 8, 5, 5, List.of(), List.of())
+                new WasteRoomDTO(1L, 10, 10, 0, 0, List.of(), List.of(),3L),
+                new WasteRoomDTO(1L, 12, 8, 5, 5, List.of(), List.of(),2L)
         );
 
         when(wasteRoomService.getWasteRoomsByPropertyId(1L)).thenReturn(rooms);
