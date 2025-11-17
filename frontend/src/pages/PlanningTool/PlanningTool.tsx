@@ -101,14 +101,13 @@ export default function PlanningTool() {
     /* ──────────────── Save room ──────────────── */
     const savedProperty = localStorage.getItem("selectedProperty");
     const propertyId = savedProperty ? JSON.parse(savedProperty).propertyId : null;
-    console.log("THIS IS THE PROPERTY ID ---------------", propertyId)
-
     const { saveRoom, isSaving, error } = useSaveRoom();
     const { buildWasteRoomRequest } = useWasteRoomRequestBuilder();
 
-    const handleSaveRoom = () => {
+    const handleSaveRoom = async () => {
         const roomRequest = buildWasteRoomRequest(room, doors, containersInRoom, propertyId);
-        saveRoom(roomRequest);
+        const savedRoom = await saveRoom(roomRequest);
+        room.id = savedRoom?.wasteRoomId;
     };
 
     /* ──────────────── Render ──────────────── */

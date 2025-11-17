@@ -231,7 +231,6 @@ async function onDeleteWasteRoom(propertyId: number, wasteRoomId: number) {
         await deleteWasteRoom(wasteRoomId);
 
         setProperties(prev => {
-            console.log('Properties before deletion:', prev);
             return prev.map(p => {
                 if (p.id !== propertyId) return p;
                 const updatedRooms = (p.wasteRooms ?? []).filter(r => r.wasteRoomId !== wasteRoomId);
@@ -565,10 +564,10 @@ async function onDeleteWasteRoom(propertyId: number, wasteRoomId: number) {
 
             {isCreateRoomOpen && (
                 <RoomSizePrompt
-                    onConfirm={(length: number, width: number) => {
+                    onConfirm={(name : string, length: number, width: number) => {
                         localStorage.setItem(
                             'enviormentRoomData',
-                            JSON.stringify({ height: length, width: width})
+                            JSON.stringify({ name : name, height: length, width: width})
                         );
                         localStorage.setItem(
                             'selectedProperty',

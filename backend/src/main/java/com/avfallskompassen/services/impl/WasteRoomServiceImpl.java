@@ -59,6 +59,10 @@ public class WasteRoomServiceImpl implements WasteRoomService {
         wasteRoom.setContainers(containerPositions);
         wasteRoom.setDoors(doorPositions);
 
+        if (request.getName() != null) {
+            wasteRoom.setName(request.getName());
+        }
+
         WasteRoom savedRoom = wasteRoomRepository.save(wasteRoom);
         return WasteRoomDTO.fromEntity(savedRoom);
     }
@@ -112,21 +116,25 @@ public class WasteRoomServiceImpl implements WasteRoomService {
         wasteRoom.setY(request.getY());
         wasteRoom.setProperty(findPropertyById(request.getPropertyId()));
 
+        if (request.getName() != null) {
+            wasteRoom.setName(request.getName());
+        }
+
         List<ContainerPosition> updatedContainers = new ArrayList<>();
         if (wasteRoom.getContainers() != null) {
-            updatedContainers.addAll(wasteRoom.getContainers());
+            wasteRoom.getContainers().clear();
         }
 
         updatedContainers.addAll(convertContainerRequest(request.getContainers(), wasteRoom));
-        wasteRoom.setContainers(updatedContainers);
+        wasteRoom.getContainers().addAll(updatedContainers);
 
         List<Door> updatedDoors = new ArrayList<>();
         if (wasteRoom.getDoors() != null) {
-            updatedDoors.addAll(wasteRoom.getDoors());
+            wasteRoom.getDoors().clear();
         }
 
         updatedDoors.addAll(convertDoorRequest(request.getDoors(), wasteRoom));
-        wasteRoom.setDoors(updatedDoors);
+        wasteRoom.getDoors().addAll(updatedDoors);
 
         WasteRoom updated = wasteRoomRepository.save(wasteRoom);
         return WasteRoomDTO.fromEntity(updated);
@@ -242,7 +250,8 @@ public class WasteRoomServiceImpl implements WasteRoomService {
                 entity.getY(),
                 containers,
                 doors,
-                entity.getId()
+                entity.getId(),
+                entity.getName()
         );
     }
 }

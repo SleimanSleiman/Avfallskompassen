@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { post } from '../../../lib/api'; // Ändra till rätt 
-import { createWasteRoom, type ContainerPositionRequest, type DoorRequest, type RoomRequest } from "../../../lib/WasteRoomRequest";
+import { createWasteRoom, updateWasteRoom, type ContainerPositionRequest, type DoorRequest, type RoomRequest } from "../../../lib/WasteRoomRequest";
 import type { ContainerInRoom, Door, Room } from "../Types";
 import { SCALE } from "../Constants";
 
@@ -11,15 +11,21 @@ export function useSaveRoom() {
     const saveRoom = async (roomRequest : RoomRequest) => {
         setIsSaving(true);
         setError(null);
-        console.log("ROOM TO BE SAVED---------------------______");
-        console.log(roomRequest);
-        console.log("Bin angle");
 
         try {
-            const savedRoom = await createWasteRoom(roomRequest);
-            console.log('Room saved:', savedRoom);
+            const roomId = roomRequest.wasteRoomId;
+            var savedRoom;
+            if (roomId == null) {
+                savedRoom = await createWasteRoom(roomRequest);
+            } else {
+                savedRoom = updateWasteRoom(roomRequest);
+            }
+
+            return savedRoom;
         } catch (err) {
             console.error('Error saving room:', err);
+        } finally {
+            setIsSaving(false);
         }
     };
 
@@ -34,6 +40,7 @@ export function useWasteRoomRequestBuilder() {
         propertyId : number
     ) : RoomRequest => {
          return {
+            wasteRoomId : room.id,
             x: room.x,
             y: room.y,
             width: room.width * SCALE, 
@@ -52,7 +59,8 @@ export function useWasteRoomRequestBuilder() {
                 y: c.y,
                 angle: c.rotation,
             })),
-            propertyId
+            propertyId,
+            name : room.name
         };
     };
 

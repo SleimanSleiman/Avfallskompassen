@@ -88,8 +88,10 @@ export default function RoomCanvas({
 
     //State to control room size prompt visibility
     const [isRoomPromptOpen, setIsRoomPromptOpen] = useState(false);
-    const handleConfirmRoomSize = (length: number, width: number) => {
+    const handleConfirmRoomSize = (name : string, length: number, width: number) => {
         setRoom({
+            ...room,
+            name,
             x: (STAGE_WIDTH - length / SCALE) / 2,
             y: (STAGE_HEIGHT - width / SCALE) / 2,
             width: width / SCALE,
@@ -253,7 +255,7 @@ export default function RoomCanvas({
             {/* Room Size Prompt */}
             {isRoomPromptOpen && (
                 <RoomSizePrompt
-                    onConfirm={handleConfirmRoomSize}
+                    onConfirm={(name, length, width) => handleConfirmRoomSize(name, length, width)}
                     onCancel={() => setIsRoomPromptOpen(false)}
                 />
             )}

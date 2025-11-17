@@ -2,6 +2,7 @@ import { api } from "./api";
 import type { WasteRoom } from "./WasteRoom";
 
 export type RoomRequest = {
+    name?: string,
     x: number;
     y: number;
     width: number; 
@@ -9,6 +10,7 @@ export type RoomRequest = {
     doors: DoorRequest[];
     containers: ContainerPositionRequest[];
     propertyId : number;
+    wasteRoomId : number;
 }
 
 export type DoorRequest = {
@@ -42,5 +44,17 @@ export async function createWasteRoom(roomRequest: RoomRequest): Promise<WasteRo
 export async function deleteWasteRoom(wasteRoomId: number): Promise<void> {
     return await api<void>(`/api/wasterooms/${wasteRoomId}`, {
         method: 'DELETE'
+    });
+}
+
+export async function updateWasteRoom(roomRequest: RoomRequest): Promise<WasteRoom> {
+    const headers = {
+        'Content-Type': 'application/json',
+    };
+
+    return await api<WasteRoom>(`/api/wasterooms/${roomRequest.wasteRoomId}`, {
+        method: 'PUT',
+        body: roomRequest,
+        headers,
     });
 }

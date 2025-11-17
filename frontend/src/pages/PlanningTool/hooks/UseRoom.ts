@@ -7,6 +7,13 @@ import { Scale } from "lucide-react";
 import { SCALE, mmToPixels, STAGE_WIDTH, STAGE_HEIGHT, MIN_WIDTH, MIN_HEIGHT, MARGIN, clamp } from "../Constants";
 import type { Room, ContainerInRoom } from "../Types";
 
+/**
+ * This function runs when planning tool site is started. It sets the initial state of the room.
+ * It does this be reading from local storage if there is any data in "enviromentRoomData". If there is
+ * it parses the data to JSON, reads the data, assigns it as well as scales it to fit in the planning tool
+ * before returning it. If there isn't anything in the local storage, it returns default value
+ * @returns A room read from local storage or a default room
+ */
 export function useRoom(
     containersInRoom: ContainerInRoom[],
     setContainersInRoom: React.Dispatch<React.SetStateAction<ContainerInRoom[]>>
@@ -29,7 +36,6 @@ export function useRoom(
                 const heightMeters = parsed.height ?? parsed.length ?? defaultHeightMeters;
                 const x = parsed.x !== undefined ? parsed.x : defaultX;
                 const y = parsed.y !== undefined ? parsed.y : defaultY;
-                console.log(parsed.containers);
 
                 const containers = (parsed.containers ?? []).map(c => {
                 const containerInfo = c.containerDTO ?? {
@@ -67,6 +73,7 @@ export function useRoom(
 
 
             return {
+                id: parsed.id ?? parsed.wasteRoomId ?? null,
                 x,
                 y,
                 width: widthMeters / SCALE,
@@ -74,13 +81,15 @@ export function useRoom(
                 doors,
                 containers,
                 propertyId: parsed.property?.id ?? null,
+                name: parsed.name ?? "",
             };
         } catch {
-            return { x: defaultX, y: defaultY, width: defaultWidthMeters / SCALE, height: defaultHeightMeters / SCALE, propertyId: null, };
+            return { id: null, x: defaultX, y: defaultY, width: defaultWidthMeters / SCALE, 
+                height: defaultHeightMeters / SCALE, propertyId: null, name: "", };
         }
     }
 
-    return { x: defaultX, y: defaultY, width: defaultWidthMeters / SCALE, height: defaultHeightMeters / SCALE };
+    return { id: null, x: defaultX, y: defaultY, width: defaultWidthMeters / SCALE, height: defaultHeightMeters / SCALE, name: "", };
 })();
 
 
@@ -122,7 +131,13 @@ export function useRoom(
                 break;
         }
 
-        setRoom({ x, y, width, height });
+        setRoom(prevRoom => ({
+            ...prevRoom,
+            x,
+            y,
+            width,
+            height,
+        }));
     };
 
 
