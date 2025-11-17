@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { getPropertiesSimple } from "../lib/Statistics";
 
 interface Property {
   id: number;
-  name: string;
+  address: string;
   numberOfApartments?: number;
 }
 
@@ -39,7 +39,6 @@ export default function StatisticsOverviewPage() {
     }
 
     function exportPDF(p: Property) {
-      // Placeholder — you can hook your real PDF generation here
       console.log("Export PDF for property", p.id);
     }
 

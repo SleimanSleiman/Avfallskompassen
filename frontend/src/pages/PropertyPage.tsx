@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createProperty, getMyProperties, deleteProperty, updateProperty,getMunicipalities, getLockTypes } from '../lib/Property';
 import type { Municipality, Property, PropertyRequest } from '../lib/Property';
-import { currentUser } from '../lib/auth';
+import { currentUser } from '../lib/Auth';
 import RoomSizePrompt from '../components/RoomSizePrompt';
 import ConfirmModal from '../components/ConfirmModal';
 import { getWasteRoomsByPropertyId } from '../lib/WasteRoom';

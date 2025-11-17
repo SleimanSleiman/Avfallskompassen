@@ -1,12 +1,4 @@
-import { get, api, post } from './api';
-import { currentUser } from './auth';
-
-export type CostComparisonDTO = {
-  propertyId: number;
-  averageCost: number;
-  myCost: number;
-  difference: number;
-};
+import {  api } from './api';
 
 export type AnnualCostDTO = {
   propertyId: number;
@@ -17,15 +9,10 @@ export type AnnualCostDTO = {
   maintenanceCost: number;
 };
 
-export type UserCostDTO = {
-  propertyId: number;
-  address: string;
-  totalCost: number;
-};
 
 export type SimplePropertyDTO = {
     id: number;
-    address: String;
+    address: string;
     numberOfApartments: number;
 };
 
@@ -38,20 +25,8 @@ export type PropertyContainerDTO = {
     cost: number;
 };
 
-export async function getCostComparison(propertyId: number): Promise<CostComparisonDTO> {
-  return await api<CostComparisonDTO>(`/api/properties/${propertyId}/comparison/cost`, {
-    method: 'GET',
-  });
-}
-
 export async function getAnnualCost(propertyId: number): Promise<AnnualCostDTO> {
   return await api<AnnualCostDTO>(`/api/propertycost/${propertyId}/totalCost`, {
-    method: 'GET',
-  });
-}
-
-export async function getUserCosts(username: string): Promise<UserCostDTO[]> {
-  return await api<UserCostDTO[]>(`/api/propertycost/user/${username}`, {
     method: 'GET',
   });
 }

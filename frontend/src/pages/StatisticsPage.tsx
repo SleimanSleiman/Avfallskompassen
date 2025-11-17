@@ -2,16 +2,18 @@ import { useEffect, useState } from 'react';
 import React from 'react';
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { useParams, useLocation, Link } from 'react-router-dom';
-import {getCostComparison, getAnnualCost, getPropertyContainers} from '../lib/Statistics'
+import { getAnnualCost, getPropertyContainers} from '../lib/Statistics'
 
 //TODO: Ändra hårdkodade uträkningen av grön/gul/röd till riktiga värden som kan ändras via admin panel.
 //TODO: Bryt ut delar och bygga komponenter av dem istället samt ta bort propertyComparisonDTO om jag inte ska ha någon jämförelsediagram.
 
 interface ContainerData {
-  type: string;
+  fractionType: string;
+  containerName: string;
   size: number;
   quantity: number;
-  collectionFrequency: number;
+  emptyingFrequency: number;
+  cost: number;
 }
 
 export default function StatisticsPage() {
@@ -25,14 +27,13 @@ export default function StatisticsPage() {
   const [error, setError] = useState<string | null>(null);
   const [containers, setContainers] = useState<ContainerData[]>([]);
   const [data, setData] = useState<{
-    costComparison: any;
     annualCost: any;
   } | null>(null);
   const [openWasteGroups, setOpenWasteGroups] = useState<Record<string, boolean>>({});
 
   const groupedContainers = containers.reduce((acc, container) => {
-    if (!acc[container.type]) acc[container.type] = [];
-    acc[container.type].push(container);
+    if (!acc[container.fractionType]) acc[container.fractionType] = [];
+    acc[container.fractionType].push(container);
     return acc;
   }, {} as Record<string, ContainerData[]>);
 
@@ -41,24 +42,23 @@ export default function StatisticsPage() {
 
     async function loadStatistics() {
       try {
-        const [containersData, costComparisonData, annualCostData] = await Promise.all([
+        const [containersData, annualCostData] = await Promise.all([
           getPropertyContainers(Number(propertyId)),
-          getCostComparison(Number(propertyId)),
           getAnnualCost(Number(propertyId)),
         ]);
 
         const formattedContainers = containersData.map((c) => ({
-          type: c.fractionType,
+          fractionType: c.fractionType,
+            containerName: c.containerName,
           size: c.size,
           quantity: c.quantity,
-          collectionFrequency: c.emptyingFrequency,
+          emptyingFrequency: c.emptyingFrequency,
           cost: c.cost,
         }));
 
         setContainers(formattedContainers);
 
         setData({
-          costComparison: costComparisonData,
           annualCost: annualCostData,
         });
 
@@ -114,7 +114,7 @@ export default function StatisticsPage() {
             {Object.entries(groupedContainers).map(([type, containers]) => {
               const totalVolume = containers.reduce((sum, c) => sum + c.size * c.quantity, 0);
               const totalQuantity = containers.reduce((sum, c) => sum + c.quantity, 0);
-              const totalAnnualVolume = containers.reduce((sum, c) => sum + c.size * c.quantity * c.collectionFrequency, 0);
+              const totalAnnualVolume = containers.reduce((sum, c) => sum + c.size * c.quantity * c.emptyingFrequency, 0);
               const costPerYear = containers.reduce((sum, c) => sum + (c.cost ?? 0), 0);
 
               const litersPerWeekPerApartment = numberOfApartments > 0 ? totalAnnualVolume / 52 / numberOfApartments : 0;
@@ -160,12 +160,12 @@ export default function StatisticsPage() {
                             </thead>
                             <tbody>
                               {containers.map((container, idx) => {
-                                const annualVolume = container.size * container.quantity * container.collectionFrequency;
+                                const annualVolume = container.size * container.quantity * container.emptyingFrequency;
                                 return (
                                   <tr key={idx} className="bg-white text-gray-600">
                                     <td className="px-3 py-2 border">{container.size.toLocaleString()}</td>
                                     <td className="px-3 py-2 border">{container.quantity.toLocaleString()}</td>
-                                    <td className="px-3 py-2 border">{container.collectionFrequency.toLocaleString()}</td>
+                                    <td className="px-3 py-2 border">{container.emptyingFrequency.toLocaleString()}</td>
                                     <td className="px-3 py-2 border">{annualVolume.toLocaleString()}</td>
                                     <td className="px-3 py-2 border">{container.cost?.toLocaleString()}</td>
                                   </tr>

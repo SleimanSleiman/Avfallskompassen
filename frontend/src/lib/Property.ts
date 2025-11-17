@@ -1,5 +1,5 @@
 import { api, post } from './api';
-import { currentUser } from './auth';
+import { currentUser } from './Auth';
 import type { WasteRoom } from './WasteRoom.ts';
 
 export type Property = {
