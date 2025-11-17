@@ -356,7 +356,7 @@ export default function PropertyPage() {
               </div>
               
               <div>
-                <label htmlFor="lockType" className="block text-sm font-medium mb-2">
+                <label htmlFor="lockTypeId" className="block text-sm font-medium mb-2">
                   Typ av lås för miljörum *
                 </label>
                 <select
