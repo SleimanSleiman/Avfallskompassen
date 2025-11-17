@@ -10,9 +10,10 @@ export default defineConfig({
       },
     }),
   ],
-    test: {
+  test: {
     globals: true, 
     environment: 'jsdom',
+    setupFiles: ["./setupTests.js"],
     include: ['tests/**/*.test.{ts,tsx}'],
     reporters: ['default', 'html'],      
     

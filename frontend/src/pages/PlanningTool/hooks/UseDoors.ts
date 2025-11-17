@@ -45,9 +45,10 @@ export function useDoors(
         doorOffsetRef.current[id] = 0.5;
 
         setDoors(prev => [
-            ...prev,
-            { id, width, x, y, wall, rotation: getOutwardRotation(wall) }
-            ]);
+    ...prev,
+    { id, width, x, y, wall, rotation: getOutwardRotation(wall), swingDirection: "outward" }
+]);
+
 
         setSelectedDoorId(id);
         return true;
@@ -165,7 +166,7 @@ export function useDoors(
                     if (d.swingDirection === "inward") rotation += 180;
                 }
 
-                return { ...d, x: newX, y: newY, wall: newWall, rotation };
+                return { ...d, x: newX, y: newY, wall: newWall, rotation, swingDirection: d.swingDirection ?? "inward" };
             })
         );
     };

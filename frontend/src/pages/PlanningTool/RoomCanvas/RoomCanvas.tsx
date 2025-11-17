@@ -83,7 +83,6 @@ type RoomCanvasProps = {
     handleStageDragOver: (event: React.DragEvent<HTMLDivElement>) => void;
     handleStageDragLeave: (event: React.DragEvent<HTMLDivElement>) => void;
     isStageDropActive: boolean;
-
     //Container selection props
     serviceTypes: { id: number; name: string }[];
     selectedType: string | null;
@@ -99,6 +98,7 @@ type RoomCanvasProps = {
     onContainerPanelHeightChange?: (height: number) => void;
     undo?: () => void;
     redo?: () => void;
+    saveRoom?: () => void;
 };
 
 type ServiceTypeIconRule = {
@@ -171,6 +171,7 @@ export default function RoomCanvas({
     onContainerPanelHeightChange,
     undo,
     redo,
+    saveRoom,
 }: RoomCanvasProps) {
     //State to track if a container is being dragged
     const [isDraggingContainer, setIsDraggingContainer] = useState(false);
@@ -239,15 +240,16 @@ export default function RoomCanvas({
         }
     }, [onContainerPanelHeightChange, isContainerPanelOpen]);
 
-    const handleConfirmRoomSize = (length: number, width: number) => {
-        const desiredWidthPx = width / SCALE;
-        const desiredHeightPx = length / SCALE;
+    const handleConfirmRoomSize = (name: string, length: number, width: number) => {
+        // length and width are expected in mm; convert to canvas px using SCALE
+        const widthPx = width / SCALE;
+        const heightPx = length / SCALE;
 
         const maxWidthPx = STAGE_WIDTH - 2 * MARGIN;
         const maxHeightPx = STAGE_HEIGHT - 2 * MARGIN;
 
-        const newWidth = clamp(desiredWidthPx, MIN_WIDTH, maxWidthPx);
-        const newHeight = clamp(desiredHeightPx, MIN_HEIGHT, maxHeightPx);
+        const newWidth = clamp(widthPx, MIN_WIDTH, maxWidthPx);
+        const newHeight = clamp(heightPx, MIN_HEIGHT, maxHeightPx);
 
         const centeredX = (STAGE_WIDTH - newWidth) / 2 + ROOM_HORIZONTAL_OFFSET;
         const centeredY = (STAGE_HEIGHT - newHeight) / 2 + ROOM_VERTICAL_OFFSET;
@@ -256,6 +258,8 @@ export default function RoomCanvas({
         const newY = clamp(centeredY, MARGIN, STAGE_HEIGHT - MARGIN - newHeight);
 
         setRoom({
+            ...room,
+            name,
             x: newX,
             y: newY,
             width: newWidth,
@@ -524,7 +528,7 @@ export default function RoomCanvas({
 
                 {/* Save design */}
                 <button
-                    onClick={() => alert("Spara funktionalitet kommer snart!")}
+                    onClick = {saveRoom}
                     className="flex items-center justify-start bg-green-50 text-green-700 hover:bg-green-100 hover:text-green-800 px-2 py-1 rounded-lg transition-all duration-300 shadow-sm group overflow-hidden"
                 >
                     <Save className="w-5 h-5 flex-shrink-0" />
@@ -688,7 +692,7 @@ export default function RoomCanvas({
             {/* Room Size Prompt */}
             {isRoomPromptOpen && (
                 <RoomSizePrompt
-                    onConfirm={handleConfirmRoomSize}
+                    onConfirm={(name, length, width) => handleConfirmRoomSize(name, length, width)}
                     onCancel={() => setIsRoomPromptOpen(false)}
                 />
             )}

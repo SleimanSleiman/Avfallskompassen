@@ -3,7 +3,8 @@ import type { Property } from './Property.ts';
 import type { ContainerDTO } from './Container.ts'
 
 export type WasteRoom = {
-    id : number;
+    wasteRoomId? : number;
+    name? : string;
     length : number;
     width : number;
     x : number;
@@ -23,6 +24,8 @@ export type Door = {
     y : number;
     angle : number;
     wasteRoomId : number;
+    wall : string;
+    swingDirection : string;
 }
 
 export type ContainerPosition = {

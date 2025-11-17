@@ -5,6 +5,8 @@ import { currentUser } from '../lib/auth';
 import RoomSizePrompt from '../components/RoomSizePrompt';
 import ConfirmModal from '../components/ConfirmModal';
 import { getWasteRoomsByPropertyId } from '../lib/WasteRoom';
+import type { WasteRoom } from '../lib/WasteRoom';
+import { deleteWasteRoom } from '../lib/WasteRoomRequest';
 
 export default function PropertyPage() {
     const [properties, setProperties] = useState<Property[]>([]);
@@ -230,6 +232,23 @@ export default function PropertyPage() {
         }));
     }
 
+async function onDeleteWasteRoom(propertyId: number, wasteRoomId: number) {
+    try {
+        await deleteWasteRoom(wasteRoomId);
+
+        setProperties(prev => {
+            return prev.map(p => {
+                if (p.id !== propertyId) return p;
+                const updatedRooms = (p.wasteRooms ?? []).filter(r => r.wasteRoomId !== wasteRoomId);
+                return { ...p, wasteRooms: updatedRooms };
+            });
+        });
+    } catch (err) {
+        console.error('Could not delete waste room', err);
+    }
+}
+
+
 
     return (
         <main className="mx-auto max-w-7xl px-4 py-8">
@@ -362,7 +381,7 @@ export default function PropertyPage() {
               </div>
               
               <div>
-                <label htmlFor="lockType" className="block text-sm font-medium mb-2">
+                <label htmlFor="lockTypeId" className="block text-sm font-medium mb-2">
                   Typ av lås för miljörum *
                 </label>
                 <select
@@ -470,18 +489,20 @@ export default function PropertyPage() {
                       {/* ===== Waste Rooms Section ===== */}
                       <div className="mt-3">
                         <span className="text-gray-500 text-sm font-medium">Miljörum:</span>
-                        <div className="mt-1 space-y-1">
-                          {property.wasteRooms && property.wasteRooms.length > 0
-                                                                ?
-                                                                property.wasteRooms.map((room: any, index: number) => (
+                                                <div className="mt-1 space-y-1">
+                                                    {property.wasteRooms && property.wasteRooms.length > 0 ? (
+                                                        property.wasteRooms.map((room, index) => (
+                                                            <div
+                                                                key={room.id ?? room.wasteRoomId ?? index}
+                                                                className="flex items-center justify-between border border-gray-200 rounded px-2 py-1 bg-white"
+                                                            >
                                                                 <button
-                                                                    key={room.id ?? index}
-                                                                    type="button"
-                                                                    className="w-full text-left rounded border border-gray-200 px-2 py-1 text-sm text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-gray-400"
+                                                                    className="w-60 text-left rounded border border-gray-200 px-2 py-1"
                                                                     onClick={() => {
                                                                         const fullRoomData = {
                                                                             ...room,
-                                                                              containers: (room.containers ?? []).map((c: any) => ({
+                                                                            wasteRoomId: room.wasteRoomId ?? room.id,
+                                                                            containers: (room.containers ?? []).map((c: any) => ({
                                                                                 ...c,
                                                                                 containerType: c.containerType ?? { imageTopViewUrl: "", width: 1, depth: 1 },
                                                                             })),
@@ -489,16 +510,43 @@ export default function PropertyPage() {
                                                                         };
 
                                                                         localStorage.setItem("enviormentRoomData", JSON.stringify(fullRoomData));
+                                                                        localStorage.setItem("selectedProperty", JSON.stringify({ propertyId: property.id }));
                                                                         localStorage.setItem("selectedPropertyId", String(property.id));
                                                                         window.location.href = '/planningTool';
                                                                     }}
                                                                 >
                                                                     {room.name ?? `Miljörum ${index + 1}`}
                                                                 </button>
-                                                            ))
-                            : <p className="text-gray-400 text-sm">Inga miljörum tillgängliga.</p>
-                          }
-                        </div>
+                                                                <button
+                                                                    className="ml-2 text-red-500 hover:text-red-700 text-sm px-1"
+                                                                    onClick={(e) => {
+                                                                        e.stopPropagation();
+                                                                        if (confirm("Är du säker på att du vill radera detta miljörum?")) {
+                                                                            onDeleteWasteRoom(property.id, room.wasteRoomId ?? room.id);
+                                                                        }
+                                                                    }}
+                                                                >
+                                                                    <svg
+                                                                        xmlns="http://www.w3.org/2000/svg"
+                                                                        fill="none"
+                                                                        viewBox="0 0 24 24"
+                                                                        strokeWidth={1.5}
+                                                                        stroke="currentColor"
+                                                                        className="w-5 h-5"
+                                                                    >
+                                                                        <path
+                                                                            strokeLinecap="round"
+                                                                            strokeLinejoin="round"
+                                                                            d="M6 7h12M9 7V4h6v3m-7 4v7m4-7v7m4-7v7M4 7h16"
+                                                                        />
+                                                                    </svg>
+                                                                </button>
+                                                            </div>
+                                                        ))
+                                                    ) : (
+                                                        <p className="text-gray-400 text-sm">Inga miljörum tillgängliga.</p>
+                                                    )}
+                                                </div>
                       </div>
                       {/* ===== End Waste Rooms Section ===== */}
                   </div>
@@ -521,22 +569,22 @@ export default function PropertyPage() {
 
       </div>
 
-            {isCreateRoomOpen && (
-                <RoomSizePrompt
-                    onConfirm={(length: number, width: number) => {
-                        localStorage.setItem(
-                            'enviormentRoomData',
-                            JSON.stringify({ height: length, width: width})
-                        );
-                        localStorage.setItem('selectedPropertyId', String(selectedProperty?.id)
-                        );
+                        {isCreateRoomOpen && (
+                            <RoomSizePrompt
+                                onConfirm={(name: string, length: number, width: number) => {
+                                    localStorage.setItem(
+                                        'enviormentRoomData',
+                                        JSON.stringify({ name, height: length, width: width })
+                                    );
+                                    localStorage.setItem('selectedProperty', JSON.stringify({ propertyId: selectedProperty?.id }));
+                                    localStorage.setItem('selectedPropertyId', String(selectedProperty?.id));
 
-                        setIsCreateRoomOpen(false);
-                        window.location.href = '/planningTool';
-                    }}
-                    onCancel={() => setIsCreateRoomOpen(false)}
-                />
-            )}
+                                    setIsCreateRoomOpen(false);
+                                    window.location.href = '/planningTool';
+                                }}
+                                onCancel={() => setIsCreateRoomOpen(false)}
+                            />
+                        )}
         </main>
     );
 } 

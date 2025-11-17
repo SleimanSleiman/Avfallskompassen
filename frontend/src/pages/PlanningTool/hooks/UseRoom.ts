@@ -1,234 +1,175 @@
 /**
- * Custom hook to manage room's position, size, and resizing logic.
- * Handles corner dragging, constraints, and initial state from localStorage.
+ * Clean implementation of useRoom
  */
 import { useState } from "react";
 import { SCALE, STAGE_WIDTH, STAGE_HEIGHT, MIN_WIDTH, MIN_HEIGHT, MARGIN, clamp, mmToPixels, ROOM_VERTICAL_OFFSET, ROOM_HORIZONTAL_OFFSET } from "../Constants";
-import type { Room, Door, ContainerInRoom } from "../Types";
+import type { Room, ContainerInRoom, Door } from "../Types";
 import type { ContainerDTO } from "../../../lib/Container";
 
-type StoredContainerDTO = {
-    id?: number;
-    imageTopViewUrl?: string;
-    imageFrontViewUrl?: string;
-    width?: number;
-    depth?: number;
-    height?: number;
-    name?: string;
-    size?: number;
-    emptyingFrequencyPerYear?: number;
-    cost?: number;
-    serviceTypeId?: number;
-    serviceTypeName?: string;
-};
-
-type StoredContainer = {
-    id?: number;
-    x?: number;
-    y?: number;
-    width?: number;
-    height?: number;
-    angle?: number;
-    rotation?: number;
-    containerDTO?: StoredContainerDTO;
-};
-
-type StoredDoor = {
-    id?: number;
-    x?: number;
-    y?: number;
-    width?: number;
-    wall?: Door["wall"];
-    rotation?: number;
-    swingDirection?: Door["swingDirection"];
-};
-
-type StoredRoom = {
-    width?: number;
-    height?: number;
-    x?: number;
-    y?: number;
-    containers?: StoredContainer[];
-    doors?: StoredDoor[];
-};
-
 export function useRoom() {
-    /* ──────────────── Initial Room State ──────────────── */
-    const initialRoom = (() => {
-        const savedRoom = localStorage.getItem("enviormentRoomData") ?? localStorage.getItem("trashRoomData");
-        const defaultWidthMeters = 5;
-        const defaultHeightMeters = 5;
+  const initialRoom = (() => {
+    const saved = typeof window !== "undefined"
+      ? (localStorage.getItem("enviormentRoomData") ?? localStorage.getItem("trashRoomData"))
+      : null;
 
-        if (!savedRoom) {
-            const defaultX = (STAGE_WIDTH - defaultWidthMeters / SCALE) / 2 + ROOM_HORIZONTAL_OFFSET;
-            const defaultY = (STAGE_HEIGHT - defaultHeightMeters / SCALE) / 2 + ROOM_VERTICAL_OFFSET;
+    const defaultWidthMeters = 5;
+    const defaultHeightMeters = 5;
 
-            return {
-                x: defaultX,
-                y: defaultY,
-                width: defaultWidthMeters / SCALE,
-                height: defaultHeightMeters / SCALE,
-            } satisfies Room;
-        }
+    const defaultX = (STAGE_WIDTH - defaultWidthMeters / SCALE) / 2 + ROOM_HORIZONTAL_OFFSET;
+    const defaultY = (STAGE_HEIGHT - defaultHeightMeters / SCALE) / 2 + ROOM_VERTICAL_OFFSET;
 
-        try {
-            const parsed = JSON.parse(savedRoom) as StoredRoom;
+    if (!saved) {
+      return {
+        id: undefined,
+        x: defaultX,
+        y: defaultY,
+        width: defaultWidthMeters / SCALE,
+        height: defaultHeightMeters / SCALE,
+        doors: [] as Door[],
+        containers: [] as ContainerInRoom[],
+        propertyId: undefined,
+        name: "",
+      } as Room;
+    }
 
-            const toMeters = (value?: number) => {
-                if (typeof value !== "number" || !Number.isFinite(value) || value <= 0) {
-                    return undefined;
-                }
+    try {
+      const parsed = JSON.parse(saved);
 
-                // Legacy data might come in millimetres
-                if (value > 100) {
-                    return value / 1000;
-                }
+      const toMeters = (v?: number) => {
+        if (typeof v !== "number" || !Number.isFinite(v) || v <= 0) return undefined;
+        if (v > 100) return v / 1000;
+        return v;
+      };
 
-                return value;
+      const parsedWidth = toMeters(parsed?.width) ?? toMeters(parsed?.length);
+      const parsedHeight = toMeters(parsed?.height) ?? toMeters(parsed?.length) ?? parsedWidth;
+
+      const widthMeters = parsedWidth ?? defaultWidthMeters;
+      const heightMeters = parsedHeight ?? defaultHeightMeters;
+
+      const x = parsed?.x ?? defaultX;
+      const y = parsed?.y ?? defaultY;
+
+      const containers: ContainerInRoom[] = Array.isArray(parsed?.containers)
+        ? parsed.containers.map((c: any, i: number) => {
+            const dto = (c?.containerDTO ?? {}) as Partial<ContainerDTO>;
+            const fallbackId = dto.id ?? c?.id ?? (Date.now() + i);
+
+            const normalized: ContainerDTO = {
+              id: fallbackId,
+              name: dto.name ?? "Unknown",
+              size: dto.size ?? 0,
+              width: dto.width ?? 1000,
+              depth: dto.depth ?? 1000,
+              height: dto.height ?? 1000,
+              imageFrontViewUrl: dto.imageFrontViewUrl ?? dto.imageTopViewUrl ?? "",
+              imageTopViewUrl: dto.imageTopViewUrl ?? dto.imageFrontViewUrl ?? "",
+              emptyingFrequencyPerYear: dto.emptyingFrequencyPerYear ?? 0,
+              cost: dto.cost ?? 0,
+              serviceTypeId: dto.serviceTypeId,
+              serviceTypeName: dto.serviceTypeName,
             };
 
-            const parsedWidth = toMeters(parsed?.width);
-            const parsedHeight =
-                toMeters(parsed?.height) ??
-                toMeters((parsed as any)?.length);
-
-       
-            const isLegacyFullSize = parsedWidth === 12 && parsedHeight === 9;
-
-            const widthMeters = isLegacyFullSize ? defaultWidthMeters : parsedWidth ?? defaultWidthMeters;
-            const heightMeters = isLegacyFullSize ? defaultHeightMeters : parsedHeight ?? defaultHeightMeters;
-
-            const defaultX = (STAGE_WIDTH - widthMeters / SCALE) / 2 + ROOM_HORIZONTAL_OFFSET;
-            const defaultY = (STAGE_HEIGHT - heightMeters / SCALE) / 2 + ROOM_VERTICAL_OFFSET;
-
-            const x = parsed?.x ?? defaultX;
-            const y = parsed?.y ?? defaultY;
-
-            const containers: ContainerInRoom[] = Array.isArray(parsed?.containers)
-                ? parsed.containers.map((container, index): ContainerInRoom => {
-                    const seed = Date.now() + index;
-                    const storedContainer = container?.containerDTO ?? {};
-                    const fallbackId = storedContainer.id ?? container?.id ?? seed;
-
-                    const normalizedContainer: ContainerDTO = {
-                        id: fallbackId,
-                        name: storedContainer.name ?? "Unknown",
-                        size: storedContainer.size ?? 0,
-                        width: storedContainer.width ?? 1,
-                        depth: storedContainer.depth ?? 1,
-                        height: storedContainer.height ?? 1,
-                        imageFrontViewUrl: storedContainer.imageFrontViewUrl ?? "/images/containers/tempFrontView.png",
-                        imageTopViewUrl: storedContainer.imageTopViewUrl ?? "/images/containers/tempTopView.png",
-                        emptyingFrequencyPerYear: storedContainer.emptyingFrequencyPerYear ?? 0,
-                        cost: storedContainer.cost ?? 0,
-                        serviceTypeId: storedContainer.serviceTypeId,
-                        serviceTypeName: storedContainer.serviceTypeName,
-                    };
-
-                    return {
-                        id: fallbackId,
-                        x: container?.x ?? 0,
-                        y: container?.y ?? 0,
-                        width: mmToPixels(normalizedContainer.width),
-                        height: mmToPixels(normalizedContainer.depth),
-                        container: normalizedContainer,
-                        rotation: container?.angle ?? container?.rotation ?? 0,
-                    };
-                })
-                : [];
-
-            const doors = Array.isArray(parsed?.doors)
-                ? parsed.doors.map((door) => ({
-                    id: door?.id ?? Date.now(),
-                    x: door?.x ?? 0,
-                    y: door?.y ?? 0,
-                    width: door?.width ?? 1.2,
-                    wall: door?.wall ?? "bottom",
-                    rotation: door?.rotation ?? 0,
-                    swingDirection: door?.swingDirection ?? "inward",
-                }))
-                : [];
-
             return {
-                x,
-                y,
-                width: widthMeters / SCALE,
-                height: heightMeters / SCALE,
-                doors,
-                containers,
-            };
-        } catch (error) {
-            console.warn("Failed to parse stored room data", error);
-            const fallbackX = (STAGE_WIDTH - defaultWidthMeters / SCALE) / 2 + ROOM_HORIZONTAL_OFFSET;
-            const fallbackY = (STAGE_HEIGHT - defaultHeightMeters / SCALE) / 2 + ROOM_VERTICAL_OFFSET;
-            return {
-                x: fallbackX,
-                y: fallbackY,
-                width: defaultWidthMeters / SCALE,
-                height: defaultHeightMeters / SCALE,
-            } satisfies Room;
-        }
-    })();
+              id: fallbackId,
+              x: (c?.x ?? 0),
+              y: (c?.y ?? 0),
+              width: mmToPixels(normalized.width),
+              height: mmToPixels(normalized.depth),
+              container: normalized,
+              rotation: c?.angle ?? c?.rotation ?? 0,
+            } as ContainerInRoom;
+          })
+        : [];
 
-    /* ──────────────── Room State ──────────────── */
-    const [room, setRoom] = useState<Room>(initialRoom);
+      const doors: Door[] = Array.isArray(parsed?.doors)
+        ? parsed.doors.map((d: any, i: number) => ({
+            id: d?.id ?? Date.now() + i,
+            x: d?.x ?? 0,
+            y: d?.y ?? 0,
+            width: d?.width ?? 1.2,
+            wall: (d?.wall as Door['wall']) ?? 'bottom',
+            rotation: d?.rotation ?? d?.angle ?? 0,
+            swingDirection: (d?.swingDirection as Door['swingDirection']) ?? 'inward',
+          }))
+        : [];
 
-    //Resize logic
-    const handleDragCorner = (index: number, pos: { x: number; y: number }) => {
-        let { x, y, width, height } = room;
+      return {
+        id: parsed?.id ?? parsed?.wasteRoomId ?? undefined,
+        x,
+        y,
+        width: widthMeters / SCALE,
+        height: heightMeters / SCALE,
+        doors,
+        containers,
+        propertyId: parsed?.property?.id ?? undefined,
+        name: parsed?.name ?? "",
+      } as Room;
+    } catch (err) {
+      console.warn("Failed to parse stored room data", err);
+      return {
+        id: undefined,
+        x: defaultX,
+        y: defaultY,
+        width: defaultWidthMeters / SCALE,
+        height: defaultHeightMeters / SCALE,
+        doors: [] as Door[],
+        containers: [] as ContainerInRoom[],
+        propertyId: undefined,
+        name: "",
+      } as Room;
+    }
+  })();
 
-        switch (index) {
-            case 0: { // Top-left
-                const newX = clamp(pos.x, MARGIN, x + width - MIN_WIDTH);
-                const newY = clamp(pos.y, MARGIN, y + height - MIN_HEIGHT);
-                width = x + width - newX;
-                height = y + height - newY;
-                x = newX;
-                y = newY;
-                break;
-            }
-            case 1: { // Top-right
-                const newTRX = clamp(pos.x, x + MIN_WIDTH, STAGE_WIDTH - MARGIN);
-                const newTRY = clamp(pos.y, MARGIN, y + height - MIN_HEIGHT);
-                width = newTRX - x;
-                height = y + height - newTRY;
-                y = newTRY;
-                break;
-            }
-            case 2: { // Bottom-right
-                const newBRX = clamp(pos.x, x + MIN_WIDTH, STAGE_WIDTH - MARGIN);
-                const newBRY = clamp(pos.y, y + MIN_HEIGHT, STAGE_HEIGHT - MARGIN);
-                width = newBRX - x;
-                height = newBRY - y;
-                break;
-            }
-            case 3: { // Bottom-left
-                const newBLX = clamp(pos.x, MARGIN, x + width - MIN_WIDTH);
-                const newBLY = clamp(pos.y, y + MIN_HEIGHT, STAGE_HEIGHT - MARGIN);
-                width = x + width - newBLX;
-                height = newBLY - y;
-                x = newBLX;
-                break;
-            }
-        }
+  const [room, setRoom] = useState<Room>(initialRoom);
 
-        setRoom({ x, y, width, height });
-    };
+  const handleDragCorner = (index: number, pos: { x: number; y: number }) => {
+    let { x, y, width, height } = room;
 
+    switch (index) {
+      case 0: {
+        const newX = clamp(pos.x, MARGIN, x + width - MIN_WIDTH);
+        const newY = clamp(pos.y, MARGIN, y + height - MIN_HEIGHT);
+        width = x + width - newX;
+        height = y + height - newY;
+        x = newX;
+        y = newY;
+        break;
+      }
+      case 1: {
+        const newTRX = clamp(pos.x, x + MIN_WIDTH, STAGE_WIDTH - MARGIN);
+        const newTRY = clamp(pos.y, MARGIN, y + height - MIN_HEIGHT);
+        width = newTRX - x;
+        height = y + height - newTRY;
+        y = newTRY;
+        break;
+      }
+      case 2: {
+        const newBRX = clamp(pos.x, x + MIN_WIDTH, STAGE_WIDTH - MARGIN);
+        const newBRY = clamp(pos.y, y + MIN_HEIGHT, STAGE_HEIGHT - MARGIN);
+        width = newBRX - x;
+        height = newBRY - y;
+        break;
+      }
+      case 3: {
+        const newBLX = clamp(pos.x, MARGIN, x + width - MIN_WIDTH);
+        const newBLY = clamp(pos.y, y + MIN_HEIGHT, STAGE_HEIGHT - MARGIN);
+        width = x + width - newBLX;
+        height = newBLY - y;
+        x = newBLX;
+        break;
+      }
+    }
 
-    //Define corners for resizing handles
-    const corners = [
-        { x: room.x, y: room.y },
-        { x: room.x + room.width, y: room.y },
-        { x: room.x + room.width, y: room.y + room.height },
-        { x: room.x, y: room.y + room.height },
-    ];
+    setRoom(prev => ({ ...prev, x, y, width, height }));
+  };
 
-    /* ──────────────── Return ──────────────── */
-    return {
-        room,
-        setRoom,
-        corners,
-        handleDragCorner
-    };
+  const corners = [
+    { x: room.x, y: room.y },
+    { x: room.x + room.width, y: room.y },
+    { x: room.x + room.width, y: room.y + room.height },
+    { x: room.x, y: room.y + room.height },
+  ];
+
+  return { room, setRoom, corners, handleDragCorner };
 }

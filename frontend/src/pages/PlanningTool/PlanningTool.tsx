@@ -8,6 +8,11 @@ import { MapPin, Home, Users } from "lucide-react";
 
 //Lib
 import type { Property } from '../../lib/Property';
+import type { ContainerDTO } from '../../lib/Container';
+
+import { useComparison } from './hooks/useComparison';
+import { useLayoutHistory } from './hooks/UseLayoutHistory';
+import { useSaveRoom, useWasteRoomRequestBuilder } from './hooks/UseSaveRoom';
 
 //Components
 import RoomCanvas from './RoomCanvas/RoomCanvas';
@@ -20,7 +25,7 @@ import { useRoom } from './hooks/UseRoom';
 import { useDoors } from './hooks/UseDoors';
 import { useContainers } from './hooks/UseContainers';
 import { useServiceTypes } from './hooks/UseServiceTypes';
-import { useComparison } from './hooks/useComparison';
+
 
 export default function PlanningTool() {
 
@@ -88,11 +93,6 @@ export default function PlanningTool() {
     const serviceTypes = useServiceTypes();
 
 
-    const savedPropertyId = typeof window !== 'undefined' ? localStorage.getItem('selectedPropertyId') : null;
-    const propertyId = savedPropertyId && savedPropertyId !== 'undefined' && savedPropertyId !== 'null'
-        ? Number(savedPropertyId)
-        : null;
-
     const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
     const [containerPanelHeight, setContainerPanelHeight] = useState(0);
 
@@ -121,11 +121,25 @@ export default function PlanningTool() {
     }, []);
 
     /* ──────────────── Comparison data ──────────────── */
-    const { data: comparisonData, loading: comparisonLoading, error: comparisonError } = useComparison(propertyId);
+    // Note: initialized after propertyId is determined below
 
     /* ──────────────── Sidebar state ──────────────── */
     const [selectedType, setSelectedType] = useState<string | null>(null);
     const [selectedSize, setSelectedSize] = useState<{ [key: number]: number | null }>({});
+
+    
+
+    const ACTION_PANEL_EXTRA_OFFSET = 150;
+    const ACTION_PANEL_MIN_TOP = 160;
+    const desktopActionPanelTop = Math.max(containerPanelHeight + ACTION_PANEL_EXTRA_OFFSET, ACTION_PANEL_MIN_TOP);
+
+    /* ──────────────── Save room ──────────────── */
+    // Determine propertyId from either `selectedProperty` object or `selectedPropertyId` string in localStorage
+    const _savedProperty = typeof window !== 'undefined' ? localStorage.getItem("selectedProperty") : null;
+    const _savedPropertyId = typeof window !== 'undefined' ? localStorage.getItem('selectedPropertyId') : null;
+    const propertyId = _savedProperty ? JSON.parse(_savedProperty).propertyId : (_savedPropertyId ? Number(_savedPropertyId) : null);
+
+    const { data: comparisonData, loading: comparisonLoading, error: comparisonError } = useComparison(propertyId);
 
     const displayAddress = comparisonData?.address ?? selectedProperty?.address ?? null;
     const apartmentCount = comparisonData?.numberOfApartments ?? selectedProperty?.numberOfApartments ?? null;
@@ -177,9 +191,14 @@ export default function PlanningTool() {
         },
     ];
 
-    const ACTION_PANEL_EXTRA_OFFSET = 150;
-    const ACTION_PANEL_MIN_TOP = 160;
-    const desktopActionPanelTop = Math.max(containerPanelHeight + ACTION_PANEL_EXTRA_OFFSET, ACTION_PANEL_MIN_TOP);
+    const { saveRoom, isSaving, error } = useSaveRoom();
+    const { buildWasteRoomRequest } = useWasteRoomRequestBuilder();
+
+    const handleSaveRoom = async () => {
+        const roomRequest = buildWasteRoomRequest(room, doors, containersInRoom, propertyId);
+        const savedRoom = await saveRoom(roomRequest);
+        room.id = savedRoom?.wasteRoomId;
+    };
 
     /* ──────────────── Render ──────────────── */
     return (
@@ -210,7 +229,6 @@ export default function PlanningTool() {
                         draggedContainer={draggedContainer}
                         setSelectedContainerInfo={setSelectedContainerInfo}
                         selectedContainerInfo={selectedContainerInfo}
-
                         isStageDropActive={isStageDropActive}
                         stageWrapperRef={stageWrapperRef}
                         handleStageDrop={handleStageDrop}
@@ -230,6 +248,7 @@ export default function PlanningTool() {
                         onContainerPanelHeightChange={setContainerPanelHeight}
                         undo={undo}
                         redo={redo}
+                        saveRoom={handleSaveRoom}
                     />
 
                     {/* ActionPanel for selected container or door */}

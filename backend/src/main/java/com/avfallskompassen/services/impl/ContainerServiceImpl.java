@@ -108,6 +108,7 @@ public class ContainerServiceImpl implements ContainerService {
                 : type.getImageTopViewUrl();
 
         return new ContainerDTO(
+                plan.getId(),
                 type.getName(),
                 type.getSize(),
                 type.getWidth(),
