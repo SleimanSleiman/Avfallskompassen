@@ -46,6 +46,7 @@ type RoomCanvasProps = {
     isStageDropActive: boolean;
     undo: () => void;
     redo: () => void;
+    saveRoom: () => void;
 };
 
 export default function RoomCanvas({
@@ -72,6 +73,7 @@ export default function RoomCanvas({
     draggedContainer,
     redo,
     undo,
+    saveRoom,
 }: RoomCanvasProps) {
     //State to track if a container is being dragged
     const [isDraggingContainer, setIsDraggingContainer] = useState(false);
@@ -86,8 +88,10 @@ export default function RoomCanvas({
 
     //State to control room size prompt visibility
     const [isRoomPromptOpen, setIsRoomPromptOpen] = useState(false);
-    const handleConfirmRoomSize = (length: number, width: number) => {
+    const handleConfirmRoomSize = (name : string, length: number, width: number) => {
         setRoom({
+            ...room,
+            name,
             x: (STAGE_WIDTH - length / SCALE) / 2,
             y: (STAGE_HEIGHT - width / SCALE) / 2,
             width: width / SCALE,
@@ -124,7 +128,7 @@ export default function RoomCanvas({
 
                 {/* Save design */}
                 <button
-                    onClick={() => alert("Spara funktionalitet kommer snart!")}
+                    onClick = {saveRoom}
                     className="flex items-center justify-start bg-green-50 text-green-700 hover:bg-green-100 hover:text-green-800 px-2 py-1 rounded-lg transition-all duration-300 shadow-sm group overflow-hidden"
                 >
                     <Save className="w-5 h-5 flex-shrink-0" />
@@ -251,7 +255,7 @@ export default function RoomCanvas({
             {/* Room Size Prompt */}
             {isRoomPromptOpen && (
                 <RoomSizePrompt
-                    onConfirm={handleConfirmRoomSize}
+                    onConfirm={(name, length, width) => handleConfirmRoomSize(name, length, width)}
                     onCancel={() => setIsRoomPromptOpen(false)}
                 />
             )}

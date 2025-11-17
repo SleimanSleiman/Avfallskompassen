@@ -24,13 +24,21 @@ public class DoorRequest {
     @Max(360)
     private double angle;
 
+    @NotNull
+    private String wall;
+
+    @NotNull
+    private String swingDirection;
+
     public DoorRequest() {}
 
-    public DoorRequest(double width, double x, double y, double angle) {
+    public DoorRequest(double width, double x, double y, double angle, String wall, String swingDirection) {
         this.width = width;
         this.x = x;
         this.y = y;
         this.angle = angle;
+        this.wall = wall;
+        this.swingDirection = swingDirection;
     }
 
     public double getWidth() {
@@ -63,5 +71,21 @@ public class DoorRequest {
 
     public void setAngle(double angle) {
         this.angle = angle;
+    }
+
+    public String getWall() {
+        return wall;
+    }
+
+    public void setWall(String wall) {
+        this.wall = wall;
+    }
+
+    public String getSwingDirection() {
+        return swingDirection;
+    }
+
+    public void setSwingDirection(String swingDirection) {
+        this.swingDirection = swingDirection;
     }
 }

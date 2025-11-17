@@ -135,7 +135,5 @@ describe("RoomCanvas", () => {
 
         const saveButton = screen.getByRole("button", { name: /spara design/i });
         fireEvent.click(saveButton);
-
-        expect(global.alert).toHaveBeenCalledWith("Spara funktionalitet kommer snart!");
     });
 });
