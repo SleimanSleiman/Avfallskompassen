@@ -4,7 +4,6 @@ import RegisterPage from "../../src/pages/RegisterPage";
 import { register } from "../../src/lib/Auth";
 import { BrowserRouter } from "react-router-dom";
 
-// Mock register()
 vi.mock("../../src/lib/Auth", () => ({
   register: vi.fn(),
 }));
@@ -121,7 +120,6 @@ describe("RegisterPage", () => {
 
 expect(await screen.findByText("Kontot har skapats!")).toBeInTheDocument();
 
-    // Form should reset
     await waitFor(() => {
       expect(screen.getByLabelText("Användarnamn")).toHaveValue("");
       expect(screen.getByLabelText("Lösenord")).toHaveValue("");

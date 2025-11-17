@@ -27,15 +27,15 @@ export default function RoomSizePrompt({ onConfirm, onCancel }: RoomSizePromptPr
     }
 
     if (!(lengthNum >= minValue) || !(widthNum >= minValue)) {
-      setError(`Rummets längd och bredd måste vara minst ${minValue}.`);
+      setError(`Rummets längd och bredd måste vara minst ${minValue} meter.`);
       return;
     }
     if (lengthNum > maxLength) {
-      setError(`Rummets längd får inte överstiga ${maxLength}.`);
+      setError(`Rummets längd får inte överstiga ${maxLength} meter.`);
       return;
     }
     if (widthNum > maxWidth) {
-      setError(`Rummets bredd får inte överstiga ${maxWidth}.`);
+      setError(`Rummets bredd får inte överstiga ${maxWidth} meter.`);
       return;
     }
 

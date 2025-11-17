@@ -528,7 +528,14 @@ export default function RoomCanvas({
 
                 {/* Save design */}
                 <button
-                    onClick = {saveRoom}
+                    onClick={() => {
+                        if (typeof saveRoom === "function") {
+                            saveRoom();
+                        } else {
+                      
+                            alert("Spara funktionalitet kommer snart!");
+                        }
+                    }}
                     className="flex items-center justify-start bg-green-50 text-green-700 hover:bg-green-100 hover:text-green-800 px-2 py-1 rounded-lg transition-all duration-300 shadow-sm group overflow-hidden"
                 >
                     <Save className="w-5 h-5 flex-shrink-0" />

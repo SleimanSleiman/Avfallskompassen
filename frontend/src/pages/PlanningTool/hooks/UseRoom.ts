@@ -1,6 +1,4 @@
-/**
- * Clean implementation of useRoom
- */
+
 import { useState } from "react";
 import { SCALE, STAGE_WIDTH, STAGE_HEIGHT, MIN_WIDTH, MIN_HEIGHT, MARGIN, clamp, mmToPixels, ROOM_VERTICAL_OFFSET, ROOM_HORIZONTAL_OFFSET } from "../Constants";
 import type { Room, ContainerInRoom, Door } from "../Types";
@@ -46,6 +44,24 @@ export function useRoom() {
 
       const widthMeters = parsedWidth ?? defaultWidthMeters;
       const heightMeters = parsedHeight ?? defaultHeightMeters;
+
+      const maxWidthMeters = (STAGE_WIDTH - 2 * MARGIN) * SCALE;
+      const maxHeightMeters = (STAGE_HEIGHT - 2 * MARGIN) * SCALE;
+
+    
+      if (widthMeters >= maxWidthMeters || heightMeters >= maxHeightMeters) {
+        return {
+          id: undefined,
+          x: defaultX,
+          y: defaultY,
+          width: defaultWidthMeters / SCALE,
+          height: defaultHeightMeters / SCALE,
+          doors: [] as Door[],
+          containers: [] as ContainerInRoom[],
+          propertyId: undefined,
+          name: "",
+        } as Room;
+      }
 
       const x = parsed?.x ?? defaultX;
       const y = parsed?.y ?? defaultY;
