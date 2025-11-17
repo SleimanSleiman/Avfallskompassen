@@ -5,7 +5,7 @@
 import { useState } from "react";
 import { Scale } from "lucide-react";
 import { SCALE, mmToPixels, STAGE_WIDTH, STAGE_HEIGHT, MIN_WIDTH, MIN_HEIGHT, MARGIN, clamp } from "../Constants";
-import type { Room, ContainerInRoom } from "../Types";
+import type { Room, ContainerInRoom, Door } from "../Types";
 
 /**
  * This function runs when planning tool site is started. It sets the initial state of the room.
@@ -60,15 +60,18 @@ export function useRoom(
             };
             });
 
-            const doors = (parsed.doors ?? []).map(d => ({
-                id: d.id ?? Date.now(),
-                x: d.x ?? 0,
-                y: d.y ?? 0,
-                width: d.width ?? 1.2,
-                wall: d.wall ?? "bottom",
-                rotation: d.rotation ?? 0,
-                swingDirection: d.swingDirection ?? "inward",
-            }));
+            const doors = (parsed.doors ?? []).map(d => {
+                return {
+                    id: d.id,
+                    x: d.x,
+                    y: d.y,
+                    width: d.width ?? 1.2,
+                    rotation: d.angle ?? 0,                         
+                    wall: (d.wall as Door["wall"]) ?? "bottom",     
+                    swingDirection: (d.swingDirection as Door["swingDirection"]) ?? "outward",
+                };
+            });
+
 
 
 

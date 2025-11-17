@@ -49,7 +49,7 @@ class WasteRoomControllerTest {
         );
 
         List<DoorDTO> doors = List.of(
-                new DoorDTO(1L, 0.5, 0.5, 0, 1.0, 0.1, 5L)
+                new DoorDTO(1L, 0.5, 0.5, 0, 1.0, 0.1, 5L,"top","outward")
         );
 
         WasteRoomDTO dto = new WasteRoomDTO(2L,10,10,10,10,containers,doors, 5L, "Name");
@@ -144,7 +144,7 @@ class WasteRoomControllerTest {
         );
 
         List<DoorDTO> doors = List.of(
-                new DoorDTO(1L, 0.5, 0.5, 0, 1.0, 0.1, 5L)
+                new DoorDTO(1L, 0.5, 0.5, 0, 1.0, 0.1, 5L,"top","outward")
         );
 
         WasteRoomDTO dto = new WasteRoomDTO(2L, 10, 10, 10, 10, containers, doors, 5L, "Name");

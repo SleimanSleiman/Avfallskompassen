@@ -24,6 +24,8 @@ export type Door = {
     y : number;
     angle : number;
     wasteRoomId : number;
+    wall : string;
+    swingDirection : string;
 }
 
 export type ContainerPosition = {
