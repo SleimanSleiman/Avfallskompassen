@@ -111,6 +111,12 @@ export default function PropertyPage() {
         }
     }
 
+    const savedProperty = localStorage.getItem('selectedPropertyId');
+    const propertyId = savedProperty && savedProperty !== 'undefined' && savedProperty !== 'null'
+        ? Number(savedProperty)
+        : null;
+    console.log('Selected Property ID from localStorage:', propertyId);
+    
     const filteredProperties = useMemo(() => {
         const q = query.trim().toLowerCase();
         let list = properties.filter(p =>
@@ -483,63 +489,64 @@ async function onDeleteWasteRoom(propertyId: number, wasteRoomId: number) {
                       {/* ===== Waste Rooms Section ===== */}
                       <div className="mt-3">
                         <span className="text-gray-500 text-sm font-medium">Miljörum:</span>
-                        <div className="mt-1 space-y-1">
-                          {property.wasteRooms && property.wasteRooms.length > 0
-                            ? property.wasteRooms.map((room, index) => (
-                                <div
-                                    key={room.id ?? index}
-                                    className="flex items-center justify-between border border-gray-200 rounded px-2 py-1 bg-white"
-                                >
-                                    <button
-                                    className="w-60 text-left rounded border border-gray-200 px-2 py-1 ..."
-                                    onClick={() => {
-                                        const fullRoomData = {
-                                        ...room,
-                                        wasteRoomId: room.wasteRoomId,
-                                        containers: (room.containers ?? []).map(c => ({
-                                            ...c,
-                                            containerType: c.containerType ?? { imageTopViewUrl: "", width: 1, depth: 1 },
-                                        })),
-                                        doors: room.doors ?? [],
-                                        };
+                                                <div className="mt-1 space-y-1">
+                                                    {property.wasteRooms && property.wasteRooms.length > 0 ? (
+                                                        property.wasteRooms.map((room, index) => (
+                                                            <div
+                                                                key={room.id ?? room.wasteRoomId ?? index}
+                                                                className="flex items-center justify-between border border-gray-200 rounded px-2 py-1 bg-white"
+                                                            >
+                                                                <button
+                                                                    className="w-60 text-left rounded border border-gray-200 px-2 py-1"
+                                                                    onClick={() => {
+                                                                        const fullRoomData = {
+                                                                            ...room,
+                                                                            wasteRoomId: room.wasteRoomId ?? room.id,
+                                                                            containers: (room.containers ?? []).map((c: any) => ({
+                                                                                ...c,
+                                                                                containerType: c.containerType ?? { imageTopViewUrl: "", width: 1, depth: 1 },
+                                                                            })),
+                                                                            doors: room.doors ?? [],
+                                                                        };
 
-                                        localStorage.setItem("enviormentRoomData", JSON.stringify(fullRoomData));
-                                        localStorage.setItem("selectedProperty", JSON.stringify({ propertyId: property.id }));
-                                        
-                                        window.location.href = '/planningTool';
-                                    }}
-                                    >
-                                    {room.name ?? `Miljörum ${index + 1}`}
-                                    </button> 
-                                    <button
-                                        className="ml-2 text-red-500 hover:text-red-700 text-sm px-1"
-                                        onClick={(e) => {
-                                            e.stopPropagation(); 
-                                            if (confirm("Är du säker på att du vill radera detta miljörum?")) {
-                                                onDeleteWasteRoom(property.id, room.wasteRoomId);
-                                            }
-                                        }}
-                                    >
-                                        <svg
-                                            xmlns="http://www.w3.org/2000/svg"
-                                            fill="none"
-                                            viewBox="0 0 24 24"
-                                            strokeWidth={1.5}
-                                            stroke="currentColor"
-                                            className="w-5 h-5"
-                                            >
-                                            <path
-                                                strokeLinecap="round"
-                                                strokeLinejoin="round"
-                                                d="M6 7h12M9 7V4h6v3m-7 4v7m4-7v7m4-7v7M4 7h16"
-                                            />
-                                        </svg>
-                                    </button>
-                                </div>
-                            ))
-                            : <p className="text-gray-400 text-sm">Inga miljörum tillgängliga.</p>
-                          }
-                        </div>
+                                                                        localStorage.setItem("enviormentRoomData", JSON.stringify(fullRoomData));
+                                                                        localStorage.setItem("selectedProperty", JSON.stringify({ propertyId: property.id }));
+                                                                        localStorage.setItem("selectedPropertyId", String(property.id));
+                                                                        window.location.href = '/planningTool';
+                                                                    }}
+                                                                >
+                                                                    {room.name ?? `Miljörum ${index + 1}`}
+                                                                </button>
+                                                                <button
+                                                                    className="ml-2 text-red-500 hover:text-red-700 text-sm px-1"
+                                                                    onClick={(e) => {
+                                                                        e.stopPropagation();
+                                                                        if (confirm("Är du säker på att du vill radera detta miljörum?")) {
+                                                                            onDeleteWasteRoom(property.id, room.wasteRoomId ?? room.id);
+                                                                        }
+                                                                    }}
+                                                                >
+                                                                    <svg
+                                                                        xmlns="http://www.w3.org/2000/svg"
+                                                                        fill="none"
+                                                                        viewBox="0 0 24 24"
+                                                                        strokeWidth={1.5}
+                                                                        stroke="currentColor"
+                                                                        className="w-5 h-5"
+                                                                    >
+                                                                        <path
+                                                                            strokeLinecap="round"
+                                                                            strokeLinejoin="round"
+                                                                            d="M6 7h12M9 7V4h6v3m-7 4v7m4-7v7m4-7v7M4 7h16"
+                                                                        />
+                                                                    </svg>
+                                                                </button>
+                                                            </div>
+                                                        ))
+                                                    ) : (
+                                                        <p className="text-gray-400 text-sm">Inga miljörum tillgängliga.</p>
+                                                    )}
+                                                </div>
                       </div>
                       {/* ===== End Waste Rooms Section ===== */}
                   </div>
@@ -562,24 +569,22 @@ async function onDeleteWasteRoom(propertyId: number, wasteRoomId: number) {
 
       </div>
 
-            {isCreateRoomOpen && (
-                <RoomSizePrompt
-                    onConfirm={(name : string, length: number, width: number) => {
-                        localStorage.setItem(
-                            'enviormentRoomData',
-                            JSON.stringify({ name : name, height: length, width: width})
-                        );
-                        localStorage.setItem(
-                            'selectedProperty',
-                            JSON.stringify({ propertyId : selectedProperty?.id})
-                        );
+                        {isCreateRoomOpen && (
+                            <RoomSizePrompt
+                                onConfirm={(name: string, length: number, width: number) => {
+                                    localStorage.setItem(
+                                        'enviormentRoomData',
+                                        JSON.stringify({ name, height: length, width: width })
+                                    );
+                                    localStorage.setItem('selectedProperty', JSON.stringify({ propertyId: selectedProperty?.id }));
+                                    localStorage.setItem('selectedPropertyId', String(selectedProperty?.id));
 
-                        setIsCreateRoomOpen(false);
-                        window.location.href = '/planningTool';
-                    }}
-                    onCancel={() => setIsCreateRoomOpen(false)}
-                />
-            )}
+                                    setIsCreateRoomOpen(false);
+                                    window.location.href = '/planningTool';
+                                }}
+                                onCancel={() => setIsCreateRoomOpen(false)}
+                            />
+                        )}
         </main>
     );
-}
+} 

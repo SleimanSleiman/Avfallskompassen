@@ -9,7 +9,7 @@ vi.mock("../../src/lib/Auth", () => ({
 describe("api()", () => {
   beforeEach(() => {
     vi.resetAllMocks();
-    globalThis.fetch = vi.fn(); // <-- updated
+    globalThis.fetch = vi.fn(); 
   });
 
   it("includes auth headers when user is logged in", async () => {

@@ -1,23 +1,39 @@
 import { render, screen, fireEvent } from "@testing-library/react";
-import RoomCanvas from "../../../../src/pages/PlanningTool/RoomCanvas/RoomCanvas";
-import { vi, describe, it, beforeEach, afterEach } from "vitest";
 import "@testing-library/jest-dom";
+import { describe, it, beforeEach, afterEach, vi, expect } from "vitest";
+import RoomCanvas from "../../../../src/pages/PlanningTool/RoomCanvas/RoomCanvas";
+import { createRef, type ComponentProps, type ReactNode } from "react";
 
-vi.mock("react-konva", () => ({
-    Stage: ({ children }: any) => <div>{children}</div>,
-    Layer: ({ children }: any) => <div>{children}</div>,
-    Group: ({ children, "data-testid": dataTestId, ...props }: any) => (
-        <div data-testid={dataTestId || "group"} {...props}>{children}</div>
-    ),
-    Rect: (props: any) => <div data-testid="rect" {...props} />,
-    Circle: (props: any) => <div data-testid="circle" {...props} />,
-    Image: (props: any) => <div data-testid="image" {...props} />,
-    Text: (props: any) => <div data-testid="text" {...props} />,
-}));
+type DummyProps = { children?: ReactNode } & Record<string, unknown>;
+type GroupProps = DummyProps & { ["data-testid"]?: string };
+
+type RoomCanvasProps = ComponentProps<typeof RoomCanvas>;
+
+vi.mock("react-konva", () => {
+    const Stage = ({ children }: DummyProps) => <div>{children}</div>;
+    const Layer = ({ children }: DummyProps) => <div>{children}</div>;
+    const Group = ({ children, ["data-testid"]: dataTestId }: GroupProps) => (
+        <div data-testid={typeof dataTestId === "string" ? dataTestId : "group"}>{children}</div>
+    );
+    const Rect = ({ children }: DummyProps) => <div data-testid="rect">{children}</div>;
+    const Circle = ({ children }: DummyProps) => <div data-testid="circle">{children}</div>;
+    const Image = ({ children }: DummyProps) => <div data-testid="image">{children}</div>;
+    const Text = ({ children }: DummyProps) => <div data-testid="text">{children}</div>;
+
+    return {
+        Stage,
+        Layer,
+        Group,
+        Rect,
+        Circle,
+        Image,
+        Text,
+    };
+});
 
 vi.mock("../../../../src/pages/PlanningTool/RoomCanvas/ContainersLayer", () => ({
     __esModule: true,
-    default: ({ setIsDraggingContainer }: any) => {
+    default: ({ setIsDraggingContainer }: { setIsDraggingContainer: (value: boolean) => void }) => {
         setIsDraggingContainer(true);
         return <div data-testid="mock-containers-layer" />;
     },
@@ -25,7 +41,7 @@ vi.mock("../../../../src/pages/PlanningTool/RoomCanvas/ContainersLayer", () => (
 
 vi.mock("../../../../src/components/RoomSizePrompt", () => ({
     __esModule: true,
-    default: ({ onConfirm, onCancel }: any) => (
+    default: ({ onConfirm, onCancel }: { onConfirm: (length: number, width: number) => void; onCancel: () => void }) => (
         <div data-testid="room-size-prompt">
             <button onClick={() => onConfirm(400, 300)} data-testid="confirm-room-size">Confirm</button>
             <button onClick={onCancel} data-testid="cancel-room-size">Cancel</button>
@@ -36,39 +52,61 @@ vi.mock("../../../../src/components/RoomSizePrompt", () => ({
 const room = { x: 0, y: 0, width: 500, height: 400 };
 const doorZones = [{ x: 100, y: 50, width: 120, height: 40 }];
 
+const defaultProps: RoomCanvasProps = {
+    room,
+    corners: [
+        { x: 0, y: 0 },
+        { x: 500, y: 0 },
+        { x: 500, y: 400 },
+        { x: 0, y: 400 },
+    ],
+    handleDragCorner: vi.fn(),
+    setRoom: vi.fn(),
+    doors: [],
+    selectedDoorId: null,
+    handleDragDoor: vi.fn(),
+    handleSelectDoor: vi.fn(),
+    handleAddDoor: () => true,
+    containers: [],
+    selectedContainerId: null,
+    handleDragContainer: vi.fn(),
+    handleSelectContainer: vi.fn(),
+    setSelectedContainerInfo: vi.fn(),
+    selectedContainerInfo: null,
+    stageWrapperRef: createRef<HTMLDivElement>(),
+    handleStageDrop: vi.fn(),
+    handleStageDragOver: vi.fn(),
+    handleStageDragLeave: vi.fn(),
+    isStageDropActive: false,
+    doorZones,
+    getContainerZones: vi.fn(() => []),
+    draggedContainer: null,
+    serviceTypes: [{ id: 1, name: "Restavfall" }],
+    selectedType: null,
+    setSelectedType: vi.fn(),
+    availableContainers: [],
+    selectedSize: {},
+    setSelectedSize: vi.fn() as RoomCanvasProps["setSelectedSize"],
+    isLoadingContainers: false,
+    fetchContainers: async () => {},
+    handleAddContainer: vi.fn(),
+    setIsStageDropActive: vi.fn(),
+    setDraggedContainer: vi.fn(),
+};
+
+const renderRoomCanvas = (override?: Partial<RoomCanvasProps>) => render(<RoomCanvas {...defaultProps} {...override} />);
+
 describe("RoomCanvas", () => {
     beforeEach(() => {
-        global.alert = vi.fn();
+        globalThis.alert = vi.fn();
     });
 
     afterEach(() => {
         vi.restoreAllMocks();
     });
 
-    //Test rendering highlighted zones for doors and other containers when a container is being dragged
     it("renders highlighted zones when a container is being dragged", () => {
-        render(
-            <RoomCanvas
-                room={room}
-                corners={[{ x: 0, y: 0 }, { x: 500, y: 0 }, { x: 500, y: 400 }, { x: 0, y: 400 }]}
-                handleDragCorner={() => {}}
-                doors={[]}
-                selectedDoorId={null}
-                handleDragDoor={() => {}}
-                handleSelectDoor={() => {}}
-                containers={[]}
-                selectedContainerId={null}
-                handleDragContainer={() => {}}
-                handleSelectContainer={() => {}}
-                stageWrapperRef={{ current: null }}
-                handleStageDrop={() => {}}
-                handleStageDragOver={() => {}}
-                handleStageDragLeave={() => {}}
-                isStageDropActive={false}
-                doorZones={doorZones}
-                getContainerZones={() => []}
-            />
-        );
+        renderRoomCanvas();
 
         const zoneGroup = screen.getByTestId("zone-0");
         expect(zoneGroup).toBeInTheDocument();
@@ -77,30 +115,8 @@ describe("RoomCanvas", () => {
         expect(rects.length).toBeGreaterThan(0);
     });
 
-    //Test opening RoomSizePrompt when clicking the ruler button
     it("opens the RoomSizePrompt when clicking the ruler button", () => {
-        render(
-            <RoomCanvas
-                room={room}
-                corners={[{ x: 0, y: 0 }, { x: 500, y: 0 }, { x: 500, y: 400 }, { x: 0, y: 400 }]}
-                handleDragCorner={() => {}}
-                doors={[]}
-                selectedDoorId={null}
-                handleDragDoor={() => {}}
-                handleSelectDoor={() => {}}
-                containers={[]}
-                selectedContainerId={null}
-                handleDragContainer={() => {}}
-                handleSelectContainer={() => {}}
-                stageWrapperRef={{ current: null }}
-                handleStageDrop={() => {}}
-                handleStageDragOver={() => {}}
-                handleStageDragLeave={() => {}}
-                isStageDropActive={false}
-                doorZones={doorZones}
-                getContainerZones={() => []}
-            />
-        );
+        renderRoomCanvas();
 
         const rulerButton = screen.getByRole("button", { name: /ändra rumsdimensioner/i });
         fireEvent.click(rulerButton);
@@ -108,32 +124,12 @@ describe("RoomCanvas", () => {
         expect(screen.getByTestId("room-size-prompt")).toBeInTheDocument();
     });
 
-    //Test alert when clicking save design button
     it("calls alert when clicking save design button", () => {
-        render(
-            <RoomCanvas
-                room={room}
-                corners={[{ x: 0, y: 0 }, { x: 500, y: 0 }, { x: 500, y: 400 }, { x: 0, y: 400 }]}
-                handleDragCorner={() => {}}
-                doors={[]}
-                selectedDoorId={null}
-                handleDragDoor={() => {}}
-                handleSelectDoor={() => {}}
-                containers={[]}
-                selectedContainerId={null}
-                handleDragContainer={() => {}}
-                handleSelectContainer={() => {}}
-                stageWrapperRef={{ current: null }}
-                handleStageDrop={() => {}}
-                handleStageDragOver={() => {}}
-                handleStageDragLeave={() => {}}
-                isStageDropActive={false}
-                doorZones={doorZones}
-                getContainerZones={() => []}
-            />
-        );
+        renderRoomCanvas();
 
         const saveButton = screen.getByRole("button", { name: /spara design/i });
         fireEvent.click(saveButton);
+
+        expect(globalThis.alert).toHaveBeenCalledWith("Spara funktionalitet kommer snart!");
     });
 });

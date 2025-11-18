@@ -6,13 +6,11 @@ import "@testing-library/jest-dom";
 vi.stubGlobal("requestAnimationFrame", (cb: any) => cb());
 
 
-// Clean up between tests
 afterEach(() => {
 cleanup();
 vi.clearAllMocks();
 });
 
-    // Mock createPortal to render normally in the DOM (instead of a detached portal)
 vi.mock("react-dom", async (importOriginal) => {
     const actual = await importOriginal<typeof import("react-dom")>();
     return {
@@ -84,13 +82,11 @@ describe("InfoTooltip", () => {
         render(<InfoTooltip text="Click tooltip text" />);
         const button = screen.getByRole("button");
 
-        // First click: open
         act(() => {
             fireEvent.click(button);
         });
         expect(screen.getByRole("tooltip")).toBeInTheDocument();
 
-        // Second click: close immediately
         act(() => {
             fireEvent.click(button);
         });

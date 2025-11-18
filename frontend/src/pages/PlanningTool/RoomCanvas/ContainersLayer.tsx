@@ -5,7 +5,7 @@
 import { Group, Rect, Text, Image as KonvaImage } from "react-konva";
 import useImage from "use-image";
 import { useState } from "react";
-import type { ContainerInRoom, Room, Door } from "../Types";
+import type { ContainerInRoom, Room } from "../Types";
 import { clamp, SCALE, isOverlapping } from "../Constants";
 
 /* ─────────────── ContainersLayer Props ──────────────── */
@@ -15,7 +15,6 @@ type ContainersLayerProps = {
     handleDragContainer: (id: number, pos: { x: number; y: number }) => void;
     handleSelectContainer: (id: number) => void;
     room: Room;
-    doors: Door[];
     doorZones: { x: number; y: number; width: number; height: number }[];
     getContainerZones: (excludeId?: number) => { x: number; y: number; width: number; height: number }[];
     setIsDraggingContainer: (dragging: boolean) => void;
@@ -28,9 +27,7 @@ export default function ContainersLayer({
     handleDragContainer,
     handleSelectContainer,
     room,
-    doors,
     doorZones,
-    isOverlapping,
     setIsDraggingContainer,
     getContainerZones,
 }: ContainersLayerProps) {

@@ -3,10 +3,12 @@
  * types from the API.
  */
 import { useState, useRef } from "react";
+import type { DragEvent as ReactDragEvent } from "react";
 import type { ContainerInRoom, Room } from "../Types";
 import type { ContainerDTO } from "../../../lib/Container";
 import { fetchContainersByMunicipalityAndService } from "../../../lib/Container";
 import { mmToPixels, clamp, DRAG_DATA_FORMAT, STAGE_WIDTH, STAGE_HEIGHT, SCALE, isOverlapping } from "../Constants";
+import { useLayoutHistory } from "./UseLayoutHistory";
 
 /* ──────────────── Helper functions ──────────────── */
 //Create rectangle for container at given position
@@ -31,8 +33,8 @@ function calculateInitialPosition(
     const widthPx = mmToPixels(container.width);
     const heightPx = mmToPixels(container.depth);
 
-    let targetX = position ? position.x - widthPx / 2 : room.x + room.width / 2 - widthPx / 2;
-    let targetY = position ? position.y - heightPx / 2 : room.y + room.height / 2 - heightPx / 2;
+    const targetX = position ? position.x - widthPx / 2 : room.x + room.width / 2 - widthPx / 2;
+    const targetY = position ? position.y - heightPx / 2 : room.y + room.height / 2 - heightPx / 2;
 
     return {
         x: clamp(targetX, room.x, room.x + room.width - widthPx),
@@ -79,15 +81,14 @@ function validateContainerPlacement(
 
 /* ──────────────── Main Hook ──────────────── */
 export function useContainers(
-    room: Room | null,
-    containersInRoom: ContainerInRoom[],
-    setContainersInRoom: React.Dispatch<React.SetStateAction<ContainerInRoom[]>>,
+    room: Room,
     setSelectedContainerId: (id: number | null) => void,
     setSelectedDoorId: (id: number | null) => void,
     doorZones: { x: number; y: number; width: number; height: number }[] = []
 ) {
 
     /* ──────────────── Containers State ──────────────── */
+    const { state: containersInRoom, save: saveContainers, undo, redo } = useLayoutHistory<ContainerInRoom[]>([]);
     const [selectedContainerInfo, setSelectedContainerInfo] = useState<ContainerDTO | null>(null);
     const [draggedContainer, setDraggedContainer] = useState<ContainerDTO | null>(null);
     const [availableContainers, setAvailableContainers] = useState<ContainerDTO[]>([]);
@@ -99,39 +100,13 @@ export function useContainers(
 
     //Add a new container to the room
     const handleAddContainer = (container: ContainerDTO, position?: { x: number; y: number }) => {
-        let { x, y } = calculateInitialPosition(room, container, position);
+        const { x, y } = calculateInitialPosition(room, container, position);
         const newRect = createContainerRect(container, x, y);
 
         const containerZones = buildContainerZones(containersInRoom);
         const isValid = validateContainerPlacement(newRect, doorZones, containerZones);
 
-        //If initial position is invalid, try to find a valid spot
-        if (!isValid && !position) {
-            const widthPx = mmToPixels(container.width);
-            const heightPx = mmToPixels(container.depth);
-
-            const step = 20;
-            let foundSpot = false;
-
-            for (let tryY = room.y; tryY < room.y + room.height - heightPx; tryY += step) {
-                for (let tryX = room.x; tryX < room.x + room.width - widthPx; tryX += step) {
-                    const testRect = { x: tryX, y: tryY, width: widthPx, height: heightPx };
-                    if (validateContainerPlacement(testRect, doorZones, containerZones)) {
-                        x = tryX;
-                        y = tryY;
-                        foundSpot = true;
-                        break;
-                    }
-                }
-                if (foundSpot) break;
-            }
-
-            //If no valid spot found, alert user and exit
-            if (!foundSpot) {
-                alert("Det finns ingen ledig plats för att lägga till detta kärl i rummet.");
-                return;
-            }
-        } else if (!isValid) {
+        if(!isValid) {
             return;
         }
 
@@ -147,13 +122,13 @@ export function useContainers(
 
         handleSelectContainer(newContainer.id);
         const newState = [...containersInRoom, newContainer];
-        setContainersInRoom(newState);
+        saveContainers(newState);
     };
 
     //Remove a container from the room
     const handleRemoveContainer = (id: number) => {
         const newState = containersInRoom.filter(c => c.id !== id);
-        setContainersInRoom(newState);
+        saveContainers(newState);
         setSelectedContainerId(null);
     };
 
@@ -162,7 +137,7 @@ export function useContainers(
         const newState = containersInRoom.map(c =>
             c.id === id ? { ...c, ...pos } : c
         );
-        setContainersInRoom(newState);
+        saveContainers(newState);
     };
 
     //Select or deselect a container
@@ -176,7 +151,7 @@ export function useContainers(
         const newState = containersInRoom.map(c =>
             c.id === id ? { ...c, rotation: ((c.rotation || 0) + 90) % 360 } : c
         );
-        setContainersInRoom(newState);
+        saveContainers(newState);
     };
 
     //Show container info in sidebar
@@ -187,7 +162,7 @@ export function useContainers(
 
     /* ──────────────── Drag & Drop Handlers ──────────────── */
     //Handle dropping a container onto the stage
-    const handleStageDrop = (event: React.DragEvent<HTMLDivElement>) => {
+    const handleStageDrop = (event: ReactDragEvent<HTMLDivElement>) => {
         event.preventDefault();
         setIsStageDropActive(false);
 
@@ -196,11 +171,12 @@ export function useContainers(
 
         try {
             const container = JSON.parse(data) as ContainerDTO;
-            const rect = stageWrapperRef.current?.getBoundingClientRect();
-            if (!rect) return;
+            const stageContainer = stageWrapperRef.current?.querySelector("canvas");
+            const stageRect = stageContainer?.getBoundingClientRect();
+            if (!stageRect) return;
 
-            const dropX = clamp(event.clientX - rect.left, 0, STAGE_WIDTH);
-            const dropY = clamp(event.clientY - rect.top, 0, STAGE_HEIGHT);
+            const dropX = clamp(event.clientX - stageRect.left, 0, stageRect.width);
+            const dropY = clamp(event.clientY - stageRect.top, 0, stageRect.height);
             handleAddContainer(container, { x: dropX, y: dropY });
         } catch (error) {
             console.error("Failed to parse dropped container data", error);
@@ -208,7 +184,7 @@ export function useContainers(
     };
 
     //Handle drag over event to allow dropping
-    const handleStageDragOver = (event: React.DragEvent<HTMLDivElement>) => {
+    const handleStageDragOver = (event: ReactDragEvent<HTMLDivElement>) => {
         if (!Array.from(event.dataTransfer.types).includes(DRAG_DATA_FORMAT)) return;
 
         event.preventDefault();
@@ -218,17 +194,22 @@ export function useContainers(
     };
 
     //Handle drag leave event to reset drop state
-    const handleStageDragLeave = (event: React.DragEvent<HTMLDivElement>) => {
+    const handleStageDragLeave = (event: ReactDragEvent<HTMLDivElement>) => {
         if (event.currentTarget.contains(event.relatedTarget as Node)) return;
         setIsStageDropActive(false);
     };
 
     /* ──────────────── API Fetch ──────────────── */
-    const fetchAvailableContainers = async (serviceId: number) => {
+    const fetchAvailableContainers = async (service: { id: number; name: string }) => {
         setIsLoadingContainers(true);
         try {
-            const data = await fetchContainersByMunicipalityAndService(1, serviceId);
-            setAvailableContainers(data);
+            const data = await fetchContainersByMunicipalityAndService(1, service.id);
+            const enriched = data.map(container => ({
+                ...container,
+                serviceTypeId: service.id,
+                serviceTypeName: service.name,
+            }));
+            setAvailableContainers(enriched);
         } catch (error) {
             console.error("Failed to fetch available containers:", error);
             setAvailableContainers([]);
@@ -240,7 +221,7 @@ export function useContainers(
     /* ──────────────── Return ──────────────── */
     return {
         containersInRoom,
-        setContainersInRoom,
+        saveContainers,
         draggedContainer,
         setDraggedContainer,
         availableContainers,
@@ -266,5 +247,8 @@ export function useContainers(
         handleShowContainerInfo,
 
         getContainerZones: (excludeId?: number) => buildContainerZones(containersInRoom, excludeId),
+
+        undo,
+        redo,
     };
 }

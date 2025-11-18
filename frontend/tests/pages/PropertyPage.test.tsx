@@ -13,7 +13,6 @@ import {
 } from "../../src/lib/Property";
 import { getWasteRoomsByPropertyId } from "../../src/lib/WasteRoom";
 
-// Mock API functions
 vi.mock("../../src/lib/Property", () => ({
   getMyProperties: vi.fn(),
   getMunicipalities: vi.fn(),
@@ -27,7 +26,6 @@ vi.mock("../../src/lib/WasteRoom", () => ({
   getWasteRoomsByPropertyId: vi.fn(),
 }));
 
-// Mock currentUser
 vi.mock("../../src/lib/auth", () => ({
   currentUser: () => ({ username: "TestUser" }),
 }));
@@ -121,7 +119,6 @@ describe("PropertyPage", () => {
 
     renderPage();
 
-    // Open form and ensure it's open
     fireEvent.click(screen.getByRole("button", { name: /Lägg till fastighet/i }));
     await screen.findByText("Lägg till ny fastighet");
 
@@ -157,7 +154,7 @@ describe("PropertyPage", () => {
     renderPage();
 
     const deleteButtons = await screen.findAllByRole("button", { name: "Ta bort" });
-    fireEvent.click(deleteButtons[0]); // first one is on property card
+    fireEvent.click(deleteButtons[0]); 
 
     const modal = await screen.findByText("Bekräfta borttagning");
     expect(modal).toBeInTheDocument();

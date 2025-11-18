@@ -11,8 +11,8 @@ describe('Constants utilities', () => {
 
     //Test mmToPixels function
     it('mmToPixels should convert millimeters to pixels correctly', () => {
-        //1000 mm = 1 m => 1 / 0.02 = 50 px
-        expect(mmToPixels(1000)).toBeCloseTo(50);
+        //1000 mm = 1 m => convert using the active SCALE factor
+        expect(mmToPixels(1000)).toBeCloseTo(1 / SCALE);
     });
 
     //Test isOverlapping function

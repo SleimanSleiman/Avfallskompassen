@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { post } from '../../../lib/api'; // Ändra till rätt 
+import { post } from '../../../lib/api';
 import { createWasteRoom, updateWasteRoom, type ContainerPositionRequest, type DoorRequest, type RoomRequest } from "../../../lib/WasteRoomRequest";
 import type { ContainerInRoom, Door, Room } from "../Types";
 import { SCALE } from "../Constants";

@@ -22,7 +22,7 @@ public class PropertyContainer {
     private Property property;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "container_type_service_id", nullable = false) //Skriv om detta till ContainerPlan_id.
+    @JoinColumn(name = "container_plan_id", nullable = false)
     private ContainerPlan containerPlan;
 
     @Column(nullable = false)
