@@ -290,8 +290,8 @@ public class PropertyControllerTest {
 
     @Test
     void getPropertiesSimple_success_returnsDtos() {
-        PropertySimpleDTO dto1 = new PropertySimpleDTO(1L, "Första gatan", 10);
-        PropertySimpleDTO dto2 = new PropertySimpleDTO(2L, "Andra gatan", 20);
+        PropertySimpleDTO dto1 = new PropertySimpleDTO(1L, "Första gatan", 10, "Fysiskt lås", BigDecimal.valueOf(10), 10, "Helsingborg");
+        PropertySimpleDTO dto2 = new PropertySimpleDTO(2L, "Andra gatan", 20, "SweLock", BigDecimal.valueOf(20), 20, "Malmö");
 
         when(propertyService.getSimplePropertiesByUser("chris"))
                 .thenReturn(List.of(dto1, dto2));

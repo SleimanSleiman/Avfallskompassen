@@ -9,21 +9,29 @@ export type AnnualCostDTO = {
   maintenanceCost: number;
 };
 
-
 export type SimplePropertyDTO = {
     id: number;
     address: string;
     numberOfApartments: number;
+    lockName: string;
+    lockPrice: number;
+    accessPathLength: number;
+    municipalityName: string;
 };
 
 export type PropertyContainerDTO = {
-    fractionType: string,
-    containerName: string,
-    size: number,
-    quantity: number,
-    emptyingFrequency: number,
+    fractionType: string;
+    containerName: string;
+    size: number;
+    quantity: number;
+    emptyingFrequency: number;
     cost: number;
 };
+
+export type CollectionFeeDTO = {
+    id: number;
+    cost: number;
+}
 
 export async function getAnnualCost(propertyId: number): Promise<AnnualCostDTO> {
   return await api<AnnualCostDTO>(`/api/propertycost/${propertyId}/totalCost`, {
@@ -34,6 +42,12 @@ export async function getAnnualCost(propertyId: number): Promise<AnnualCostDTO> 
 export async function getPropertyContainers(propertyId: number): Promise<PropertyContainerDTO[]> {
     return await api<PropertyContainerDTO[]>(`/api/containerPlan/${propertyId}/containers`,{
       method: 'GET',
+    });
+}
+
+export async function getCollectionFee(propertyId: number): Promise<CollectionFeeDTO> {
+    return await api<CollectionFeeDTO>(`/api/containerPlan/collectionFee/${propertyId}`,{
+        method: 'GET',
     });
 }
 

@@ -2,10 +2,10 @@ import { useEffect, useState } from 'react';
 import React from 'react';
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { useParams, useLocation, Link } from 'react-router-dom';
-import { getAnnualCost, getPropertyContainers} from '../lib/Statistics'
+import {getCollectionFee, getAnnualCost, getPropertyContainers, type AnnualCostDTO} from '../lib/Statistics'
 
 //TODO: Ändra hårdkodade uträkningen av grön/gul/röd till riktiga värden som kan ändras via admin panel.
-//TODO: Bryt ut delar och bygga komponenter av dem istället samt ta bort propertyComparisonDTO om jag inte ska ha någon jämförelsediagram.
+//TODO: Bryt ut delar och bygga komponenter av dem.
 
 interface ContainerData {
   fractionType: string;
@@ -16,18 +16,23 @@ interface ContainerData {
   cost: number;
 }
 
+interface CollectionFee {
+    cost: number;
+}
+
 export default function StatisticsPage() {
   const { propertyId } = useParams<{ propertyId: string }>();
   const location = useLocation();
-  const { state } = location as { state?: { propertyName: string; numberOfApartments?: number } };
+  const { state } = location as { state?: { propertyName: string; numberOfApartments?: number;} };
   const propertyName = state?.propertyName || '';
   const numberOfApartments = state?.numberOfApartments ?? 0;
 
   const [loading, setLoading] = useState(true);
+  const [collectionFee, setCollectionFee] = useState<CollectionFee | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [containers, setContainers] = useState<ContainerData[]>([]);
   const [data, setData] = useState<{
-    annualCost: any;
+    annualCost: AnnualCostDTO
   } | null>(null);
   const [openWasteGroups, setOpenWasteGroups] = useState<Record<string, boolean>>({});
 
@@ -37,41 +42,55 @@ export default function StatisticsPage() {
     return acc;
   }, {} as Record<string, ContainerData[]>);
 
-  useEffect(() => {
-    if (!propertyId) return;
+    useEffect(() => {
+        if (!propertyId) return;
 
-    async function loadStatistics() {
-      try {
-        const [containersData, annualCostData] = await Promise.all([
-          getPropertyContainers(Number(propertyId)),
-          getAnnualCost(Number(propertyId)),
-        ]);
+        async function loadStatistics() {
+            try {
+                const [containersData, annualCostData, collectionFeeData] = await Promise.all([
+                    getPropertyContainers(Number(propertyId)),
+                    getAnnualCost(Number(propertyId)),
+                    getCollectionFee(Number(propertyId)),
+                ]);
 
-        const formattedContainers = containersData.map((c) => ({
-          fractionType: c.fractionType,
-            containerName: c.containerName,
-          size: c.size,
-          quantity: c.quantity,
-          emptyingFrequency: c.emptyingFrequency,
-          cost: c.cost,
-        }));
+                console.log(propertyId);
 
-        setContainers(formattedContainers);
+                const formattedContainers = containersData.map((c) => ({
+                    fractionType: c.fractionType,
+                    containerName: c.containerName,
+                    size: c.size,
+                    quantity: c.quantity,
+                    emptyingFrequency: c.emptyingFrequency,
+                    cost: c.cost,
+                }));
 
-        setData({
-          annualCost: annualCostData,
-        });
+                setContainers(formattedContainers);
 
-        setLoading(false);
-      } catch (err: any) {
-        console.error("Kunde inte hämta statistik", err);
-        setError(err.message || "Ett fel uppstod");
-        setLoading(false);
-      }
-    }
+                setData({
+                    annualCost: annualCostData,
+                });
 
-    loadStatistics();
-  }, [propertyId]);
+                console.debug("collectionFeeData", collectionFeeData);
+                setCollectionFee({
+                    cost: Number(collectionFeeData?.cost) || 0,
+                });
+                console.log(collectionFeeData.cost);
+
+                setLoading(false);
+            } catch (err: unknown) {
+                console.error("Kunde inte hämta statistik", err);
+
+                if (err instanceof Error) {
+                    setError(err.message);
+                } else {
+                    setError("Ett fel uppstod");
+                }
+                setLoading(false);
+            }
+        }
+
+        loadStatistics();
+    }, [propertyId]);
 
   const toggleWasteGroup = (type: string) =>
     setOpenWasteGroups((prev) => ({ ...prev, [type]: !prev[type] }));
@@ -107,6 +126,7 @@ export default function StatisticsPage() {
               <th className="px-3 py-2 border">Totala volym (L)</th>
               <th className="px-3 py-2 border">Totalt antal kärl</th>
               <th className="px-3 py-2 border">Årsvolym (L)</th>
+                <th className="px-3 py-2 border">Liter per lägenhet/vecka</th>
               <th className="px-3 py-2 border">Årskostnad (kr)</th>
             </tr>
           </thead>
@@ -115,9 +135,18 @@ export default function StatisticsPage() {
               const totalVolume = containers.reduce((sum, c) => sum + c.size * c.quantity, 0);
               const totalQuantity = containers.reduce((sum, c) => sum + c.quantity, 0);
               const totalAnnualVolume = containers.reduce((sum, c) => sum + c.size * c.quantity * c.emptyingFrequency, 0);
-              const costPerYear = containers.reduce((sum, c) => sum + (c.cost ?? 0), 0);
-
               const litersPerWeekPerApartment = numberOfApartments > 0 ? totalAnnualVolume / 52 / numberOfApartments : 0;
+                const costPerYear = containers.reduce((sum, c) => {
+                    const containerCost = Number(c.cost) || 0;
+                    const qty = Number(c.quantity) || 0;
+                    const freq = Number(c.emptyingFrequency) || 0;
+                    const lock = Number(collectionFee?.cost) || 0;
+
+                    const unitPricePerEmptying = (qty * lock) * freq;
+                    const annualForThisContainerType = unitPricePerEmptying + (containerCost * qty);
+
+                    return sum + annualForThisContainerType;
+                }, 0);
 
               let indicatorColor = "bg-green-500 ring-green-300";
               if (litersPerWeekPerApartment > 45) {
@@ -141,6 +170,7 @@ export default function StatisticsPage() {
                     <td className="px-3 py-2 border font-semibold">{totalVolume.toLocaleString()}</td>
                     <td className="px-3 py-2 border font-semibold">{totalQuantity.toLocaleString()}</td>
                     <td className="px-3 py-2 border font-semibold">{totalAnnualVolume.toLocaleString()}</td>
+                      <td className="px-3 py-2 border font-semibold">{Number(litersPerWeekPerApartment.toFixed(1)).toLocaleString()}</td>
                     <td className="px-3 py-2 border font-semibold">{costPerYear.toLocaleString()}</td>
                   </tr>
 
@@ -161,13 +191,20 @@ export default function StatisticsPage() {
                             <tbody>
                               {containers.map((container, idx) => {
                                 const annualVolume = container.size * container.quantity * container.emptyingFrequency;
+                                  const containerCost = Number(container.cost) || 0;
+                                  const qty = Number(container.quantity) || 0;
+                                  const freq = Number(container.emptyingFrequency) || 0;
+                                  const lock = Number(collectionFee?.cost) || 0;
+
+                                  const unitPricePerEmptying = (qty * lock) * freq;
+                                  const annualCost = unitPricePerEmptying + (qty * containerCost);
                                 return (
                                   <tr key={idx} className="bg-white text-gray-600">
                                     <td className="px-3 py-2 border">{container.size.toLocaleString()}</td>
                                     <td className="px-3 py-2 border">{container.quantity.toLocaleString()}</td>
                                     <td className="px-3 py-2 border">{container.emptyingFrequency.toLocaleString()}</td>
                                     <td className="px-3 py-2 border">{annualVolume.toLocaleString()}</td>
-                                    <td className="px-3 py-2 border">{container.cost?.toLocaleString()}</td>
+                                    <td className="px-3 py-2 border">{annualCost.toLocaleString()}</td>
                                   </tr>
                                 );
                               })}

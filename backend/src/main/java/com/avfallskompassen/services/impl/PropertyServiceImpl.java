@@ -111,15 +111,11 @@ public class PropertyServiceImpl implements PropertyService {
      * @return PropertySimpleDTO
      */
     public List<PropertySimpleDTO> getSimplePropertiesByUser(String username) {
+        List<Property> properties = propertyRepository.findByCreatedByUsername(username);
 
-        return propertyRepository.findByCreatedByUsername(username)
-                .stream()
-                .map(property -> new PropertySimpleDTO(
-                        property.getId(),
-                        property.getAddress(),
-                        property.getNumberOfApartments()
-                ))
-                .collect(Collectors.toList());
+        return properties.stream()
+                .map(PropertySimpleDTO::from)
+                .toList();
     }
 
      /**

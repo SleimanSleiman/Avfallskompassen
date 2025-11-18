@@ -6,6 +6,10 @@ interface Property {
   id: number;
   address: string;
   numberOfApartments?: number;
+  lockName: string;
+  lockPrice: number;
+  accessPathLength: number;
+  municipalityName: string;
 }
 
 export default function StatisticsOverviewPage() {
@@ -34,6 +38,7 @@ export default function StatisticsOverviewPage() {
         state: {
           propertyName: p.address,
           numberOfApartments: p.numberOfApartments,
+          lockPrice: p.lockPrice,
         },
       });
     }
@@ -83,6 +88,18 @@ export default function StatisticsOverviewPage() {
                       <span className="text-gray-500">Lägenheter:</span>{" "}
                       {p.numberOfApartments ?? "—"}
                     </div>
+                    <div>
+                        <span className="text-gray-500"> Låstyp:</span>{" "}
+                    {p.lockName} m
+                    </div>
+                      <div>
+                          <span className="text-gray-500">Dragväg:</span>{" "}
+                          {p.accessPathLength} m
+                      </div>
+                      <div>
+                          <span className="text-gray-500">Kommun:</span>{" "}
+                          {p.municipalityName || "—"}
+                      </div>
                   </div>
 
                   <div className="mt-4 flex flex-wrap gap-2">

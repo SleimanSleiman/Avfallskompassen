@@ -238,15 +238,35 @@ public class PropertyServiceImplTest {
     @Test
     void getSimplePropertiesByUser_returnsMappedDtos() {
 
+        LockType lock1 = new LockType();
+        lock1.setName("Fysisk");
+        lock1.setCost(BigDecimal.valueOf(10.0));
+
+        LockType lock2 = new LockType();
+        lock2.setName("Nyckel");
+        lock2.setCost(BigDecimal.valueOf(20.0));
+
+        Municipality municipality = new Municipality();
+        municipality.setName("Helsingborg");
+
+        Municipality municipality2 = new Municipality();
+        municipality2.setName("Malmö");
+
         Property p1 = new Property();
         p1.setId(10L);
         p1.setAddress("Första gatan 1");
         p1.setNumberOfApartments(5);
+        p1.setLockType(lock1);
+        p1.setAccessPathLength(12.5);
+        p1.setMunicipality(municipality);
 
         Property p2 = new Property();
         p2.setId(20L);
         p2.setAddress("Andra gatan 2");
         p2.setNumberOfApartments(12);
+        p2.setLockType(lock2);
+        p2.setAccessPathLength(25.5);
+        p2.setMunicipality(municipality2);
 
         when(propertyRepository.findByCreatedByUsername("tester"))
                 .thenReturn(List.of(p1, p2));
@@ -259,11 +279,19 @@ public class PropertyServiceImplTest {
         assertEquals(10L, dto1.getId());
         assertEquals("Första gatan 1", dto1.getAddress());
         assertEquals(5, dto1.getNumberOfApartments());
+        assertEquals("Fysisk", dto1.getLockName());
+        assertEquals(BigDecimal.valueOf(10.0), dto1.getLockPrice());
+        assertEquals(12.5, dto1.getAccessPathLength());
+        assertEquals("Helsingborg", dto1.getMunicipalityName());
 
         PropertySimpleDTO dto2 = result.get(1);
         assertEquals(20L, dto2.getId());
         assertEquals("Andra gatan 2", dto2.getAddress());
         assertEquals(12, dto2.getNumberOfApartments());
+        assertEquals("Nyckel", dto2.getLockName());
+        assertEquals(BigDecimal.valueOf(20.0), dto2.getLockPrice());
+        assertEquals(25.5, dto2.getAccessPathLength());
+        assertEquals("Malmö", dto2.getMunicipalityName());
 
         verify(propertyRepository).findByCreatedByUsername("tester");
     }
