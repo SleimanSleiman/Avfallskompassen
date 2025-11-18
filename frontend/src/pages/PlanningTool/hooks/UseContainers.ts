@@ -166,6 +166,17 @@ export function useContainers(
         saveContainers(newState);
     };
 
+    //Moves all containers within the room when the room itself is dragged
+    const moveAllContainers = (dx: number, dy: number) => {
+        const newState = containersInRoom.map(c => ({
+            ...c,
+            x: c.x + dx,
+            y: c.y + dy,
+        }));
+
+        saveContainers(newState);
+    };
+
     //Select or deselect a container
     const handleSelectContainer = (id: number | null) => {
         setSelectedContainerId(id);
@@ -273,6 +284,7 @@ export function useContainers(
         handleAddContainer,
         handleRemoveContainer,
         handleDragContainer,
+        moveAllContainers,
         handleSelectContainer,
         handleRotateContainer,
 

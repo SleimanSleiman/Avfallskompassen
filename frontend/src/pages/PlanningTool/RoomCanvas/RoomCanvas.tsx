@@ -71,6 +71,7 @@ type RoomCanvasProps = {
     containers: ContainerInRoom[];
     selectedContainerId: number | null;
     handleDragContainer: (id: number, pos: { x: number; y: number }) => void;
+    moveAllContainers: (dx: number, dy: number) => void;
     handleSelectContainer: (id: number | null) => void;
     setSelectedContainerInfo: (v: ContainerDTO | null) => void;
     selectedContainerInfo: ContainerDTO | null;
@@ -148,6 +149,7 @@ export default function RoomCanvas({
     containers,
     selectedContainerId,
     handleDragContainer,
+    moveAllContainers,
     handleSelectContainer,
     setSelectedContainerInfo,
     selectedContainerInfo,
@@ -335,6 +337,16 @@ export default function RoomCanvas({
             ? containersForActiveType.filter(container => container.size === activeSize)
             : containersForActiveType)
         : [];
+
+    //Moves a room and the containers inside it
+    const handleMoveRoom = (newX: number, newY: number) => {
+        const dx = newX - room.x;
+        const dy = newY - room.y;
+
+        setRoom({ ...room, x: newX, y: newY });
+        moveAllContainers(dx, dy);
+    };
+
 
     /* ──────────────── Render ──────────────── */
     return (
@@ -593,6 +605,7 @@ export default function RoomCanvas({
                         handleSelectContainer={handleSelectContainer}
                         handleSelectDoor={handleSelectDoor}
                         setSelectedContainerInfo={setSelectedContainerInfo}
+                        onMove={handleMoveRoom}
                     />
 
                     {/* Draggable corners for resizing the room */}

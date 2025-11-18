@@ -63,6 +63,7 @@ export default function PlanningTool() {
         handleAddContainer,
         handleRemoveContainer,
         handleDragContainer,
+        moveAllContainers,
         handleSelectContainer,
 
         availableContainers,
@@ -225,6 +226,7 @@ export default function PlanningTool() {
                         containers={containersInRoom}
                         selectedContainerId={selectedContainerId}
                         handleDragContainer={handleDragContainer}
+                        moveAllContainers={moveAllContainers}
                         handleSelectContainer={handleSelectContainer}
                         getContainerZones={getContainerZones}
                         draggedContainer={draggedContainer}
