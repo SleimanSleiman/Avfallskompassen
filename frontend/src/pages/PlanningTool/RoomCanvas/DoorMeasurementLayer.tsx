@@ -4,8 +4,9 @@
  * The text displayes the distance between the corners in meters.
  */
 import { Line, Text } from "react-konva";
+import type { ReactNode } from "react";
 import type { Door } from "../Types";
-import { SCALE } from "../Constants";
+import { SCALE, STAGE_HEIGHT, STAGE_WIDTH } from "../Constants";
 
 /* ─────────────── Props ──────────────── */
 type DoorMeasurementLayerProps = {
@@ -14,8 +15,12 @@ type DoorMeasurementLayerProps = {
 };
 
 export default function DoorMeasurementLayer({ doors, room }: DoorMeasurementLayerProps) {
-    const baseMargin = 20; //margin from door to measurement lines
-    const textOffset = 20; //offset for the measurement text above or beside the line
+    const baseMargin = 1;
+    const textOffset = -5;
+    const fontSize = 14;
+    const textPadding = 4;
+    const minCanvasPadding = 8;
+    const textColor = "blue";
 
     /* ──────────────── Render ──────────────── */
     return (
@@ -57,131 +62,168 @@ export default function DoorMeasurementLayer({ doors, room }: DoorMeasurementLay
 
                 let line1: number[] = [];
                 let line2: number[] = [];
-                let texts: JSX.Element[] = [];
+                const texts: ReactNode[] = [];
 
                 switch (door.wall) {
                     case "top":
-                        line1 = [room.x, topY - margin, leftX, topY - margin];
-                        line2 = [rightX, topY - margin, room.x + room.width, topY - margin];
+                        {
+                            const availableTopSpace = topY;
+                            const maxOffset = Math.max(availableTopSpace - minCanvasPadding, 0);
+                            const offset = Math.min(margin, maxOffset);
+                            const lineY = topY - offset;
+                            const textY = Math.max(lineY + textPadding, textPadding);
+                            line1 = [room.x, lineY, leftX, lineY];
+                            line2 = [rightX, lineY, room.x + room.width, lineY];
 
-                        texts.push(
-                            <Text
-                                key={`text-left-${door.id}`}
-                                x={(room.x + leftX) / 2}
-                                y={topY - margin - textOffset}
-                                text={`${((leftX - room.x) * SCALE).toFixed(2)} m`}
-                                fontSize={14}
-                                fill="blue"
-                                align="center"
-                            />
-                        );
+                            texts.push(
+                                <Text
+                                    key={`text-left-${door.id}`}
+                                    x={(room.x + leftX) / 2}
+                                    y={textY}
+                                    text={`${((leftX - room.x) * SCALE).toFixed(2)} m`}
+                                    fontSize={fontSize}
+                                    fill={textColor}
+                                    align="center"
+                                />
+                            );
 
-                        texts.push(
-                            <Text
-                                key={`text-right-${door.id}`}
-                                x={(rightX + room.x + room.width) / 2}
-                                y={topY - margin - textOffset}
-                                text={`${((room.x + room.width - rightX) * SCALE).toFixed(2)} m`}
-                                fontSize={14}
-                                fill="blue"
-                                align="center"
-                            />
-                        );
+                            texts.push(
+                                <Text
+                                    key={`text-right-${door.id}`}
+                                    x={(rightX + room.x + room.width) / 2}
+                                    y={textY}
+                                    text={`${((room.x + room.width - rightX) * SCALE).toFixed(2)} m`}
+                                    fontSize={fontSize}
+                                    fill={textColor}
+                                    align="center"
+                                />
+                            );
+                        }
                         break;
 
                     case "bottom":
-                        line1 = [room.x, bottomY + margin, leftX, bottomY + margin];
-                        line2 = [rightX, bottomY + margin, room.x + room.width, bottomY + margin];
+                        {
+                            const availableBottomSpace = STAGE_HEIGHT - bottomY;
+                            const maxOffset = Math.max(availableBottomSpace - minCanvasPadding, 0);
+                            const offset = Math.min(margin, maxOffset);
+                            const lineY = bottomY + offset;
+                            const baseTextY = lineY - (fontSize + textPadding);
+                            const textY = Math.min(
+                                Math.max(baseTextY, textPadding),
+                                STAGE_HEIGHT - fontSize - textPadding
+                            );
+                            line1 = [room.x, lineY, leftX, lineY];
+                            line2 = [rightX, lineY, room.x + room.width, lineY];
 
-                        texts.push(
-                            <Text
-                                key={`text-left-${door.id}`}
-                                x={(room.x + leftX) / 2}
-                                y={bottomY + margin + textOffset - 14}
-                                text={`${((leftX - room.x) * SCALE).toFixed(2)} m`}
-                                fontSize={14}
-                                fill="blue"
-                                align="center"
-                            />
-                        );
+                            texts.push(
+                                <Text
+                                    key={`text-left-${door.id}`}
+                                    x={(room.x + leftX) / 2}
+                                    y={textY}
+                                    text={`${((leftX - room.x) * SCALE).toFixed(2)} m`}
+                                    fontSize={fontSize}
+                                    fill={textColor}
+                                    align="center"
+                                />
+                            );
 
-                        texts.push(
-                            <Text
-                                key={`text-right-${door.id}`}
-                                x={(rightX + room.x + room.width) / 2}
-                                y={bottomY + margin + textOffset - 14}
-                                text={`${((room.x + room.width - rightX) * SCALE).toFixed(2)} m`}
-                                fontSize={14}
-                                fill="blue"
-                                align="center"
-                            />
-                        );
+                            texts.push(
+                                <Text
+                                    key={`text-right-${door.id}`}
+                                    x={(rightX + room.x + room.width) / 2}
+                                    y={textY}
+                                    text={`${((room.x + room.width - rightX) * SCALE).toFixed(2)} m`}
+                                    fontSize={fontSize}
+                                    fill={textColor}
+                                    align="center"
+                                />
+                            );
+                        }
                         break;
 
                     case "left":
-                        line1 = [leftX - margin, room.y, leftX - margin, topY];
-                        line2 = [leftX - margin, bottomY, leftX - margin, room.y + room.height];
+                        {
+                            const availableLeftSpace = leftX;
+                            const maxOffset = Math.max(availableLeftSpace - minCanvasPadding, 0);
+                            const offset = Math.min(margin, maxOffset);
+                            const lineX = leftX - offset;
+                            const baseTextX = lineX - textOffset;
+                            const textX = Math.max(baseTextX, textPadding);
+                            line1 = [lineX, room.y, lineX, topY];
+                            line2 = [lineX, bottomY, lineX, room.y + room.height];
 
-                        texts.push(
-                            <Text
-                                key={`text-top-${door.id}`}
-                                x={leftX - margin - textOffset}
-                                y={(room.y + topY) / 2}
-                                text={`${((topY - room.y) * SCALE).toFixed(2)} m`}
-                                fontSize={14}
-                                fill="blue"
-                                rotation={-90}
-                                align="center"
-                                verticalAlign="middle"
-                            />
-                        );
+                            texts.push(
+                                <Text
+                                    key={`text-top-${door.id}`}
+                                    x={textX}
+                                    y={(room.y + topY) / 2}
+                                    text={`${((topY - room.y) * SCALE).toFixed(2)} m`}
+                                    fontSize={fontSize}
+                                    fill={textColor}
+                                    rotation={-90}
+                                    align="center"
+                                    verticalAlign="middle"
+                                />
+                            );
 
-                        texts.push(
-                            <Text
-                                key={`text-bottom-${door.id}`}
-                                x={leftX - margin - textOffset}
-                                y={(bottomY + room.y + room.height) / 2}
-                                text={`${((room.y + room.height - bottomY) * SCALE).toFixed(2)} m`}
-                                fontSize={14}
-                                fill="blue"
-                                rotation={-90}
-                                align="center"
-                                verticalAlign="middle"
-                            />
-                        );
+                            texts.push(
+                                <Text
+                                    key={`text-bottom-${door.id}`}
+                                    x={textX}
+                                    y={(bottomY + room.y + room.height) / 2}
+                                    text={`${((room.y + room.height - bottomY) * SCALE).toFixed(2)} m`}
+                                    fontSize={fontSize}
+                                    fill={textColor}
+                                    rotation={-90}
+                                    align="center"
+                                    verticalAlign="middle"
+                                />
+                            );
+                        }
                         break;
 
                     case "right":
-                        line1 = [rightX + margin, room.y, rightX + margin, topY];
-                        line2 = [rightX + margin, bottomY, rightX + margin, room.y + room.height];
+                        {
+                            const availableRightSpace = STAGE_WIDTH - rightX;
+                            const maxOffset = Math.max(availableRightSpace - minCanvasPadding, 0);
+                            const offset = Math.min(margin, maxOffset);
+                            const lineX = rightX + offset;
+                            const baseTextX = lineX + textOffset;
+                            const textX = Math.min(
+                                Math.max(baseTextX, textPadding),
+                                STAGE_WIDTH - textPadding
+                            );
+                            line1 = [lineX, room.y, lineX, topY];
+                            line2 = [lineX, bottomY, lineX, room.y + room.height];
 
-                        texts.push(
-                            <Text
-                                key={`text-top-${door.id}`}
-                                x={rightX + margin + textOffset}
-                                y={(room.y + topY) / 2}
-                                text={`${((topY - room.y) * SCALE).toFixed(2)} m`}
-                                fontSize={14}
-                                fill="blue"
-                                rotation={90}
-                                align="center"
-                                verticalAlign="middle"
-                            />
-                        );
+                            texts.push(
+                                <Text
+                                    key={`text-top-${door.id}`}
+                                    x={textX}
+                                    y={(room.y + topY) / 2}
+                                    text={`${((topY - room.y) * SCALE).toFixed(2)} m`}
+                                    fontSize={fontSize}
+                                    fill={textColor}
+                                    rotation={90}
+                                    align="center"
+                                    verticalAlign="middle"
+                                />
+                            );
 
-                        texts.push(
-                            <Text
-                                key={`text-bottom-${door.id}`}
-                                x={rightX + margin + textOffset}
-                                y={(bottomY + room.y + room.height) / 2}
-                                text={`${((room.y + room.height - bottomY) * SCALE).toFixed(2)} m`}
-                                fontSize={14}
-                                fill="blue"
-                                rotation={90}
-                                align="center"
-                                verticalAlign="middle"
-                            />
-                        );
+                            texts.push(
+                                <Text
+                                    key={`text-bottom-${door.id}`}
+                                    x={textX}
+                                    y={(bottomY + room.y + room.height) / 2}
+                                    text={`${((room.y + room.height - bottomY) * SCALE).toFixed(2)} m`}
+                                    fontSize={fontSize}
+                                    fill={textColor}
+                                    rotation={90}
+                                    align="center"
+                                    verticalAlign="middle"
+                                />
+                            );
+                        }
                         break;
                 }
 

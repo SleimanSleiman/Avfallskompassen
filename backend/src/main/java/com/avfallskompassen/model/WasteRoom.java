@@ -16,6 +16,9 @@ public class WasteRoom {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column
+    private String name;
+
     @Column(nullable = false)
     private double length;
 
@@ -54,83 +57,36 @@ public class WasteRoom {
         updatedAt = LocalDateTime.now();
     }
 
-    public Long getId() {
-        return id;
-    }
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    public double getLength() { return length; }
+    public void setLength(double length) { this.length = length; }
 
-    public double getLength() {
-        return length;
-    }
+    public double getWidth() { return width; }
+    public void setWidth(double width) { this.width = width; }
 
-    public void setLength(double length) {
-        this.length = length;
-    }
+    public double getX() { return x; }
+    public void setX(double x) { this.x = x; }
 
-    public double getWidth() {
-        return width;
-    }
+    public double getY() { return y; }
+    public void setY(double y) { this.y = y; }
 
-    public void setWidth(double width) {
-        this.width = width;
-    }
+    public LocalDateTime getCreatedAt() { return createdAt; }
+    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
 
-    public double getX() {
-        return x;
-    }
+    public LocalDateTime getUpdatedAt() { return updatedAt; }
+    public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
 
-    public void setX(double x) {
-        this.x = x;
-    }
+    public Property getProperty() { return property; }
+    public void setProperty(Property property) { this.property = property; }
 
-    public double getY() {
-        return y;
-    }
+    public List<Door> getDoors() { return doors; }
+    public void setDoors(List<Door> doors) { this.doors = doors; }
 
-    public void setY(double y) {
-        this.y = y;
-    }
+    public List<ContainerPosition> getContainers() { return containers; }
+    public void setContainers(List<ContainerPosition> containers) { this.containers = containers; }
 
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public LocalDateTime getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public void setUpdatedAt(LocalDateTime updatedAt) {
-        this.updatedAt = updatedAt;
-    }
-
-    public Property getProperty() {
-        return property;
-    }
-
-    public void setProperty(Property property) {
-        this.property = property;
-    }
-
-    public List<Door> getDoors() {
-        return doors;
-    }
-
-    public void setDoors(List<Door> doors) {
-        this.doors = doors;
-    }
-
-    public List<ContainerPosition> getContainers() {
-        return containers;
-    }
-
-    public void setContainers(List<ContainerPosition> containers) {
-        this.containers = containers;
-    }
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
 }

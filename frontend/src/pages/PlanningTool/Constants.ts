@@ -6,7 +6,6 @@
 export const clamp = (value: number, min: number, max: number) =>
   Math.max(min, Math.min(value, max));
 
-//Convert millimeters to pixels based on SCALE
 export const mmToPixels = (mm?: number): number => {
     const mmToMeter = mm / 1000;
     return mmToMeter / SCALE;
@@ -25,17 +24,18 @@ export const isOverlapping = (
     );
 };
 
-//Scale factor: 1 pixel = 0.02 meter in real life
 export const SCALE = 0.02;
+
+export const MARGIN = 150;
+export const STAGE_WIDTH = 900;
+export const STAGE_HEIGHT = 750;
 
 //Minimum room dimensions in pixels
 export const MIN_WIDTH = 2.5 / SCALE;
 export const MIN_HEIGHT = 2.5 / SCALE;
 
-//Canvas dimensions and margins
-export const MARGIN = 150;
-export const STAGE_WIDTH = 900;
-export const STAGE_HEIGHT = 750;
+export const ROOM_VERTICAL_OFFSET = 35;
+export const ROOM_HORIZONTAL_OFFSET = 0;
 
 //Drag-and-drop data format for containers
 export const DRAG_DATA_FORMAT = 'application/avfallskompassen-container';

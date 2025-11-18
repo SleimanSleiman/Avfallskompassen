@@ -27,7 +27,12 @@ describe('fetchContainersByMunicipalityAndService', () => {
 
         const result = await fetchContainersByMunicipalityAndService(1, 2);
 
-        expect(result).toEqual(mockData);
+        expect(result).toEqual(
+            mockData.map(container => ({
+                ...container,
+                serviceTypeId: 2,
+            }))
+        );
         expect(getSpy).toHaveBeenCalledWith(
             '/api/containers/municipality/1/service/2'
         );

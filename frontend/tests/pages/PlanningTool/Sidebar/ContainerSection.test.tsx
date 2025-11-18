@@ -41,7 +41,7 @@ describe('ContainerSection', () => {
 
         await waitFor(() => {
             expect(mockSetSelectedType).toHaveBeenCalledWith('Matavfall');
-            expect(mockFetchContainers).toHaveBeenCalledWith(1);
+            expect(mockFetchContainers).toHaveBeenCalledWith(expect.objectContaining({ id: 1, name: 'Matavfall' }));
         });
     });
 

@@ -4,12 +4,10 @@ import LoginPage from "../../src/pages/LoginPage";
 import { login } from "../../src/lib/Auth";
 import { BrowserRouter } from "react-router-dom";
 
-// Mock login()
 vi.mock("../../src/lib/Auth", () => ({
   login: vi.fn(),
 }));
 
-// Mock useNavigate
 const mockNavigate = vi.fn();
 vi.mock("react-router-dom", async () => {
   const actual = await vi.importActual<any>("react-router-dom"); 

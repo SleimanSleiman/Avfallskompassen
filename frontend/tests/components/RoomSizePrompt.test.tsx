@@ -6,6 +6,7 @@ import RoomSizePrompt from "../../src/components/RoomSizePrompt";
 describe("RoomSizePrompt", () => {
   let onConfirm: ReturnType<typeof vi.fn>;
   let onCancel: ReturnType<typeof vi.fn>;
+  let nameInput: HTMLElement;
   let lengthInput: HTMLElement;
   let widthInput: HTMLElement;
   let confirmButton: HTMLElement;
@@ -16,47 +17,51 @@ describe("RoomSizePrompt", () => {
 
     render(<RoomSizePrompt onConfirm={onConfirm} onCancel={onCancel} />);
 
-    // Component placeholders contain the unit ("Längd (meter)") so use a partial/regex match
+    nameInput = screen.getByPlaceholderText(/Namn/i);
     lengthInput = screen.getByPlaceholderText(/Längd/i);
     widthInput = screen.getByPlaceholderText(/Bredd/i);
     confirmButton = screen.getByText("Bekräfta");
   });
 
   it("Works with valid inputs", () => {
+    fireEvent.change(nameInput, { target: { value: "testing" } });
     fireEvent.change(lengthInput, { target: { value: "5" } });
     fireEvent.change(widthInput, { target: { value: "6" } });
     fireEvent.click(confirmButton);
 
-    expect(onConfirm).toHaveBeenCalledWith(5, 6);
+    expect(onConfirm).toHaveBeenCalledWith("testing", 5, 6);
   });
 
   it("Works with min inputs", () => {
+    fireEvent.change(nameInput, { target: { value: "testing" } });
     fireEvent.change(lengthInput, { target: { value: "2.5" } });
     fireEvent.change(widthInput, { target: { value: "2.5" } });
     fireEvent.click(confirmButton);
 
-    expect(onConfirm).toHaveBeenCalledWith(2.5, 2.5);
+    expect(onConfirm).toHaveBeenCalledWith("testing", 2.5, 2.5);
   });
 
   it("Works with max inputs", () => {
+    fireEvent.change(nameInput, { target: { value: "testing" } });
     fireEvent.change(lengthInput, { target: { value: "9" } });
     fireEvent.change(widthInput, { target: { value: "12" } });
     fireEvent.click(confirmButton);
 
-    expect(onConfirm).toHaveBeenCalledWith(9, 12);
+    expect(onConfirm).toHaveBeenCalledWith("testing", 9, 12);
   });
 
   it("Shows error for length more than 9", () => {
+    fireEvent.change(nameInput, { target: { value: "testing" } });
     fireEvent.change(lengthInput, { target: { value: "10" } });
     fireEvent.change(widthInput, { target: { value: "6" } });
     fireEvent.click(confirmButton);
 
-    // Component renders the error inline instead of using window.alert
     expect(screen.getByText('Rummets längd får inte överstiga 9 meter.')).toBeInTheDocument();
     expect(onConfirm).not.toHaveBeenCalled();
   });
 
    it("Shows error for width greater than allowed", () => {
+    fireEvent.change(nameInput, { target: { value: "testing" } });
     fireEvent.change(lengthInput, { target: { value: "6" } });
     fireEvent.change(widthInput, { target: { value: "13" } });
     fireEvent.click(confirmButton);
@@ -66,6 +71,7 @@ describe("RoomSizePrompt", () => {
   });
 
   it("Shows error for invalid input", () => {
+    fireEvent.change(nameInput, { target: { value: "testing" } });
     fireEvent.change(lengthInput, { target: { value: "hej" } });
     fireEvent.change(widthInput, { target: { value: "halloj" } });
     fireEvent.click(confirmButton);
@@ -75,6 +81,7 @@ describe("RoomSizePrompt", () => {
   });
 
   it("Shows error for length and width less than 2.5", () => {
+    fireEvent.change(nameInput, { target: { value: "testing" } });
     fireEvent.change(lengthInput, { target: { value: "2.4" } });
     fireEvent.change(widthInput, { target: { value: "2.4" } });
     fireEvent.click(confirmButton);

@@ -7,6 +7,7 @@ import java.math.BigDecimal;
  */
 public class ContainerDTO {
 
+    private Long id;
     private String name;
     private int size;
     private double width;
@@ -20,6 +21,7 @@ public class ContainerDTO {
     public ContainerDTO() {}
 
     public ContainerDTO(
+            Long id,
             String name,
             int size,
             double width,
@@ -30,6 +32,7 @@ public class ContainerDTO {
             int emptyingFrequencyPerYear,
             BigDecimal cost
     ) {
+        this.id  = id;
         this.name = name;
         this.size = size;
         this.width = width;
@@ -111,5 +114,13 @@ public class ContainerDTO {
 
     public void setCost(BigDecimal cost) {
         this.cost = cost;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 }

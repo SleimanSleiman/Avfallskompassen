@@ -12,9 +12,12 @@ public class DoorDTO {
     private double angle;
     private double width;
     private double depth;
+    private String wall;
+    private String swingDirection;
     private Long wasteRoomId;
 
-    public DoorDTO(Long id, double x, double y, double angle, double width, double depth, Long wasteRoomId) {
+    public DoorDTO(Long id, double x, double y, double angle, double width, double depth,
+                   Long wasteRoomId, String wall, String swingDirection) {
         this.id = id;
         this.x = x;
         this.y = y;
@@ -22,6 +25,8 @@ public class DoorDTO {
         this.width = width;
         this.depth = depth;
         this.wasteRoomId = wasteRoomId;
+        this.wall = wall;
+        this.swingDirection = swingDirection;
     }
 
     public DoorDTO() {}
@@ -47,6 +52,22 @@ public class DoorDTO {
     public Long getWasteRoomId() { return wasteRoomId; }
     public void setWasteRoomId(Long wasteRoomId) { this.wasteRoomId = wasteRoomId; }
 
+    public String getWall() {
+        return wall;
+    }
+
+    public void setWall(String wall) {
+        this.wall = wall;
+    }
+
+    public String getSwingDirection() {
+        return swingDirection;
+    }
+
+    public void setSwingDirection(String swingDirection) {
+        this.swingDirection = swingDirection;
+    }
+
     /**
      * Method for converting an entity object to a DTO object
      * @param entity The entity object to be converted
@@ -61,6 +82,8 @@ public class DoorDTO {
         dto.setWidth(entity.getWidth());
         dto.setDepth(entity.getDepth());
         dto.setWasteRoomId(entity.getWasteRoom() != null ? entity.getWasteRoom().getId() : null);
+        dto.setWall(entity.getWall());
+        dto.setSwingDirection(entity.getSwingDirection());
         return dto;
     }
 }

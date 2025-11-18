@@ -1,34 +1,64 @@
-/**
- * Custom hook to manage room's position, size, and resizing logic.
- * Handles corner dragging, constraints, and initial state from localStorage.
- */
+
 import { useState } from "react";
-import { Scale } from "lucide-react";
-import { SCALE, mmToPixels, STAGE_WIDTH, STAGE_HEIGHT, MIN_WIDTH, MIN_HEIGHT, MARGIN, clamp } from "../Constants";
-import type { Room, ContainerInRoom } from "../Types";
+import { SCALE, STAGE_WIDTH, STAGE_HEIGHT, MIN_WIDTH, MIN_HEIGHT, MARGIN, clamp, mmToPixels, ROOM_VERTICAL_OFFSET, ROOM_HORIZONTAL_OFFSET } from "../Constants";
+import type { Room, ContainerInRoom, Door } from "../Types";
+import type { ContainerDTO } from "../../../lib/Container";
 
-export function useRoom(
-    containersInRoom: ContainerInRoom[],
-    setContainersInRoom: React.Dispatch<React.SetStateAction<ContainerInRoom[]>>
-) {
-    /* ──────────────── Initial Room State ──────────────── */
-    const initialRoom = (() => {
-        const savedRoom = localStorage.getItem("enviormentRoomData");
-        const defaultWidthMeters = 10;
-        const defaultHeightMeters = 8;
-        const defaultX = (STAGE_WIDTH - defaultWidthMeters / SCALE) / 2;
-        const defaultY = (STAGE_HEIGHT - defaultHeightMeters / SCALE) / 2;
+export function useRoom() {
+  const initialRoom = (() => {
+    const saved = typeof window !== "undefined"
+      ? (localStorage.getItem("enviormentRoomData") ?? localStorage.getItem("trashRoomData"))
+      : null;
 
-        if (savedRoom) {
-            try {
-                const parsed = JSON.parse(savedRoom);
+    const defaultWidthMeters = 5;
+    const defaultHeightMeters = 5;
 
-                const widthMeters = parsed.width ?? defaultWidthMeters;
-                const heightMeters = parsed.height ?? defaultHeightMeters;
-                const x = parsed.x !== undefined ? parsed.x : defaultX;
-                const y = parsed.y !== undefined ? parsed.y : defaultY;
-                console.log(parsed.containers);
+    const defaultX = (STAGE_WIDTH - defaultWidthMeters / SCALE) / 2 + ROOM_HORIZONTAL_OFFSET;
+    const defaultY = (STAGE_HEIGHT - defaultHeightMeters / SCALE) / 2 + ROOM_VERTICAL_OFFSET;
 
+    if (!saved) {
+      return {
+        id: undefined,
+        x: defaultX,
+        y: defaultY,
+        width: defaultWidthMeters / SCALE,
+        height: defaultHeightMeters / SCALE,
+        doors: [] as Door[],
+        containers: [] as ContainerInRoom[],
+        propertyId: undefined,
+        name: "",
+      } as Room;
+    }
+
+    try {
+      const parsed = JSON.parse(saved);
+
+
+      const widthMeters = parsed?.width ?? defaultWidthMeters;
+      const heightMeters = parsed?.height ?? parsed?.length ?? defaultHeightMeters;
+
+      const maxWidthMeters = (STAGE_WIDTH - 2 * MARGIN) * SCALE;
+      const maxHeightMeters = (STAGE_HEIGHT - 2 * MARGIN) * SCALE;
+
+    
+      if (widthMeters >= maxWidthMeters || heightMeters >= maxHeightMeters) {
+        return {
+          id: undefined,
+          x: defaultX,
+          y: defaultY,
+          width: defaultWidthMeters / SCALE,
+          height: defaultHeightMeters / SCALE,
+          doors: [] as Door[],
+          containers: [] as ContainerInRoom[],
+          propertyId: undefined,
+          name: "",
+        } as Room;
+      }
+
+      const x = parsed?.x ?? defaultX;
+      const y = parsed?.y ?? defaultY;
+
+      
                 const containers = (parsed.containers ?? []).map(c => {
                 const containerInfo = c.containerDTO ?? {
                 imageTopViewUrl: "/images/containers/tempTopView.png",
@@ -38,7 +68,8 @@ export function useRoom(
                 height: 1,
                 name: "Unknown",
                 size: 0,
-            };
+
+                            };
 
             return {
                 ...c,
@@ -52,90 +83,94 @@ export function useRoom(
             };
             });
 
-            const doors = (parsed.doors ?? []).map(d => ({
-                id: d.id ?? Date.now(),
-                x: d.x ?? 0,
-                y: d.y ?? 0,
-                width: d.width ?? 1.2,
-                wall: d.wall ?? "bottom",
-                rotation: d.rotation ?? 0,
-                swingDirection: d.swingDirection ?? "inward",
-            }));
+      const doors: Door[] = Array.isArray(parsed?.doors)
+        ? parsed.doors.map((d: any, i: number) => ({
+            id: d?.id ?? Date.now() + i,
+            x: d?.x ?? 0,
+            y: d?.y ?? 0,
+            width: d?.width ?? 1.2,
+            wall: (d?.wall as Door['wall']) ?? 'bottom',
+            rotation: d?.rotation ?? d?.angle ?? 0,
+            swingDirection: (d?.swingDirection as Door['swingDirection']) ?? 'inward',
+          }))
+        : [];
 
+      return {
+        id: parsed?.id ?? parsed?.wasteRoomId ?? undefined,
+        x,
+        y,
+        width: widthMeters / SCALE,
+        height: heightMeters / SCALE,
+        doors,
+        containers,
+        propertyId: parsed?.property?.id ?? undefined,
+        name: parsed?.name ?? "",
+      } as Room;
+    } catch (err) {
+      console.warn("Failed to parse stored room data", err);
+      return {
+        id: undefined,
+        x: defaultX,
+        y: defaultY,
+        width: defaultWidthMeters / SCALE,
+        height: defaultHeightMeters / SCALE,
+        doors: [] as Door[],
+        containers: [] as ContainerInRoom[],
+        propertyId: undefined,
+        name: "",
+      } as Room;
+    }
+  })();
 
+  const [room, setRoom] = useState<Room>(initialRoom);
 
-            return {
-                x,
-                y,
-                width: widthMeters / SCALE,
-                height: heightMeters / SCALE,
-                doors,
-                containers,
-            };
-        } catch {
-            return { x: defaultX, y: defaultY, width: defaultWidthMeters / SCALE, height: defaultHeightMeters / SCALE };
-        }
+  const handleDragCorner = (index: number, pos: { x: number; y: number }) => {
+    let { x, y, width, height } = room;
+
+    switch (index) {
+      case 0: {
+        const newX = clamp(pos.x, MARGIN, x + width - MIN_WIDTH);
+        const newY = clamp(pos.y, MARGIN, y + height - MIN_HEIGHT);
+        width = x + width - newX;
+        height = y + height - newY;
+        x = newX;
+        y = newY;
+        break;
+      }
+      case 1: {
+        const newTRX = clamp(pos.x, x + MIN_WIDTH, STAGE_WIDTH - MARGIN);
+        const newTRY = clamp(pos.y, MARGIN, y + height - MIN_HEIGHT);
+        width = newTRX - x;
+        height = y + height - newTRY;
+        y = newTRY;
+        break;
+      }
+      case 2: {
+        const newBRX = clamp(pos.x, x + MIN_WIDTH, STAGE_WIDTH - MARGIN);
+        const newBRY = clamp(pos.y, y + MIN_HEIGHT, STAGE_HEIGHT - MARGIN);
+        width = newBRX - x;
+        height = newBRY - y;
+        break;
+      }
+      case 3: {
+        const newBLX = clamp(pos.x, MARGIN, x + width - MIN_WIDTH);
+        const newBLY = clamp(pos.y, y + MIN_HEIGHT, STAGE_HEIGHT - MARGIN);
+        width = x + width - newBLX;
+        height = newBLY - y;
+        x = newBLX;
+        break;
+      }
     }
 
-    return { x: defaultX, y: defaultY, width: defaultWidthMeters / SCALE, height: defaultHeightMeters / SCALE };
-})();
+    setRoom(prev => ({ ...prev, x, y, width, height }));
+  };
 
+  const corners = [
+    { x: room.x, y: room.y },
+    { x: room.x + room.width, y: room.y },
+    { x: room.x + room.width, y: room.y + room.height },
+    { x: room.x, y: room.y + room.height },
+  ];
 
-    /* ──────────────── Room State ──────────────── */
-    const [room, setRoom] = useState<Room>(initialRoom);
-
-    //Resize logic
-    const handleDragCorner = (index: number, pos: { x: number; y: number }) => {
-        let { x, y, width, height } = room;
-
-        switch (index) {
-            case 0: //top-left corner
-                const newX = clamp(pos.x, MARGIN, x + width - MIN_WIDTH);
-                const newY = clamp(pos.y, MARGIN, y + height - MIN_HEIGHT);
-                width = x + width - newX;
-                height = y + height - newY;
-                x = newX;
-                y = newY;
-                break;
-            case 1: //top-right corner
-                const newTRX = clamp(pos.x, x + MIN_WIDTH, STAGE_WIDTH - MARGIN);
-                const newTRY = clamp(pos.y, MARGIN, y + height - MIN_HEIGHT);
-                width = newTRX - x;
-                height = y + height - newTRY;
-                y = newTRY;
-                break;
-            case 2: //bottom-right corner
-                const newBRX = clamp(pos.x, x + MIN_WIDTH, STAGE_WIDTH - MARGIN);
-                const newBRY = clamp(pos.y, y + MIN_HEIGHT, STAGE_HEIGHT - MARGIN);
-                width = newBRX - x;
-                height = newBRY - y;
-                break;
-            case 3: //bottom-left corner
-                const newBLX = clamp(pos.x, MARGIN, x + width - MIN_WIDTH);
-                const newBLY = clamp(pos.y, y + MIN_HEIGHT, STAGE_HEIGHT - MARGIN);
-                width = x + width - newBLX;
-                height = newBLY - y;
-                x = newBLX;
-                break;
-        }
-
-        setRoom({ x, y, width, height });
-    };
-
-
-    //Define corners for resizing handles
-    const corners = [
-        { x: room.x, y: room.y },
-        { x: room.x + room.width, y: room.y },
-        { x: room.x + room.width, y: room.y + room.height },
-        { x: room.x, y: room.y + room.height },
-    ];
-
-    /* ──────────────── Return ──────────────── */
-    return {
-        room,
-        setRoom,
-        corners,
-        handleDragCorner,
-    };
+  return { room, setRoom, corners, handleDragCorner };
 }

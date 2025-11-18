@@ -1,9 +1,7 @@
 /**
  * ActionPanel component for managing bins and doors in the planning tool.
- * Displays the selected item and provides buttons to move, rotate, or remove it, Undo/Redo container actions.
+ * Displays the selected item and provides controls to view info, rotate, or remove it.
  */
-
-import { useEffect } from "react";
 import InfoTooltip from "./components/InfoTooltip";
 import type { ContainerInRoom as Container, Door } from "./Types";
 import { RotateCcw, Trash2, Info } from "lucide-react";
@@ -19,8 +17,6 @@ type ActionPanelProps = {
     handleRotateDoor: (id: number) => void;
     handleRotateContainer: (id: number) => void;
     handleShowContainerInfo: (id: number) => void;
-    undo: () => void;
-    redo: () => void;
 };
 
 export default function ActionPanel({
@@ -33,8 +29,6 @@ export default function ActionPanel({
     handleRotateDoor,
     handleRotateContainer,
     handleShowContainerInfo,
-    undo,
-    redo,
 }: ActionPanelProps) {
 
     //Display action panel if an object is selected
@@ -64,11 +58,7 @@ export default function ActionPanel({
         if (selectedDoorId !== null) {
             const door = doors.find((d) => d.id === selectedDoorId);
             if (!door) return;
-
-            const newRotation = (door.rotation + 180) % 360;
-            const newSwing =
-            door.swingDirection === "inward" ? "outward" : "inward";
-            handleRotateDoor(door.id, newRotation, newSwing);
+            handleRotateDoor(door.id);
         } else if (selectedContainerId !== null) {
             handleRotateContainer(selectedContainerId);
         }
@@ -83,31 +73,10 @@ export default function ActionPanel({
         }
     }
 
-    /* ─────────────── Keyboard shortcuts (Ctrl+Z / Ctrl+Y) ─────────────── */
-    useEffect(() => {
-        const handleKeyDown = (event: KeyboardEvent) => {
-            const isMac = navigator.platform.toUpperCase().includes("MAC");
-            const ctrlOrCmd = isMac ? event.metaKey : event.ctrlKey;
-
-            if (ctrlOrCmd && event.key === "z") {
-                event.preventDefault();
-                undo();
-            }
-            if (ctrlOrCmd && (event.key === "y")) {
-                event.preventDefault();
-                redo();
-            }
-        };
-
-        window.addEventListener("keydown", handleKeyDown);
-        return () => window.removeEventListener("keydown", handleKeyDown);
-    }, [undo, redo]);
-
-
     /* ─────────────── Render ──────────────── */
     return (
-        <div className="flex flex-col items-center gap-3 border border-gray-300 rounded-2xl bg-white shadow-sm px-3 py-2 w-fit max-w-full mx-auto">
-            
+    <div className="flex flex-col items-center gap-2 border border-gray-300 rounded-xl bg-white shadow-sm px-0 py-1 w-fit max-w-full mx-auto text-sm">
+
             {/* Tooltip */}
             <div className="self-end">
                 <InfoTooltip
@@ -120,34 +89,33 @@ export default function ActionPanel({
 
             {/* Selected item name */}
             {selectedName && (
-                <div className="text-center font-semibold text-gray-800 text-base px-2 py-1 border-b border-gray-200 w-full">
+                <div className="text-center font-semibold text-gray-800 text-sm px-2 py-1 border-b border-gray-200 w-full">
                     {selectedName}
                 </div>
             )}
 
             {/* Action buttons */}
-            <div className="flex flex-col items-center justify-center gap-3 flex-wrap">
+            <div className="flex flex-row lg:flex-col items-center justify-center gap-2.5 flex-wrap">
 
                 {/* Information button - only for containers */}
                 {selectedContainerId !== null && (
                     <button
                         onClick={() => handleShowContainerInfo(selectedContainerId)}
-                        className="flex flex-col items-center justify-center text-gray-700 hover:text-blue-600 transition min-w-[80px] group"
+                        className="flex flex-col items-center justify-center text-gray-700 hover:text-blue-600 transition min-w-[64px] group"
                     >
-                        <Info className="w-6 h-6" />
+                        <Info className="w-5 h-5" />
                         <span className="text-sm font-medium max-h-0 overflow-hidden transition-all duration-300 group-hover:max-h-6">
                             Information
                         </span>
                     </button>
                 )}
-
                 {/* Rotate button */}
                 <button
                         onClick={handleRotate}
-                        className="flex flex-col items-center justify-center text-gray-700 hover:text-blue-600 transition min-w-[80px] group"
+                        className="flex flex-col items-center justify-center text-gray-700 hover:text-blue-600 transition min-w-[64px] group"
                 >
-                    <RotateCcw className="w-6 h-6" />
-                    <span className="text-sm font-small max-h-0 overflow-hidden transition-all duration-300 group-hover:max-h-6">
+                    <RotateCcw className="w-5 h-5" />
+                    <span className="text-xs font-medium max-h-0 overflow-hidden transition-all duration-300 group-hover:max-h-6">
                         {rotateText}
                     </span>
                 </button>
@@ -155,10 +123,10 @@ export default function ActionPanel({
                 {/* Remove button */}
                 <button
                     onClick={handleRemove}
-                    className="flex flex-col items-center justify-center text-red-600 hover:text-red-700 transition min-w-[80px] group"
+                    className="flex flex-col items-center justify-center text-red-600 hover:text-red-700 transition min-w-[64px] group"
                 >
-                    <Trash2 className="w-6 h-6" />
-                    <span className="text-sm font-small max-h-0 overflow-hidden transition-all duration-300 group-hover:max-h-6">
+                    <Trash2 className="w-5 h-5" />
+                    <span className="text-xs font-medium max-h-0 overflow-hidden transition-all duration-300 group-hover:max-h-6">
                         {removeText}
                     </span>
                 </button>

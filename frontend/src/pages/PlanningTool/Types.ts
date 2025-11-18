@@ -2,11 +2,17 @@
  * Types for the Planning Tool feature
  */
 
+import type { ContainerDTO } from "../../lib/Container";
+
 export type Room = {
+    id? : number;
+    name? : string;
     x: number;
     y: number;
     width: number;
     height: number;
+    doors?: Door[];
+    containers?: ContainerInRoom[];
 };
 
 export type Door = {
@@ -26,6 +32,5 @@ export type ContainerInRoom = {
     y: number;
     width: number;
     height: number;
-    container: ContainerDTO;
     rotation: number;
 };

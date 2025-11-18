@@ -2,7 +2,6 @@ package com.avfallskompassen.services.impl;
 
 import com.avfallskompassen.dto.*;
 import com.avfallskompassen.dto.request.ContainerPositionRequest;
-import com.avfallskompassen.dto.request.DoorPositionRequest;
 import com.avfallskompassen.dto.request.DoorRequest;
 import com.avfallskompassen.dto.request.WasteRoomRequest;
 import com.avfallskompassen.exception.ResourceNotFoundException;
@@ -60,6 +59,10 @@ public class WasteRoomServiceImpl implements WasteRoomService {
         wasteRoom.setContainers(containerPositions);
         wasteRoom.setDoors(doorPositions);
 
+        if (request.getName() != null) {
+            wasteRoom.setName(request.getName());
+        }
+
         WasteRoom savedRoom = wasteRoomRepository.save(wasteRoom);
         return WasteRoomDTO.fromEntity(savedRoom);
     }
@@ -113,21 +116,25 @@ public class WasteRoomServiceImpl implements WasteRoomService {
         wasteRoom.setY(request.getY());
         wasteRoom.setProperty(findPropertyById(request.getPropertyId()));
 
+        if (request.getName() != null) {
+            wasteRoom.setName(request.getName());
+        }
+
         List<ContainerPosition> updatedContainers = new ArrayList<>();
         if (wasteRoom.getContainers() != null) {
-            updatedContainers.addAll(wasteRoom.getContainers());
+            wasteRoom.getContainers().clear();
         }
 
         updatedContainers.addAll(convertContainerRequest(request.getContainers(), wasteRoom));
-        wasteRoom.setContainers(updatedContainers);
+        wasteRoom.getContainers().addAll(updatedContainers);
 
         List<Door> updatedDoors = new ArrayList<>();
         if (wasteRoom.getDoors() != null) {
-            updatedDoors.addAll(wasteRoom.getDoors());
+            wasteRoom.getDoors().clear();
         }
 
         updatedDoors.addAll(convertDoorRequest(request.getDoors(), wasteRoom));
-        wasteRoom.setDoors(updatedDoors);
+        wasteRoom.getDoors().addAll(updatedDoors);
 
         WasteRoom updated = wasteRoomRepository.save(wasteRoom);
         return WasteRoomDTO.fromEntity(updated);
@@ -171,7 +178,7 @@ public class WasteRoomServiceImpl implements WasteRoomService {
 
     /**
      * Helper method that converts the data from a request containing information about doors. Transfers
-     * the data from {@link DoorPositionRequest} to {@link Door} which must be done before saving
+     * the data from {@link DoorRequest} to {@link Door} which must be done before saving
      * the doors in the database
      *
      * @param doors     A list containing requests of doors
@@ -192,6 +199,8 @@ public class WasteRoomServiceImpl implements WasteRoomService {
             door.setY(request.getY());
             door.setAngle(request.getAngle());
             door.setWasteRoom(wasteRoom);
+            door.setWall(request.getWall());
+            door.setSwingDirection(request.getSwingDirection());
 
             doorPositions.add(door);
         }
@@ -240,7 +249,9 @@ public class WasteRoomServiceImpl implements WasteRoomService {
                 entity.getX(),
                 entity.getY(),
                 containers,
-                doors
+                doors,
+                entity.getId(),
+                entity.getName()
         );
     }
 }
