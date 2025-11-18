@@ -250,64 +250,11 @@ async function onDeleteWasteRoom(propertyId: number, wasteRoomId: number) {
         console.error('Could not delete waste room', err);
     }
 }
-
-
-
-    return (
-        <main className="mx-auto max-w-7xl px-4 py-8">
-            <ConfirmModal
-                open={!!pendingDelete}
-                title="Bekräfta borttagning"
-                message={pendingDelete ? `Är du säker på att du vill ta bort fastigheten "${pendingDelete.address}"?` : ''}
-                confirmLabel="Ta bort"
-                cancelLabel="Avbryt"
-                loading={deleting}
-                onConfirm={confirmDelete}
-                onCancel={() => setPendingDelete(null)}
-            />
-            <div className="mb-8 rounded-2xl border bg-white p-6 shadow-soft">
-                <div className="mb-3">
-                    <h1 className="h1">Mina Fastigheter</h1>
-                    <p className="mt-2 text-gray-600">
-                        Välkommen {user?.username}! Hantera dina fastigheter här.
-                    </p>
-                </div>
-                <div className="mb-0 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-                    <div className="flex w-full gap-3 md:w-auto">
-                        <div className="relative flex-1 md:w-80">
-                            <input
-                                type="text"
-                                placeholder="Sök på adress eller kommun"
-                                value={query}
-                                onChange={(e) => setQuery(e.target.value)}
-                                className="w-full rounded-xl border-gray-300 shadow-sm pl-10 pr-3 py-2 focus:border-nsr-teal focus:ring-nsr-teal"
-                            />
-                            <svg className="pointer-events-none absolute left-3 top-2.5 h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M12.9 14.32a8 8 0 111.414-1.414l3.387 3.387a1 1 0 01-1.414 1.414l-3.387-3.387zM14 8a6 6 0 11-12 0 6 6 0 0112 0z" clipRule="evenodd"/></svg>
-                        </div>
-                        <select
-                            value={sortBy}
-                            onChange={(e) => setSortBy(e.target.value as any)}
-                            className="rounded-xl border-gray-300 shadow-sm focus:border-nsr-teal focus:ring-nsr-teal"
-                        >
-                            <option value="created">Senaste</option>
-                            <option value="address">Adress A–Ö</option>
-                            <option value="apartmentsAsc">Stigande antal</option>
-                            <option value="apartmentsDesc">Fallande antal</option>
-                        </select>
-                    </div>
-
   function viewStatistics(p: Property) {
     navigate(`/statistics/${p.id}`, {
       state: { propertyName: p.address,
           numberOfApartments: p.numberOfApartments}
     });
-  }
-
-  function handleInputChange(field: keyof PropertyRequest, value: string | number) {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value
-    }));
   }
 
   return (
