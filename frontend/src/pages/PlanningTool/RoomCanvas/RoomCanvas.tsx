@@ -50,6 +50,7 @@ import {
     Undo,
     Redo,
 } from "lucide-react";
+import Message from "../../../components/ShowStatus";
 
 /* ─────────────── RoomCanvas Props ──────────────── */
 type RoomCanvasProps = {
@@ -176,6 +177,8 @@ export default function RoomCanvas({
     //State to track if a container is being dragged
     const [isDraggingContainer, setIsDraggingContainer] = useState(false);
     const isDraggingExistingContainer = isDraggingContainer && selectedContainerId !== null;
+        const [msg, setMsg] = useState<string | null>(null);
+    const [error, setError] = useState<string | null>(null);
 
     const safeUndo = useCallback(() => {
         if (typeof undo === "function") {
@@ -480,6 +483,16 @@ export default function RoomCanvas({
                     </div>
                 </div>
 
+                {/* Feedback messages */}
+                <div
+                    ref={stageWrapperRef}
+                    className="relative w-full overflow-x-auto rounded-2xl text-lg"
+                >
+
+                    {msg && <Message message={msg} type="success" />}
+                    {error && <Message message={error} type="error" />}
+                </div>
+
                 <div className="relative inline-block">
                     {/* Top-left action buttons */}
                     <div className="absolute top-4 left-4 flex flex-row items-center gap-2 z-50">
@@ -528,13 +541,17 @@ export default function RoomCanvas({
 
                 {/* Save design */}
                 <button
-                    onClick={() => {
+                    onClick={async () => {
                         if (typeof saveRoom === "function") {
-                            saveRoom();
-                        } else {
-                      
-                            alert("Spara funktionalitet kommer snart!");
-                        }
+                            try {
+                                await saveRoom(); 
+                                setMsg("Rummet har sparats");
+                                setError(null);
+                            } catch (err) {
+                                setError("Rummet gick inte att spara. Vänligen försök senare igen");
+                                setMsg(null);
+                            }
+                        } 
                     }}
                     className="flex items-center justify-start bg-green-50 text-green-700 hover:bg-green-100 hover:text-green-800 px-2 py-1 rounded-lg transition-all duration-300 shadow-sm group overflow-hidden"
                 >
