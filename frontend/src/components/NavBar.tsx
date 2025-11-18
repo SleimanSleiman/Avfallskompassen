@@ -5,6 +5,7 @@ import { currentUser, logout } from '../lib/Auth';
 export default function NavBar() {
   const [open, setOpen] = useState(false);
   const [user, setUser] = useState(currentUser());
+  const isAdmin = String(user?.role || '').toUpperCase().includes('ADMIN');
 
   useEffect(() => {
     // Update user state when component mounts
@@ -57,7 +58,7 @@ export default function NavBar() {
             </button>
 
             <nav className="hidden md:flex items-center gap-6 text-white font-black text-lg">
-              {user?.role === 'ADMIN' ? (
+              {isAdmin ? (
                 <>
                   <NavLink to="/admin" className={({ isActive }) => `nav-link hover:text-white transition-colors ${isActive ? 'nav-link-active' : ''}`}>Admin</NavLink>
                   <div className="flex items-center gap-3">
@@ -75,9 +76,7 @@ export default function NavBar() {
                   <NavLink to="/dashboard" className={({ isActive }) => `nav-link hover:text-white transition-colors ${isActive ? 'nav-link-active' : ''}`}>Dashboard</NavLink>
                   <NavLink to="/properties" className={({ isActive }) => `nav-link hover:text-white transition-colors ${isActive ? 'nav-link-active' : ''}`}>Mina fastigheter</NavLink>
                   <NavLink to="/planningTool" className={({ isActive }) => `nav-link hover:text-white transition-colors ${isActive ? 'nav-link-active' : ''}`}>Planeringsverktyg</NavLink>
-                  {user?.role === 'ADMIN' && (
-                    <NavLink to="/admin" className={({ isActive }) => `nav-link hover:text-white transition-colors ${isActive ? 'nav-link-active' : ''}`}>Admin</NavLink>
-                  )}
+                  <NavLink to="/reports" className={({ isActive }) => `nav-link hover:text-white transition-colors ${isActive ? 'nav-link-active' : ''}`}>Rapporter</NavLink>
                   <div className="flex items-center gap-3">
                     {user && <span className="text-sm">Hej {user.username}!</span>}
                     {user ? (
@@ -106,7 +105,7 @@ export default function NavBar() {
       {open && (
         <div className="md:hidden bg-white border-b">
           <nav className="mx-auto max-w-7xl px-4 py-3 flex flex-col gap-3 font-black">
-            {user?.role === 'ADMIN' ? (
+            {isAdmin ? (
               <>
                 <NavLink to="/admin" className="text-nsr-ink">Admin</NavLink>
                 <button onClick={handleLogout} className="text-left text-nsr-ink">Logga ut</button>
@@ -116,7 +115,7 @@ export default function NavBar() {
                 <NavLink to="/dashboard" className="text-nsr-ink">Dashboard</NavLink>
                 <NavLink to="/properties" className="text-nsr-ink">Mina fastigheter</NavLink>
                 <NavLink to="/planningTool" className="text-nsr-ink">Planeringsverktyg</NavLink>
-                {user?.role === 'ADMIN' && <NavLink to="/admin" className="text-nsr-ink">Admin</NavLink>}
+                <NavLink to="/reports" className="text-nsr-ink">Rapporter</NavLink>
                 {user ? (
                   <button onClick={handleLogout} className="text-left text-nsr-ink">Logga ut</button>
                 ) : (
