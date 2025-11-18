@@ -192,8 +192,8 @@ export default function PlanningTool() {
         },
     ];
 
-    const { saveRoom, isSaving, error } = useSaveRoom(isContainerInsideRoom);
-    const { buildWasteRoomRequest } = useWasteRoomRequestBuilder();
+    const { saveRoom, isSaving, error } = useSaveRoom();
+    const { buildWasteRoomRequest } = useWasteRoomRequestBuilder(isContainerInsideRoom);
 
     const handleSaveRoom = async () => {
         const roomRequest = buildWasteRoomRequest(room, doors, containersInRoom, propertyId);
