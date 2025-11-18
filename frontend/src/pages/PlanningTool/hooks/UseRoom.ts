@@ -161,6 +161,7 @@ export function useRoom() {
         break;
       }
     }
+    
 
     setRoom(prev => ({ ...prev, x, y, width, height }));
   };

@@ -84,9 +84,10 @@ export default function PlanningTool() {
     } = useContainers(room, setSelectedContainerId, setSelectedDoorId, getDoorZones());
 
     useEffect(() => {
-        if (room.doors) setDoors(room.doors);
-        if (room.containers) saveContainers(room.containers);
-    }, [room, setDoors, saveContainers]);
+        if (room.doors && room.doors.length > 0) setDoors(room.doors);
+        if (room.containers && room.containers.length > 0) saveContainers(room.containers);
+    }, [room.id, setDoors, saveContainers]);
+
 
 
     /* ──────────────── Service Types (API data) ──────────────── */
