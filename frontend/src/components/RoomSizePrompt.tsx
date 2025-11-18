@@ -21,7 +21,7 @@ export default function RoomSizePrompt({ onConfirm, onCancel }: RoomSizePromptPr
     const lengthNum = Number(length);
     const widthNum = Number(width);
 
-    if (Number.isNaN(lengthNum) || Number.isNaN(widthNum)) {
+    if (Number.isNaN(lengthNum) || Number.isNaN(widthNum)) {  
       setError("Ange giltiga numeriska värden för längd och bredd.");
       return;
     }

@@ -33,17 +33,9 @@ export function useRoom() {
     try {
       const parsed = JSON.parse(saved);
 
-      const toMeters = (v?: number) => {
-        if (typeof v !== "number" || !Number.isFinite(v) || v <= 0) return undefined;
-        if (v > 100) return v / 1000;
-        return v;
-      };
 
-      const parsedWidth = toMeters(parsed?.width) ?? toMeters(parsed?.length);
-      const parsedHeight = toMeters(parsed?.height) ?? toMeters(parsed?.length) ?? parsedWidth;
-
-      const widthMeters = parsedWidth ?? defaultWidthMeters;
-      const heightMeters = parsedHeight ?? defaultHeightMeters;
+      const widthMeters = parsed?.width ?? defaultWidthMeters;
+      const heightMeters = parsed?.height ?? parsed?.length ?? defaultHeightMeters;
 
       const maxWidthMeters = (STAGE_WIDTH - 2 * MARGIN) * SCALE;
       const maxHeightMeters = (STAGE_HEIGHT - 2 * MARGIN) * SCALE;
@@ -66,37 +58,30 @@ export function useRoom() {
       const x = parsed?.x ?? defaultX;
       const y = parsed?.y ?? defaultY;
 
-      const containers: ContainerInRoom[] = Array.isArray(parsed?.containers)
-        ? parsed.containers.map((c: any, i: number) => {
-            const dto = (c?.containerDTO ?? {}) as Partial<ContainerDTO>;
-            const fallbackId = dto.id ?? c?.id ?? (Date.now() + i);
+      
+                const containers = (parsed.containers ?? []).map(c => {
+                const containerInfo = c.containerDTO ?? {
+                imageTopViewUrl: "/images/containers/tempTopView.png",
+                imageFrontViewUrl: "/images/containers/tempFrontView.png",
+                width: 1,
+                depth: 1,
+                height: 1,
+                name: "Unknown",
+                size: 0,
 
-            const normalized: ContainerDTO = {
-              id: fallbackId,
-              name: dto.name ?? "Unknown",
-              size: dto.size ?? 0,
-              width: dto.width ?? 1000,
-              depth: dto.depth ?? 1000,
-              height: dto.height ?? 1000,
-              imageFrontViewUrl: dto.imageFrontViewUrl ?? dto.imageTopViewUrl ?? "",
-              imageTopViewUrl: dto.imageTopViewUrl ?? dto.imageFrontViewUrl ?? "",
-              emptyingFrequencyPerYear: dto.emptyingFrequencyPerYear ?? 0,
-              cost: dto.cost ?? 0,
-              serviceTypeId: dto.serviceTypeId,
-              serviceTypeName: dto.serviceTypeName,
-            };
+                            };
 
             return {
-              id: fallbackId,
-              x: (c?.x ?? 0),
-              y: (c?.y ?? 0),
-              width: mmToPixels(normalized.width),
-              height: mmToPixels(normalized.depth),
-              container: normalized,
-              rotation: c?.angle ?? c?.rotation ?? 0,
-            } as ContainerInRoom;
-          })
-        : [];
+                ...c,
+                x: c.x ?? 0,
+                y: c.y ?? 0,
+                width: mmToPixels(containerInfo.width),
+                height: mmToPixels(containerInfo.depth),
+
+                container: containerInfo,
+                rotation: c.angle ?? 0,
+            };
+            });
 
       const doors: Door[] = Array.isArray(parsed?.doors)
         ? parsed.doors.map((d: any, i: number) => ({

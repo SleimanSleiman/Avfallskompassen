@@ -100,13 +100,39 @@ export function useContainers(
 
     //Add a new container to the room
     const handleAddContainer = (container: ContainerDTO, position?: { x: number; y: number }) => {
-        const { x, y } = calculateInitialPosition(room, container, position);
+        let { x, y } = calculateInitialPosition(room, container, position);
         const newRect = createContainerRect(container, x, y);
 
         const containerZones = buildContainerZones(containersInRoom);
         const isValid = validateContainerPlacement(newRect, doorZones, containerZones);
 
-        if(!isValid) {
+       //If initial position is invalid, try to find a valid spot
+        if (!isValid && !position) {
+            const widthPx = mmToPixels(container.width);
+            const heightPx = mmToPixels(container.depth);
+
+            const step = 20;
+            let foundSpot = false;
+
+            for (let tryY = room.y; tryY < room.y + room.height - heightPx; tryY += step) {
+                for (let tryX = room.x; tryX < room.x + room.width - widthPx; tryX += step) {
+                    const testRect = { x: tryX, y: tryY, width: widthPx, height: heightPx };
+                    if (validateContainerPlacement(testRect, doorZones, containerZones)) {
+                        x = tryX;
+                        y = tryY;
+                        foundSpot = true;
+                        break;
+                    }
+                }
+                if (foundSpot) break;
+            }
+
+            //If no valid spot found, alert user and exit
+            if (!foundSpot) {
+                alert("Det finns ingen ledig plats för att lägga till detta kärl i rummet.");
+                return;
+            }
+        } else if (!isValid) {
             return;
         }
 

@@ -6,7 +6,10 @@
 export const clamp = (value: number, min: number, max: number) =>
   Math.max(min, Math.min(value, max));
 
-export const CONTAINER_PIXEL_SCALE = 1;
+export const mmToPixels = (mm?: number): number => {
+    const mmToMeter = mm / 1000;
+    return mmToMeter / SCALE;
+};
 
 //Check if two objects are overlapping
 export const isOverlapping = (
@@ -21,27 +24,15 @@ export const isOverlapping = (
     );
 };
 
-//Canvas dimensions and margins
-export const MARGIN = 70;
-export const STAGE_WIDTH = 880  ;
-export const STAGE_HEIGHT = 695;
+export const SCALE = 0.02;
 
-//Scale factor selected så att rummets maxyta motsvarar 12 m × 9 m (givet marginalerna)
-export const SCALE = 12 / (STAGE_WIDTH - 2 * MARGIN);
+export const MARGIN = 150;
+export const STAGE_WIDTH = 900;
+export const STAGE_HEIGHT = 750;
 
 //Minimum room dimensions in pixels
 export const MIN_WIDTH = 2.5 / SCALE;
 export const MIN_HEIGHT = 2.5 / SCALE;
-
-//Convert millimeters to pixels based on SCALE
-export const mmToPixels = (mm?: number): number => {
-    if (mm == null) {
-        return 0;
-    }
-
-    const mmToMeter = mm / 1000;
-    return (mmToMeter / SCALE) * CONTAINER_PIXEL_SCALE;
-};
 
 export const ROOM_VERTICAL_OFFSET = 35;
 export const ROOM_HORIZONTAL_OFFSET = 0;
