@@ -483,7 +483,7 @@ export default function RoomCanvas({
                     </div>
                 </div>
 
-                <div className="relative inline-block">
+                <div className="relative w-full">
                     {/* Top-left action buttons */}
                     <div className="absolute top-4 left-4 flex flex-row items-center gap-2 z-50">
                 {/* Change room size */}
@@ -584,7 +584,7 @@ export default function RoomCanvas({
                         setSelectedContainerInfo(null);
                     }
                 }}
-                className="border border-gray-300 bg-gray-50 rounded-2xl inline-block"
+                className="border border-gray-300 bg-gray-50 rounded-2xl w-full"
             >
                 <Layer>
                     {/* Room rectangle */}

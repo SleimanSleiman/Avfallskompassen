@@ -204,10 +204,10 @@ export default function PlanningTool() {
     /* ──────────────── Render ──────────────── */
     return (
         <div className="flex h-full w-full flex-col gap-4 p-3 sm:p-5">
-            <div className="flex w-full flex-1 flex-col gap-4 lg:flex-row lg:gap-4">
+            <div className="flex w-full flex-1 flex-col gap-4 lg:flex-row lg:gap-6">
 
                 {/* ─────────────── Canvas ──────────────── */}
-                <div className="relative flex w-full min-w-0 flex-col lg:flex-[4] lg:min-w-[820px] xl:flex-[5]">
+                  <div className="relative w-full lg:w-3/4 flex flex-col">
                     {/* RoomCanvas displays the room, containers, and doors */}
                     <RoomCanvas
                         room={room}
@@ -323,7 +323,7 @@ export default function PlanningTool() {
                 </div>
 
                 {/* ─────────────── Sidebar ──────────────── */}
-                <div className="flex w-full min-w-0 flex-col lg:flex-[5] xl:flex-[4] lg:pl-5">
+                 <div className="w-full lg:w-2/4 lg:pl-6 flex flex-col">
                     <Sidebar
                         //Comparison data
                         comparisonData={comparisonData}
