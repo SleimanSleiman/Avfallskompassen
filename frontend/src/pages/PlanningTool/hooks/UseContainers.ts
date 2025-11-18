@@ -244,6 +244,19 @@ export function useContainers(
         }
     };
 
+    //Checks if a container is inside the boundaries of a room
+    const isContainerInsideRoom = (
+        c: { x: number; y: number; width: number; height: number },
+        room: Room
+    ) => {
+        return (
+            c.x >= room.x &&
+            c.y >= room.y &&
+            c.x + c.width <= room.x + room.width &&
+            c.y + c.height <= room.y + room.height
+        );
+    };
+
     /* ──────────────── Return ──────────────── */
     return {
         containersInRoom,
@@ -276,5 +289,6 @@ export function useContainers(
 
         undo,
         redo,
+        isContainerInsideRoom,
     };
 }

@@ -76,6 +76,8 @@ type RoomCanvasProps = {
     selectedContainerInfo: ContainerDTO | null;
     getContainerZones: (excludeId?: number) => { x: number; y: number; width: number; height: number }[];
     draggedContainer: ContainerDTO | null;
+    isContainerInsideRoom: (rect: { x: number; y: number; width: number; height: number },room: Room) => boolean;
+
 
     //Drag & Drop props
     stageWrapperRef: React.RefObject<HTMLDivElement | null>;
@@ -172,6 +174,7 @@ export default function RoomCanvas({
     undo,
     redo,
     saveRoom,
+    isContainerInsideRoom,
 }: RoomCanvasProps) {
     //State to track if a container is being dragged
     const [isDraggingContainer, setIsDraggingContainer] = useState(false);
@@ -654,6 +657,7 @@ export default function RoomCanvas({
                         doorZones={doorZones}
                         getContainerZones={getContainerZones}
                         setIsDraggingContainer={setIsDraggingContainer}
+                        isContainerInsideRoom={isContainerInsideRoom}
                     />
                 </Layer>
                     </Stage>

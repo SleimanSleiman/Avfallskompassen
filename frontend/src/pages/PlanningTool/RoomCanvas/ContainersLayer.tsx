@@ -18,6 +18,7 @@ type ContainersLayerProps = {
     doorZones: { x: number; y: number; width: number; height: number }[];
     getContainerZones: (excludeId?: number) => { x: number; y: number; width: number; height: number }[];
     setIsDraggingContainer: (dragging: boolean) => void;
+    isContainerInsideRoom: (rect: { x: number; y: number; width: number; height: number },room: Room) => boolean;
 };
 
 /* ─────────────── ContainersLayer ─────────────── */
@@ -30,6 +31,7 @@ export default function ContainersLayer({
     doorZones,
     setIsDraggingContainer,
     getContainerZones,
+    isContainerInsideRoom,
 }: ContainersLayerProps) {
     return (
         <>
@@ -44,6 +46,7 @@ export default function ContainersLayer({
                     handleDragContainer={handleDragContainer}
                     handleSelectContainer={handleSelectContainer}
                     setIsDraggingContainer={setIsDraggingContainer}
+                    isContainerInsideRoom={isContainerInsideRoom}
                 />
             ))}
         </>
@@ -59,6 +62,7 @@ function ContainerItem({
     handleDragContainer,
     handleSelectContainer,
     setIsDraggingContainer,
+    isContainerInsideRoom,
 }: {
     container: ContainerInRoom;
     selected: boolean;
@@ -68,33 +72,39 @@ function ContainerItem({
     handleDragContainer: (id: number, pos: { x: number; y: number }) => void;
     handleSelectContainer: (id: number) => void;
     setIsDraggingContainer: (dragging: boolean) => void;
+    isContainerInsideRoom: (rect: { x: number; y: number; width: number; height: number },room: Room) => boolean;
 }) {
     const [lastValidPos, setLastValidPos] = useState({ x: container.x, y: container.y });
     const [isOverZone, setIsOverZone] = useState(false);
 
     //Check if container at (x,y) with given rotation overlaps any door or other container zones
     const checkZones = (x: number, y: number, rotation = container.rotation || 0) => {
-  const rot = rotation % 180;
-  const rotatedWidth = rot === 90 ? container.height : container.width;
-  const rotatedHeight = rot === 90 ? container.width : container.height;
+    const rot = rotation % 180;
+    const rotatedWidth = rot === 90 ? container.height : container.width;
+    const rotatedHeight = rot === 90 ? container.width : container.height;
+    
+    const r = { x, y, width: rotatedWidth, height: rotatedHeight };
 
-  const r = { x, y, width: rotatedWidth, height: rotatedHeight };
-
-  const zones = [...(doorZones ?? []), ...(getContainerZones(container.id) ?? [])];
-  return zones.some(zone => zone && isOverlapping(r, zone));
+    const zones = [...(doorZones ?? []), ...(getContainerZones(container.id) ?? [])];
+    return zones.some(zone => zone && isOverlapping(r, zone));
 };
 
 
     const [imageToUse, status] = useImage(`http://localhost:8081${container.container.imageTopViewUrl}`);
-        if (status !== "loaded") {
-            return null;
-        }
+    if (status !== "loaded") {
+        return null;
+    }
+
     //Determine if container is outside room bounds
-    const isOutsideRoom =
-        container.x < room.x ||
-        container.y < room.y ||
-        container.x + container.width > room.x + room.width ||
-        container.y + container.height > room.y + room.height;
+    const isOutsideRoom = !isContainerInsideRoom(
+        {
+            x: container.x,
+            y: container.y,
+            width: container.width,
+            height: container.height
+        },
+        room
+    );
 
     return (
         <Group

@@ -81,6 +81,7 @@ export default function PlanningTool() {
         undo,
         redo,
         getContainerZones,
+        isContainerInsideRoom,
     } = useContainers(room, setSelectedContainerId, setSelectedDoorId, getDoorZones());
 
     useEffect(() => {
@@ -246,6 +247,8 @@ export default function PlanningTool() {
                         setIsStageDropActive={setIsStageDropActive}
                         setDraggedContainer={setDraggedContainer}
                         onContainerPanelHeightChange={setContainerPanelHeight}
+                        isContainerInsideRoom={isContainerInsideRoom}
+
                         undo={undo}
                         redo={redo}
                         saveRoom={handleSaveRoom}
