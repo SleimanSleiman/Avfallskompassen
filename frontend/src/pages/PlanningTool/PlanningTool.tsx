@@ -87,7 +87,7 @@ export default function PlanningTool() {
     useEffect(() => {
         if (room.doors) setDoors(room.doors);
         if (room.containers) saveContainers(room.containers);
-    }, [room, setDoors, saveContainers]);
+    }, []);
 
 
     /* ──────────────── Service Types (API data) ──────────────── */
@@ -192,7 +192,7 @@ export default function PlanningTool() {
         },
     ];
 
-    const { saveRoom, isSaving, error } = useSaveRoom();
+    const { saveRoom, isSaving, error } = useSaveRoom(isContainerInsideRoom);
     const { buildWasteRoomRequest } = useWasteRoomRequestBuilder();
 
     const handleSaveRoom = async () => {

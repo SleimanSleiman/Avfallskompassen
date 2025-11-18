@@ -82,7 +82,7 @@ function ContainerItem({
     const rot = rotation % 180;
     const rotatedWidth = rot === 90 ? container.height : container.width;
     const rotatedHeight = rot === 90 ? container.width : container.height;
-    
+
     const r = { x, y, width: rotatedWidth, height: rotatedHeight };
 
     const zones = [...(doorZones ?? []), ...(getContainerZones(container.id) ?? [])];
