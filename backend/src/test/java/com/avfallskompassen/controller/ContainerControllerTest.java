@@ -49,6 +49,7 @@ public class ContainerControllerTest {
         plan.setContainerType(type);
 
         ContainerDTO dto = new ContainerDTO(
+                plan.getId(),
                 type.getName(),
                 200,     // size
                 0.5,     // width

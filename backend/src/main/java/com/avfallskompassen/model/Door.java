@@ -33,6 +33,12 @@ public class Door {
     @Column(nullable = false)
     private double angle;
 
+    @Column(nullable = false)
+    private String wall;
+
+    @Column(nullable = false)
+    private String swingDirection;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "waste_room_id", nullable = false)
     private WasteRoom wasteRoom;
@@ -40,12 +46,16 @@ public class Door {
     public Door() {
     }
 
-    public Door(double width, double depth, double x, double y, double angle, WasteRoom wasteRoom) {
+    public Door(Long id, double width, double depth, double x, double y,
+                double angle, String wall, String swingDirection, WasteRoom wasteRoom) {
+        this.id = id;
         this.width = width;
         this.depth = depth;
         this.x = x;
         this.y = y;
         this.angle = angle;
+        this.wall = wall;
+        this.swingDirection = swingDirection;
         this.wasteRoom = wasteRoom;
     }
 
@@ -103,5 +113,21 @@ public class Door {
 
     public void setWasteRoom(WasteRoom wasteRoom) {
         this.wasteRoom = wasteRoom;
+    }
+
+    public String getWall() {
+        return wall;
+    }
+
+    public void setWall(String wall) {
+        this.wall = wall;
+    }
+
+    public String getSwingDirection() {
+        return swingDirection;
+    }
+
+    public void setSwingDirection(String swingDirection) {
+        this.swingDirection = swingDirection;
     }
 }

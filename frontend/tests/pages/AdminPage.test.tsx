@@ -3,15 +3,12 @@ import { vi, describe, it, expect, beforeEach } from "vitest";
 import AdminPage from "../../src/pages/AdminPage";
 import { get } from "../../src/lib/api";
 
-// Mock API
 vi.mock("../../src/lib/api", () => ({
   get: vi.fn(),
 }));
 
-// Convert get → typed mock
 const mockGet = vi.mocked(get);
 
-// Mock AdminUserDetail
 vi.mock("../../src/pages/Admin/AdminUserDetail", () => ({
   default: ({ user, onBack }: any) => (
     <div data-testid="admin-user-detail">
