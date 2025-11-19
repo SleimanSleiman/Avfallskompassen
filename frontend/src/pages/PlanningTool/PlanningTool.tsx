@@ -129,11 +129,8 @@ export default function PlanningTool() {
     const [selectedType, setSelectedType] = useState<string | null>(null);
     const [selectedSize, setSelectedSize] = useState<{ [key: number]: number | null }>({});
 
-    
-
-    const ACTION_PANEL_EXTRA_OFFSET = 150;
-    const ACTION_PANEL_MIN_TOP = 160;
-    const desktopActionPanelTop = Math.max(containerPanelHeight + ACTION_PANEL_EXTRA_OFFSET, ACTION_PANEL_MIN_TOP);
+    /* ──────────────── ActionPanel position ──────────────── */
+    const [actionPanelPos, setActionPanelPos] = useState<{ left: number; top: number } | null>(null);
 
     /* ──────────────── Save room ──────────────── */
     // Determine propertyId from either `selectedProperty` object or `selectedPropertyId` string in localStorage
@@ -260,7 +257,6 @@ export default function PlanningTool() {
                     {(selectedContainerId !== null || selectedDoorId !== null) && (
                         <div
                             className="pointer-events-none absolute left-0.5 z-50 hidden lg:flex"
-                            style={{ top: `${desktopActionPanelTop}px` }}
                         >
                             <div className="pointer-events-auto">
                                 <ActionPanel
@@ -273,6 +269,9 @@ export default function PlanningTool() {
                                     handleRotateDoor={handleRotateDoor}
                                     handleRotateContainer={handleRotateContainer}
                                     handleShowContainerInfo={handleShowContainerInfo}
+                                    stageWrapperRef={stageWrapperRef}
+                                    pos={actionPanelPos}
+                                    setPos={setActionPanelPos}
                                 />
                             </div>
                         </div>

@@ -57,7 +57,7 @@ export default function RoomShape({
                     const container = e.target.getStage()?.container();
                     if (container) container.style.cursor = 'grab';
                 }}
-            
+
                 onDragMove={(e) => {
                     const { x, y } = e.target.position();
                     const clampedX = clamp(x, MARGIN, STAGE_WIDTH - room.width - MARGIN);
