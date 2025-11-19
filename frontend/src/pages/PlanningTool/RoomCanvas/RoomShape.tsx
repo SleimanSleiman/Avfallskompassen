@@ -39,6 +39,25 @@ export default function RoomShape({
                 stroke="#1e6091"
                 strokeWidth={2}
                 draggable
+                //a open hand is shown when hovering over the room
+                onMouseEnter={(e) => {
+                    const container = e.target.getStage()?.container();
+                    if (container) container.style.cursor = 'grab';
+                }}
+                onMouseLeave={(e) => {
+                    const container = e.target.getStage()?.container();
+                    if (container) container.style.cursor = 'default';
+                }}
+                //a closed hand is shown when dragging the room
+                onDragStart={(e) => {
+                    const container = e.target.getStage()?.container();
+                    if (container) container.style.cursor = 'grabbing';
+                }}
+                onDragEnd={(e) => {
+                    const container = e.target.getStage()?.container();
+                    if (container) container.style.cursor = 'grab';
+                }}
+            
                 onDragMove={(e) => {
                     const { x, y } = e.target.position();
                     const clampedX = clamp(x, MARGIN, STAGE_WIDTH - room.width - MARGIN);
