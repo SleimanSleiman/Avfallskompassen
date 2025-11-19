@@ -3,6 +3,7 @@ package com.avfallskompassen.controller;
 import com.avfallskompassen.dto.CollectionFeeDTO;
 import com.avfallskompassen.dto.PropertyContainerDTO;
 import com.avfallskompassen.services.CollectionFeeService;
+import com.avfallskompassen.services.ContainerService;
 import com.avfallskompassen.services.PropertyContainerService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -35,6 +36,9 @@ public class ContainerPlanControllerTest {
 
     @MockBean
     private PropertyContainerService propertyContainerService;
+
+    @MockBean
+    private ContainerService containerService;
 
     @Test
     @DisplayName("GET /api/containerplan/collectionFeeInput/{municipalityId} returns cost successfully")
@@ -104,10 +108,16 @@ public class ContainerPlanControllerTest {
     @Test
     @DisplayName("GET /api/containerPlan/{propertyId}/containers returns containers successfully")
     void testGetPropertyContainers_success() throws Exception {
-        PropertyContainerDTO c1 = new PropertyContainerDTO("Paper", "240L kärl", 240, 1, 52, BigDecimal.valueOf(10.5));
-        PropertyContainerDTO c2 = new PropertyContainerDTO("Plastic", "370L kärl", 370, 2, 26, BigDecimal.valueOf(20));
 
-        Mockito.when(propertyContainerService.getContainersByPropertyId(anyLong()))
+        PropertyContainerDTO c1 = new PropertyContainerDTO(
+                "Paper", "240L kärl", 240, 1, 52, BigDecimal.valueOf(10.5)
+        );
+
+        PropertyContainerDTO c2 = new PropertyContainerDTO(
+                "Plastic", "370L kärl", 370, 2, 26, BigDecimal.valueOf(20)
+        );
+
+        Mockito.when(containerService.getContainersByPropertyId(anyLong()))
                 .thenReturn(List.of(c1, c2));
 
         mockMvc.perform(get("/api/containerPlan/{propertyId}/containers", 100L)
@@ -130,7 +140,8 @@ public class ContainerPlanControllerTest {
     @Test
     @DisplayName("GET /api/containerPlan/{propertyId}/containers returns 404 when containers not found")
     void testGetPropertyContainers_notFound() throws Exception {
-        Mockito.when(propertyContainerService.getContainersByPropertyId(anyLong()))
+
+        Mockito.when(containerService.getContainersByPropertyId(anyLong()))
                 .thenReturn(null);
 
         mockMvc.perform(get("/api/containerPlan/{propertyId}/containers", 200L))

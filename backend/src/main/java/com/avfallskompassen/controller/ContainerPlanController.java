@@ -3,6 +3,7 @@ package com.avfallskompassen.controller;
 import com.avfallskompassen.dto.CollectionFeeDTO;
 import com.avfallskompassen.dto.PropertyContainerDTO;
 import com.avfallskompassen.services.CollectionFeeService;
+import com.avfallskompassen.services.ContainerService;
 import com.avfallskompassen.services.PropertyContainerService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,10 +24,12 @@ public class ContainerPlanController {
 
     private final CollectionFeeService collectionFeeService;
     private final PropertyContainerService propertyContainerService;
+    private final ContainerService containerService;
 
-    private ContainerPlanController(CollectionFeeService collectionFeeService, PropertyContainerService propertyContainerService) {
+    private ContainerPlanController(CollectionFeeService collectionFeeService, PropertyContainerService propertyContainerService, ContainerService containerService) {
         this.collectionFeeService = collectionFeeService;
         this.propertyContainerService = propertyContainerService;
+        this.containerService = containerService;
     }
 
     /**
@@ -84,7 +87,7 @@ public class ContainerPlanController {
      */
     @GetMapping("/{propertyId}/containers")
     public ResponseEntity<List<PropertyContainerDTO>> getPropertyContainers(@PathVariable Long propertyId) {
-        List<PropertyContainerDTO> dtos = propertyContainerService.getContainersByPropertyId(propertyId);
+        List<PropertyContainerDTO> dtos = containerService.getContainersByPropertyId(propertyId);
 
         if(dtos == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Fastighetskärl hittades ej");
