@@ -9,8 +9,8 @@ import jakarta.validation.constraints.*;
 public class DoorRequest {
 
     @NotNull
-    @DecimalMin("0.9")
-    @Max(12)
+    @DecimalMin("0.5")
+    @Max(2)
     private double width;
 
     @NotNull

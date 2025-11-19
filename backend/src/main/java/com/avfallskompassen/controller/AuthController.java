@@ -3,8 +3,9 @@ package com.avfallskompassen.controller;
 import com.avfallskompassen.dto.request.LoginRequest;
 import com.avfallskompassen.dto.response.LoginResponse;
 import com.avfallskompassen.model.User;
+import com.avfallskompassen.security.JwtUtil;
 import com.avfallskompassen.services.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.annotation.Nullable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,11 +21,14 @@ import java.util.Optional;
 @RequestMapping("/api/auth")
 @CrossOrigin(origins = "*")
 public class AuthController {
-    
-    @Autowired
-    private UserService userService;
-    @Autowired(required = false)
-    private com.avfallskompassen.security.JwtUtil jwtUtil;
+
+    private final UserService userService;
+    private JwtUtil jwtUtil;
+
+    public AuthController(UserService userService, @Nullable JwtUtil jwtUtil) {
+        this.userService = userService;
+        this.jwtUtil = jwtUtil;
+    }
 
     /**
      * Handles user login requests.

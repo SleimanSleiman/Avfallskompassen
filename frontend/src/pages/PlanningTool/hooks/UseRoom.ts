@@ -2,7 +2,6 @@
 import { useState } from "react";
 import { SCALE, STAGE_WIDTH, STAGE_HEIGHT, MIN_WIDTH, MIN_HEIGHT, MARGIN, clamp, mmToPixels, ROOM_VERTICAL_OFFSET, ROOM_HORIZONTAL_OFFSET } from "../Constants";
 import type { Room, ContainerInRoom, Door } from "../Types";
-import type { ContainerDTO } from "../../../lib/Container";
 
 export function useRoom() {
   const initialRoom = (() => {
@@ -37,51 +36,30 @@ export function useRoom() {
       const widthMeters = parsed?.width ?? defaultWidthMeters;
       const heightMeters = parsed?.height ?? parsed?.length ?? defaultHeightMeters;
 
-      const maxWidthMeters = (STAGE_WIDTH - 2 * MARGIN) * SCALE;
-      const maxHeightMeters = (STAGE_HEIGHT - 2 * MARGIN) * SCALE;
-
-    
-      if (widthMeters >= maxWidthMeters || heightMeters >= maxHeightMeters) {
-        return {
-          id: undefined,
-          x: defaultX,
-          y: defaultY,
-          width: defaultWidthMeters / SCALE,
-          height: defaultHeightMeters / SCALE,
-          doors: [] as Door[],
-          containers: [] as ContainerInRoom[],
-          propertyId: undefined,
-          name: "",
-        } as Room;
-      }
-
       const x = parsed?.x ?? defaultX;
       const y = parsed?.y ?? defaultY;
-
       
-                const containers = (parsed.containers ?? []).map(c => {
-                const containerInfo = c.containerDTO ?? {
-                imageTopViewUrl: "/images/containers/tempTopView.png",
-                imageFrontViewUrl: "/images/containers/tempFrontView.png",
-                width: 1,
-                depth: 1,
-                height: 1,
-                name: "Unknown",
-                size: 0,
+      const containers = (parsed.containers ?? []).map(c => {
+        const containerInfo = c.containerDTO ?? {
+        imageTopViewUrl: "/images/containers/tempTopView.png",
+        imageFrontViewUrl: "/images/containers/tempFrontView.png",
+        width: 1,
+        depth: 1,
+        height: 1,
+        name: "Unknown",
+        size: 0,
+        };
 
-                            };
-
-            return {
-                ...c,
-                x: c.x ?? 0,
-                y: c.y ?? 0,
-                width: mmToPixels(containerInfo.width),
-                height: mmToPixels(containerInfo.depth),
-
-                container: containerInfo,
-                rotation: c.angle ?? 0,
-            };
-            });
+        return {
+          ...c,
+          x: c.x ?? 0,
+          y: c.y ?? 0,
+          width: mmToPixels(containerInfo.width),
+          height: mmToPixels(containerInfo.depth),
+          container: containerInfo,
+          rotation: c.angle ?? 0,
+        };
+      });
 
       const doors: Door[] = Array.isArray(parsed?.doors)
         ? parsed.doors.map((d: any, i: number) => ({

@@ -2,7 +2,6 @@ package com.avfallskompassen.controller;
 
 import com.avfallskompassen.model.Municipality;
 import com.avfallskompassen.repository.MunicipalityRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,8 +12,11 @@ import java.util.List;
 @CrossOrigin(origins = "*")
 public class MunicipalityController {
 
-    @Autowired
-    private MunicipalityRepository municipalityRepository;
+    private final MunicipalityRepository municipalityRepository;
+
+    public MunicipalityController (MunicipalityRepository municipalityRepository) {
+        this.municipalityRepository = municipalityRepository;
+    }
 
     @GetMapping
     public ResponseEntity<List<Municipality>> getAllMunicipalities() {

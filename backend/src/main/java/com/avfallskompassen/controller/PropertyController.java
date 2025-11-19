@@ -7,7 +7,6 @@ import com.avfallskompassen.dto.PropertyDTO;
 import com.avfallskompassen.model.Property;
 import com.avfallskompassen.services.LockTypeService;
 import com.avfallskompassen.services.PropertyService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import com.avfallskompassen.exception.ExceptionResponseUtil;
@@ -29,11 +28,14 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/properties")
 @CrossOrigin(origins = "*")
 public class PropertyController {
-    
-    @Autowired
+
     private PropertyService propertyService;
-    @Autowired
     private LockTypeService lockTypeService;
+
+    public PropertyController(PropertyService propertyService, LockTypeService lockTypeService) {
+        this.propertyService = propertyService;
+        this.lockTypeService = lockTypeService;
+    }
     
     /**
      * Create a new property for the current user.
