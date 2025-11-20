@@ -8,6 +8,7 @@ import ConfirmModal from '../components/ConfirmModal';
 import { getWasteRoomsByPropertyId } from '../lib/WasteRoom';
 import type { WasteRoom } from '../lib/WasteRoom';
 import { deleteWasteRoom } from '../lib/WasteRoomRequest';
+import Message from '../components/ShowStatus';
 
 export default function PropertyPage() {
     const [properties, setProperties] = useState<Property[]>([]);
@@ -163,6 +164,7 @@ export default function PropertyPage() {
 
             if (response.success) {
                 setMsg(editingId ? 'Fastighet uppdaterad!' : 'Fastighet skapad framgångsrikt!');
+                setError(null);
                 // reset form
                 setFormData({
                     address: '',
@@ -177,6 +179,7 @@ export default function PropertyPage() {
                 await loadProperties();
             } else {
                 setError(response.message || (editingId ? 'Kunde inte uppdatera fastighet' : 'Kunde inte skapa fastighet'));
+                setMsg(null);
             }
         } catch (err: any) {
             setError(err.message || 'Något gick fel');
@@ -314,16 +317,8 @@ async function onDeleteWasteRoom(propertyId: number, wasteRoomId: number) {
             </div>
 
             {/* Messages */}
-            {msg && (
-                <div className="mb-6 rounded-lg border border-green-200 bg-green-50 p-3 text-sm text-green-700">
-                    {msg}
-                </div>
-            )}
-            {error && (
-                <div className="mb-6 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">
-                    {error}
-                </div>
-            )}
+            <Message message={msg} type="success" />
+            <Message message={error} type="error" />
 
             {/* Property Form */}
             {showForm && (

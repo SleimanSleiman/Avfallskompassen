@@ -6,7 +6,6 @@ import com.avfallskompassen.dto.request.WasteRoomRequest;
 import com.avfallskompassen.services.RoomPdfService;
 import com.avfallskompassen.services.WasteRoomService;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -23,13 +22,12 @@ import java.util.List;
 @RequestMapping("/api")
 @CrossOrigin(origins = "*")
 public class WasteRoomController {
-    private WasteRoomService wasteRoomService;
+    private final WasteRoomService wasteRoomService;
+    private final RoomPdfService roomPdfService;
 
-    @Autowired
-    private RoomPdfService roomPdfService;
-
-    public WasteRoomController(WasteRoomService wasteRoomService) {
+    public WasteRoomController(WasteRoomService wasteRoomService, RoomPdfService roomPdfService) {
         this.wasteRoomService = wasteRoomService;
+        this.roomPdfService = roomPdfService;
     }
 
     /**

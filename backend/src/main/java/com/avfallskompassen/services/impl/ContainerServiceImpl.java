@@ -9,7 +9,6 @@ import com.avfallskompassen.model.ContainerPosition;
 import com.avfallskompassen.repository.ContainerPlanRepository;
 import com.avfallskompassen.repository.ContainerPositionRepository;
 import com.avfallskompassen.services.ContainerService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,11 +24,14 @@ import java.util.stream.Collectors;
 @Transactional
 public class ContainerServiceImpl implements ContainerService {
 
-    @Autowired
     private ContainerPlanRepository containerPlanRepository;
-
-    @Autowired
     private ContainerPositionRepository containerPositionRepository;
+
+    public ContainerServiceImpl(ContainerPlanRepository containerPlanRepository,
+                                ContainerPositionRepository containerPositionRepository) {
+        this.containerPlanRepository = containerPlanRepository;
+        this.containerPositionRepository = containerPositionRepository;
+    }
 
     /**
      * Get containers by municipality ID and service type ID.

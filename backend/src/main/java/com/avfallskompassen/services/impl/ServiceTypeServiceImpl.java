@@ -4,7 +4,6 @@ import com.avfallskompassen.model.ServiceType;
 import com.avfallskompassen.services.ServiceTypeService;
 import org.springframework.stereotype.Service;
 import com.avfallskompassen.repository.ServiceTypeRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 
@@ -15,8 +14,11 @@ import java.util.List;
 @Service
 public class ServiceTypeServiceImpl implements ServiceTypeService {
 
-    @Autowired
     private ServiceTypeRepository serviceTypeRepository;
+
+    public ServiceTypeServiceImpl(ServiceTypeRepository serviceTypeRepository) {
+        this.serviceTypeRepository = serviceTypeRepository;
+    }
 
     /**
      * Get all service types.

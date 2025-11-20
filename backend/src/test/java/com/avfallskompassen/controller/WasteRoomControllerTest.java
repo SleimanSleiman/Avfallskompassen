@@ -58,21 +58,22 @@ class WasteRoomControllerTest {
 
         mockMvc.perform(post("/api/wasterooms")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("""
-                {
-                    "propertyId": 10,
-                    "length": 12.5,
-                    "width": 8.0,
-                    "x": 1.0,
-                    "y": 2.0,
-                    "containers": [
-                        { "id": 1, "x": 2.0, "y": 2.0, "width": 0, "height": 3, "rotation": 5 }
-                    ],
-                    "doors": [
-                        { "id": 1, "x": 0.5, "y": 0.5 }
-                    ]
-                }
-            """))
+                .content("""
+                    {
+                      "propertyId": 5,
+                      "length": 8.0,
+                      "width": 8.0,
+                      "x": 1.0,
+                      "y": 2.0,
+                      "containers": [
+                        { "id": 1, "x": 2.0, "y": 2.0, "angle": 5.0 }
+                      ],
+                      "doors": [
+                        { "width": 1.0, "x": 0.5, "y": 0.5, "angle": 0.0, "wall": "top", "swingDirection": "outward" }
+                      ]
+                    }
+                """))
+
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.propertyId").value(2))
                 .andExpect(jsonPath("$.containers[0].id").value(1))
@@ -154,19 +155,19 @@ class WasteRoomControllerTest {
         mockMvc.perform(put("/api/wasterooms/{id}", 2L)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
-                            {
-                                "propertyId": 10,
-                                "length": 12.5,
-                                "width": 8.0,
-                                "x": 1.0,
-                                "y": 2.0,
-                                "containers": [
-                                    { "id": 1, "x": 2.0, "y": 2.0, "width": 0, "height": 3, "rotation": 5 }
-                                ],
-                                "doors": [
-                                    { "id": 1, "x": 0.5, "y": 0.5 }
-                                ]
-                            }
+                    {
+                      "propertyId": 5,
+                      "length": 8.0,
+                      "width": 8.0,
+                      "x": 1.0,
+                      "y": 2.0,
+                      "containers": [
+                        { "id": 1, "x": 2.0, "y": 2.0, "angle": 5.0 }
+                      ],
+                      "doors": [
+                        { "width": 1.0, "x": 0.5, "y": 0.5, "angle": 0.0, "wall": "top", "swingDirection": "outward" }
+                      ]
+                    }
                     """))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.propertyId").value(2))

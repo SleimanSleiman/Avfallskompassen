@@ -8,10 +8,10 @@ import com.avfallskompassen.model.Property;
 import com.avfallskompassen.model.PropertyType;
 import com.avfallskompassen.model.Municipality;
 import com.avfallskompassen.model.User;
+import com.avfallskompassen.repository.MunicipalityRepository;
 import com.avfallskompassen.repository.PropertyRepository;
 import com.avfallskompassen.services.PropertyService;
 import com.avfallskompassen.services.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,15 +30,18 @@ import java.util.stream.Collectors;
 @Transactional
 public class PropertyServiceImpl implements PropertyService {
     
-    @Autowired
     private PropertyRepository propertyRepository;
-
-    @Autowired
     private com.avfallskompassen.repository.MunicipalityRepository municipalityRepository;
-
-    @Autowired
     private UserService userService;
-    
+
+    public PropertyServiceImpl(PropertyRepository propertyRepository,
+                               MunicipalityRepository municipalityRepository,
+                               UserService userService) {
+        this.propertyRepository = propertyRepository;
+        this.municipalityRepository = municipalityRepository;
+        this.userService = userService;
+    }
+
     /**
      * Create a new property.
      * @param request the property request data

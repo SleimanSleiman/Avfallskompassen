@@ -51,6 +51,7 @@ export default function PlanningTool() {
         handleRemoveDoor,
         handleSelectDoor,
         getDoorZones,
+        doorOffsetRef,
     } = useDoors(room, setSelectedDoorId, setSelectedContainerId);
 
     /* ──────────────── Container state & logic ──────────────── */
@@ -83,10 +84,39 @@ export default function PlanningTool() {
         getContainerZones,
     } = useContainers(room, setSelectedContainerId, setSelectedDoorId, getDoorZones());
 
+    /* ──────────────── Sync the doors and containers when changes are made to the room ──────────────── */
     useEffect(() => {
-        if (room.doors) setDoors(room.doors);
-        if (room.containers) saveContainers(room.containers);
-    }, [room, setDoors, saveContainers]);
+        if (room.doors && room.doors.length > 0) {
+
+        const leftX = room.x;
+        const topY = room.y;
+
+        const offsets: Record<number, number> = {};
+
+        room.doors.forEach(d => {
+            let offset = 0.5;
+
+            switch (d.wall) {
+                case "top":
+                case "bottom":
+                    offset = (d.x - leftX) / room.width;
+                    break;
+
+                case "left":
+                case "right":
+                    offset = (d.y - topY) / room.height;
+                    break;
+            }
+
+            offsets[d.id] = offset;
+        });
+
+        doorOffsetRef.current = offsets;
+        setDoors(room.doors);
+    }
+        if (room.containers && room.containers.length > 0) saveContainers(room.containers);
+    }, [room.id, setDoors, saveContainers]);
+
 
 
     /* ──────────────── Service Types (API data) ──────────────── */
