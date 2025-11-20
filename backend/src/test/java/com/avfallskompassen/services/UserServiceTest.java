@@ -2,6 +2,7 @@ package com.avfallskompassen.services;
 
 import com.avfallskompassen.model.User;
 import com.avfallskompassen.repository.UserRepository;
+import com.avfallskompassen.services.impl.UserServiceImpl;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -25,7 +26,7 @@ class UserServiceTest {
     private PasswordEncoder passwordEncoder;
 
     @InjectMocks
-    private UserService userService;
+    private UserServiceImpl userService;
 
     @Test
     void findByUsername_found_returnsUserOptional() {
