@@ -1,6 +1,7 @@
 package com.avfallskompassen.services;
 
 import com.avfallskompassen.dto.LockTypeDto;
+import com.avfallskompassen.dto.PropertySimpleDTO;
 import com.avfallskompassen.dto.request.PropertyRequest;
 import com.avfallskompassen.model.Property;
 
@@ -12,6 +13,8 @@ public interface PropertyService {
     Property createProperty(PropertyRequest request, String username, LockTypeDto lockTypeDto);
 
     List<Property> getPropertiesByUser(String username);
+
+    List<PropertySimpleDTO> getSimplePropertiesByUser(String username);
 
     boolean isPropertyOwnedByUser(Long propertyId, String username);
 

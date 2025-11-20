@@ -1,11 +1,16 @@
 package com.avfallskompassen.controller;
 
 import com.avfallskompassen.dto.CollectionFeeDTO;
+import com.avfallskompassen.dto.PropertyContainerDTO;
 import com.avfallskompassen.services.CollectionFeeService;
+import com.avfallskompassen.services.ContainerService;
+import com.avfallskompassen.services.PropertyContainerService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
+
+import java.util.List;
 
 /**
  * REST controller for handling collection fee-related requests.
@@ -18,9 +23,13 @@ import org.springframework.web.server.ResponseStatusException;
 public class ContainerPlanController {
 
     private final CollectionFeeService collectionFeeService;
+    private final PropertyContainerService propertyContainerService;
+    private final ContainerService containerService;
 
-    private ContainerPlanController(CollectionFeeService collectionFeeService) {
+    private ContainerPlanController(CollectionFeeService collectionFeeService, PropertyContainerService propertyContainerService, ContainerService containerService) {
         this.collectionFeeService = collectionFeeService;
+        this.propertyContainerService = propertyContainerService;
+        this.containerService = containerService;
     }
 
     /**
@@ -36,7 +45,7 @@ public class ContainerPlanController {
     public ResponseEntity<CollectionFeeDTO> getCollectionFeeByMunicipalityId(@PathVariable Long municipalityId, @RequestParam(name = "distance") double distance){
 
         if(municipalityId == null || municipalityId <= 0) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Municipality ID must be valid");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Kommunens ID måste vara giltigt");
         }
         CollectionFeeDTO collectionFeeDTO = collectionFeeService.findCollectionFeeByMunicipalityId(municipalityId, distance);
 
@@ -65,5 +74,24 @@ public class ContainerPlanController {
         }
 
         return ResponseEntity.ok(collectionFeeDTO);
+    }
+
+    /**
+     * Handles a request for fetching property container data based on PropertyId.
+     *
+     * @author Christian Storck
+     * @param propertyId ID of the property
+     * @return A {@link ResponseEntity} containing a {@link PropertyContainerDTO} with collection fee details,
+     *         or a 404 response if no container is found
+     * @throws ResponseStatusException if no container data can be found for the given property
+     */
+    @GetMapping("/{propertyId}/containers")
+    public ResponseEntity<List<PropertyContainerDTO>> getPropertyContainers(@PathVariable Long propertyId) {
+        List<PropertyContainerDTO> dtos = containerService.getContainersByPropertyId(propertyId);
+
+        if(dtos == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Fastighetskärl hittades ej");
+        }
+        return ResponseEntity.ok(dtos);
     }
 }

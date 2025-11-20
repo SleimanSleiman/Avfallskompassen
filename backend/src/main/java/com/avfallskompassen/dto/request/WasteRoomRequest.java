@@ -13,12 +13,12 @@ import java.util.List;
 public class WasteRoomRequest {
     @NotNull
     @DecimalMin("2.5")
-    @Max(35)
+    @Max(9)
     private double length;
 
     @NotNull
     @DecimalMin("2.5")
-    @Max(27)
+    @Max(12)
     private double width;
 
     @NotNull

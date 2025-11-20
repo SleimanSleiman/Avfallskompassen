@@ -267,6 +267,7 @@ export function useDoors(
         handleRemoveDoor,
         handleSelectDoor,
         getDoorZones,
+        doorOffsetRef,
     };
 }
 
