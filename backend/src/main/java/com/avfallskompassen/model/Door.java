@@ -8,10 +8,7 @@ import jakarta.persistence.*;
  */
 @Entity
 @Table(
-        name = "doors",
-        indexes = {
-            @Index(name = "idx_doors_waste_room_id", columnList = "waste_room_id")
-        }
+        name = "doors"
 )
 public class Door {
     @Id

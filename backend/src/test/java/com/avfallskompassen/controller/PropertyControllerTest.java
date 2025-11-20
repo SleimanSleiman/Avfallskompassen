@@ -1,6 +1,7 @@
 package com.avfallskompassen.controller;
 
 import com.avfallskompassen.dto.LockTypeDto;
+import com.avfallskompassen.dto.PropertySimpleDTO;
 import com.avfallskompassen.dto.request.PropertyRequest;
 import com.avfallskompassen.dto.response.PropertyResponse;
 import com.avfallskompassen.dto.PropertyDTO;
@@ -276,5 +277,44 @@ public class PropertyControllerTest {
         assertEquals("Fysisk nyckel", body.get(1).getName());
 
         verify(lockTypeService, times(1)).getAllLockTypes();
+    }
+
+    @Test
+    void getPropertiesSimple_unauthorized_noHeader_returns401() {
+        ResponseEntity<List<PropertySimpleDTO>> response = controller.getPropertiesSimple(null);
+
+        assertEquals(401, response.getStatusCodeValue());
+        assertNull(response.getBody());
+        verifyNoInteractions(propertyService);
+    }
+
+    @Test
+    void getPropertiesSimple_success_returnsDtos() {
+        PropertySimpleDTO dto1 = new PropertySimpleDTO(1L, "Första gatan", 10, "Fysiskt lås", BigDecimal.valueOf(10), 10, "Helsingborg");
+        PropertySimpleDTO dto2 = new PropertySimpleDTO(2L, "Andra gatan", 20, "SweLock", BigDecimal.valueOf(20), 20, "Malmö");
+
+        when(propertyService.getSimplePropertiesByUser("chris"))
+                .thenReturn(List.of(dto1, dto2));
+
+        ResponseEntity<List<PropertySimpleDTO>> resp = controller.getPropertiesSimple("chris");
+
+        assertEquals(200, resp.getStatusCodeValue());
+        assertNotNull(resp.getBody());
+        assertEquals(2, resp.getBody().size());
+        assertEquals("Första gatan", resp.getBody().get(0).getAddress());
+
+        verify(propertyService).getSimplePropertiesByUser("chris");
+    }
+
+    @Test
+    void getPropertiesSimple_serviceThrows_returns500() {
+        when(propertyService.getSimplePropertiesByUser("chris"))
+                .thenThrow(new RuntimeException("database fail"));
+
+        ResponseEntity<List<PropertySimpleDTO>> resp = controller.getPropertiesSimple("chris");
+
+        assertEquals(500, resp.getStatusCodeValue());
+        assertNull(resp.getBody());
+        verify(propertyService).getSimplePropertiesByUser("chris");
     }
 }

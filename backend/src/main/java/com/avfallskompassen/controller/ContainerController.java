@@ -1,9 +1,7 @@
 package com.avfallskompassen.controller;
 
 import com.avfallskompassen.dto.ContainerDTO;
-import com.avfallskompassen.model.ContainerPlan;
 import com.avfallskompassen.services.ContainerService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,8 +17,11 @@ import java.util.stream.Collectors;
 @CrossOrigin(origins = "*")
 public class ContainerController {
 
-    @Autowired
-    private ContainerService containerService;
+    private final ContainerService containerService;
+
+    public ContainerController(ContainerService containerService) {
+        this.containerService = containerService;
+    }
 
     /**
      * Get containers by municipality ID and service type ID.

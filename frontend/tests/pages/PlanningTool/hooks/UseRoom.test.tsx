@@ -26,7 +26,7 @@ describe("useRoom", () => {
     });
 
     //Test restoration of room from localStorage
-    it("falls back to defaults when legacy room dimensions are stored", () => {
+    it("restores room from localStorage when data is current format", () => {
         localStorage.setItem(
             "enviormentRoomData",
             JSON.stringify({ width: 12, height: 9 })
@@ -34,8 +34,8 @@ describe("useRoom", () => {
 
         const { result } = renderHook(() => useRoom());
 
-        expect(result.current.room.width).toBeCloseTo(defaultRoomWidthPx);
-        expect(result.current.room.height).toBeCloseTo(defaultRoomHeightPx);
+        expect(result.current.room.width).toBeCloseTo(12 / SCALE);
+        expect(result.current.room.height).toBeCloseTo(9 / SCALE);
     });
 
     //Test resizing room by dragging a corner
