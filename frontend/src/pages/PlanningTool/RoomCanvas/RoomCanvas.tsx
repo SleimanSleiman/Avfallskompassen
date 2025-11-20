@@ -23,6 +23,7 @@ import {
     MIN_WIDTH,
     MIN_HEIGHT,
     clamp,
+    GRID_SIZE_PX,
 } from "../Constants";
 import type { Room, ContainerInRoom, Door } from "../Types";
 import type { ContainerDTO } from "../../../lib/Container";
@@ -50,6 +51,8 @@ import {
     Undo,
     Redo,
 } from "lucide-react";
+import './css/roomCanvasToolbar.css'
+import BinIcon from "../../../assets/bin_icon.png"
 
 /* ─────────────── RoomCanvas Props ──────────────── */
 type RoomCanvasProps = {
@@ -352,7 +355,7 @@ export default function RoomCanvas({
     return (
         <div
             ref={stageWrapperRef}
-            className={`relative w-full overflow-x-auto rounded-2xl ${isStageDropActive ? 'ring-4 ring-blue-300 ring-offset-2' : ''}`}
+            className={`relative w-full overflow-hidden rounded-2xl ${isStageDropActive ? 'ring-4 ring-blue-300 ring-offset-2' : ''}`}
             onDrop={handleStageDrop}
             onDragOver={handleStageDragOver}
             onDragLeave={handleStageDragLeave}
@@ -505,23 +508,19 @@ export default function RoomCanvas({
                         handleSelectContainer(null);
                         handleSelectDoor(null);
                     }}
-                    className="flex items-center justify-start bg-gray-200 hover:bg-gray-300 text-gray-800 px-2 py-1 rounded-lg transition-all duration-300 shadow-sm group overflow-hidden"
-                >
-                    <Ruler className="w-5 h-5 flex-shrink-0" />
-                    <span className="ml-2 text-sm font-medium opacity-0 w-0 group-hover:opacity-100 group-hover:w-auto transition-all duration-300 whitespace-nowrap">
-                        Ändra rumsdimensioner
-                    </span>
+                        className="group toolbar-btn"
+                    >
+                    <Ruler className="toolbar-icon" />
+                    <span className="toolbar-label">Ändra rumsdimensioner</span>
                 </button>
 
                 {/* Add door */}
                 <button
                     onClick={() => setIsDoorPromptOpen(true)}
-                    className="flex items-center justify-start bg-blue-50 text-blue-700 hover:bg-blue-100 hover:text-blue-800 px-2 py-1 rounded-lg transition-all duration-300 shadow-sm group overflow-hidden"
+                    className="group toolbar-btn"
                 >
-                    <DoorOpen className="w-5 h-5 flex-shrink-0" />
-                    <span className="ml-2 text-sm font-medium opacity-0 w-0 group-hover:opacity-100 group-hover:w-auto transition-all duration-300 whitespace-nowrap">
-                        Lägg till dörr
-                    </span>
+                    <DoorOpen className="toolbar-icon" />
+                    <span className="toolbar-label">Lägg till dörr</span>
                 </button>
 
                 {/* Add container */}
@@ -533,12 +532,14 @@ export default function RoomCanvas({
                             setIsContainerPanelOpen(true);
                         }
                     }}
-                    className={`flex items-center justify-start px-2 py-1 rounded-lg transition-all duration-300 shadow-sm group overflow-hidden ${isContainerPanelOpen ? "bg-emerald-600 text-white hover:bg-emerald-500" : "bg-emerald-50 text-emerald-700 hover:bg-emerald-100 hover:text-emerald-800"}`}
-                >
-                    <PillBottle className="w-5 h-5 flex-shrink-0" />
-                    <span className="ml-2 text-sm font-medium opacity-0 w-0 group-hover:opacity-100 group-hover:w-auto transition-all duration-300 whitespace-nowrap">
-                        Lägg till sopkärl
-                    </span>
+                        className={`group toolbar-btn ${isContainerPanelOpen ? "toolbar-btn-active" : ""}`}
+                    >
+                    <img
+                        src={BinIcon}
+                        alt="Lägg till sopkärl"
+                        className="toolbar-icon w-5 h-5 object-contain"
+                    />
+                    <span className="toolbar-label">Lägg till sopkärl</span>
                 </button>
 
                 {/* Save design */}
@@ -551,36 +552,30 @@ export default function RoomCanvas({
                             alert("Spara funktionalitet kommer snart!");
                         }
                     }}
-                    className="flex items-center justify-start bg-green-50 text-green-700 hover:bg-green-100 hover:text-green-800 px-2 py-1 rounded-lg transition-all duration-300 shadow-sm group overflow-hidden"
+                    className="group toolbar-btn"
                 >
-                    <Save className="w-5 h-5 flex-shrink-0" />
-                    <span className="ml-2 text-sm font-medium opacity-0 w-0 group-hover:opacity-100 group-hover:w-auto transition-all duration-300 whitespace-nowrap">
-                        Spara design
-                    </span>
+                    <Save className="toolbar-icon" />
+                    <span className="toolbar-label">Spara design</span>
                 </button>
                 
                 {/* Undo */}
                 <button
                     onClick={safeUndo}
-                    className="flex items-center justify-start bg-blue-50 text-blue-700 hover:bg-blue-100 hover:text-blue-800 px-2 py-1 rounded-lg transition-all duration-300 shadow-sm group overflow-hidden"
+                    className="group toolbar-btn"
                     title="Ångra (Ctrl+Z)"
                 >
-                    <Undo className="w-5 h-5 flex-shrink-0" />
-                    <span className="ml-2 text-sm font-medium opacity-0 w-0 group-hover:opacity-100 group-hover:w-auto transition-all duration-300 whitespace-nowrap">
-                        Ångra
-                    </span>
+                    <Undo className="toolbar-icon" />
+                    <span className="toolbar-label">Ångra</span>
                 </button>
 
                 {/* Redo */}
                 <button
                     onClick={safeRedo}
-                    className="flex items-center justify-start bg-blue-50 text-blue-700 hover:bg-blue-100 hover:text-blue-800 px-2 py-1 rounded-lg transition-all duration-300 shadow-sm group overflow-hidden"
+                    className="group toolbar-btn"
                     title="Gör om (Ctrl+Y)"
                 >
-                    <Redo className="w-5 h-5 flex-shrink-0" />
-                    <span className="ml-2 text-sm font-medium opacity-0 w-0 group-hover:opacity-100 group-hover:w-auto transition-all duration-300 whitespace-nowrap">
-                        Gör om
-                    </span>
+                    <Redo className="toolbar-icon" />
+                    <span className="toolbar-label">Gör om</span>
                 </button>
             </div>
 
@@ -596,7 +591,8 @@ export default function RoomCanvas({
                         setSelectedContainerInfo(null);
                     }
                 }}
-                className="border border-gray-300 bg-gray-50 rounded-2xl w-full"
+                className="page-grid-bg"
+                  style={{ backgroundSize: `${GRID_SIZE_PX}px ${GRID_SIZE_PX}px` }}
             >
                 <Layer>
                     {/* Room rectangle */}

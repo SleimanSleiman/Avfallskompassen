@@ -28,8 +28,8 @@ export default function CornerHandles({
                     key={index}
                     x={corner.x}
                     y={corner.y}
-                    radius={8}
-                    fill="#1e6091"
+                    radius={5}
+                    fill="#7a7a7a"
                     draggable
                     //Constrain corner movement to maintain room size and stay within canvas
                     dragBoundFunc={(pos) => {

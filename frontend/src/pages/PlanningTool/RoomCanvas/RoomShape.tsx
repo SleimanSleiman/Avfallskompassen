@@ -35,8 +35,8 @@ export default function RoomShape({
                 y={room.y}
                 width={room.width}
                 height={room.height}
-                fill="#bde0fe"
-                stroke="#1e6091"
+                fill="#d9d9d9"
+                stroke="#7a7a7a"
                 strokeWidth={2}
                 draggable
                 //a open hand is shown when hovering over the room
