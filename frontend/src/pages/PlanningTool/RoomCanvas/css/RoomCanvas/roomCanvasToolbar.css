@@ -7,6 +7,10 @@
   @apply bg-emerald-600 text-white hover:bg-emerald-500 border-transparent;
 }
 
+.toolbar-btn:hover {
+  @apply bg-nsr-teal/10;
+}
+
 .toolbar-icon {
   @apply w-5 h-5 flex-shrink-0;
 }
@@ -14,13 +18,4 @@
 .toolbar-label {
   @apply text-sm font-medium opacity-0 w-0 group-hover:opacity-100 group-hover:w-auto
          transition-all duration-300 whitespace-nowrap;
-}
-
-.page-grid-bg {
-border-radius: 1rem;
- border: 0.5px solid #d6c8b8;
-  background-color: #e6e4e1;
-  background-image:
-    linear-gradient(#d6c8b8 1px, transparent 1px),
-    linear-gradient(90deg, #d6c8b8 1px, transparent 1px);
 }
