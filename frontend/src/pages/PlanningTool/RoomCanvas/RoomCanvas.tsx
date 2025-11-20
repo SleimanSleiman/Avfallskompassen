@@ -52,8 +52,9 @@ import {
     Redo,
 } from "lucide-react";
 import Message from "../../../components/ShowStatus";
-import './css/roomCanvasToolbar.css'
-import BinIcon from "../../../assets/bin_icon.png"
+import './css/RoomCanvas/roomCanvasToolbar.css'
+import './css/RoomCanvas/roomCanvasStage.css'
+import './css/RoomCanvas/roomCanvasPanel.css'
 
 /* ─────────────── RoomCanvas Props ──────────────── */
 type RoomCanvasProps = {
@@ -361,24 +362,24 @@ export default function RoomCanvas({
             onDragLeave={handleStageDragLeave}
         >
             <div className="flex flex-col gap-4">
-                <div
-                    ref={containerPanelRef}
-                    className={`transition-all duration-300 ease-out overflow-hidden ${isContainerPanelOpen ? "max-h-[75vh] opacity-100" : "max-h-0 opacity-0 pointer-events-none"}`}
-                >
-                    <div className="relative rounded-2xl border border-gray-200 bg-white shadow-xl">
-                        <div className="flex items-start justify-between gap-5 px-4 py-4 sm:px-6">
-                            <div>
-                                <h3 className="text-sm font-semibold text-gray-900">Välj sopkärl</h3>
-                                <p className="text-xs text-gray-500">Öppna en tjänst nedan, filtrera på volym och dra kärlet till ritningen eller använd Lägg till.</p>
-                            </div>
-                            <button
-                                onClick={closeContainerPanel}
-                                className="p-1 rounded-full text-gray-500 hover:text-gray-700 hover:bg-gray-100"
-                                aria-label="Stäng sopkärlspanelen"
-                            >
-                                <X className="w-4 h-4" />
-                            </button>
-                        </div>
+               <div
+                 ref={containerPanelRef}
+                 className={`transition-panel ${isContainerPanelOpen ? "panel-open" : "panel-closed"}`}
+               >
+                 <div className="panel-card">
+                   <div className="panel-header">
+                     <div>
+                       <h3 className="text-sm font-semibold text-gray-900">Välj sopkärl</h3>
+                       <p className="text-xs text-gray-500">Öppna en tjänst nedan, filtrera på volym och dra kärlet till ritningen eller använd Lägg till.</p>
+                     </div>
+                     <button
+                       onClick={closeContainerPanel}
+                       className="panel-close-btn"
+                       aria-label="Stäng sopkärlspanelen"
+                     >
+                       <X className="w-4 h-4" />
+                     </button>
+                   </div>
 
                         <div className="px-4 pb-6 sm:px-6">
                             {serviceTypes.length === 0 ? (
@@ -448,6 +449,7 @@ export default function RoomCanvas({
                                                         key={container.id}
                                                         className="flex flex-col rounded-2xl border border-gray-200 bg-white p-3 shadow-sm"
                                                     >
+                                                    <div className="container-card" key={container.id}>
                                                         <div className="flex items-start gap-3">
                                                             <img
                                                                 src={`http://localhost:8081${container.imageFrontViewUrl}`}
@@ -476,17 +478,18 @@ export default function RoomCanvas({
                                                         <div className="mt-3 flex gap-2">
                                                             <button
                                                                 onClick={() => handleAddContainer(container)}
-                                                                className="flex-1 rounded-lg border border-emerald-600 px-3 py-2 text-xs font-semibold text-emerald-700 hover:bg-emerald-50 transition"
+                                                                className="container-btn container-btn-add"
                                                             >
                                                                 Lägg till
                                                             </button>
                                                             <button
                                                                 onClick={() => setSelectedContainerInfo(container)}
-                                                                className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-xs font-semibold text-gray-600 hover:bg-gray-100 transition"
+                                                                className="container-btn container-btn-info"
                                                             >
                                                                 Info
                                                             </button>
                                                         </div>
+                                                    </div>
                                                     </div>
                                                 ))}
                                             </div>
@@ -544,11 +547,7 @@ export default function RoomCanvas({
                     }}
                         className={`group toolbar-btn ${isContainerPanelOpen ? "toolbar-btn-active" : ""}`}
                     >
-                    <img
-                        src={BinIcon}
-                        alt="Lägg till sopkärl"
-                        className="toolbar-icon w-5 h-5 object-contain"
-                    />
+                    <PillBottle className="toolbar-icon" />
                     <span className="toolbar-label">Lägg till sopkärl</span>
                 </button>
 

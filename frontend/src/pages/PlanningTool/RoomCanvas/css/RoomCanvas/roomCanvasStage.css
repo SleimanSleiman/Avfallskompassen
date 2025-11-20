@@ -1,0 +1,14 @@
+/* Stage with grid background */
+.page-grid-bg {
+  @apply rounded-2xl;
+  border: 0.5px solid #d6c8b8;
+  background-color: #e6e4e1;
+  background-image:
+    linear-gradient(#d6c8b8 1px, transparent 1px),
+    linear-gradient(90deg, #d6c8b8 1px, transparent 1px);
+}
+
+/* Add optional hover/focus styling if needed */
+.page-grid-bg:focus {
+  @apply outline-none;
+}
