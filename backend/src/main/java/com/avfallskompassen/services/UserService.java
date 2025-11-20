@@ -1,5 +1,6 @@
 package com.avfallskompassen.services;
 
+import com.avfallskompassen.dto.UserDTO;
 import com.avfallskompassen.model.User;
 import com.avfallskompassen.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,10 +37,12 @@ public class UserService {
     }
 
     /**
-     * Returns all users in the system.
+     * Returns all users in the system as DTOs.
      */
-    public java.util.List<User> findAllUsers() {
-        return userRepository.findAll();
+    public java.util.List<UserDTO> findAllUsers() {
+        return userRepository.findAll().stream()
+                .map(UserDTO::new)
+                .collect(java.util.stream.Collectors.toList());
     }
     
     /**
@@ -90,10 +93,12 @@ public class UserService {
 
     /**
      * Update a user's role. Throws RuntimeException if user not found.
+     * Returns a DTO instead of the entity.
      */
-    public User updateUserRole(Integer userId, String newRole) {
+    public UserDTO updateUserRole(Integer userId, String newRole) {
         User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
         user.setRole(newRole);
-        return userRepository.save(user);
+        User savedUser = userRepository.save(user);
+        return new UserDTO(savedUser);
     }
 }

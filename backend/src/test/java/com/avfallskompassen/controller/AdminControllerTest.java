@@ -1,6 +1,6 @@
 package com.avfallskompassen.controller;
 
-import com.avfallskompassen.model.User;
+import com.avfallskompassen.dto.UserDTO;
 import com.avfallskompassen.services.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -29,26 +29,18 @@ public class AdminControllerTest {
     @InjectMocks
     private AdminController adminController;
     
-    private User testUser1;
-    private User testUser2;
-    private User testAdmin;
+    private UserDTO testUser1;
+    private UserDTO testUser2;
+    private UserDTO testAdmin;
     
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
         
-        // Create test users
-        testUser1 = new User("user1", "hashedPassword1", "USER");
-        testUser1.setId(1);
-        testUser1.setCreatedAt(Instant.now());
-        
-        testUser2 = new User("user2", "hashedPassword2", "USER");
-        testUser2.setId(2);
-        testUser2.setCreatedAt(Instant.now());
-        
-        testAdmin = new User("admin", "hashedPassword3", "ADMIN");
-        testAdmin.setId(3);
-        testAdmin.setCreatedAt(Instant.now());
+        // Create test user DTOs
+        testUser1 = new UserDTO(1, "user1", "USER", Instant.now());
+        testUser2 = new UserDTO(2, "user2", "USER", Instant.now());
+        testAdmin = new UserDTO(3, "admin", "ADMIN", Instant.now());
     }
     
     /**
@@ -57,11 +49,11 @@ public class AdminControllerTest {
     @Test
     void testListUsers_Success() {
         // Arrange
-        List<User> expectedUsers = Arrays.asList(testUser1, testUser2, testAdmin);
+        List<UserDTO> expectedUsers = Arrays.asList(testUser1, testUser2, testAdmin);
         when(userService.findAllUsers()).thenReturn(expectedUsers);
         
         // Act
-        ResponseEntity<List<User>> response = adminController.listUsers();
+        ResponseEntity<List<UserDTO>> response = adminController.listUsers();
         
         // Assert
         assertNotNull(response);
@@ -79,11 +71,11 @@ public class AdminControllerTest {
     @Test
     void testListUsers_EmptyList() {
         // Arrange
-        List<User> emptyList = Arrays.asList();
+        List<UserDTO> emptyList = Arrays.asList();
         when(userService.findAllUsers()).thenReturn(emptyList);
         
         // Act
-        ResponseEntity<List<User>> response = adminController.listUsers();
+        ResponseEntity<List<UserDTO>> response = adminController.listUsers();
         
         // Assert
         assertNotNull(response);
@@ -102,14 +94,12 @@ public class AdminControllerTest {
         // Arrange
         Integer userId = 1;
         String newRole = "ADMIN";
-        User updatedUser = new User("user1", "hashedPassword1", "ADMIN");
-        updatedUser.setId(userId);
-        updatedUser.setCreatedAt(testUser1.getCreatedAt());
+        UserDTO updatedUser = new UserDTO(userId, "user1", "ADMIN", testUser1.getCreatedAt());
         
         when(userService.updateUserRole(userId, newRole)).thenReturn(updatedUser);
         
         // Act
-        ResponseEntity<User> response = adminController.updateUserRole(userId, newRole);
+        ResponseEntity<UserDTO> response = adminController.updateUserRole(userId, newRole);
         
         // Assert
         assertNotNull(response);
@@ -130,14 +120,12 @@ public class AdminControllerTest {
         // Arrange
         Integer userId = 3;
         String newRole = "USER";
-        User updatedUser = new User("admin", "hashedPassword3", "USER");
-        updatedUser.setId(userId);
-        updatedUser.setCreatedAt(testAdmin.getCreatedAt());
+        UserDTO updatedUser = new UserDTO(userId, "admin", "USER", testAdmin.getCreatedAt());
         
         when(userService.updateUserRole(userId, newRole)).thenReturn(updatedUser);
         
         // Act
-        ResponseEntity<User> response = adminController.updateUserRole(userId, newRole);
+        ResponseEntity<UserDTO> response = adminController.updateUserRole(userId, newRole);
         
         // Assert
         assertNotNull(response);
@@ -158,14 +146,12 @@ public class AdminControllerTest {
         // Arrange
         Integer userId = 2;
         String newRole = "MODERATOR";
-        User updatedUser = new User("user2", "hashedPassword2", "MODERATOR");
-        updatedUser.setId(userId);
-        updatedUser.setCreatedAt(testUser2.getCreatedAt());
+        UserDTO updatedUser = new UserDTO(userId, "user2", "MODERATOR", testUser2.getCreatedAt());
         
         when(userService.updateUserRole(userId, newRole)).thenReturn(updatedUser);
         
         // Act
-        ResponseEntity<User> response = adminController.updateUserRole(userId, newRole);
+        ResponseEntity<UserDTO> response = adminController.updateUserRole(userId, newRole);
         
         // Assert
         assertNotNull(response);
@@ -206,8 +192,7 @@ public class AdminControllerTest {
         // Arrange
         Integer userId = 1;
         String newRole = "ADMIN";
-        User updatedUser = new User("user1", "hashedPassword1", "ADMIN");
-        updatedUser.setId(userId);
+        UserDTO updatedUser = new UserDTO(userId, "user1", "ADMIN", Instant.now());
         
         when(userService.updateUserRole(userId, newRole)).thenReturn(updatedUser);
         
@@ -224,11 +209,11 @@ public class AdminControllerTest {
     @Test
     void testListUsers_ReturnsExactServiceResponse() {
         // Arrange
-        List<User> users = Arrays.asList(testUser1, testAdmin);
+        List<UserDTO> users = Arrays.asList(testUser1, testAdmin);
         when(userService.findAllUsers()).thenReturn(users);
         
         // Act
-        ResponseEntity<List<User>> response = adminController.listUsers();
+        ResponseEntity<List<UserDTO>> response = adminController.listUsers();
         
         // Assert
         assertSame(users, response.getBody(), "Controller should return the exact list from service");
