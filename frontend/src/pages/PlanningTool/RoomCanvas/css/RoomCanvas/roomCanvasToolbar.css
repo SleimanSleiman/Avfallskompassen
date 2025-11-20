@@ -1,21 +1,29 @@
+.toolbar-panel {
+    @apply absolute top-4 left-4 flex flex-row items-center gap-2 z-50;
+}
+
 .toolbar-btn {
-  @apply flex items-center gap-2 px-3 py-2 rounded-lg shadow-sm transition-all duration-200
+    @apply flex items-center gap-2 px-3 py-2 rounded-lg shadow-sm transition-all duration-200
          bg-white text-gray-700 border border-gray-300 hover:bg-gray-100;
 }
 
 .toolbar-btn-active {
-  @apply bg-emerald-600 text-white hover:bg-emerald-500 border-transparent;
+    @apply bg-emerald-600 text-white hover:bg-emerald-500 border-transparent;
 }
 
 .toolbar-btn:hover {
-  @apply bg-nsr-teal/10;
+    @apply bg-nsr-teal/10;
 }
 
 .toolbar-icon {
-  @apply w-5 h-5 flex-shrink-0;
+    @apply w-5 h-5 flex-shrink-0;
 }
 
 .toolbar-label {
-  @apply text-sm font-medium opacity-0 w-0 group-hover:opacity-100 group-hover:w-auto
+    @apply text-sm font-medium opacity-0 w-0 group-hover:opacity-100 group-hover:w-auto
          transition-all duration-300 whitespace-nowrap;
+}
+
+.room-name {
+    @apply bg-white bg-opacity-80 px-3 py-1 rounded-lg shadow-sm text-sm font-semibold text-gray-900;
 }
