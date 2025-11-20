@@ -20,9 +20,6 @@ import {
 } from "../Constants";
 import type { Room, ContainerInRoom, Door } from "../Types";
 import type { ContainerDTO } from "../../../lib/Container";
-import {
-    X
-} from "lucide-react";
 import Message from "../../../components/ShowStatus";
 import './css/RoomCanvas/roomCanvasStage.css'
 
@@ -232,169 +229,127 @@ export default function RoomCanvas({
                     ref={stageWrapperRef}
                     className="relative w-full overflow-x-auto rounded-2xl text-lg"
                 >
-
                     {msg && <Message message={msg} type="success" />}
                     {error && <Message message={error} type="error" />}
                 </div>
 
                 <div className="relative w-full">
-
-                <Toolbar
-                    roomName={room.name}
-                    isContainerPanelOpen={isContainerPanelOpen}
-                    toggleContainerPanel={() => {
-                        if (isContainerPanelOpen) {
-                            closeContainerPanel();
-                        } else {
-                            setIsContainerPanelOpen(true);
-                        }
-                    }}
-                    handleAddDoor={handleAddDoor}
-                    handleSelectContainer={handleSelectContainer}
-                    handleSelectDoor={handleSelectDoor}
-                    room={room}
-                    setRoom={setRoom}
-                    saveRoom={saveRoom}
-                    doorsLength={doors.length}
-                    setMsg={setMsg}
-                    setError={setError}
-                    undo={undo}
-                    redo={redo}
-                />
-
-
-
-
-
-
+                    <Toolbar
+                        roomName={room.name}
+                        isContainerPanelOpen={isContainerPanelOpen}
+                        toggleContainerPanel={() => {
+                            if (isContainerPanelOpen) {
+                                closeContainerPanel();
+                            } else {
+                                setIsContainerPanelOpen(true);
+                            }
+                        }}
+                        handleAddDoor={handleAddDoor}
+                        handleSelectContainer={handleSelectContainer}
+                        handleSelectDoor={handleSelectDoor}
+                        room={room}
+                        setRoom={setRoom}
+                        saveRoom={saveRoom}
+                        doorsLength={doors.length}
+                        setMsg={setMsg}
+                        setError={setError}
+                        undo={undo}
+                        redo={redo}
+                        selectedContainerInfo={selectedContainerInfo}
+                        setSelectedContainerInfo={setSelectedContainerInfo}
+                    />
 
                     {/* Konva Stage */}
                     <Stage
-                width={STAGE_WIDTH}
-                height={STAGE_HEIGHT}
-                onMouseDown={(e) => {
-                    //Deselect when clicking on empty area
-                    if (e.target === e.target.getStage()) {
-                        handleSelectContainer(null);
-                        handleSelectDoor(null);
-                        setSelectedContainerInfo(null);
-                    }
-                }}
-                className="page-grid-bg"
-                  style={{ backgroundSize: `${GRID_SIZE_PX}px ${GRID_SIZE_PX}px` }}
-            >
-                <Layer>
-                    {/* Room rectangle */}
-                    <RoomShape
-                        room={room}
-                        handleSelectContainer={handleSelectContainer}
-                        handleSelectDoor={handleSelectDoor}
-                        setSelectedContainerInfo={setSelectedContainerInfo}
-                        onMove={handleMoveRoom}
-                    />
+                        width={STAGE_WIDTH}
+                        height={STAGE_HEIGHT}
+                        onMouseDown={(e) => {
+                            //Deselect when clicking on empty area
+                            if (e.target === e.target.getStage()) {
+                                handleSelectContainer(null);
+                                handleSelectDoor(null);
+                                setSelectedContainerInfo(null);
+                            }
+                        }}
+                        className="page-grid-bg"
+                        style={{ backgroundSize: `${GRID_SIZE_PX}px ${GRID_SIZE_PX}px` }}
+                    >
+                        <Layer>
+                            {/* Room rectangle */}
+                            <RoomShape
+                                room={room}
+                                handleSelectContainer={handleSelectContainer}
+                                handleSelectDoor={handleSelectDoor}
+                                setSelectedContainerInfo={setSelectedContainerInfo}
+                                onMove={handleMoveRoom}
+                            />
 
-                    {/* Draggable corners for resizing the room */}
-                    <CornerHandles
-                        corners={corners}
-                        room={room}
-                        handleDragCorner={handleDragCorner}
-                    />
+                            {/* Draggable corners for resizing the room */}
+                            <CornerHandles
+                                corners={corners}
+                                room={room}
+                                handleDragCorner={handleDragCorner}
+                            />
 
-                    {/* Door layer*/}
-                    <DoorsLayer
-                        doors={doors}
-                        selectedDoorId={selectedDoorId}
-                        room={room}
-                        handleDragDoor={handleDragDoor}
-                        handleSelectDoor={handleSelectDoor}
-                    />
+                            {/* Door layer*/}
+                            <DoorsLayer
+                                doors={doors}
+                                selectedDoorId={selectedDoorId}
+                                room={room}
+                                handleDragDoor={handleDragDoor}
+                                handleSelectDoor={handleSelectDoor}
+                            />
 
-                    {/* Measurements between door and corners*/}
-                    <DoorMeasurementLayer
-                        doors={doors}
-                        room={room}
-                    />
+                            {/* Measurements between door and corners*/}
+                            <DoorMeasurementLayer
+                                doors={doors}
+                                room={room}
+                            />
 
-                    {/* Highlighted zones a container cannot be placed */}
-                    {(isDraggingContainer || draggedContainer) &&
-                        [...doorZones, ...containerZonesToShow]
-                        .filter(Boolean) // <— remove undefined or null
-                        .map((zone, i) => (
-                            <Group key={`zone-${i}`} x={zone.x} y={zone.y} listening={false} data-testid={`zone-${i}`}>
-                                <Rect
-                                     x={0}
-                                     y={0}
-                                     width={zone.width}
-                                     height={zone.height}
-                                     fill="red"
-                                     opacity={0.15}
-                                     cornerRadius={4}
-                                />
+                            {/* Highlighted zones a container cannot be placed */}
+                            {(isDraggingContainer || draggedContainer) &&
+                                [...doorZones, ...containerZonesToShow]
+                                .filter(Boolean) // <— remove undefined or null
+                                .map((zone, i) => (
+                                    <Group key={`zone-${i}`} x={zone.x} y={zone.y} listening={false} data-testid={`zone-${i}`}>
+                                        <Rect
+                                             x={0}
+                                             y={0}
+                                             width={zone.width}
+                                             height={zone.height}
+                                             fill="red"
+                                             opacity={0.15}
+                                             cornerRadius={4}
+                                        />
 
-                                <Rect
-                                    x={0}
-                                    y={0}
-                                    width={zone.width}
-                                    height={zone.height}
-                                    stroke="red"
-                                    strokeWidth={2}
-                                    dash={[6, 4]}
-                                    cornerRadius={4}
-                                />
-                            </Group>
-                        ))
-                    }
+                                        <Rect
+                                            x={0}
+                                            y={0}
+                                            width={zone.width}
+                                            height={zone.height}
+                                            stroke="red"
+                                            strokeWidth={2}
+                                            dash={[6, 4]}
+                                            cornerRadius={4}
+                                        />
+                                    </Group>
+                                ))
+                            }
 
-                    {/* Containers layer */}
-                    <ContainersLayer
-                        containersInRoom={containers}
-                        selectedContainerId={selectedContainerId}
-                        handleDragContainer={handleDragContainer}
-                        handleSelectContainer={handleSelectContainer}
-                        room={room}
-                        doorZones={doorZones}
-                        getContainerZones={getContainerZones}
-                        setIsDraggingContainer={setIsDraggingContainer}
-                        isContainerInsideRoom={isContainerInsideRoom}
-                    />
-                </Layer>
+                            {/* Containers layer */}
+                            <ContainersLayer
+                                containersInRoom={containers}
+                                selectedContainerId={selectedContainerId}
+                                handleDragContainer={handleDragContainer}
+                                handleSelectContainer={handleSelectContainer}
+                                room={room}
+                                doorZones={doorZones}
+                                getContainerZones={getContainerZones}
+                                setIsDraggingContainer={setIsDraggingContainer}
+                                isContainerInsideRoom={isContainerInsideRoom}
+                            />
+                        </Layer>
                     </Stage>
-
-                    {/* Selected container information */}
-                    {selectedContainerInfo && (
-                        <div className="absolute bottom-4 left-4 z-40 w-[320px] sm:w-[360px] rounded-2xl border border-gray-200 bg-white shadow-xl p-4">
-                    <div className="flex items-start justify-between">
-                        <div>
-                            <h3 className="text-sm font-semibold text-gray-900">{selectedContainerInfo.name}</h3>
-                            <p className="text-xs text-gray-500">{selectedContainerInfo.size} L · {selectedContainerInfo.cost} kr/år</p>
-                        </div>
-                        <button
-                            onClick={() => setSelectedContainerInfo(null)}
-                            className="p-1 rounded-full text-gray-500 hover:text-gray-700 hover:bg-gray-100"
-                            aria-label="Stäng information"
-                        >
-                            <X className="w-4 h-4" />
-                        </button>
-                    </div>
-                    <div className="mt-3 flex gap-3">
-                        <img
-                            src={`http://localhost:8081${selectedContainerInfo.imageFrontViewUrl}`}
-                            alt={selectedContainerInfo.name}
-                            className="h-20 w-20 flex-shrink-0 object-contain"
-                        />
-                        <div className="flex flex-1 flex-col gap-1 text-xs text-gray-600">
-                            <p>Mått: {selectedContainerInfo.width} × {selectedContainerInfo.height} × {selectedContainerInfo.depth} mm</p>
-                            <p>Tömningsfrekvens: {selectedContainerInfo.emptyingFrequencyPerYear}/år</p>
-                            <p>Service: {selectedContainerInfo.serviceTypeName}</p>
-                            {[190, 240, 243, 370].includes(selectedContainerInfo.size) && (
-                                <p className="rounded-lg bg-amber-50 px-2 py-1 text-amber-700">
-                                    Kompatibel med lock-i-lock (100 kr/år per lock)
-                                </p>
-                            )}
-                        </div>
-                    </div>
-                        </div>
-                    )}
                 </div>
             </div>
         </div>

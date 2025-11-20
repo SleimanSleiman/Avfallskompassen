@@ -1,6 +1,6 @@
 // Toolbar.tsx
 import { React, useState } from "react";
-import { Save, Ruler, DoorOpen, Undo, Redo, PillBottle } from "lucide-react";
+import { Save, Ruler, DoorOpen, Undo, Redo, PillBottle, X } from "lucide-react";
 import { SCALE, STAGE_WIDTH, STAGE_HEIGHT, MARGIN, clamp, MIN_HEIGHT, MIN_WIDTH } from "../Constants"
 import RoomSizePrompt from "../../../components/RoomSizePrompt";
 import DoorWidthPrompt from "../../../components/DoorWidthPrompt";
@@ -21,6 +21,8 @@ type ToolbarProps = {
     setError: (error: string | null) => void;
     undo?: () => void;
     redo?: () => void;
+    selectedContainerInfo: ContainerDTO | null;
+    setSelectedContainerInfo: (container: ContainerDTO | null) => void;
 };
 
 export default function Toolbar({
@@ -38,6 +40,8 @@ export default function Toolbar({
     setError,
     undo,
     redo,
+    selectedContainerInfo,
+    setSelectedContainerInfo,
 }: ToolbarProps) {
 
     const [isRoomPromptOpen, setIsRoomPromptOpen] = useState(false);
@@ -183,6 +187,42 @@ export default function Toolbar({
                     onConfirm={handleAddDoorWithPrompt}
                     onCancel={() => setIsDoorPromptOpen(false)}
                 />
+            )}
+
+            {/* Selected container information */}
+            {selectedContainerInfo && (
+                <div className="selected-container-panel">
+                    <div className="selected-container-header">
+                        <div>
+                            <h3 className="selected-container-name">{selectedContainerInfo.name}</h3>
+                            <p className="selected-container-subtitle">{selectedContainerInfo.size} L · {selectedContainerInfo.cost} kr/år</p>
+                        </div>
+                        <button
+                            onClick={() => setSelectedContainerInfo(null)}
+                            className="selected-container-close-btn"
+                            aria-label="Stäng information"
+                        >
+                            <X className="selected-container-close-btn-icon" />
+                        </button>
+                    </div>
+                    <div className="selected-container-body">
+                        <img
+                            src={`http://localhost:8081${selectedContainerInfo.imageFrontViewUrl}`}
+                            alt={selectedContainerInfo.name}
+                            className="selected-container-image"
+                        />
+                        <div className="selected-container-info">
+                            <p>Mått: {selectedContainerInfo.width} × {selectedContainerInfo.height} × {selectedContainerInfo.depth} mm</p>
+                            <p>Tömningsfrekvens: {selectedContainerInfo.emptyingFrequencyPerYear}/år</p>
+                            <p>Service: {selectedContainerInfo.serviceTypeName}</p>
+                            {[190, 240, 243, 370].includes(selectedContainerInfo.size) && (
+                                <p className="selected-container-lock-i-lock">
+                                    Kompatibel med lock-i-lock (100 kr/år per lock)
+                                </p>
+                            )}
+                        </div>
+                    </div>
+                </div>
             )}
         </div>
     );
