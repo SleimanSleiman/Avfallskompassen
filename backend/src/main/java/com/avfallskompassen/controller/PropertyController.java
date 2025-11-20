@@ -1,6 +1,7 @@
 package com.avfallskompassen.controller;
 
 import com.avfallskompassen.dto.LockTypeDto;
+import com.avfallskompassen.dto.PropertySimpleDTO;
 import com.avfallskompassen.dto.request.PropertyRequest;
 import com.avfallskompassen.dto.response.PropertyResponse;
 import com.avfallskompassen.dto.PropertyDTO;
@@ -112,6 +113,30 @@ public class PropertyController {
             System.out.println("PropertyController: Returning " + propertyDTOs.size() + " DTOs");
             return ResponseEntity.ok(propertyDTOs);
             
+        } catch (Exception e) {
+            System.out.println("PropertyController: Exception: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    /**
+     * Gets all properties created by current user - Returns a simplified version of the property DTO.
+     * @param username
+     * @return PropertySimpleDTO
+     */
+    @GetMapping("/my-properties/simple")
+    public ResponseEntity<List<PropertySimpleDTO>> getPropertiesSimple(
+            @RequestHeader(value = "X-Username", required = false) String username) {
+
+        if (username == null || username.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        try {
+            List<PropertySimpleDTO> dtos = propertyService.getSimplePropertiesByUser(username);
+
+            return ResponseEntity.ok(dtos);
         } catch (Exception e) {
             System.out.println("PropertyController: Exception: " + e.getMessage());
             e.printStackTrace();

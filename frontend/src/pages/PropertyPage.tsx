@@ -1,7 +1,8 @@
 import { useState, useEffect, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { createProperty, getMyProperties, deleteProperty, updateProperty,getMunicipalities, getLockTypes } from '../lib/Property';
 import type { Municipality, Property, PropertyRequest } from '../lib/Property';
-import { currentUser } from '../lib/auth';
+import { currentUser } from '../lib/Auth';
 import RoomSizePrompt from '../components/RoomSizePrompt';
 import ConfirmModal from '../components/ConfirmModal';
 import { getWasteRoomsByPropertyId } from '../lib/WasteRoom';
@@ -38,6 +39,8 @@ export default function PropertyPage() {
         accessPathLength: 0,
         municipalityId: 0
     });
+
+    const navigate = useNavigate();
 
     const [municipalities, setMunicipalities] = useState<Municipality[]>([]);
 
@@ -247,52 +250,55 @@ async function onDeleteWasteRoom(propertyId: number, wasteRoomId: number) {
         console.error('Could not delete waste room', err);
     }
 }
+  function viewStatistics(p: Property) {
+    navigate(`/statistics/${p.id}`, {
+      state: { propertyName: p.address,
+          numberOfApartments: p.numberOfApartments}
+    });
+  }
 
-
-
-    return (
-        <main className="mx-auto max-w-7xl px-4 py-8">
-            <ConfirmModal
-                open={!!pendingDelete}
-                title="Bekräfta borttagning"
-                message={pendingDelete ? `Är du säker på att du vill ta bort fastigheten "${pendingDelete.address}"?` : ''}
-                confirmLabel="Ta bort"
-                cancelLabel="Avbryt"
-                loading={deleting}
-                onConfirm={confirmDelete}
-                onCancel={() => setPendingDelete(null)}
-            />
-            <div className="mb-8 rounded-2xl border bg-white p-6 shadow-soft">
-                <div className="mb-3">
-                    <h1 className="h1">Mina Fastigheter</h1>
-                    <p className="mt-2 text-gray-600">
-                        Välkommen {user?.username}! Hantera dina fastigheter här.
-                    </p>
-                </div>
-                <div className="mb-0 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-                    <div className="flex w-full gap-3 md:w-auto">
-                        <div className="relative flex-1 md:w-80">
-                            <input
-                                type="text"
-                                placeholder="Sök på adress eller kommun"
-                                value={query}
-                                onChange={(e) => setQuery(e.target.value)}
-                                className="w-full rounded-xl border-gray-300 shadow-sm pl-10 pr-3 py-2 focus:border-nsr-teal focus:ring-nsr-teal"
-                            />
-                            <svg className="pointer-events-none absolute left-3 top-2.5 h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M12.9 14.32a8 8 0 111.414-1.414l3.387 3.387a1 1 0 01-1.414 1.414l-3.387-3.387zM14 8a6 6 0 11-12 0 6 6 0 0112 0z" clipRule="evenodd"/></svg>
-                        </div>
-                        <select
-                            value={sortBy}
-                            onChange={(e) => setSortBy(e.target.value as any)}
-                            className="rounded-xl border-gray-300 shadow-sm focus:border-nsr-teal focus:ring-nsr-teal"
-                        >
-                            <option value="created">Senaste</option>
-                            <option value="address">Adress A–Ö</option>
-                            <option value="apartmentsAsc">Stigande antal</option>
-                            <option value="apartmentsDesc">Fallande antal</option>
-                        </select>
-                    </div>
-
+  return (
+    <main className="mx-auto max-w-7xl px-4 py-8">
+      <ConfirmModal
+        open={!!pendingDelete}
+        title="Bekräfta borttagning"
+        message={pendingDelete ? `Är du säker på att du vill ta bort fastigheten "${pendingDelete.address}"?` : ''}
+        confirmLabel="Ta bort"
+        cancelLabel="Avbryt"
+        loading={deleting}
+        onConfirm={confirmDelete}
+        onCancel={() => setPendingDelete(null)}
+      />
+      <div className="mb-8 rounded-2xl border bg-white p-6 shadow-soft">
+        <div className="mb-3">
+          <h1 className="h1">Mina Fastigheter</h1>
+          <p className="mt-2 text-gray-600">
+            Välkommen {user?.username}! Hantera dina fastigheter här.
+          </p>
+        </div>
+        <div className="mb-0 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+          <div className="flex w-full gap-3 md:w-auto">
+            <div className="relative flex-1 md:w-80">
+              <input
+                type="text"
+                placeholder="Sök på adress eller kommun"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                className="w-full rounded-xl border-gray-300 shadow-sm pl-10 pr-3 py-2 focus:border-nsr-teal focus:ring-nsr-teal"
+              />
+              <svg className="pointer-events-none absolute left-3 top-2.5 h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M12.9 14.32a8 8 0 111.414-1.414l3.387 3.387a1 1 0 01-1.414 1.414l-3.387-3.387zM14 8a6 6 0 11-12 0 6 6 0 0112 0z" clipRule="evenodd"/></svg>
+            </div>
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value as any)}
+              className="rounded-xl border-gray-300 shadow-sm focus:border-nsr-teal focus:ring-nsr-teal"
+            >
+            <option value="created">Senaste</option>
+            <option value="address">Adress A–Ö</option>
+            <option value="apartmentsAsc">Stigande antal</option>
+            <option value="apartmentsDesc">Fallande antal</option>
+            </select>
+          </div>
                     <button
                         onClick={() => setShowForm(!showForm)}
                         className="w-full md:w-auto flex items-center justify-between p-3 rounded-xl2 border border-nsr-teal bg-white text-nsr-teal hover:bg-gray-50 transition text-left"
@@ -355,7 +361,6 @@ async function onDeleteWasteRoom(propertyId: number, wasteRoomId: number) {
                   onChange={(e) => handleInputChange('municipalityId', parseInt(e.target.value))}
                 >
                   <option value={0}>Välj kommun</option>
-                  {/* Ensure current value remains visible when editing even if not allowed */}
                   {formData.municipalityId !== 0 && !allowedMunicipalities.some(m => m.id === formData.municipalityId) && (
                     <option value={formData.municipalityId}>{getMunicipalityName(formData.municipalityId)}</option>
                   )}
@@ -554,7 +559,13 @@ async function onDeleteWasteRoom(propertyId: number, wasteRoomId: number) {
                 <div className="mt-4 flex flex-wrap gap-2">
                   <button className="btn-secondary-sm" onClick={() => createWasteRoom(property)}>Skapa miljörum</button>
                   <button className="btn-secondary-sm" onClick={() => handleEdit(property)}>Redigera</button>
-                  <button className="btn-secondary-sm" type="button">Se rapport</button>
+                  <button
+                    className="btn-secondary-sm"
+                    type="button"
+                    onClick={() => viewStatistics(property)}
+                  >
+                    Se rapport
+                  </button>
                   <button
                     className="inline-flex items-center justify-center rounded-xl2 px-3 py-1 text-sm font-medium border border-red-200 bg-red-50 text-red-700 hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-600"
                     onClick={() => requestDelete(property.id, property.address)}
@@ -566,7 +577,6 @@ async function onDeleteWasteRoom(propertyId: number, wasteRoomId: number) {
             ))
         )}
           </div>
-
       </div>
 
                         {isCreateRoomOpen && (

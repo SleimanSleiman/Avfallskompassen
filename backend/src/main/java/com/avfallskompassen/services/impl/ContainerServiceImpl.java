@@ -2,6 +2,7 @@ package com.avfallskompassen.services.impl;
 
 import com.avfallskompassen.dto.ContainerDTO;
 import com.avfallskompassen.dto.ContainerPositionDTO;
+import com.avfallskompassen.dto.PropertyContainerDTO;
 import com.avfallskompassen.exception.ResourceNotFoundException;
 import com.avfallskompassen.model.ContainerPlan;
 import com.avfallskompassen.model.ContainerPosition;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -71,6 +73,30 @@ public class ContainerServiceImpl implements ContainerService {
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "ContainerPlan with ID: " + id + " can't be found"
                 ));
+    }
+
+    public List<PropertyContainerDTO> getContainersByPropertyId(Long propertyId) {
+        List<ContainerPosition> positions = containerPositionRepository.findByPropertyId(propertyId);
+
+        Map<ContainerPlan, Long> grouped = positions.stream()
+                .collect(Collectors.groupingBy(ContainerPosition::getContainerPlan, Collectors.counting()));
+
+        List<PropertyContainerDTO> results = grouped.entrySet().stream()
+                .map(entry -> {
+                    ContainerPlan containerPlan = entry.getKey();
+                    Long count = entry.getValue();
+
+                    return new PropertyContainerDTO(
+                            containerPlan.getMunicipalityService().getServiceType().getName(),
+                            containerPlan.getContainerType().getName(),
+                            containerPlan.getContainerType().getSize(),
+                            count.intValue(),
+                            containerPlan.getEmptyingFrequencyPerYear(),
+                            containerPlan.getCost()
+                    );
+                })
+                .toList();
+        return results;
     }
 
     /**

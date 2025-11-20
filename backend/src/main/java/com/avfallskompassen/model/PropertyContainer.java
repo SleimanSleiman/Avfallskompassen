@@ -1,7 +1,5 @@
 package com.avfallskompassen.model;
 
-
-import com.fasterxml.jackson.databind.annotation.JsonAppend;
 import jakarta.persistence.*;
 
 /**
