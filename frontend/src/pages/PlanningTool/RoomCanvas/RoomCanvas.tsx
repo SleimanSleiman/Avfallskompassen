@@ -8,7 +8,7 @@ import RoomShape from "./components/Room/RoomShape";
 import CornerHandles from "./components/Room/CornerHandles";
 import BlockedZones from "./components/Room/BlockedZones"
 import DoorsLayer from "./components/Door/DoorsLayer";
-import DoorMeasurementLayer from "./components/Door/DoorMeasurementLayer";
+import DoorMeasurementLayer from "./components/Door/DoorMeasurementLayer/DoorMeasurementLayer";
 import ContainersLayer from "./components/Container/ContainersLayer";
 import ContainerPanel from "./components/Container/ContainerPanel";
 import Toolbar from "./components/Toolbar/Toolbar";
