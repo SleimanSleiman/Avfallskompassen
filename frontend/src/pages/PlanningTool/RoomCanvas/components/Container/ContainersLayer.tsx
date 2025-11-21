@@ -5,8 +5,8 @@
 import { Group, Rect, Text, Image as KonvaImage } from "react-konva";
 import useImage from "use-image";
 import { useState } from "react";
-import type { ContainerInRoom, Room } from "../Types";
-import { clamp, SCALE, isOverlapping } from "../Constants";
+import type { ContainerInRoom, Room } from "../../../Types";
+import { clamp, SCALE, isOverlapping } from "../../../Constants";
 
 /* ─────────────── ContainersLayer Props ──────────────── */
 type ContainersLayerProps = {

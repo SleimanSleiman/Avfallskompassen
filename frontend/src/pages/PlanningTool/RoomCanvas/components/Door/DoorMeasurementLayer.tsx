@@ -5,8 +5,8 @@
  */
 import { Line, Text } from "react-konva";
 import type { ReactNode } from "react";
-import type { Door } from "../Types";
-import { SCALE, STAGE_HEIGHT, STAGE_WIDTH } from "../Constants";
+import type { Door } from "../../../Types";
+import { SCALE, STAGE_HEIGHT, STAGE_WIDTH } from "../../../Constants";
 
 /* ─────────────── Props ──────────────── */
 type DoorMeasurementLayerProps = {

@@ -2,37 +2,35 @@
  * RoomCanvas Component
  * Renders the Konva Stage with the room shape, corner handles, doors, and containers.
  */
-import { Stage, Layer, Group, Rect, Text } from "react-konva";
-import { useCallback, useEffect, useRef, useState, type Dispatch, type SetStateAction } from "react";
-import RoomShape from "./RoomShape";
-import CornerHandles from "./CornerHandles";
-import DoorsLayer from "./DoorsLayer";
-import ContainersLayer from "./ContainersLayer";
-import DoorMeasurementLayer from "./DoorMeasurementLayer";
-import ContainerPanel from "./ContainerPanel";
-import Toolbar from "./Toolbar";
-import {
-    STAGE_WIDTH,
-    STAGE_HEIGHT,
-    ROOM_HORIZONTAL_OFFSET,
-    ROOM_VERTICAL_OFFSET,
-    GRID_SIZE_PX,
-} from "../Constants";
+import { Stage, Layer } from "react-konva";
+import { useState, type Dispatch, type SetStateAction } from "react";
+import RoomShape from "./components/Room/RoomShape";
+import CornerHandles from "./components/Room/CornerHandles";
+import BlockedZones from "./components/Room/BlockedZones"
+import DoorsLayer from "./components/Door/DoorsLayer";
+import DoorMeasurementLayer from "./components/Door/DoorMeasurementLayer";
+import ContainersLayer from "./components/Container/ContainersLayer";
+import ContainerPanel from "./components/Container/ContainerPanel";
+import Toolbar from "./components/Toolbar/Toolbar";
+import useContainerPanel from "./hooks/useContainerPanel";
+import useContainerZones from "./hooks/useContainerZones";
+import { STAGE_WIDTH, STAGE_HEIGHT, GRID_SIZE_PX } from "../Constants";
 import type { Room, ContainerInRoom, Door } from "../Types";
 import type { ContainerDTO } from "../../../lib/Container";
 import Message from "../../../components/ShowStatus";
-import './css/RoomCanvas/roomCanvasStage.css'
+import './css/roomCanvasStage.css'
 
 
 /* ─────────────── RoomCanvas Props ──────────────── */
 type RoomCanvasProps = {
-    //Room and corner props
+    /* ───────────── Room & Corner Props ───────────── */
     room: Room;
     corners: { x: number; y: number }[];
-    handleDragCorner: (index: number, pos: { x: number; y: number }) => void;
     setRoom: (room: Room) => void;
+    handleDragCorner: (index: number, pos: { x: number; y: number }) => void;
+    isContainerInsideRoom: (rect: { x: number; y: number; width: number; height: number }, room: Room) => boolean;
 
-    //Door props
+    /* ───────────── Door Props ───────────── */
     doors: Door[];
     selectedDoorId: number | null;
     handleSelectDoor: (id: number | null) => void;
@@ -40,26 +38,26 @@ type RoomCanvasProps = {
     handleAddDoor: (door: { width: number }) => boolean;
     doorZones: { x: number; y: number; width: number; height: number }[];
 
-    //Container props
+    /* ───────────── Container Props ───────────── */
     containers: ContainerInRoom[];
     selectedContainerId: number | null;
+    handleSelectContainer: (id: number | null) => void;
     handleDragContainer: (id: number, pos: { x: number; y: number }) => void;
     moveAllContainers: (dx: number, dy: number) => void;
-    handleSelectContainer: (id: number | null) => void;
     setSelectedContainerInfo: (v: ContainerDTO | null) => void;
     selectedContainerInfo: ContainerDTO | null;
-    getContainerZones: (excludeId?: number) => { x: number; y: number; width: number; height: number }[];
     draggedContainer: ContainerDTO | null;
-    isContainerInsideRoom: (rect: { x: number; y: number; width: number; height: number },room: Room) => boolean;
+    getContainerZones: (excludeId?: number) => { x: number; y: number; width: number; height: number }[];
 
-
-    //Drag & Drop props
+    /* ───────────── Drag & Drop Props ───────────── */
     stageWrapperRef: React.RefObject<HTMLDivElement | null>;
     handleStageDrop: (event: React.DragEvent<HTMLDivElement>) => void;
     handleStageDragOver: (event: React.DragEvent<HTMLDivElement>) => void;
     handleStageDragLeave: (event: React.DragEvent<HTMLDivElement>) => void;
     isStageDropActive: boolean;
-    //Container selection props
+    setIsStageDropActive: (v: boolean) => void;
+
+    /* ───────────── Container Panel / Service Props ───────────── */
     serviceTypes: { id: number; name: string }[];
     selectedType: string | null;
     setSelectedType: (value: string | null) => void;
@@ -69,39 +67,51 @@ type RoomCanvasProps = {
     isLoadingContainers: boolean;
     fetchContainers: (service: { id: number; name: string }) => Promise<void>;
     handleAddContainer: (container: ContainerDTO, position?: { x: number; y: number }) => void;
-    setIsStageDropActive: (v: boolean) => void;
-    setDraggedContainer: Dispatch<SetStateAction<ContainerDTO | null>>;
     onContainerPanelHeightChange?: (height: number) => void;
+    setDraggedContainer: Dispatch<SetStateAction<ContainerDTO | null>>;
+
+    /* ───────────── Misc / Utilities ───────────── */
     undo?: () => void;
     redo?: () => void;
     saveRoom?: () => void;
 };
 
 export default function RoomCanvas({
+    /* ───────────── Room & Corner Props ───────────── */
     room,
     corners,
-    handleDragCorner,
     setRoom,
+    handleDragCorner,
+    isContainerInsideRoom,
+
+    /* ───────────── Door Props ───────────── */
     doors,
     selectedDoorId,
-    handleDragDoor,
     handleSelectDoor,
+    handleDragDoor,
     handleAddDoor,
+    doorZones,
+
+    /* ───────────── Container Props ───────────── */
     containers,
     selectedContainerId,
+    handleSelectContainer,
     handleDragContainer,
     moveAllContainers,
-    handleSelectContainer,
     setSelectedContainerInfo,
     selectedContainerInfo,
+    draggedContainer,
+    getContainerZones,
+
+    /* ───────────── Drag & Drop Props ───────────── */
     stageWrapperRef,
     handleStageDrop,
     handleStageDragOver,
     handleStageDragLeave,
     isStageDropActive,
-    doorZones,
-    getContainerZones,
-    draggedContainer,
+    setIsStageDropActive,
+
+    /* ───────────── Container Panel / Service Props ───────────── */
     serviceTypes,
     selectedType,
     setSelectedType,
@@ -111,80 +121,36 @@ export default function RoomCanvas({
     isLoadingContainers,
     fetchContainers,
     handleAddContainer,
-    setIsStageDropActive,
-    setDraggedContainer,
     onContainerPanelHeightChange,
+    setDraggedContainer,
+
+    /* ───────────── Misc / Utilities ───────────── */
     undo,
     redo,
     saveRoom,
-    isContainerInsideRoom,
 }: RoomCanvasProps) {
-    //State to track if a container is being dragged
     const [isDraggingContainer, setIsDraggingContainer] = useState(false);
-    const isDraggingExistingContainer = isDraggingContainer && selectedContainerId !== null;
     const [msg, setMsg] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
 
+    const {
+        isOpen: isContainerPanelOpen,
+        setIsOpen: setIsContainerPanelOpen,
+        close: closeContainerPanel,
+        ref: containerPanelRef
+    } = useContainerPanel({
+        onContainerPanelHeightChange,
+        setIsStageDropActive,
+        setDraggedContainer
+    });
 
-
-    //Determine which container zones to show
-    const containerZonesToShow = isDraggingExistingContainer
-      ? getContainerZones(selectedContainerId)
-      : draggedContainer
-        ? getContainerZones()
-        : [];
-
-    //State to control room size prompt visibility
-
-    const [isContainerPanelOpen, setIsContainerPanelOpen] = useState(false);
-    const containerPanelRef = useRef<HTMLDivElement | null>(null);
-
-    useEffect(() => {
-        const element = containerPanelRef.current;
-        if (!element) {
-            onContainerPanelHeightChange?.(0);
-            return;
-        }
-
-        const updateHeight = () => {
-            onContainerPanelHeightChange?.(element.getBoundingClientRect().height);
-        };
-
-        updateHeight();
-
-        const win = typeof window !== "undefined" ? (window as unknown as {
-            ResizeObserver?: typeof ResizeObserver;
-            addEventListener?: (type: string, listener: EventListenerOrEventListenerObject) => void;
-            removeEventListener?: (type: string, listener: EventListenerOrEventListenerObject) => void;
-        }) : undefined;
-        if (!win) {
-            return;
-        }
-
-        if (typeof win.ResizeObserver === "function") {
-            const observer = new win.ResizeObserver(() => updateHeight());
-            observer.observe(element);
-            return () => observer.disconnect();
-        }
-
-        if (typeof win.addEventListener === "function") {
-            win.addEventListener("resize", updateHeight);
-            return () => {
-                if (typeof win.removeEventListener === "function") {
-                    win.removeEventListener("resize", updateHeight);
-                }
-            };
-        }
-    }, [onContainerPanelHeightChange, isContainerPanelOpen]);
-
-
-
-    const closeContainerPanel = useCallback(() => {
-        setIsContainerPanelOpen(false);
-        setIsStageDropActive(false);
-        setDraggedContainer(null);
-    }, [setIsContainerPanelOpen, setIsStageDropActive, setDraggedContainer]);
-
+    const zones = useContainerZones({
+        isDraggingContainer,
+        selectedContainerId: selectedContainerId,
+        draggedContainer: draggedContainer,
+        getContainerZones: getContainerZones,
+        doorZones: doorZones
+      });
 
     //Moves a room and the containers inside it
     const handleMoveRoom = (newX: number, newY: number) => {
@@ -195,7 +161,6 @@ export default function RoomCanvas({
         moveAllContainers(dx, dy);
     };
 
-
     /* ──────────────── Render ──────────────── */
     return (
         <div
@@ -205,6 +170,17 @@ export default function RoomCanvas({
             onDragOver={handleStageDragOver}
             onDragLeave={handleStageDragLeave}
         >
+
+            {/* Feedback messages */}
+            <div
+                ref={stageWrapperRef}
+                className="relative w-full overflow-x-auto rounded-2xl text-lg"
+            >
+                {msg && <Message message={msg} type="success" />}
+                {error && <Message message={error} type="error" />}
+            </div>
+
+            {/* Panel for viewing containers */}
             <div className="flex flex-col gap-4">
                 <ContainerPanel
                     ref={containerPanelRef}
@@ -224,15 +200,7 @@ export default function RoomCanvas({
                     setDraggedContainer={setDraggedContainer}
                 />
 
-                {/* Feedback messages */}
-                <div
-                    ref={stageWrapperRef}
-                    className="relative w-full overflow-x-auto rounded-2xl text-lg"
-                >
-                    {msg && <Message message={msg} type="success" />}
-                    {error && <Message message={error} type="error" />}
-                </div>
-
+                {/* Toolbar menu */}
                 <div className="relative w-full">
                     <Toolbar
                         roomName={room.name}
@@ -306,36 +274,6 @@ export default function RoomCanvas({
                                 room={room}
                             />
 
-                            {/* Highlighted zones a container cannot be placed */}
-                            {(isDraggingContainer || draggedContainer) &&
-                                [...doorZones, ...containerZonesToShow]
-                                .filter(Boolean) // <— remove undefined or null
-                                .map((zone, i) => (
-                                    <Group key={`zone-${i}`} x={zone.x} y={zone.y} listening={false} data-testid={`zone-${i}`}>
-                                        <Rect
-                                             x={0}
-                                             y={0}
-                                             width={zone.width}
-                                             height={zone.height}
-                                             fill="red"
-                                             opacity={0.15}
-                                             cornerRadius={4}
-                                        />
-
-                                        <Rect
-                                            x={0}
-                                            y={0}
-                                            width={zone.width}
-                                            height={zone.height}
-                                            stroke="red"
-                                            strokeWidth={2}
-                                            dash={[6, 4]}
-                                            cornerRadius={4}
-                                        />
-                                    </Group>
-                                ))
-                            }
-
                             {/* Containers layer */}
                             <ContainersLayer
                                 containersInRoom={containers}
@@ -348,6 +286,8 @@ export default function RoomCanvas({
                                 setIsDraggingContainer={setIsDraggingContainer}
                                 isContainerInsideRoom={isContainerInsideRoom}
                             />
+
+                            {(isDraggingContainer || draggedContainer) && <BlockedZones zones={zones} />}
                         </Layer>
                     </Stage>
                 </div>

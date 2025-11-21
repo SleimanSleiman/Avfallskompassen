@@ -1,9 +1,9 @@
 import { useCallback, useEffect, forwardRef, type ForwardRef, Dispatch, type SetStateAction } from "react";
 import { Apple, Trash2, CupSoda, Package, Package2, GlassWater, BottleWine, InspectionPanel, X } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
-import type { ContainerDTO } from "../../../lib/Container";
-import { DRAG_DATA_FORMAT } from "../Constants";
-import './css/RoomCanvas/roomCanvasPanel.css'
+import type { ContainerDTO } from "../../../../../lib/Container";
+import { DRAG_DATA_FORMAT } from "../../../Constants";
+import './css/roomCanvasPanel.css'
 
 type ContainerPanelProps = {
     isOpen: boolean;
@@ -112,9 +112,15 @@ const ContainerPanel = forwardRef(function ContainerPanel(
     /* Filter containers based on active type and size selection */
     const filteredContainers = activeType
         ? (activeSize != null
-        ? containersForActiveType.filter(c => c.size === activeSize)
-        : containersForActiveType)
+            ? containersForActiveType
+                .filter(c => c.size === activeSize)
+                .sort((a, b) => a.size - b.size || a.cost - b.cost)
+            : containersForActiveType
+                .slice()
+                .sort((a, b) => a.size - b.size || a.cost - b.cost))
         : [];
+
+
 
     /* Toggle selected size; deselect if already active */
     const handleToggleSize = (typeId: number, size: number) => {
