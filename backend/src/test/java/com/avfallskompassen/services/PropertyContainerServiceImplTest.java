@@ -38,7 +38,7 @@ class PropertyContainerServiceImplTest {
         ServiceType serviceType = new ServiceType();
         serviceType.setName(fractionName);
 
-        MunicipalityService municipalityService = new MunicipalityService();
+        com.avfallskompassen.model.MunicipalityService municipalityService = new com.avfallskompassen.model.MunicipalityService();
         municipalityService.setServiceType(serviceType);
 
         ContainerType type = new ContainerType();
