@@ -19,7 +19,6 @@ export default function ContainerImage({
 
     const image = status === "loaded" ? img : null;
 
-    // ❗ Everything happens here: both image and fallback rect in same component
     if (!image) {
         return (
             <Rect
