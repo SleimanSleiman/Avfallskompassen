@@ -6,6 +6,7 @@ import { SCALE, STAGE_WIDTH, STAGE_HEIGHT, MARGIN } from "../../../../src/pages/
 
 const rectPropsStore: Record<string, any> = {};
 
+// ─────────────── Mock react-konva ───────────────
 vi.mock("react-konva", async () => {
     const actual = await vi.importActual("react");
     return {
@@ -18,8 +19,29 @@ vi.mock("react-konva", async () => {
     };
 });
 
+// ─────────────── Default mocks ───────────────
+const defaultRoom = { x: 0, y: 0, width: 500, height: 400 };
+const defaultHandlers = {
+    handleSelectDoor: vi.fn(),
+    handleSelectContainer: vi.fn(),
+    setSelectedContainerInfo: vi.fn(),
+    onMove: vi.fn(),
+};
+
+// ─────────────── Helper function ───────────────
+const renderRoomShape = (overrideProps: Partial<React.ComponentProps<typeof RoomShape>> = {}) =>
+    render(
+        <RoomShape
+            room={defaultRoom}
+            handleSelectDoor={defaultHandlers.handleSelectDoor}
+            handleSelectContainer={defaultHandlers.handleSelectContainer}
+            setSelectedContainerInfo={defaultHandlers.setSelectedContainerInfo}
+            onMove={defaultHandlers.onMove}
+            {...overrideProps}
+        />
+    );
+
 describe("RoomShape", () => {
-    const mockRoom = { x: 0, y: 0, width: 500, height: 400 };
     let handleSelectDoor: ReturnType<typeof vi.fn>;
     let handleSelectContainer: ReturnType<typeof vi.fn>;
     let setSelectedContainerInfo: ReturnType<typeof vi.fn>;
@@ -30,38 +52,27 @@ describe("RoomShape", () => {
         handleSelectContainer = vi.fn();
         setSelectedContainerInfo = vi.fn();
         onMove = vi.fn();
+        vi.clearAllMocks();
     });
 
     it("renders the room rectangle and dimension texts", () => {
-        render(
-            <RoomShape
-                room={mockRoom}
-                handleSelectDoor={handleSelectDoor}
-                handleSelectContainer={handleSelectContainer}
-                setSelectedContainerInfo={setSelectedContainerInfo}
-                onMove={onMove}
-            />
-        );
+        renderRoomShape();
 
         const rect = screen.getByTestId("rect");
         expect(rect).toBeDefined();
 
         const texts = screen.getAllByTestId("text");
         expect(texts.length).toBe(2);
-        expect(texts[0].textContent).toBe((mockRoom.width * SCALE).toFixed(2) + " m");
-        expect(texts[1].textContent).toBe((mockRoom.height * SCALE).toFixed(2) + " m");
+        expect(texts[0].textContent).toBe((defaultRoom.width * SCALE).toFixed(2) + " m");
+        expect(texts[1].textContent).toBe((defaultRoom.height * SCALE).toFixed(2) + " m");
     });
 
     it("calls selection handlers when clicking on the room rectangle", () => {
-        render(
-            <RoomShape
-                room={mockRoom}
-                handleSelectDoor={handleSelectDoor}
-                handleSelectContainer={handleSelectContainer}
-                setSelectedContainerInfo={setSelectedContainerInfo}
-                onMove={onMove}
-            />
-        );
+        renderRoomShape({
+            handleSelectDoor,
+            handleSelectContainer,
+            setSelectedContainerInfo,
+        });
 
         const rect = screen.getByTestId("rect");
         fireEvent.mouseDown(rect);
@@ -72,15 +83,7 @@ describe("RoomShape", () => {
     });
 
     it("calls onMove with clamped coordinates on drag", () => {
-        render(
-            <RoomShape
-                room={mockRoom}
-                handleSelectDoor={handleSelectDoor}
-                handleSelectContainer={handleSelectContainer}
-                setSelectedContainerInfo={setSelectedContainerInfo}
-                onMove={onMove}
-            />
-        );
+        renderRoomShape({ onMove });
 
         const props = rectPropsStore["rect"];
         expect(props).toBeDefined();
@@ -96,14 +99,12 @@ describe("RoomShape", () => {
         props.onDragMove({ target: targetMock });
 
         expect(onMove).toHaveBeenCalled();
-
         const calledX = onMove.mock.calls[0][0];
         const calledY = onMove.mock.calls[0][1];
 
         expect(calledX).toBeGreaterThanOrEqual(MARGIN);
-        expect(calledX).toBeLessThanOrEqual(STAGE_WIDTH - mockRoom.width - MARGIN);
+        expect(calledX).toBeLessThanOrEqual(STAGE_WIDTH - defaultRoom.width - MARGIN);
         expect(calledY).toBeGreaterThanOrEqual(MARGIN);
-        expect(calledY).toBeLessThanOrEqual(STAGE_HEIGHT - mockRoom.height - MARGIN);
+        expect(calledY).toBeLessThanOrEqual(STAGE_HEIGHT - defaultRoom.height - MARGIN);
     });
-
 });

@@ -15,7 +15,7 @@ type DoorMeasurementLayerProps = {
 };
 
 export default function DoorMeasurementLayer({ doors, room }: DoorMeasurementLayerProps) {
-    const baseMargin = 1;
+    const baseMargin = 14;
     const textOffset = -5;
     const fontSize = 14;
     const textPadding = 4;

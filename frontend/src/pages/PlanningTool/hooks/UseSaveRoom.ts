@@ -32,13 +32,21 @@ export function useSaveRoom() {
     return { saveRoom, isSaving, error };
 }
 
-export function useWasteRoomRequestBuilder() {
+export function useWasteRoomRequestBuilder(
+    isContainerInsideRoom: (rect: { x: number; y: number; width: number; height: number },room: Room) => boolean,
+) {
     const buildWasteRoomRequest = (
         room : Room,
         doors : Door[],
         containers : ContainerInRoom[],
         propertyId : number
     ) : RoomRequest => {
+        const validContainers = containers.filter(c =>
+            isContainerInsideRoom(
+                { x: c.x, y: c.y, width: c.width, height: c.height },
+                room
+            )
+        );
          return {
             wasteRoomId : room.id,
             x: room.x,
@@ -53,7 +61,7 @@ export function useWasteRoomRequestBuilder() {
                 wall: d.wall,
                 swingDirection: d.swingDirection,
             })),
-            containers: containers.map(c => ({
+            containers: validContainers.map(c => ({
                 id: c.container.id,
                 x: c.x,
                 y: c.y,

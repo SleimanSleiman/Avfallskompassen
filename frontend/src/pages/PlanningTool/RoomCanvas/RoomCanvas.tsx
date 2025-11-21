@@ -72,11 +72,14 @@ type RoomCanvasProps = {
     containers: ContainerInRoom[];
     selectedContainerId: number | null;
     handleDragContainer: (id: number, pos: { x: number; y: number }) => void;
+    moveAllContainers: (dx: number, dy: number) => void;
     handleSelectContainer: (id: number | null) => void;
     setSelectedContainerInfo: (v: ContainerDTO | null) => void;
     selectedContainerInfo: ContainerDTO | null;
     getContainerZones: (excludeId?: number) => { x: number; y: number; width: number; height: number }[];
     draggedContainer: ContainerDTO | null;
+    isContainerInsideRoom: (rect: { x: number; y: number; width: number; height: number },room: Room) => boolean;
+
 
     //Drag & Drop props
     stageWrapperRef: React.RefObject<HTMLDivElement | null>;
@@ -147,6 +150,7 @@ export default function RoomCanvas({
     containers,
     selectedContainerId,
     handleDragContainer,
+    moveAllContainers,
     handleSelectContainer,
     setSelectedContainerInfo,
     selectedContainerInfo,
@@ -173,11 +177,12 @@ export default function RoomCanvas({
     undo,
     redo,
     saveRoom,
+    isContainerInsideRoom,
 }: RoomCanvasProps) {
     //State to track if a container is being dragged
     const [isDraggingContainer, setIsDraggingContainer] = useState(false);
     const isDraggingExistingContainer = isDraggingContainer && selectedContainerId !== null;
-        const [msg, setMsg] = useState<string | null>(null);
+    const [msg, setMsg] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
 
     const safeUndo = useCallback(() => {
@@ -332,6 +337,16 @@ export default function RoomCanvas({
             ? containersForActiveType.filter(container => container.size === activeSize)
             : containersForActiveType)
         : [];
+
+    //Moves a room and the containers inside it
+    const handleMoveRoom = (newX: number, newY: number) => {
+        const dx = newX - room.x;
+        const dy = newY - room.y;
+
+        setRoom({ ...room, x: newX, y: newY });
+        moveAllContainers(dx, dy);
+    };
+
 
     /* ──────────────── Render ──────────────── */
     return (
@@ -490,7 +505,7 @@ export default function RoomCanvas({
                     {error && <Message message={error} type="error" />}
                 </div>
 
-                <div className="relative inline-block">
+                <div className="relative w-full">
                     {/* Top-left action buttons */}
                     <div className="absolute top-4 left-4 flex flex-row items-center gap-2 z-50">
                 {/* Change room size */}
@@ -544,7 +559,7 @@ export default function RoomCanvas({
                         if (typeof saveRoom === "function") {
                             if (doors.length > 0) {
                                 try {
-                                    await saveRoom(); 
+                                    await saveRoom();
                                     setTimeout(() => setMsg("Rummet har sparats"),10);
                                     setTimeout(() => setError(null),10);
                                 } catch (err) {
@@ -555,7 +570,7 @@ export default function RoomCanvas({
                                 setTimeout(() => setError("Det måste finnas en dörr innan du sparar rummet"), 10);
                                 setTimeout(() => setMsg(null), 10);
                             }
-                        } 
+                        }
                     }}
                     className="flex items-center justify-start bg-green-50 text-green-700 hover:bg-green-100 hover:text-green-800 px-2 py-1 rounded-lg transition-all duration-300 shadow-sm group overflow-hidden"
                 >
@@ -609,7 +624,7 @@ export default function RoomCanvas({
                         setSelectedContainerInfo(null);
                     }
                 }}
-                className="border border-gray-300 bg-gray-50 rounded-2xl inline-block"
+                className="border border-gray-300 bg-gray-50 rounded-2xl w-full"
             >
                 <Layer>
                     {/* Room rectangle */}
@@ -618,6 +633,7 @@ export default function RoomCanvas({
                         handleSelectContainer={handleSelectContainer}
                         handleSelectDoor={handleSelectDoor}
                         setSelectedContainerInfo={setSelectedContainerInfo}
+                        onMove={handleMoveRoom}
                     />
 
                     {/* Draggable corners for resizing the room */}
@@ -682,6 +698,7 @@ export default function RoomCanvas({
                         doorZones={doorZones}
                         getContainerZones={getContainerZones}
                         setIsDraggingContainer={setIsDraggingContainer}
+                        isContainerInsideRoom={isContainerInsideRoom}
                     />
                 </Layer>
                     </Stage>

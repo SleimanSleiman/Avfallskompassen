@@ -5,6 +5,8 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Min;
 import java.time.LocalDateTime;
+import java.util.List;
+
 /**
  * This class maps to the "properties" table in the PostgreSQL database and
  * represents a property with its details.
@@ -61,6 +63,9 @@ public class Property {
 
     @Column(name = "last_notified_at")
     private LocalDateTime lastNotifiedAt;
+
+    @OneToMany(mappedBy = "property", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<WasteRoom> wasteRooms;
 
     // Constructors
     public Property() {
@@ -176,4 +181,13 @@ public class Property {
     public void preUpdate() {
         this.updatedAt = LocalDateTime.now();
     }
+
+    public List<WasteRoom> getWasteRooms() {
+        return wasteRooms;
+    }
+
+    public void setWasteRooms(List<WasteRoom> wasteRooms) {
+        this.wasteRooms = wasteRooms;
+    }
+
 }
