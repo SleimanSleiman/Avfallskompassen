@@ -286,24 +286,22 @@ export default function PlanningTool() {
                     {/* ActionPanel for selected container or door */}
                     {(selectedContainerId !== null || selectedDoorId !== null) && (
                         <div
-                            className="pointer-events-none absolute left-0.5 z-50 hidden lg:flex"
+                            className="absolute z-50 lg:left-0.5 lg:top-0 hidden lg:flex w-full justify-center lg:justify-start"
                         >
-                            <div className="pointer-events-auto">
-                                <ActionPanel
-                                    containers={containersInRoom}
-                                    doors={doors}
-                                    selectedContainerId={selectedContainerId}
-                                    selectedDoorId={selectedDoorId}
-                                    handleRemoveContainer={handleRemoveContainer}
-                                    handleRemoveDoor={handleRemoveDoor}
-                                    handleRotateDoor={handleRotateDoor}
-                                    handleRotateContainer={handleRotateContainer}
-                                    handleShowContainerInfo={handleShowContainerInfo}
-                                    stageWrapperRef={stageWrapperRef}
-                                    pos={actionPanelPos}
-                                    setPos={setActionPanelPos}
-                                />
-                            </div>
+                            <ActionPanel
+                                containers={containersInRoom}
+                                doors={doors}
+                                selectedContainerId={selectedContainerId}
+                                selectedDoorId={selectedDoorId}
+                                handleRemoveContainer={handleRemoveContainer}
+                                handleRemoveDoor={handleRemoveDoor}
+                                handleRotateDoor={handleRotateDoor}
+                                handleRotateContainer={handleRotateContainer}
+                                handleShowContainerInfo={handleShowContainerInfo}
+                                stageWrapperRef={stageWrapperRef}
+                                pos={actionPanelPos}
+                                setPos={setActionPanelPos}
+                            />
                         </div>
                     )}
 

@@ -163,7 +163,7 @@ export default function ActionPanel({
                 top: actualPos.top,
             }}
         >
-            <div className="flex flex-col items-center gap-2 border border-gray-300 rounded-xl bg-white shadow-sm px-0 py-1 w-fit max-w-full text-sm">
+            <div className="flex flex-col items-center gap-2 border border-gray-300 rounded-xl bg-white shadow-sm px-2 py-2 w-20 text-sm">
                 {/* Tooltip */}
                 <div className="self-end">
                     <InfoTooltip
