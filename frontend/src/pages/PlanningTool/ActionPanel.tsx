@@ -40,7 +40,10 @@ export default function ActionPanel({
 
     //Display action panel if an object is selected
     const isVisible = selectedContainerId !== null || selectedDoorId !== null;
-    if (!isVisible) return null;
+    if (!isVisible ) return null;
+
+    const defaultPos = { left: 100, top: 200 };
+    const actualPos = pos ?? defaultPos;
 
     //States for actionpanel positioning
     const panelRef = useRef<HTMLDivElement | null>(null);
@@ -156,8 +159,8 @@ export default function ActionPanel({
             onMouseDown={onMouseDown}
             className="absolute z-50 cursor-grab active:cursor-grabbing select-none"
             style={{
-                left: pos?.left ?? 0,
-                top: pos?.top ?? 0,
+                left: actualPos.left,
+                top: actualPos.top,
             }}
         >
             <div className="flex flex-col items-center gap-2 border border-gray-300 rounded-xl bg-white shadow-sm px-0 py-1 w-fit max-w-full text-sm">
