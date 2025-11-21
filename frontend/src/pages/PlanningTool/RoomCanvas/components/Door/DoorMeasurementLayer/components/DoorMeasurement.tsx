@@ -8,17 +8,20 @@ type DoorMeasurementProps = {
 };
 
 export default function DoorMeasurement({ door, room }: DoorMeasurementProps) {
+    if (door.width <= 0) return null;
+
     const { lines, texts } = getLinesAndTexts(door, room);
 
     return (
         <>
-            {lines.map((line, i) => (
+            {lines.map((points, idx) => (
                 <Line
-                    key={`line-${door.id}-${i}`}
-                    points={line}
+                    key={`line-${door.id}-${idx}`}
+                    points={points}
                     stroke="red"
                     strokeWidth={1}
                     dash={[4, 4]}
+                    data-testid={`line-${door.id}-${idx}`}
                 />
             ))}
             {texts}
