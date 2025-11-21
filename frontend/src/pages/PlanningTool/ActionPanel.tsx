@@ -144,7 +144,7 @@ export default function ActionPanel({
 
             setPos({
                 left: stageRect.width - panelRect.width - margin,
-                top: margin + 10,
+                top: margin + 200,
             });
         }
     }, [stageWrapperRef, pos, setPos]);
