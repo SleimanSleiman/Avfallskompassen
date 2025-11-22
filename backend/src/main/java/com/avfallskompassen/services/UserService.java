@@ -1,29 +1,20 @@
 package com.avfallskompassen.services;
 
+import com.avfallskompassen.dto.UserDTO;
 import com.avfallskompassen.model.User;
-import com.avfallskompassen.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
- * Service class for user-related business logic and operations.
+ * Service interface for user-related business logic and operations.
  * 
  * This service handles user authentication, registration, and password
  * management using BCrypt encryption for secure password storage.
  * 
  * @author Akmal Safi
  */
-@Service
-public class UserService {
-    
-    @Autowired
-    private UserRepository userRepository;
-    
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+public interface UserService {
     
     /**
      * Finds a user by their username.
@@ -31,16 +22,14 @@ public class UserService {
      * @param username the username to search for
      * @return Optional containing the user if found, empty otherwise
      */
-    public Optional<User> findByUsername(String username) {
-        return userRepository.findByUsername(username);
-    }
+    Optional<User> findByUsername(String username);
 
     /**
-     * Returns all users in the system.
+     * Returns all users in the system as DTOs.
+     * 
+     * @return List of UserDTO
      */
-    public java.util.List<User> findAllUsers() {
-        return userRepository.findAll();
-    }
+    List<UserDTO> findAllUsers();
     
     /**
      * Validates a plain text password against an encoded password.
@@ -49,9 +38,7 @@ public class UserService {
      * @param encodedPassword the BCrypt encoded password from database
      * @return true if passwords match, false otherwise
      */
-    public boolean validatePassword(String rawPassword, String encodedPassword) {
-        return passwordEncoder.matches(rawPassword, encodedPassword);
-    }
+    boolean validatePassword(String rawPassword, String encodedPassword);
     
     /**
      * Creates a new user with default USER role.
@@ -60,15 +47,7 @@ public class UserService {
      * @param password the plain text password (will be BCrypt encoded)
      * @return the created User entity
      */
-    public User createUser(String username, String password) {
-        if (userRepository.existsByUsername(username)) {
-            throw new RuntimeException("Username already exists");
-        }
-        
-        String encodedPassword = passwordEncoder.encode(password);
-        User user = new User(username, encodedPassword);
-        return userRepository.save(user);
-    }
+    User createUser(String username, String password);
     
     /**
      * Creates a new user with a specific role.
@@ -78,22 +57,15 @@ public class UserService {
      * @param role the role to assign to the user (USER, ADMIN, etc.)
      * @return the created User entity
      */
-    public User createUser(String username, String password, String role) {
-        if (userRepository.existsByUsername(username)) {
-            throw new RuntimeException("Username already exists");
-        }
-        
-        String encodedPassword = passwordEncoder.encode(password);
-        User user = new User(username, encodedPassword, role);
-        return userRepository.save(user);
-    }
+    User createUser(String username, String password, String role);
 
     /**
      * Update a user's role. Throws RuntimeException if user not found.
+     * Returns a DTO instead of the entity.
+     * 
+     * @param userId the ID of the user to update
+     * @param newRole the new role to assign
+     * @return UserDTO of the updated user
      */
-    public User updateUserRole(Integer userId, String newRole) {
-        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
-        user.setRole(newRole);
-        return userRepository.save(user);
-    }
+    UserDTO updateUserRole(Integer userId, String newRole);
 }

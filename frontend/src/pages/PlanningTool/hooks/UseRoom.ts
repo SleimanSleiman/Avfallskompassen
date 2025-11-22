@@ -36,8 +36,13 @@ export function useRoom() {
       const widthMeters = parsed?.width ?? defaultWidthMeters;
       const heightMeters = parsed?.height ?? parsed?.length ?? defaultHeightMeters;
 
-      let x = parsed?.x ?? defaultX;
-      let y = parsed?.y ?? defaultY;
+      let x = 150;
+      let y = 150;
+
+      if (parsed.id != null) {
+        x = parsed?.x ?? defaultX;
+        y = parsed?.y ?? defaultY;
+      }
       
       const containers = (parsed.containers ?? []).map(c => {
         const containerInfo = c.containerDTO ?? {

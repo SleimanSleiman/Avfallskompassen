@@ -1,6 +1,6 @@
 package com.avfallskompassen.controller;
 
-import com.avfallskompassen.model.User;
+import com.avfallskompassen.dto.UserDTO;
 import com.avfallskompassen.services.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -24,14 +24,14 @@ public class AdminController {
 
     @GetMapping("/users")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<List<User>> listUsers() {
+    public ResponseEntity<List<UserDTO>> listUsers() {
         return ResponseEntity.ok(userService.findAllUsers());
     }
 
     @PutMapping("/users/{id}/role")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<User> updateUserRole(@PathVariable Integer id, @RequestParam String role) {
-        User updated = userService.updateUserRole(id, role);
+    public ResponseEntity<UserDTO> updateUserRole(@PathVariable Integer id, @RequestParam String role) {
+        UserDTO updated = userService.updateUserRole(id, role);
         return ResponseEntity.ok(updated);
     }
 }
