@@ -26,6 +26,7 @@ export default function CornerHandles({
             {corners.map((corner, index) => (
                 <Circle
                     key={index}
+                    index={index}
                     x={corner.x}
                     y={corner.y}
                     radius={5}

@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import React from "react";
-import RoomShape from "../../../../src/pages/PlanningTool/RoomCanvas/RoomShape";
+import RoomShape from "../../../../src/pages/PlanningTool/RoomCanvas/components/Room/RoomShape";
 import { SCALE, STAGE_WIDTH, STAGE_HEIGHT, MARGIN } from "../../../../src/pages/PlanningTool/Constants";
 
 const rectPropsStore: Record<string, any> = {};
