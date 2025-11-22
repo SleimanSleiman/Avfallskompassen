@@ -165,23 +165,20 @@ export default function RoomCanvas({
     return (
         <div
             ref={stageWrapperRef}
-            className={`relative w-full overflow-hidden rounded-2xl ${isStageDropActive ? 'ring-4 ring-blue-300 ring-offset-2' : ''}`}
+            className={isStageDropActive ? "stage-wrapper stage-wrapper-active" : "stage-wrapper"}
             onDrop={handleStageDrop}
             onDragOver={handleStageDragOver}
             onDragLeave={handleStageDragLeave}
         >
 
             {/* Feedback messages */}
-            <div
-                ref={stageWrapperRef}
-                className="relative w-full overflow-x-auto rounded-2xl text-lg"
-            >
+            <div className="stage-content-wrapper">
                 {msg && <Message message={msg} type="success" />}
                 {error && <Message message={error} type="error" />}
             </div>
 
             {/* Panel for viewing containers */}
-            <div className="flex flex-col gap-4">
+            <div className="container-panel-wrapper">
                 <ContainerPanel
                     ref={containerPanelRef}
                     isOpen={isContainerPanelOpen}
@@ -201,7 +198,7 @@ export default function RoomCanvas({
                 />
 
                 {/* Toolbar menu */}
-                <div className="relative w-full">
+                <div className="toolbar-wrapper">
                     <Toolbar
                         roomName={room.name}
                         isContainerPanelOpen={isContainerPanelOpen}
