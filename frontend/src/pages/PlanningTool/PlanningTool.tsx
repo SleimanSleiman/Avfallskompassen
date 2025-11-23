@@ -235,7 +235,7 @@ export default function PlanningTool() {
             <div className="flex w-full flex-1 flex-col gap-4 lg:flex-row lg:gap-6">
 
                 {/* ─────────────── Canvas ──────────────── */}
-                  <div className="relative w-full lg:w-3/4 flex flex-col">
+                  <div className="relative w-full  flex flex-col">
                     {/* RoomCanvas displays the room, containers, and doors */}
                     <RoomCanvas
                         room={room}
@@ -305,22 +305,6 @@ export default function PlanningTool() {
                         </div>
                     )}
 
-                    {(selectedContainerId !== null || selectedDoorId !== null) && (
-                        <div className="mt-3 flex justify-center lg:hidden">
-                            <ActionPanel
-                                containers={containersInRoom}
-                                doors={doors}
-                                selectedContainerId={selectedContainerId}
-                                selectedDoorId={selectedDoorId}
-                                handleRemoveContainer={handleRemoveContainer}
-                                handleRemoveDoor={handleRemoveDoor}
-                                handleRotateDoor={handleRotateDoor}
-                                handleRotateContainer={handleRotateContainer}
-                                handleShowContainerInfo={handleShowContainerInfo}
-                            />
-                        </div>
-                    )}
-
                     <div className="mt-4 rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
                         <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
                             {propertyHighlights.map(({ key, Icon, title, value, tone, helper }) => (
@@ -352,7 +336,7 @@ export default function PlanningTool() {
                 </div>
 
                 {/* ─────────────── Sidebar ──────────────── */}
-                 <div className="w-full lg:w-2/4 lg:pl-6 flex flex-col">
+                 <div className="w-full  lg:pl-6 flex flex-col">
                     <Sidebar
                         //Comparison data
                         comparisonData={comparisonData}
