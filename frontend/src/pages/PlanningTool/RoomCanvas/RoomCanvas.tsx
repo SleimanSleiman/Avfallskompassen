@@ -1,7 +1,14 @@
 /**
  * RoomCanvas Component
- * Renders the Konva Stage with the room shape, corner handles, doors, and containers.
+ * Renders the interactive Konva Stage for designing a room.
+ * Includes:
+ * - Room shape with draggable corner handles for resizing.
+ * - Doors and door measurements.
+ * - Containers with drag-and-drop functionality.
+ * - Toolbar and container panel UI.
+ * - Blocked zones overlay when dragging containers or doors.
  */
+
 import { Stage, Layer } from "react-konva";
 import { useState, type Dispatch, type SetStateAction } from "react";
 import RoomShape from "./components/Room/RoomShape";
@@ -19,7 +26,6 @@ import type { Room, ContainerInRoom, Door } from "../Types";
 import type { ContainerDTO } from "../../../lib/Container";
 import Message from "../../../components/ShowStatus";
 import './css/roomCanvasStage.css'
-
 
 /* ─────────────── RoomCanvas Props ──────────────── */
 type RoomCanvasProps = {
@@ -133,6 +139,7 @@ export default function RoomCanvas({
     const [msg, setMsg] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
 
+    //Handle container panel state and ref
     const {
         isOpen: isContainerPanelOpen,
         setIsOpen: setIsContainerPanelOpen,
@@ -144,6 +151,7 @@ export default function RoomCanvas({
         setDraggedContainer
     });
 
+    //Compute blocked zones for doors and containers
     const zones = useContainerZones({
         isDraggingContainer,
         selectedContainerId: selectedContainerId,
@@ -284,6 +292,7 @@ export default function RoomCanvas({
                                 isContainerInsideRoom={isContainerInsideRoom}
                             />
 
+                            {/* Blocked zones overlay */}
                             {(isDraggingContainer || draggedContainer) && <BlockedZones zones={zones} />}
                         </Layer>
                     </Stage>

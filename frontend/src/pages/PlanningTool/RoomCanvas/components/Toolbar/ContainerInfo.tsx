@@ -1,3 +1,8 @@
+/**
+ * ContainerInfo Component
+ * Displays information about a selected container in a draggable panel.
+ */
+
 import React, { useRef, useState, useEffect } from "react";
 import { X } from "lucide-react";
 import type { ContainerDTO } from "../../../../../lib/Container";
@@ -16,7 +21,7 @@ export default function ContainerInfo({ container, onClose, pos, setPos}: Contai
     const [offset, setOffset] = useState({ x: 0, y: 0 });
     const actualPos = pos || { left: 100, top: 100 };
 
-    // Initialize position if null
+    //Initialize position if null
     useEffect(() => {
         if (!pos) {
             const panelEl = panelRef.current;
@@ -29,30 +34,31 @@ export default function ContainerInfo({ container, onClose, pos, setPos}: Contai
         }
     }, [pos, setPos]);
 
-    // Start dragging
+    //Start dragging
     const onMouseDown = (e: React.MouseEvent) => {
         if (!panelRef.current) return;
         setOffset({ x: e.clientX - actualPos.left, y: e.clientY - actualPos.top });
         setDragging(true);
     };
 
-        useEffect(() => {
-            if (!dragging) return;
+    //Handle dragging
+    useEffect(() => {
+        if (!dragging) return;
 
-            const onMouseMove = (e: MouseEvent) => {
-                if (!pos) return;
-                setPos({ left: Math.max(0, e.clientX - offset.x), top: Math.max(0, e.clientY - offset.y) });
-            };
-            const onMouseUp = () => setDragging(false);
+        const onMouseMove = (e: MouseEvent) => {
+            if (!pos) return;
+            setPos({ left: Math.max(0, e.clientX - offset.x), top: Math.max(0, e.clientY - offset.y) });
+        };
+        const onMouseUp = () => setDragging(false);
 
-            window.addEventListener("mousemove", onMouseMove);
-            window.addEventListener("mouseup", onMouseUp);
+        window.addEventListener("mousemove", onMouseMove);
+        window.addEventListener("mouseup", onMouseUp);
 
-            return () => {
-                window.removeEventListener("mousemove", onMouseMove);
-                window.removeEventListener("mouseup", onMouseUp);
-            };
-        }, [dragging, offset, pos, setPos]);
+        return () => {
+            window.removeEventListener("mousemove", onMouseMove);
+            window.removeEventListener("mouseup", onMouseUp);
+        };
+    }, [dragging, offset, pos, setPos]);
 
     return (
         <div

@@ -1,3 +1,10 @@
+/**
+ * ContainerImage Component
+ * Renders the visual representation of a container:
+ * - Uses the container image if loaded
+ * - Falls back to a colored rectangle if image loading fails
+ */
+
 import { Rect, Image as KonvaImage } from "react-konva";
 import useImage from "use-image";
 import type { ContainerInRoom } from "../../../Types";
@@ -13,12 +20,15 @@ export default function ContainerImage({
     isOutsideRoom: boolean;
     isOverZone: boolean;
 }) {
+
+    //Load image using useImage hook
     const [img, status] = useImage(
         `http://localhost:8081${container.container.imageTopViewUrl}`
     );
 
     const image = status === "loaded" ? img : null;
 
+    //If image is not loaded yet or failed → show colored placeholder box
     if (!image) {
         return (
             <Rect
@@ -32,6 +42,7 @@ export default function ContainerImage({
         );
     }
 
+    //Render actual container image
     return (
         <KonvaImage
             image={image}

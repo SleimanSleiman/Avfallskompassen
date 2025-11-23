@@ -1,3 +1,8 @@
+/**
+ * DoorDrag Component
+ * Wraps a door in a draggable Konva group and handles selection and movement.
+ */
+
 import { Group } from "react-konva";
 import { clamp } from "../../../../Constants";
 import DoorVisual from "./DoorVisual";
@@ -10,6 +15,7 @@ export default function DoorDrag({
     handleDragDoor,
     handleSelectDoor
 }) {
+    //Keeps dragging inside room bounds
     const dragBoundFunc = (pos) => computeDragBound(door, room, pos);
 
     return (

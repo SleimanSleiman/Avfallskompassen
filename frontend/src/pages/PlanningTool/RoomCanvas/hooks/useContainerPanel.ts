@@ -1,3 +1,9 @@
+/**
+ * useContainerPanel Hook
+ * Manages the open/close state of a container panel, tracks its DOM height,
+ * and handles drag-related state for containers on a canvas.
+ */
+
 import { useState, useRef, useEffect } from "react";
 
 function useContainerPanel({
@@ -12,12 +18,14 @@ function useContainerPanel({
     const [isOpen, setIsOpen] = useState(false);
     const ref = useRef<HTMLDivElement | null>(null);
 
+    //Close panel and reset drag states
     const close = useCallback(() => {
         setIsOpen(false);
         setIsStageDropActive?.(false);
         setDraggedContainer?.(null);
     }, [setIsStageDropActive, setDraggedContainer]);
 
+    //Observe panel height changes and call callback
     useEffect(() => {
         const element = ref.current;
         if (!element) {
@@ -31,6 +39,7 @@ function useContainerPanel({
 
         updateHeight();
 
+        //Fallback for window and ResizeObserver
         const win = typeof window !== "undefined" ? window : undefined;
         if (!win) return;
 
@@ -40,6 +49,7 @@ function useContainerPanel({
             return () => observer.disconnect();
         }
 
+        //Fallback resize listener
         win.addEventListener("resize", updateHeight);
         return () => win.removeEventListener("resize", updateHeight);
 

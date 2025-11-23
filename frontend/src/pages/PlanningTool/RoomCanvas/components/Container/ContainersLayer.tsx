@@ -1,7 +1,9 @@
 /**
  * ContainersLayer Component
  * Renders containers (bins) within a room on the canvas.
+ * Each container is rendered using the <ContainerItem> component.
  */
+
 import type { ContainerInRoom, Room } from "../../../Types";
 import ContainerItem from "./components/ContainerItem";
 

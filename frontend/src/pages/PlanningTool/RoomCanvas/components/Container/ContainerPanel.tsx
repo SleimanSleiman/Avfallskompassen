@@ -1,3 +1,9 @@
+/**
+ * ContainerPanel Component
+ * A slide-in panel that lets the user browse and filter available containers,
+ * select sizes, drag containers onto the canvas, or add them directly.
+ */
+
 import { useCallback, useEffect, forwardRef, type ForwardRef, Dispatch, type SetStateAction } from "react";
 import { Apple, Trash2, CupSoda, Package, Package2, GlassWater, BottleWine, InspectionPanel, X } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
@@ -22,7 +28,7 @@ type ContainerPanelProps = {
     setDraggedContainer: Dispatch<SetStateAction<ContainerDTO | null>>;
 };
 
-/* ───────────── Service Type Icons ───────────── */
+//Maps service type names to icons based on keyword matching
 type ServiceTypeIconRule = {
     keywords: string[];
     Icon: LucideIcon;
@@ -40,6 +46,7 @@ const SERVICE_TYPE_ICON_RULES: ServiceTypeIconRule[] = [
 ];
 
 const getServiceTypeIcon = (name: string): LucideIcon => {
+    //Find matching icon rule
     const normalized = name.toLowerCase();
     const match = SERVICE_TYPE_ICON_RULES.find(rule =>
         rule.keywords.some(keyword => normalized.includes(keyword))
@@ -47,7 +54,7 @@ const getServiceTypeIcon = (name: string): LucideIcon => {
     return match?.Icon ?? Package2;
 };
 
-/* ForwardRef is used so this panel can be referenced from the parent, e.g., for animations or focus control */
+//ForwardRef is used so the parent can animate or scroll this panel directly.
 const ContainerPanel = forwardRef(function ContainerPanel(
     props: ContainerPanelProps,
     ref: ForwardedRef<HTMLDivElement>
@@ -69,7 +76,7 @@ const ContainerPanel = forwardRef(function ContainerPanel(
         setDraggedContainer,
     } = props;
 
-    /* Clear selected type and size when user re-selects the same type */
+    //Select or toggle a service type.Selecting it again clears the current selection.
     const handleSelectServiceType = async (type: { id: number; name: string }) => {
         if (selectedType === type.name) {
             setSelectedType(null);
@@ -81,7 +88,7 @@ const ContainerPanel = forwardRef(function ContainerPanel(
         await fetchContainers(type);
     };
 
-    /* Close panel on Escape key — improves accessibility and user experience */
+    //Close on Escape
     useEffect(() => {
         if (!isOpen) return;
 
@@ -93,23 +100,25 @@ const ContainerPanel = forwardRef(function ContainerPanel(
         return () => window.removeEventListener("keydown", handleKeyDown);
     }, [isOpen, closePanel]);
 
-    /* Determine which service type is active to filter displayed containers */
+    //Get currently active service type
     const activeType = selectedType
         ? serviceTypes.find((type) => type.name === selectedType) ?? null
         : null;
 
+    //Filter containers for selected type
     const containersForActiveType = activeType
         ? availableContainers.filter((c) => c.serviceTypeId === activeType.id)
         : [];
 
-    /* Collect available container sizes for filtering */
+    //Collect unique size options
     const sizeOptions = activeType
         ? Array.from(new Set(containersForActiveType.map(c => c.size))).sort((a, b) => a - b)
         : [];
 
+    //Get selected size
     const activeSize = activeType ? selectedSize[activeType.id] ?? null : null;
 
-    /* Filter containers based on active type and size selection */
+    //Filter containers by selected size
     const filteredContainers = activeType
         ? (activeSize != null
             ? containersForActiveType
@@ -120,9 +129,7 @@ const ContainerPanel = forwardRef(function ContainerPanel(
                 .sort((a, b) => a.size - b.size || a.cost - b.cost))
         : [];
 
-
-
-    /* Toggle selected size; deselect if already active */
+    //Toggle a size filter
     const handleToggleSize = (typeId: number, size: number) => {
         setSelectedSize(prev => ({
             ...prev,
@@ -142,14 +149,14 @@ const ContainerPanel = forwardRef(function ContainerPanel(
                         </p>
                     </div>
 
-                    {/* Close button wired to parent handler */}
+                    {/*Close panel*/}
                     <button onClick={closePanel} className="panel-close-btn" aria-label="Stäng sopkärlspanelen">
                         <X className="panel-close-btn-icon" />
                     </button>
                 </div>
 
                 <div className="panel-inner">
-                    {/* Show message if no services loaded */}
+                    {/*No services loaded*/}
                     {serviceTypes.length === 0 ? (
                         <p className="empty-text">Inga avfallstjänster kunde hämtas just nu.</p>
                     ) : (
@@ -166,10 +173,11 @@ const ContainerPanel = forwardRef(function ContainerPanel(
                                             onClick={() => handleSelectServiceType(type)}
                                             className={"service-btn"}
                                         >
-                                            {/* Display icon with visual cue if selected */}
+                                            {/*Service icon*/}
                                             <span className={`service-icon ${isSelected ? "service-icon-selected" : ""}`}>
                                                 <IconComponent className="service-icon-size" aria-hidden="true"/>
                                             </span>
+                                            {/*Service label*/}
                                             <span className={`service-label ${isSelected ? "service-label-selected" : ""}`}>
                                                 {type.name}
                                             </span>
@@ -181,9 +189,11 @@ const ContainerPanel = forwardRef(function ContainerPanel(
                     )}
 
                     <div className="container-scroll">
+                        {/*No type selected*/}
                         {!activeType ? (
                             <p className="empty-text">Välj en avfallstjänst för att visa tillgängliga sopkärl.</p>
                         ) : isLoadingContainers ? (
+                            //Loading spinner
                             <div className="loading-wrapper">
                                 <div className="spinner" />
                             </div>
@@ -191,6 +201,7 @@ const ContainerPanel = forwardRef(function ContainerPanel(
                             <p className="empty-text">Inga kärl hittades för {activeType.name}.</p>
                         ) : (
                             <div className="size-filter-wrapper">
+                                {/*Size filter buttons*/}
                                 {sizeOptions.length > 0 && (
                                     <div className="size-filter">
                                         {sizeOptions.map((size) => (
@@ -207,12 +218,13 @@ const ContainerPanel = forwardRef(function ContainerPanel(
                             </div>
                         )}
 
-                        {/* Render filtered containers and enable drag/drop */}
+                        {/*Container list*/}
                         <div className="container-list-scroll">
                             <div className="container-grid">
                                 {filteredContainers.map(container => (
                                     <div key={container.id} className="container-card">
                                         <div className="container-top">
+                                            {/*Drag image*/}
                                             <img
                                                 src={`http://localhost:8081${container.imageFrontViewUrl}`}
                                                 alt={container.name}
@@ -231,6 +243,7 @@ const ContainerPanel = forwardRef(function ContainerPanel(
                                                     setDraggedContainer(null);
                                                 }}
                                             />
+                                            {/*Container info*/}
                                             <div className="container-info">
                                                 <p className="container-title">{container.name}</p>
                                                 <p>{container.width} × {container.height} × {container.depth} mm</p>
@@ -239,6 +252,7 @@ const ContainerPanel = forwardRef(function ContainerPanel(
                                             </div>
                                         </div>
 
+                                        {/*Action buttons*/}
                                         <div className="container-actions">
                                             <button
                                                 onClick={() => handleAddContainer(container)}

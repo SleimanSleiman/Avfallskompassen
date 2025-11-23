@@ -1,4 +1,9 @@
-// Toolbar.tsx
+/**
+ * Toolbar Component
+ * Renders a toolbar for room actions including resizing the room, adding doors and containers,
+ * saving the design, and performing undo/redo actions.
+ */
+
 import { React, useState } from "react";
 import { Save, Ruler, DoorOpen, Undo, Redo, PillBottle, X } from "lucide-react";
 import { SCALE, STAGE_WIDTH, STAGE_HEIGHT, MARGIN, clamp, MIN_HEIGHT, MIN_WIDTH } from "../../../Constants"
@@ -50,6 +55,7 @@ export default function Toolbar({
 
     const [containerInfoPos, setContainerInfoPos] = useState<{ left: number; top: number } | null>(null);
 
+    //Safe wrappers for optional undo/redo
     const safeUndo = useCallback(() => {
         if (typeof undo === "function") {
             undo();
@@ -62,8 +68,8 @@ export default function Toolbar({
         }
     }, [redo]);
 
+    //Confirm new room size
     const handleConfirmRoomSize = (name: string, length: number, width: number) => {
-        // length and width are expected in mm; convert to canvas px using SCALE
         const widthPx = width / SCALE;
         const heightPx = length / SCALE;
 
@@ -87,30 +93,32 @@ export default function Toolbar({
         setIsRoomPromptOpen(false);
     };
 
-        const handleAddDoorWithPrompt = (width: number) => {
-            const success = handleAddDoor({ width });
-            if (success) setIsDoorPromptOpen(false);
-        };
+    //Confirm door addition
+    const handleAddDoorWithPrompt = (width: number) => {
+        const success = handleAddDoor({ width });
+        if (success) setIsDoorPromptOpen(false);
+    };
 
-        const handleSaveRoom = async () => {
-            setMsg("");
-            setError("");
-            if (typeof saveRoom === "function") {
-                if (doorsLength > 0) {
-                    try {
-                        await saveRoom();
-                        setTimeout(() => setMsg("Rummet har sparats"), 10);
-                        setTimeout(() => setError(null), 10);
-                    } catch {
-                        setTimeout(() => setError("Rummet gick inte att spara. Vänligen försök senare igen"), 10);
-                        setTimeout(() => setMsg(null), 10);
-                    }
-                } else {
-                    setTimeout(() => setError("Det måste finnas en dörr innan du sparar rummet"), 10);
+    //Save room and display messages
+    const handleSaveRoom = async () => {
+        setMsg("");
+        setError("");
+        if (typeof saveRoom === "function") {
+            if (doorsLength > 0) {
+                try {
+                    await saveRoom();
+                    setTimeout(() => setMsg("Rummet har sparats"), 10);
+                    setTimeout(() => setError(null), 10);
+                } catch {
+                    setTimeout(() => setError("Rummet gick inte att spara. Vänligen försök senare igen"), 10);
                     setTimeout(() => setMsg(null), 10);
                 }
+            } else {
+                setTimeout(() => setError("Det måste finnas en dörr innan du sparar rummet"), 10);
+                setTimeout(() => setMsg(null), 10);
             }
-        };
+        }
+    };
 
     return (
         <div className="toolbar-panel">

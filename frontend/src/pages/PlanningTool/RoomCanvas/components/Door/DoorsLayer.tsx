@@ -1,3 +1,8 @@
+/**
+ * DoorsLayer Component
+ * Renders all doors in the room and connects drag/select handlers.
+ */
+
 import DoorDrag from "./components/DoorDrag";
 import type { Door } from "../../../Types";
 

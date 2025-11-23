@@ -2,11 +2,11 @@
  * CornerHandles Component
  * Renders draggable corner handles for resizing a room.
  */
+
 import { Circle } from "react-konva";
 import { clamp, STAGE_WIDTH, STAGE_HEIGHT, MARGIN, MIN_WIDTH, MIN_HEIGHT } from "../../../Constants";
 import type { Room } from "../../../Types";
 
-/* ──────────────── CornerHandles Props ──────────────── */
 type CornerHandlesProps = {
   corners: { x: number; y: number }[];
   room: Room;

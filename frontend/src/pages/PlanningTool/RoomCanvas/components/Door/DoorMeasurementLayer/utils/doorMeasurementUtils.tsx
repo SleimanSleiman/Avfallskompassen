@@ -1,3 +1,8 @@
+/**
+ * doorMeasurementUtils Module
+ * Computes line positions and text labels for door measurements.
+ */
+
 import { Text } from "react-konva";
 import type { Door } from "../../../../Types";
 import { SCALE, STAGE_HEIGHT, STAGE_WIDTH } from "../../../../../Constants";
@@ -9,6 +14,7 @@ const textPadding = 4;
 const minCanvasPadding = 8;
 const textColor = "blue";
 
+//Compute measurement lines and text for a door
 export function getLinesAndTexts(
     door: Door,
     room: { x: number; y: number; width: number; height: number }
@@ -16,9 +22,10 @@ export function getLinesAndTexts(
     const swing = door.width / SCALE;
     const margin = baseMargin + swing;
 
-    // Door corner coordinates
+    //Initial door corner coordinates
     let leftX = door.x, rightX = door.x, topY = door.y, bottomY = door.y;
 
+    //Adjust corners based on wall
     switch (door.wall) {
         case "top":
             leftX = door.x - swing;
@@ -45,6 +52,7 @@ export function getLinesAndTexts(
     const lines: number[][] = [];
     const texts: JSX.Element[] = [];
 
+    //Generate lines and text depending on wall orientation
     switch (door.wall) {
         case "top": {
             const offset = Math.min(margin, Math.max(topY - minCanvasPadding, 0));
