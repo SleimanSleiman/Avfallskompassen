@@ -833,6 +833,11 @@ export default function CostSection({
 
                             <SummaryStat
                             title="Årlig CO₂-besparing"
+                            badge={
+                                <InfoTooltip
+                                    text="CO₂-besparingen beräknas baserat på mängden återvunnet material och dess miljöpåverkan jämfört med att inte återvinna. Ju fler kärl och bättre sortering, desto större besparing."
+                                />
+                            }
                             value={co2CardValue}
                             tone={co2Tone}
                             size="compact"

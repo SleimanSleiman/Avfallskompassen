@@ -19,6 +19,7 @@ import RoomCanvas from './RoomCanvas/RoomCanvas';
 import Sidebar from './Sidebar/Sidebar';
 import { WasteTypeComparisonPanel } from "./Sidebar/CostSection";
 import ActionPanel from './ActionPanel';
+import { Tooltip } from "../../components/Tooltip";
 
 //Hooks
 import { useRoom } from './hooks/UseRoom';
@@ -89,35 +90,34 @@ export default function PlanningTool() {
     /* ──────────────── Sync the doors and containers when changes are made to the room ──────────────── */
     useEffect(() => {
         if (room.doors && room.doors.length > 0) {
+            const leftX = room.x;
+            const topY = room.y;
 
-        const leftX = room.x;
-        const topY = room.y;
+            const offsets: Record<number, number> = {};
 
-        const offsets: Record<number, number> = {};
+            room.doors.forEach(d => {
+                let offset = 0.5;
 
-        room.doors.forEach(d => {
-            let offset = 0.5;
+                switch (d.wall) {
+                    case "top":
+                    case "bottom":
+                        offset = (d.x - leftX) / room.width;
+                        break;
 
-            switch (d.wall) {
-                case "top":
-                case "bottom":
-                    offset = (d.x - leftX) / room.width;
-                    break;
+                    case "left":
+                    case "right":
+                        offset = (d.y - topY) / room.height;
+                        break;
+                }
 
-                case "left":
-                case "right":
-                    offset = (d.y - topY) / room.height;
-                    break;
-            }
+                offsets[d.id] = offset;
+            });
 
-            offsets[d.id] = offset;
-        });
-
-        doorOffsetRef.current = offsets;
-        setDoors(room.doors);
-    }
+            doorOffsetRef.current = offsets;
+            setDoors(room.doors);
+        }
         if (room.containers && room.containers.length > 0) saveContainers(room.containers);
-    }, [room.id, setDoors, saveContainers]);
+    }, [room, setDoors, saveContainers, doorOffsetRef]);
 
 
 
@@ -216,11 +216,11 @@ export default function PlanningTool() {
                 ? "Data uppdateras"
                 : hasComparisonPeers
                     ? " "
-                    : "Jämförelsedata saknas för vald fastighet",
+                    : "Inga liknande fastigheter hittades för jämförelse",
         },
     ];
 
-    const { saveRoom, isSaving, error } = useSaveRoom();
+    const { saveRoom } = useSaveRoom();
     const { buildWasteRoomRequest } = useWasteRoomRequestBuilder(isContainerInsideRoom);
 
     const handleSaveRoom = async () => {
@@ -299,7 +299,6 @@ export default function PlanningTool() {
                                     handleRotateDoor={handleRotateDoor}
                                     handleRotateContainer={handleRotateContainer}
                                     handleShowContainerInfo={handleShowContainerInfo}
-                                    stageWrapperRef={stageWrapperRef}
                                     pos={actionPanelPos}
                                     setPos={setActionPanelPos}
                                 />
