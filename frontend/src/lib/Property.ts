@@ -49,7 +49,7 @@ export type PropertyResponse = {
 };
 
 const MAX_ACCESS_PATH_LENGTH = 100; 
-const MAX_NUMBER_OF_APARTMENTS = 100; 
+const MAX_NUMBER_OF_APARTMENTS = 300; 
 
 function getAuthHeaders(): Record<string, string> | undefined {
     const user = currentUser();
