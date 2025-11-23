@@ -8,7 +8,7 @@ export type LoginResponse = {
   token?: string;
 };
 
-export async function login(username: string, password: string, rememberMe: boolean = false): Promise<LoginResponse> {
+export async function login(username: string, password: string, rememberMe: boolean = true): Promise<LoginResponse> {
   const res = await post<LoginResponse>('/api/auth/login', { username, password });
   if (res.success) {
     const storage = rememberMe ? localStorage : sessionStorage; 
