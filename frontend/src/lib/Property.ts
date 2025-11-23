@@ -113,6 +113,13 @@ export async function getMyProperties(): Promise<Property[]> {
     });
 }
 
+export async function getMyPropertiesWithWasteRooms(): Promise<Property[]> {
+    return await api<Property[]>('/api/properties/my-properties-wasterooms', {
+        method: 'GET',
+        headers: getAuthHeaders()
+    });
+}
+
 export async function deleteProperty(id: number): Promise<PropertyResponse> {
     return await api<PropertyResponse>(`/api/properties/${id}`, {
         method: 'DELETE',

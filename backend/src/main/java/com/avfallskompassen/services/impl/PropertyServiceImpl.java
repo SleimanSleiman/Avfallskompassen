@@ -1,13 +1,11 @@
 package com.avfallskompassen.services.impl;
 
 import com.avfallskompassen.dto.LockTypeDto;
+import com.avfallskompassen.dto.PropertyDTO;
 import com.avfallskompassen.dto.PropertySimpleDTO;
+import com.avfallskompassen.dto.WasteRoomDTO;
 import com.avfallskompassen.dto.request.PropertyRequest;
-import com.avfallskompassen.model.LockType;
-import com.avfallskompassen.model.Property;
-import com.avfallskompassen.model.PropertyType;
-import com.avfallskompassen.model.Municipality;
-import com.avfallskompassen.model.User;
+import com.avfallskompassen.model.*;
 import com.avfallskompassen.repository.MunicipalityRepository;
 import com.avfallskompassen.repository.PropertyRepository;
 import com.avfallskompassen.services.PropertyService;
@@ -107,6 +105,15 @@ public class PropertyServiceImpl implements PropertyService {
     public List<Property> getPropertiesByUser(String username) {
         return propertyRepository.findByCreatedByUsername(username);
     }
+
+    public List<PropertyDTO> getPropertiesWithRoomsByUser(String username) {
+        List<Property> properties = propertyRepository.findAllByUserWithRooms(username);
+
+        return properties.stream()
+                .map(PropertyDTO::new)
+                .toList();
+    }
+
 
     /**
      * Gets all properties with a simpler DTO format for a specific user:

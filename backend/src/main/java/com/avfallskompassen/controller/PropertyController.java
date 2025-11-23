@@ -2,10 +2,12 @@ package com.avfallskompassen.controller;
 
 import com.avfallskompassen.dto.LockTypeDto;
 import com.avfallskompassen.dto.PropertySimpleDTO;
+import com.avfallskompassen.dto.WasteRoomDTO;
 import com.avfallskompassen.dto.request.PropertyRequest;
 import com.avfallskompassen.dto.response.PropertyResponse;
 import com.avfallskompassen.dto.PropertyDTO;
 import com.avfallskompassen.model.Property;
+import com.avfallskompassen.model.WasteRoom;
 import com.avfallskompassen.services.LockTypeService;
 import com.avfallskompassen.services.PropertyService;
 import org.springframework.http.HttpStatus;
@@ -121,6 +123,23 @@ public class PropertyController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
+
+    /**
+     * Get all properties and their waste rooms created by the current user - Returns DTOs to avoid proxy issues.
+     */
+    @GetMapping("/my-properties-wasterooms")
+    public ResponseEntity<List<PropertyDTO>> getMyPropertiesWithWasteRooms(
+            @RequestHeader(value = "X-Username", required = false) String username) {
+
+        if (username == null || username.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        List<PropertyDTO> dto = propertyService.getPropertiesWithRoomsByUser(username);
+
+        return ResponseEntity.ok(dto);
+    }
+
 
     /**
      * Gets all properties created by current user - Returns a simplified version of the property DTO.

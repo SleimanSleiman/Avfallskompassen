@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { createProperty, getMyProperties, deleteProperty, updateProperty,getMunicipalities, getLockTypes } from '../lib/Property';
+import { createProperty, getMyProperties, deleteProperty, updateProperty,getMunicipalities, getLockTypes, getMyPropertiesWithWasteRooms } from '../lib/Property';
 import type { Municipality, Property, PropertyRequest } from '../lib/Property';
 import { currentUser } from '../lib/Auth';
 import RoomSizePrompt from '../components/RoomSizePrompt';
@@ -87,9 +87,9 @@ export default function PropertyPage() {
     async function loadProperties() {
         try {
             setLoadingProperties(true);
-            const data = await getMyProperties();
+            const data = await getMyPropertiesWithWasteRooms();
             setProperties(data);
-
+/*
             const propertiesWithRooms = await Promise.all(
                 data.map(async (property) => {
                     const wasteRooms = await getWasteRoomsByPropertyId(property.id);
@@ -99,6 +99,7 @@ export default function PropertyPage() {
             );
 
             setProperties(propertiesWithRooms);
+            */
         } catch (err: any) {
             setError('Kunde inte ladda fastigheter: ' + err.message);
         } finally {
@@ -119,7 +120,6 @@ export default function PropertyPage() {
     const propertyId = savedProperty && savedProperty !== 'undefined' && savedProperty !== 'null'
         ? Number(savedProperty)
         : null;
-    console.log('Selected Property ID from localStorage:', propertyId);
     
     const filteredProperties = useMemo(() => {
         const q = query.trim().toLowerCase();
