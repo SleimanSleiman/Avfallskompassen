@@ -88,38 +88,37 @@ export default function PlanningTool() {
     } = useContainers(room, setSelectedContainerId, setSelectedDoorId, getDoorZones());
 
     /* ──────────────── Sync the doors and containers when changes are made to the room ──────────────── */
-    useEffect(() => {
+   useEffect(() => {
         if (room.doors && room.doors.length > 0) {
-            const leftX = room.x;
-            const topY = room.y;
 
-            const offsets: Record<number, number> = {};
+        const leftX = room.x;
+        const topY = room.y;
 
-            room.doors.forEach(d => {
-                let offset = 0.5;
+        const offsets: Record<number, number> = {};
 
-                switch (d.wall) {
-                    case "top":
-                    case "bottom":
-                        offset = (d.x - leftX) / room.width;
-                        break;
+        room.doors.forEach(d => {
+            let offset = 0.5;
 
-                    case "left":
-                    case "right":
-                        offset = (d.y - topY) / room.height;
-                        break;
-                }
+            switch (d.wall) {
+                case "top":
+                case "bottom":
+                    offset = (d.x - leftX) / room.width;
+                    break;
 
-                offsets[d.id] = offset;
-            });
+                case "left":
+                case "right":
+                    offset = (d.y - topY) / room.height;
+                    break;
+            }
 
-            doorOffsetRef.current = offsets;
-            setDoors(room.doors);
-        }
+            offsets[d.id] = offset;
+        });
+
+        doorOffsetRef.current = offsets;
+        setDoors(room.doors);
+    }
         if (room.containers && room.containers.length > 0) saveContainers(room.containers);
-    }, [room, setDoors, saveContainers, doorOffsetRef]);
-
-
+    }, [room.id, setDoors, saveContainers]);
 
     /* ──────────────── Service Types (API data) ──────────────── */
     const serviceTypes = useServiceTypes();
