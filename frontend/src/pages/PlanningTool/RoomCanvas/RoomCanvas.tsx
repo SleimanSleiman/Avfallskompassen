@@ -2,7 +2,7 @@
  * RoomCanvas Component
  * Renders the Konva Stage with the room shape, corner handles, doors, and containers.
  */
-import { Stage, Layer, Group, Rect } from "react-konva";
+import { Stage, Layer, Group, Rect, Text } from "react-konva";
 import { useCallback, useEffect, useRef, useState, type Dispatch, type SetStateAction } from "react";
 import type { LucideIcon } from "lucide-react";
 import RoomShape from "./RoomShape";
@@ -50,6 +50,7 @@ import {
     Undo,
     Redo,
 } from "lucide-react";
+import Message from "../../../components/ShowStatus";
 
 /* ─────────────── RoomCanvas Props ──────────────── */
 type RoomCanvasProps = {
@@ -71,11 +72,14 @@ type RoomCanvasProps = {
     containers: ContainerInRoom[];
     selectedContainerId: number | null;
     handleDragContainer: (id: number, pos: { x: number; y: number }) => void;
+    moveAllContainers: (dx: number, dy: number) => void;
     handleSelectContainer: (id: number | null) => void;
     setSelectedContainerInfo: (v: ContainerDTO | null) => void;
     selectedContainerInfo: ContainerDTO | null;
     getContainerZones: (excludeId?: number) => { x: number; y: number; width: number; height: number }[];
     draggedContainer: ContainerDTO | null;
+    isContainerInsideRoom: (rect: { x: number; y: number; width: number; height: number },room: Room) => boolean;
+
 
     //Drag & Drop props
     stageWrapperRef: React.RefObject<HTMLDivElement | null>;
@@ -146,6 +150,7 @@ export default function RoomCanvas({
     containers,
     selectedContainerId,
     handleDragContainer,
+    moveAllContainers,
     handleSelectContainer,
     setSelectedContainerInfo,
     selectedContainerInfo,
@@ -172,10 +177,13 @@ export default function RoomCanvas({
     undo,
     redo,
     saveRoom,
+    isContainerInsideRoom,
 }: RoomCanvasProps) {
     //State to track if a container is being dragged
     const [isDraggingContainer, setIsDraggingContainer] = useState(false);
     const isDraggingExistingContainer = isDraggingContainer && selectedContainerId !== null;
+    const [msg, setMsg] = useState<string | null>(null);
+    const [error, setError] = useState<string | null>(null);
 
     const safeUndo = useCallback(() => {
         if (typeof undo === "function") {
@@ -251,11 +259,8 @@ export default function RoomCanvas({
         const newWidth = clamp(widthPx, MIN_WIDTH, maxWidthPx);
         const newHeight = clamp(heightPx, MIN_HEIGHT, maxHeightPx);
 
-        const centeredX = (STAGE_WIDTH - newWidth) / 2 + ROOM_HORIZONTAL_OFFSET;
-        const centeredY = (STAGE_HEIGHT - newHeight) / 2 + ROOM_VERTICAL_OFFSET;
-
-        const newX = clamp(centeredX, MARGIN, STAGE_WIDTH - MARGIN - newWidth);
-        const newY = clamp(centeredY, MARGIN, STAGE_HEIGHT - MARGIN - newHeight);
+        const newX = clamp(room.x, MARGIN, STAGE_WIDTH - MARGIN - newWidth);
+        const newY = clamp(room.y, MARGIN, STAGE_HEIGHT - MARGIN - newHeight);
 
         setRoom({
             ...room,
@@ -332,6 +337,16 @@ export default function RoomCanvas({
             ? containersForActiveType.filter(container => container.size === activeSize)
             : containersForActiveType)
         : [];
+
+    //Moves a room and the containers inside it
+    const handleMoveRoom = (newX: number, newY: number) => {
+        const dx = newX - room.x;
+        const dy = newY - room.y;
+
+        setRoom({ ...room, x: newX, y: newY });
+        moveAllContainers(dx, dy);
+    };
+
 
     /* ──────────────── Render ──────────────── */
     return (
@@ -480,7 +495,17 @@ export default function RoomCanvas({
                     </div>
                 </div>
 
-                <div className="relative inline-block">
+                {/* Feedback messages */}
+                <div
+                    ref={stageWrapperRef}
+                    className="relative w-full overflow-x-auto rounded-2xl text-lg"
+                >
+
+                    {msg && <Message message={msg} type="success" />}
+                    {error && <Message message={error} type="error" />}
+                </div>
+
+                <div className="relative w-full">
                     {/* Top-left action buttons */}
                     <div className="absolute top-4 left-4 flex flex-row items-center gap-2 z-50">
                 {/* Change room size */}
@@ -528,12 +553,23 @@ export default function RoomCanvas({
 
                 {/* Save design */}
                 <button
-                    onClick={() => {
+                    onClick={async () => {
+                        setMsg("");
+                        setError("");
                         if (typeof saveRoom === "function") {
-                            saveRoom();
-                        } else {
-                      
-                            alert("Spara funktionalitet kommer snart!");
+                            if (doors.length > 0) {
+                                try {
+                                    await saveRoom();
+                                    setTimeout(() => setMsg("Rummet har sparats"),10);
+                                    setTimeout(() => setError(null),10);
+                                } catch (err) {
+                                    setTimeout(() => setError("Rummet gick inte att spara. Vänligen försök senare igen"), 10);
+                                    setTimeout(() => setMsg(null), 10);
+                                }
+                            } else {
+                                setTimeout(() => setError("Det måste finnas en dörr innan du sparar rummet"), 10);
+                                setTimeout(() => setMsg(null), 10);
+                            }
                         }
                     }}
                     className="flex items-center justify-start bg-green-50 text-green-700 hover:bg-green-100 hover:text-green-800 px-2 py-1 rounded-lg transition-all duration-300 shadow-sm group overflow-hidden"
@@ -567,6 +603,13 @@ export default function RoomCanvas({
                         Gör om
                     </span>
                 </button>
+
+                {/* Room name */}
+                {room.name && (
+                    <div className="bg-white bg-opacity-80 px-3 py-1 rounded-lg shadow-sm text-sm font-semibold text-gray-900">
+                        {"Namn: " + room.name}
+                    </div>
+                )}
             </div>
 
                     {/* Konva Stage */}
@@ -581,7 +624,7 @@ export default function RoomCanvas({
                         setSelectedContainerInfo(null);
                     }
                 }}
-                className="border border-gray-300 bg-gray-50 rounded-2xl inline-block"
+                className="border border-gray-300 bg-gray-50 rounded-2xl w-full"
             >
                 <Layer>
                     {/* Room rectangle */}
@@ -590,6 +633,7 @@ export default function RoomCanvas({
                         handleSelectContainer={handleSelectContainer}
                         handleSelectDoor={handleSelectDoor}
                         setSelectedContainerInfo={setSelectedContainerInfo}
+                        onMove={handleMoveRoom}
                     />
 
                     {/* Draggable corners for resizing the room */}
@@ -654,6 +698,7 @@ export default function RoomCanvas({
                         doorZones={doorZones}
                         getContainerZones={getContainerZones}
                         setIsDraggingContainer={setIsDraggingContainer}
+                        isContainerInsideRoom={isContainerInsideRoom}
                     />
                 </Layer>
                     </Stage>

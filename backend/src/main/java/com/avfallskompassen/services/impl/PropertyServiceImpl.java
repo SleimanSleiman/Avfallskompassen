@@ -1,22 +1,24 @@
 package com.avfallskompassen.services.impl;
 
 import com.avfallskompassen.dto.LockTypeDto;
+import com.avfallskompassen.dto.PropertySimpleDTO;
 import com.avfallskompassen.dto.request.PropertyRequest;
 import com.avfallskompassen.model.LockType;
 import com.avfallskompassen.model.Property;
 import com.avfallskompassen.model.PropertyType;
 import com.avfallskompassen.model.Municipality;
 import com.avfallskompassen.model.User;
+import com.avfallskompassen.repository.MunicipalityRepository;
 import com.avfallskompassen.repository.PropertyRepository;
 import com.avfallskompassen.services.PropertyService;
 import com.avfallskompassen.services.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * Service class for property-related operations.
@@ -28,15 +30,18 @@ import java.util.Optional;
 @Transactional
 public class PropertyServiceImpl implements PropertyService {
     
-    @Autowired
     private PropertyRepository propertyRepository;
-
-    @Autowired
     private com.avfallskompassen.repository.MunicipalityRepository municipalityRepository;
-
-    @Autowired
     private UserService userService;
-    
+
+    public PropertyServiceImpl(PropertyRepository propertyRepository,
+                               MunicipalityRepository municipalityRepository,
+                               UserService userService) {
+        this.propertyRepository = propertyRepository;
+        this.municipalityRepository = municipalityRepository;
+        this.userService = userService;
+    }
+
     /**
      * Create a new property.
      * @param request the property request data
@@ -101,6 +106,19 @@ public class PropertyServiceImpl implements PropertyService {
      */
     public List<Property> getPropertiesByUser(String username) {
         return propertyRepository.findByCreatedByUsername(username);
+    }
+
+    /**
+     * Gets all properties with a simpler DTO format for a specific user:
+     * @param username
+     * @return PropertySimpleDTO
+     */
+    public List<PropertySimpleDTO> getSimplePropertiesByUser(String username) {
+        List<Property> properties = propertyRepository.findByCreatedByUsername(username);
+
+        return properties.stream()
+                .map(PropertySimpleDTO::from)
+                .toList();
     }
 
      /**

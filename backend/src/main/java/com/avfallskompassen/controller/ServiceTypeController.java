@@ -2,7 +2,6 @@ package com.avfallskompassen.controller;
 
 import com.avfallskompassen.dto.ServiceTypeDTO;
 import com.avfallskompassen.services.ServiceTypeService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,8 +20,11 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/serviceTypes")
 public class ServiceTypeController {
 
-    @Autowired
     private ServiceTypeService serviceTypeService;
+
+    public ServiceTypeController(ServiceTypeService serviceTypeService) {
+        this.serviceTypeService = serviceTypeService;
+    }
 
     /**
      * Get all service types.

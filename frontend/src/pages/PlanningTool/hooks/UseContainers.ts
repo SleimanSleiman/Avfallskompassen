@@ -166,6 +166,17 @@ export function useContainers(
         saveContainers(newState);
     };
 
+    //Moves all containers within the room when the room itself is dragged
+    const moveAllContainers = (dx: number, dy: number) => {
+        const newState = containersInRoom.map(c => ({
+            ...c,
+            x: c.x + dx,
+            y: c.y + dy,
+        }));
+
+        saveContainers(newState);
+    };
+
     //Select or deselect a container
     const handleSelectContainer = (id: number | null) => {
         setSelectedContainerId(id);
@@ -244,6 +255,19 @@ export function useContainers(
         }
     };
 
+    //Checks if a container is inside the boundaries of a room
+    const isContainerInsideRoom = (
+        c: { x: number; y: number; width: number; height: number },
+        room: Room
+    ) => {
+        return (
+            c.x >= room.x &&
+            c.y >= room.y &&
+            c.x + c.width <= room.x + room.width &&
+            c.y + c.height <= room.y + room.height
+        );
+    };
+
     /* ──────────────── Return ──────────────── */
     return {
         containersInRoom,
@@ -260,6 +284,7 @@ export function useContainers(
         handleAddContainer,
         handleRemoveContainer,
         handleDragContainer,
+        moveAllContainers,
         handleSelectContainer,
         handleRotateContainer,
 
@@ -276,5 +301,6 @@ export function useContainers(
 
         undo,
         redo,
+        isContainerInsideRoom,
     };
 }

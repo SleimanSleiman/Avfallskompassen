@@ -74,6 +74,7 @@ export default function NavBar() {
               ) : (
                 <>
                   <NavLink to="/dashboard" className={({ isActive }) => `nav-link hover:text-white transition-colors ${isActive ? 'nav-link-active' : ''}`}>Dashboard</NavLink>
+                  <NavLink to="/statistics" className={({ isActive}) => `nav-link hover:text-white transition-colors ${isActive ? 'nav-link-active' : ''}`}>Statistik</NavLink>
                   <NavLink to="/properties" className={({ isActive }) => `nav-link hover:text-white transition-colors ${isActive ? 'nav-link-active' : ''}`}>Mina fastigheter</NavLink>
                   <NavLink to="/planningTool" className={({ isActive }) => `nav-link hover:text-white transition-colors ${isActive ? 'nav-link-active' : ''}`}>Planeringsverktyg</NavLink>
                   <NavLink to="/reports" className={({ isActive }) => `nav-link hover:text-white transition-colors ${isActive ? 'nav-link-active' : ''}`}>Rapporter</NavLink>
@@ -114,6 +115,7 @@ export default function NavBar() {
               <>
                 <NavLink to="/dashboard" className="text-nsr-ink">Dashboard</NavLink>
                 <NavLink to="/properties" className="text-nsr-ink">Mina fastigheter</NavLink>
+                <NavLink to="/statistics" className="text-nsr-ink">Statistik</NavLink>
                 <NavLink to="/planningTool" className="text-nsr-ink">Planeringsverktyg</NavLink>
                 <NavLink to="/reports" className="text-nsr-ink">Rapporter</NavLink>
                 {user ? (

@@ -51,6 +51,7 @@ export default function PlanningTool() {
         handleRemoveDoor,
         handleSelectDoor,
         getDoorZones,
+        doorOffsetRef,
     } = useDoors(room, setSelectedDoorId, setSelectedContainerId);
 
     /* ──────────────── Container state & logic ──────────────── */
@@ -63,6 +64,7 @@ export default function PlanningTool() {
         handleAddContainer,
         handleRemoveContainer,
         handleDragContainer,
+        moveAllContainers,
         handleSelectContainer,
 
         availableContainers,
@@ -81,12 +83,42 @@ export default function PlanningTool() {
         undo,
         redo,
         getContainerZones,
+        isContainerInsideRoom,
     } = useContainers(room, setSelectedContainerId, setSelectedDoorId, getDoorZones());
 
+    /* ──────────────── Sync the doors and containers when changes are made to the room ──────────────── */
     useEffect(() => {
-        if (room.doors) setDoors(room.doors);
-        if (room.containers) saveContainers(room.containers);
-    }, [room, setDoors, saveContainers]);
+        if (room.doors && room.doors.length > 0) {
+
+        const leftX = room.x;
+        const topY = room.y;
+
+        const offsets: Record<number, number> = {};
+
+        room.doors.forEach(d => {
+            let offset = 0.5;
+
+            switch (d.wall) {
+                case "top":
+                case "bottom":
+                    offset = (d.x - leftX) / room.width;
+                    break;
+
+                case "left":
+                case "right":
+                    offset = (d.y - topY) / room.height;
+                    break;
+            }
+
+            offsets[d.id] = offset;
+        });
+
+        doorOffsetRef.current = offsets;
+        setDoors(room.doors);
+    }
+        if (room.containers && room.containers.length > 0) saveContainers(room.containers);
+    }, [room.id, setDoors, saveContainers]);
+
 
 
     /* ──────────────── Service Types (API data) ──────────────── */
@@ -127,11 +159,8 @@ export default function PlanningTool() {
     const [selectedType, setSelectedType] = useState<string | null>(null);
     const [selectedSize, setSelectedSize] = useState<{ [key: number]: number | null }>({});
 
-    
-
-    const ACTION_PANEL_EXTRA_OFFSET = 150;
-    const ACTION_PANEL_MIN_TOP = 160;
-    const desktopActionPanelTop = Math.max(containerPanelHeight + ACTION_PANEL_EXTRA_OFFSET, ACTION_PANEL_MIN_TOP);
+    /* ──────────────── ActionPanel position ──────────────── */
+    const [actionPanelPos, setActionPanelPos] = useState<{ left: number; top: number } | null>(null);
 
     /* ──────────────── Save room ──────────────── */
     // Determine propertyId from either `selectedProperty` object or `selectedPropertyId` string in localStorage
@@ -192,7 +221,7 @@ export default function PlanningTool() {
     ];
 
     const { saveRoom, isSaving, error } = useSaveRoom();
-    const { buildWasteRoomRequest } = useWasteRoomRequestBuilder();
+    const { buildWasteRoomRequest } = useWasteRoomRequestBuilder(isContainerInsideRoom);
 
     const handleSaveRoom = async () => {
         const roomRequest = buildWasteRoomRequest(room, doors, containersInRoom, propertyId);
@@ -203,10 +232,10 @@ export default function PlanningTool() {
     /* ──────────────── Render ──────────────── */
     return (
         <div className="flex h-full w-full flex-col gap-4 p-3 sm:p-5">
-            <div className="flex w-full flex-1 flex-col gap-4 lg:flex-row lg:gap-4">
+            <div className="flex w-full flex-1 flex-col gap-4 lg:flex-row lg:gap-6">
 
                 {/* ─────────────── Canvas ──────────────── */}
-                <div className="relative flex w-full min-w-0 flex-col lg:flex-[4] lg:min-w-[820px] xl:flex-[5]">
+                  <div className="relative w-full lg:w-3/4 flex flex-col">
                     {/* RoomCanvas displays the room, containers, and doors */}
                     <RoomCanvas
                         room={room}
@@ -224,6 +253,7 @@ export default function PlanningTool() {
                         containers={containersInRoom}
                         selectedContainerId={selectedContainerId}
                         handleDragContainer={handleDragContainer}
+                        moveAllContainers={moveAllContainers}
                         handleSelectContainer={handleSelectContainer}
                         getContainerZones={getContainerZones}
                         draggedContainer={draggedContainer}
@@ -246,6 +276,8 @@ export default function PlanningTool() {
                         setIsStageDropActive={setIsStageDropActive}
                         setDraggedContainer={setDraggedContainer}
                         onContainerPanelHeightChange={setContainerPanelHeight}
+                        isContainerInsideRoom={isContainerInsideRoom}
+
                         undo={undo}
                         redo={redo}
                         saveRoom={handleSaveRoom}
@@ -255,7 +287,6 @@ export default function PlanningTool() {
                     {(selectedContainerId !== null || selectedDoorId !== null) && (
                         <div
                             className="pointer-events-none absolute left-0.5 z-50 hidden lg:flex"
-                            style={{ top: `${desktopActionPanelTop}px` }}
                         >
                             <div className="pointer-events-auto">
                                 <ActionPanel
@@ -268,6 +299,9 @@ export default function PlanningTool() {
                                     handleRotateDoor={handleRotateDoor}
                                     handleRotateContainer={handleRotateContainer}
                                     handleShowContainerInfo={handleShowContainerInfo}
+                                    stageWrapperRef={stageWrapperRef}
+                                    pos={actionPanelPos}
+                                    setPos={setActionPanelPos}
                                 />
                             </div>
                         </div>
@@ -320,7 +354,7 @@ export default function PlanningTool() {
                 </div>
 
                 {/* ─────────────── Sidebar ──────────────── */}
-                <div className="flex w-full min-w-0 flex-col lg:flex-[5] xl:flex-[4] lg:pl-5">
+                 <div className="w-full lg:w-2/4 lg:pl-6 flex flex-col">
                     <Sidebar
                         //Comparison data
                         comparisonData={comparisonData}

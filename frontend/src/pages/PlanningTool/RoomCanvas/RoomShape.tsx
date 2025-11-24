@@ -4,7 +4,7 @@
  */
 import { Rect, Text } from "react-konva";
 import type { Room } from "../Types";
-import { SCALE } from "../Constants";
+import { SCALE, STAGE_WIDTH, STAGE_HEIGHT, MARGIN, clamp } from "../Constants";
 
 /* ─────────────── RoomShape Props ──────────────── */
 type RoomShapeProps = {
@@ -12,6 +12,7 @@ type RoomShapeProps = {
     handleSelectDoor: (id: number) => void;
     handleSelectContainer: (id: number) => void;
     setSelectedContainerInfo: (v: ContainerDTO | null) => void;
+    onMove: (x: number, y: number) => void;
 };
 
 export default function RoomShape({
@@ -19,6 +20,7 @@ export default function RoomShape({
     handleSelectDoor,
     handleSelectContainer,
     setSelectedContainerInfo,
+    onMove,
 }: RoomShapeProps) {
     //Convert dimensions to meters for display
     const widthMeters = (room.width * SCALE).toFixed(2);
@@ -36,6 +38,34 @@ export default function RoomShape({
                 fill="#bde0fe"
                 stroke="#1e6091"
                 strokeWidth={2}
+                draggable
+                //a open hand is shown when hovering over the room
+                onMouseEnter={(e) => {
+                    const container = e.target.getStage()?.container();
+                    if (container) container.style.cursor = 'grab';
+                }}
+                onMouseLeave={(e) => {
+                    const container = e.target.getStage()?.container();
+                    if (container) container.style.cursor = 'default';
+                }}
+                //a closed hand is shown when dragging the room
+                onDragStart={(e) => {
+                    const container = e.target.getStage()?.container();
+                    if (container) container.style.cursor = 'grabbing';
+                }}
+                onDragEnd={(e) => {
+                    const container = e.target.getStage()?.container();
+                    if (container) container.style.cursor = 'grab';
+                }}
+
+                onDragMove={(e) => {
+                    const { x, y } = e.target.position();
+                    const clampedX = clamp(x, MARGIN, STAGE_WIDTH - room.width - MARGIN);
+                    const clampedY = clamp(y, MARGIN, STAGE_HEIGHT - room.height - MARGIN);
+
+                    onMove(clampedX, clampedY);
+                    e.target.position({ x: clampedX, y: clampedY });
+                }}
                 // Deselect when clicking on an empty area of the room
                 onMouseDown={(e) => {
                     handleSelectContainer(null);

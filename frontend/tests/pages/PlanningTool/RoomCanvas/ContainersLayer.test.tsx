@@ -1,6 +1,6 @@
 import { render, screen, fireEvent, cleanup } from "@testing-library/react";
 import ContainersLayer from "../../../../src/pages/PlanningTool/RoomCanvas/ContainersLayer";
-import { vi, describe, it, expect, afterEach } from "vitest";
+import { vi, describe, it, afterEach, expect } from "vitest";
 import "@testing-library/jest-dom";
 
 // ─────────────── Mock react-konva ───────────────
@@ -20,56 +20,44 @@ vi.mock("use-image", () => ({
 
 afterEach(cleanup);
 
-// ─────────────── Room, door and containers dimensions ───────────────
-const room = { x: 0, y: 0, width: 500, height: 400 };
-const doors = [{ id: 1, width: 100, x: 100, y: 0, wall: "top", rotation: 0 }];
-const containers = [
-    { id: 1, x: 50, y: 50, width: 40, height: 40, rotation: 0, container: { imageTopViewUrl: "/images/test.png" }},
-    { id: 2, x: 200, y: 100, width: 60, height: 60, rotation: 90, container: { imageTopViewUrl: "/images/test.png"}},
+// ─────────────── Default props ───────────────
+const defaultRoom = { x: 0, y: 0, width: 500, height: 400 };
+const defaultContainers = [
+    { id: 1, x: 50, y: 50, width: 40, height: 40, rotation: 0, container: { imageTopViewUrl: "/images/test.png" } },
+    { id: 2, x: 200, y: 100, width: 60, height: 60, rotation: 90, container: { imageTopViewUrl: "/images/test.png" } },
 ];
-const doorZones = [{ x: 100, y: 0, width: 100, height: 100 }];
+const defaultDoorZones = [{ x: 100, y: 0, width: 100, height: 100 }];
+
+// ─────────────── Helper function ───────────────
+const renderContainersLayer = (overrideProps: Partial<React.ComponentProps<typeof ContainersLayer>> = {}) =>
+    render(
+        <ContainersLayer
+            containersInRoom={defaultContainers}
+            selectedContainerId={null}
+            handleDragContainer={() => {}}
+            handleSelectContainer={() => {}}
+            room={defaultRoom}
+            doorZones={defaultDoorZones}
+            getContainerZones={() => []}
+            setIsDraggingContainer={() => {}}
+            isContainerInsideRoom={() => true}
+            {...overrideProps}
+        />
+    );
 
 // ─────────────── Tests ───────────────
-describe("ContainersLayer", () => {7
-    //Test rendering all containers
+describe("ContainersLayer", () => {
     it("renders all containers", () => {
-        render(
-            <ContainersLayer
-                containersInRoom={containers}
-                selectedContainerId={null}
-                handleDragContainer={() => {}}
-                handleSelectContainer={() => {}}
-                room={room}
-                doors={doors}
-                doorZones={doorZones}
-                getContainerZones={() => []}
-                setIsDraggingContainer={() => {}}
-            />
-        );
+        renderContainersLayer();
 
-        containers.forEach((c) => {
-            const group = screen.getByTestId(c.id.toString());
-            expect(group).toBeInTheDocument();
+        defaultContainers.forEach((c) => {
+            expect(screen.getByTestId(c.id.toString())).toBeInTheDocument();
         });
     });
 
-    //Test marking selected container
     it("marks selected container correctly", () => {
-        render(
-            <ContainersLayer
-                containersInRoom={containers}
-                selectedContainerId={2}
-                handleDragContainer={() => {}}
-                handleSelectContainer={() => {}}
-                room={room}
-                doors={doors}
-                doorZones={doorZones}
-                getContainerZones={() => []}
-                setIsDraggingContainer={() => {}}
-            />
-        );
+        renderContainersLayer({ selectedContainerId: 2 });
 
-        // Find the selected container’s <Image> element
         const selectedImage = screen.getAllByTestId("image").find(
             (img) => img.getAttribute("shadowcolor") === "#256029"
         );
@@ -78,46 +66,17 @@ describe("ContainersLayer", () => {7
         expect(selectedImage).toHaveAttribute("opacity", "0.9");
     });
 
-    //Test clicking container to select
     it("calls handleSelectContainer when container clicked", () => {
         const mockSelect = vi.fn();
+        renderContainersLayer({ handleSelectContainer: mockSelect });
 
-        render(
-            <ContainersLayer
-                containersInRoom={containers}
-                selectedContainerId={null}
-                handleDragContainer={() => {}}
-                handleSelectContainer={mockSelect}
-                room={room}
-                doors={doors}
-                doorZones={doorZones}
-                getContainerZones={() => []}
-                setIsDraggingContainer={() => {}}
-            />
-        );
-
-        const group1 = screen.getByTestId("1");
-        fireEvent.click(group1);
+        fireEvent.click(screen.getByTestId("1"));
         expect(mockSelect).toHaveBeenCalledWith(1);
     });
 
-    //Test dragging container
     it("calls handleDragContainer on drag end", () => {
         const mockDrag = vi.fn();
-
-        render(
-            <ContainersLayer
-                containersInRoom={containers}
-                selectedContainerId={null}
-                handleDragContainer={mockDrag}
-                handleSelectContainer={() => {}}
-                room={room}
-                doors={doors}
-                doorZones={doorZones}
-                getContainerZones={() => []}
-                setIsDraggingContainer={() => {}}
-            />
-        );
+        renderContainersLayer({ handleDragContainer: mockDrag });
 
         const group1 = screen.getByTestId("1");
         fireEvent.dragEnd(group1, {
@@ -127,23 +86,9 @@ describe("ContainersLayer", () => {7
         expect(mockDrag).toHaveBeenCalled();
     });
 
-    //Test container boundary enforcement
     it("does not allow container to go outside room boundaries", () => {
         const mockDrag = vi.fn();
-
-        render(
-            <ContainersLayer
-                containersInRoom={containers}
-                selectedContainerId={null}
-                handleDragContainer={mockDrag}
-                handleSelectContainer={() => {}}
-                room={room}
-                doors={doors}
-                doorZones={doorZones}
-                getContainerZones={() => []}
-                setIsDraggingContainer={() => {}}
-            />
-        );
+        renderContainersLayer({ handleDragContainer: mockDrag });
 
         const group1 = screen.getByTestId("1");
         const mockEvent = { target: { x: () => -100, y: () => -100, position: vi.fn() } };
@@ -152,37 +97,19 @@ describe("ContainersLayer", () => {7
         expect(mockDrag).toHaveBeenCalled();
     });
 
-    //Test opacity when container is outside the room
     it("sets opacity to 0.5 when container is outside the room", async () => {
         const mockImg = {};
         const useImage = await import("use-image");
         vi.spyOn(useImage, "default").mockReturnValueOnce([mockImg, "loaded"]);
 
         const outsideContainer = [
-            {
-                id: 3,
-                x: 480,
-                y: 50,
-                width: 40,
-                height: 40,
-                rotation: 0,
-                container: { imageTopViewUrl: "/images/test.png" },
-            },
+            { id: 3, x: 480, y: 50, width: 40, height: 40, rotation: 0, container: { imageTopViewUrl: "/images/test.png" } },
         ];
 
-        render(
-            <ContainersLayer
-                containersInRoom={outsideContainer}
-                selectedContainerId={null}
-                handleDragContainer={() => {}}
-                handleSelectContainer={() => {}}
-                room={room}
-                doors={doors}
-                doorZones={doorZones}
-                getContainerZones={() => []}
-                setIsDraggingContainer={() => {}}
-            />
-        );
+        renderContainersLayer({
+            containersInRoom: outsideContainer,
+            isContainerInsideRoom: () => false,
+        });
 
         const image = screen.getByTestId("image");
         expect(image).toHaveAttribute("opacity", "0.5");
