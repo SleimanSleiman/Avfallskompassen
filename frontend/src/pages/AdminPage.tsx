@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import AdminUserDetail from './Admin/AdminUserDetail';
 import { get } from '../lib/api';
+import { getPropertiesWithWasteRooms } from '../lib/Property';
 
 // Data types
 export type AdminUser = {
@@ -54,7 +55,7 @@ export default function AdminPage() {
       setLoading(true);
       try {
         const backendUsers = await get<BackendUser[]>('/api/admin/users');
-        const props = await get<PropertyDTO[]>('/api/properties');
+        const props = await getPropertiesWithWasteRooms();
 
         // Map properties to their creators
         const propertiesByUser = new Map<string, PropertyDTO[]>();
@@ -69,7 +70,7 @@ export default function AdminPage() {
         await Promise.all(
           props.map(async (p) => {
             try {
-              const rooms = await get<any[]>(`/api/properties/${p.id}/wasterooms`);
+              const rooms = p.wasteRooms;
               const username = p.createdByUsername || '';
               plansCountByUser.set(username, (plansCountByUser.get(username) || 0) + (rooms?.length || 0));
             } catch (e) {

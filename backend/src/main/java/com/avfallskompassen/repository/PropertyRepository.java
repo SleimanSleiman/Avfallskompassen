@@ -76,6 +76,12 @@ public interface PropertyRepository extends JpaRepository<Property, Long> {
     """)
     List<Property> findAllByUserWithRooms(String username);
 
+    @Query("""
+        SELECT DISTINCT p FROM Property p
+        LEFT JOIN FETCH p.wasteRooms wr
+    """)
+    List<Property> getAllPropertiesWithWasteRooms();
+
 
     /**
      * Find similar properties for comparison.

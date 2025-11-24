@@ -114,6 +114,13 @@ public class PropertyServiceImpl implements PropertyService {
                 .toList();
     }
 
+    public List<PropertyDTO> getPropertiesWithWasteRooms() {
+        List<Property> properties = propertyRepository.getAllPropertiesWithWasteRooms();
+
+        return properties.stream().
+                map(PropertyDTO::new)
+                .toList();
+    }
 
     /**
      * Gets all properties with a simpler DTO format for a specific user:

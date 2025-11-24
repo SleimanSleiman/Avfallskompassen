@@ -89,6 +89,14 @@ public class PropertyController {
                 
         return ResponseEntity.ok(propertyDTOs);
     }
+
+    @GetMapping("/wasterooms")
+    public ResponseEntity<List<PropertyDTO>> getAllPropertiesWithWasteRooms() {
+        List<PropertyDTO> dto = propertyService.getPropertiesWithWasteRooms();
+        System.out.println("Denna metoden kallades");
+
+        return ResponseEntity.ok(dto);
+    }
     
     /**
      * Get all properties created by the current user - Returns DTOs to avoid proxy issues.
@@ -127,6 +135,22 @@ public class PropertyController {
      */
     @GetMapping("/my-properties-wasterooms")
     public ResponseEntity<List<PropertyDTO>> getMyPropertiesWithWasteRooms(
+            @RequestHeader(value = "X-Username", required = false) String username) {
+
+        if (username == null || username.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        List<PropertyDTO> dto = propertyService.getPropertiesWithRoomsByUser(username);
+
+        return ResponseEntity.ok(dto);
+    }
+
+    /**
+     * Get all properties and their waste rooms created by a specific user - Returns DTOs to avoid proxy issues.
+     */
+    @GetMapping("/admin/user-properties-wasterooms") // --> TODO Add admin control
+    public ResponseEntity<List<PropertyDTO>> getUsersPropertiesWithWasteRooms(
             @RequestHeader(value = "X-Username", required = false) String username) {
 
         if (username == null || username.isEmpty()) {

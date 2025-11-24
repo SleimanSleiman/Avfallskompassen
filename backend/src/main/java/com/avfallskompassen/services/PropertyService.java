@@ -29,6 +29,8 @@ public interface PropertyService {
 
     List<Property> getAllProperties();
 
+    List<PropertyDTO> getPropertiesWithWasteRooms();
+
     List<Property> findByLockType(LockTypeDto lockType);
 
     boolean deleteProperty(Long id);
