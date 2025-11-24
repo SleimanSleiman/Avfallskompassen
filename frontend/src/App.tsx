@@ -10,6 +10,7 @@ import NotificationCenter from './components/NotificationCenter';
 import { currentUser } from './lib/Auth';
 import PlanningTool from './pages/PlanningTool/PlanningTool';
 import AdminPage from './pages/AdminPage';
+import AllWasteroomPage from "./pages/AllWasteroomPage";
 
 function Dashboard() {
   const user = currentUser();
@@ -164,6 +165,14 @@ export default function App() {
               <StatisticsPage />
             </ProtectedRoute>
           } />
+          <Route
+          path="/allWasteroom/:propertyId"
+          element={
+            <ProtectedRoute>
+              <AllWasteroomPage />
+            </ProtectedRoute>
+          }
+        />
         </Routes>
       </div>
       <Footer />

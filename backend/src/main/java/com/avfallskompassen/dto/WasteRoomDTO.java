@@ -20,6 +20,7 @@ public class WasteRoomDTO {
     private List<DoorDTO> doors;
     private Long wasteRoomId;
     private String name;
+    private String thumbnailUrl;
 
     // Constructors
     public WasteRoomDTO() {}
@@ -92,13 +93,17 @@ public class WasteRoomDTO {
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
 
+    public String getThumbnailUrl() {return thumbnailUrl;}
+
+    public void setThumbnailUrl(String thumbnailUrl) {this.thumbnailUrl = thumbnailUrl;}
+
     /**
      * Method for converting an entity object to a DTO object
      * @param entity The entity object to be converted
      * @return A converted DTO
      */
     public static WasteRoomDTO fromEntity(WasteRoom entity) {
-        return new WasteRoomDTO(
+        WasteRoomDTO dto = new WasteRoomDTO(
                 entity.getProperty().getId(),
                 entity.getLength(),
                 entity.getWidth(),
@@ -117,5 +122,7 @@ public class WasteRoomDTO {
                 entity.getId(),
                 entity.getName()
         );
+        dto.setThumbnailUrl(entity.getThumbnailUrl());
+        return dto;
     }
 }

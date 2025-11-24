@@ -23,7 +23,7 @@ export default function ContainerImage({
 
     //Load image using useImage hook
     const [img, status] = useImage(
-        `http://localhost:8081${container.container.imageTopViewUrl}`
+        container.container.imageTopViewUrl, 
     );
 
     const image = status === "loaded" ? img : null;
@@ -51,6 +51,7 @@ export default function ContainerImage({
             opacity={isOutsideRoom ? 0.5 : selected ? 0.9 : 1}
             shadowColor={selected ? "#256029" : undefined}
             perfectDrawEnabled={false}
+            crossOrigin="anonymous"
         />
     );
 }

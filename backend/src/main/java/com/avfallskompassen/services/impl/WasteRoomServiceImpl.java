@@ -12,6 +12,8 @@ import com.avfallskompassen.services.WasteRoomService;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -64,6 +66,9 @@ public class WasteRoomServiceImpl implements WasteRoomService {
         }
 
         WasteRoom savedRoom = wasteRoomRepository.save(wasteRoom);
+        saveThumbnail(request.getThumbnailBase64(), savedRoom.getId(), savedRoom);
+        savedRoom = wasteRoomRepository.save(savedRoom);
+
         return WasteRoomDTO.fromEntity(savedRoom);
     }
 
@@ -120,23 +125,22 @@ public class WasteRoomServiceImpl implements WasteRoomService {
             wasteRoom.setName(request.getName());
         }
 
-        List<ContainerPosition> updatedContainers = new ArrayList<>();
-        if (wasteRoom.getContainers() != null) {
-            wasteRoom.getContainers().clear();
-        }
+        wasteRoom.getContainers().clear();
+        wasteRoom.getContainers().addAll(
+                convertContainerRequest(request.getContainers(), wasteRoom)
+        );
 
-        updatedContainers.addAll(convertContainerRequest(request.getContainers(), wasteRoom));
-        wasteRoom.getContainers().addAll(updatedContainers);
-
-        List<Door> updatedDoors = new ArrayList<>();
-        if (wasteRoom.getDoors() != null) {
-            wasteRoom.getDoors().clear();
-        }
-
-        updatedDoors.addAll(convertDoorRequest(request.getDoors(), wasteRoom));
-        wasteRoom.getDoors().addAll(updatedDoors);
+        wasteRoom.getDoors().clear();
+        wasteRoom.getDoors().addAll(
+                convertDoorRequest(request.getDoors(), wasteRoom)
+        );
 
         WasteRoom updated = wasteRoomRepository.save(wasteRoom);
+
+        //Save thumbnail
+        saveThumbnail(request.getThumbnailBase64(), wasteRoomId, updated);
+
+        updated = wasteRoomRepository.save(updated);
         return WasteRoomDTO.fromEntity(updated);
     }
 
@@ -242,16 +246,56 @@ public class WasteRoomServiceImpl implements WasteRoomService {
                 ? entity.getDoors().stream().map(DoorDTO::fromEntity).toList()
                 : new ArrayList<>();
 
-        return new WasteRoomDTO(
+        WasteRoomDTO dto = new WasteRoomDTO(
                 entity.getProperty().getId(),
                 entity.getLength(),
                 entity.getWidth(),
                 entity.getX(),
                 entity.getY(),
-                containers,
-                doors,
+                containerService.getContainersByWasteRoomId(entity.getId()),
+                entity.getDoors() != null
+                        ? entity.getDoors().stream().map(DoorDTO::fromEntity).toList()
+                        : new ArrayList<>(),
                 entity.getId(),
                 entity.getName()
         );
+
+        dto.setThumbnailUrl(entity.getThumbnailUrl());
+        return dto;
+    }
+
+    private void saveThumbnail(String base64, Long roomId, WasteRoom room) {
+        if (base64 == null || base64.isEmpty()) {
+            return;
+        }
+
+        try {
+            String clean = base64.replaceAll("\\s", "");
+            String[] parts = clean.split(",");
+            String imageBase64 = parts.length > 1 ? parts[1] : parts[0];
+
+            byte[] decodedBytes = java.util.Base64.getDecoder().decode(imageBase64);
+
+            // Create folder manually
+            File folder = new File("src/main/resources/static/images/wasterooms/");
+            if (!folder.exists()) {
+                folder.mkdirs();
+            }
+
+            File file = new File(folder, roomId + ".png");
+
+            // Save file using FileOutputStream
+            try (FileOutputStream fos = new FileOutputStream(file)) {
+                fos.write(decodedBytes);
+            }
+
+            // Store URL in database
+            room.setThumbnailUrl("/images/wasterooms/" + roomId + ".png");
+
+            System.out.println("Thumbnail saved to: " + file.getAbsolutePath());
+        }
+        catch (Exception e) {
+            throw new RuntimeException("Failed to save thumbnail", e);
+        }
     }
 }

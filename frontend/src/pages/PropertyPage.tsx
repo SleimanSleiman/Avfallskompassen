@@ -552,6 +552,15 @@ async function onDeleteWasteRoom(propertyId: number, wasteRoomId: number) {
                   </div>
                 </div>
                 <div className="mt-4 flex flex-wrap gap-2">
+                    <button
+                        className="btn-secondary-sm"
+                        onClick={() => {
+                            localStorage.setItem("selectedPropertyAddress", property.address);
+                            window.location.href = `/allWasteroom/${property.id}`;
+                        }}
+                    >
+                        Visa alla miljörum
+                    </button>
                   <button className="btn-secondary-sm" onClick={() => createWasteRoom(property)}>Skapa miljörum</button>
                   <button className="btn-secondary-sm" onClick={() => handleEdit(property)}>Redigera</button>
                   <button
