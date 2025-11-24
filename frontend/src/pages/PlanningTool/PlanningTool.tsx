@@ -235,7 +235,7 @@ export default function PlanningTool() {
             <div className="flex w-full flex-1 flex-col gap-4 lg:flex-row lg:gap-6">
 
                 {/* ─────────────── Canvas ──────────────── */}
-                  <div className="relative w-full lg:w-3/4 flex flex-col">
+                  <div className="relative w-full  flex flex-col">
                     {/* RoomCanvas displays the room, containers, and doors */}
                     <RoomCanvas
                         room={room}
@@ -286,29 +286,8 @@ export default function PlanningTool() {
                     {/* ActionPanel for selected container or door */}
                     {(selectedContainerId !== null || selectedDoorId !== null) && (
                         <div
-                            className="pointer-events-none absolute left-0.5 z-50 hidden lg:flex"
+                            className="absolute z-50 lg:left-0.5 lg:top-0 hidden lg:flex w-full justify-center lg:justify-start"
                         >
-                            <div className="pointer-events-auto">
-                                <ActionPanel
-                                    containers={containersInRoom}
-                                    doors={doors}
-                                    selectedContainerId={selectedContainerId}
-                                    selectedDoorId={selectedDoorId}
-                                    handleRemoveContainer={handleRemoveContainer}
-                                    handleRemoveDoor={handleRemoveDoor}
-                                    handleRotateDoor={handleRotateDoor}
-                                    handleRotateContainer={handleRotateContainer}
-                                    handleShowContainerInfo={handleShowContainerInfo}
-                                    stageWrapperRef={stageWrapperRef}
-                                    pos={actionPanelPos}
-                                    setPos={setActionPanelPos}
-                                />
-                            </div>
-                        </div>
-                    )}
-
-                    {(selectedContainerId !== null || selectedDoorId !== null) && (
-                        <div className="mt-3 flex justify-center lg:hidden">
                             <ActionPanel
                                 containers={containersInRoom}
                                 doors={doors}
@@ -319,6 +298,9 @@ export default function PlanningTool() {
                                 handleRotateDoor={handleRotateDoor}
                                 handleRotateContainer={handleRotateContainer}
                                 handleShowContainerInfo={handleShowContainerInfo}
+                                stageWrapperRef={stageWrapperRef}
+                                pos={actionPanelPos}
+                                setPos={setActionPanelPos}
                             />
                         </div>
                     )}
@@ -354,7 +336,7 @@ export default function PlanningTool() {
                 </div>
 
                 {/* ─────────────── Sidebar ──────────────── */}
-                 <div className="w-full lg:w-2/4 lg:pl-6 flex flex-col">
+                 <div className="w-full  lg:pl-6 flex flex-col">
                     <Sidebar
                         //Comparison data
                         comparisonData={comparisonData}
