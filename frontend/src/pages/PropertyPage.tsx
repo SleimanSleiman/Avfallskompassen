@@ -88,18 +88,8 @@ export default function PropertyPage() {
         try {
             setLoadingProperties(true);
             const data = await getMyPropertiesWithWasteRooms();
+            console.log(data);
             setProperties(data);
-/*
-            const propertiesWithRooms = await Promise.all(
-                data.map(async (property) => {
-                    const wasteRooms = await getWasteRoomsByPropertyId(property.id);
-                    console.log(`Property ${property.id} waste rooms:`, wasteRooms);
-                    return { ...property, wasteRooms };
-                })
-            );
-
-            setProperties(propertiesWithRooms);
-            */
         } catch (err: any) {
             setError('Kunde inte ladda fastigheter: ' + err.message);
         } finally {

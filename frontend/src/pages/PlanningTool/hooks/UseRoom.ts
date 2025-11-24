@@ -39,15 +39,15 @@ export function useRoom() {
       let x = 150;
       let y = 150;
 
-      if (parsed.id != null) {
+      if (parsed.wasteRoomId != null) {
         x = parsed?.x ?? defaultX;
         y = parsed?.y ?? defaultY;
       }
       
       const containers = (parsed.containers ?? []).map(c => {
         const containerInfo = c.containerDTO ?? {
-        imageTopViewUrl: "/images/containers/tempTopView.png",
-        imageFrontViewUrl: "/images/containers/tempFrontView.png",
+        imageTopViewUrl: "/images/containers/defaultTopView.png", 
+        imageFrontViewUrl: "/images/containers/defaultFrontView.png", 
         width: 1,
         depth: 1,
         height: 1,

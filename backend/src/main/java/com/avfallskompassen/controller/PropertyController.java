@@ -2,12 +2,10 @@ package com.avfallskompassen.controller;
 
 import com.avfallskompassen.dto.LockTypeDto;
 import com.avfallskompassen.dto.PropertySimpleDTO;
-import com.avfallskompassen.dto.WasteRoomDTO;
 import com.avfallskompassen.dto.request.PropertyRequest;
 import com.avfallskompassen.dto.response.PropertyResponse;
 import com.avfallskompassen.dto.PropertyDTO;
 import com.avfallskompassen.model.Property;
-import com.avfallskompassen.model.WasteRoom;
 import com.avfallskompassen.services.LockTypeService;
 import com.avfallskompassen.services.PropertyService;
 import org.springframework.http.HttpStatus;
