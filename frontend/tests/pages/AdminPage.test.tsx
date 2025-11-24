@@ -71,7 +71,7 @@ describe("AdminPage", () => {
     );
 
     const input = screen.getByPlaceholderText(
-      "Sök på användarnamn eller e-post..."
+      "Sök på användarnamn, e-post eller fastighetsadress..."
     );
 
     fireEvent.change(input, { target: { value: "bob" } });
