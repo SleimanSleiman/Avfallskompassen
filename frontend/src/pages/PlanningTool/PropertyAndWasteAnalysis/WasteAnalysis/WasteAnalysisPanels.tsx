@@ -35,6 +35,8 @@ export default function WasteAnalysisPanels({
         safeApartments,
         designStats,
         combinedRows,
+        activeBenchmarks,
+        designHasContainers,
     } = useWasteComparison({
         comparisonData,
         selectedProperty,
@@ -92,6 +94,7 @@ export default function WasteAnalysisPanels({
                             safeApartments={safeApartments}
                             comparisonLoading={comparisonLoading}
                             comparisonError={comparisonError}
+                            designHasContainers={designHasContainers}
                         />
                     </section>
 
@@ -99,7 +102,8 @@ export default function WasteAnalysisPanels({
                         <EnvironmentalBenchmarkPanel
                             designStats={designStats}
                             combinedRows={combinedRows}
-                            safeApartments={safeApartments}
+                            activeBenchmarks={activeBenchmarks}
+                            designHasContainers={designHasContainers}
                         />
                     </section>
                 </>

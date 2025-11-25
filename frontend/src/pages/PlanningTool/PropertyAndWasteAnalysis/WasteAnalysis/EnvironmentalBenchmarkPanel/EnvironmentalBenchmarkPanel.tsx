@@ -6,7 +6,7 @@ import type { CombinedRow } from "../../utils/types";
 import type { ContainerInRoom } from "../../../Types";
 import SummaryStat from "../components/SummaryStat";
 import BenchmarkBar from "./components/BenchmarkBar";
-import { BENCHMARK_STATUS_STYLES, WASTE_BENCHMARKS } from "../../utils/constants"
+import { BENCHMARK_STATUS_STYLES } from "../../utils/constants"
 import { findRowForBenchmark } from "../../utils/builders"
 import { formatLitersPerWeek } from "../../utils/utils";
 import '../css/benchmarkPanel.css'
@@ -14,21 +14,16 @@ import '../css/benchmarkPanel.css'
 type EnvironmentalBenchmarkPanelProps = {
     designStats: ReturnType<typeof buildDesignStats>;
     combinedRows: CombinedRow[];
-    safeApartments: number;
+    activeBenchmarks: BenchmarkDefinition[];
+    designHasContainers: boolean;
 };
 
 export default function EnvironmentalBenchmarkPanel({
     designStats,
     combinedRows,
+    activeBenchmarks,
+    designHasContainers,
 }: EnvironmentalBenchmarkPanelProps) {
-    //Check if design has any containers
-    const designHasContainers = designStats.containerCount > 0;
-
-    //Determine which benchmarks are active
-    const activeBenchmarks = designHasContainers
-        ? WASTE_BENCHMARKS
-        : [];
-
     return (
         <section className="benchmark-section-wrapper">
             <h3 className="benchmark-panel-title">Riktmärken per lägenhet (liter/vecka)</h3>

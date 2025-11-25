@@ -27,6 +27,7 @@ export default function WasteTypeComparisonPanel({
     //Compute comparison rows using custom hook
     const {
       combinedRows,
+      designHasContainers,
     } = useWasteComparison({
       comparisonData,
       selectedProperty,
@@ -35,9 +36,6 @@ export default function WasteTypeComparisonPanel({
 
     //Determine if comparison data is available
     const hasComparison = Boolean(comparisonData);
-
-    //Determine if the design has any containers
-    const designHasContainers = containersInRoom.length > 0;
 
 return (
         <section className="summary-section">

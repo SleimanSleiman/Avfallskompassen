@@ -19,6 +19,7 @@ type TotalWasteComparisonPanelProps = {
     combinedRows: CombinedRow[];
     comparisonData: PropertyComparison;
     safeApartments: number;
+    designHasContainers: boolean;
 };
 
 export default function TotalWasteComparisonPanel({
@@ -26,6 +27,7 @@ export default function TotalWasteComparisonPanel({
     combinedRows,
     comparisonData,
     safeApartments,
+    designHasContainers,
 }: TotalWasteComparisonPanelProps) {
 
     //Compute cost-related stats
@@ -36,9 +38,6 @@ export default function TotalWasteComparisonPanel({
 
     //Compute CO₂-related stats
     const co2Data = useCo2Comparison({ designStats, combinedRows, safeApartments });
-
-    //Determine if design contains any containers
-    const designHasContainers = designStats.containerCount > 0;
 
     return (
         <section className="total-waste-panel">
