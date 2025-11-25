@@ -1,0 +1,23 @@
+.summary-stat-container {
+    @apply flex h-full flex-col rounded-lg border border-gray-200/70 bg-white/80 shadow-sm;
+}
+
+.summary-stat-header {
+    @apply flex w-full flex-wrap items-start justify-between;
+}
+
+.summary-stat-title {
+    @apply font-semibold uppercase tracking-tight;
+}
+
+.summary-stat-value {
+    @apply font-semibold leading-tight;
+}
+
+.summary-stat-badge {
+    @apply max-w-full flex-shrink-0;
+}
+
+.summary-stat-description {
+    @apply flex-1 text-gray-600 space-y-1;
+}

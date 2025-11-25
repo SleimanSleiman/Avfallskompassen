@@ -8,6 +8,7 @@ import Co2Summary from "./components/Co2Summary";
 import CostSummary from "./components/CostSummary";
 import ContainerVolumeSummary from "./components/ContainerVolumeSummary";
 import ContainerOverviewSummary from "./components/ContainerOverviewSummary";
+import '../css/wasteComparison.css'
 
 type TotalWasteComparisonPanelProps = {
     designStats: ReturnType<typeof buildDesignStats>;
@@ -30,11 +31,11 @@ export default function TotalWasteComparisonPanel({
     const designHasContainers = designStats.containerCount > 0;
 
     return (
-        <section className="lg:col-span-2 grid auto-rows-fr gap-2.5 [grid-template-columns:repeat(auto-fit,minmax(180px,1fr))]">
+        <section className="total-waste-panel">
             <CostSummary {...costData} />
             <ContainerVolumeSummary {...containerData} />
             <ContainerOverviewSummary
-                designHasContainers={designHasContainers}
+                designHasContainers={designStats.containerCount > 0}
                 containerCount={designStats.containerCount}
                 typeMapSize={designStats.typeMap.size}
                 averageFrequencyAll={containerData.averageFrequencyAll}

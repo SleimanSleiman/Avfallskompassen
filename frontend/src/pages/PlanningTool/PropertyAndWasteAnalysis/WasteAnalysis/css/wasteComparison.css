@@ -1,0 +1,22 @@
+.summary-grid {
+    @apply grid gap-1.5 text-[12px] leading-snug text-gray-500;
+}
+.summary-row {
+    @apply flex items-center justify-between gap-2;
+}
+.summary-row-label {
+    @apply font-semibold text-gray-900;
+}
+.summary-empty {
+    @apply text-[12px] leading-snug text-gray-500;
+}
+
+/* Specific spacing variants */
+.summary-row-pt {
+    @apply pt-0.5;
+}
+
+/* Layout container */
+.total-waste-panel {
+    @apply lg:col-span-2 grid auto-rows-fr gap-2.5 [grid-template-columns:repeat(auto-fit,minmax(180px,1fr))];
+}

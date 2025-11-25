@@ -8,6 +8,7 @@ import type { Property } from "../../../../lib/Property";
 import type { ContainerInRoom } from "../../Types";
 import { buildDesignStats, mapWasteComparisons, mapFrequencyComparisons, buildCombinedRows } from "../utils/builders";
 import { useWasteComparison } from "../hooks/useWasteComparison";
+import './css/analysisPanels.css'
 
 type WasteAnalysisPanelsProps = {
     comparisonData: PropertyComparison | null;
@@ -36,30 +37,30 @@ export default function WasteAnalysisPanels({
     });
 
     return (
-        <div className="flex flex-col bg-white px-3 py-3 sm:p-4 transition-all duration-300 min-w-0 flex-1">
+        <div className="analysis-root">
 
-            <div className="mb-6 flex items-center justify-between gap-4">
-                <div className="space-y-1">
-                    <h2 className="text-lg font-black tracking-tight text-nsr-teal">
+            <div className="analysis-header">
+                <div className="analysis-header-left">
+                    <h2 className="analysis-title">
                         Kostnader och jämförelse
                     </h2>
                 </div>
                 <InfoTooltip text="Se hur ditt miljörum står sig mot liknande fastigheter i samma kommun." />
             </div>
 
-            {/* Loading state */}
+            {/* Loading */}
             {comparisonLoading && (
-                <div className="flex flex-1 items-center justify-center text-gray-500">
-                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                <div className="analysis-loading">
+                    <Loader2 className="loading-icon" />
                     Hämtar jämförelsedata...
                 </div>
             )}
 
-            {/* Error state */}
+            {/* Error */}
             {!comparisonLoading && comparisonError && (
-                <div className="flex flex-col items-start gap-2 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
-                    <div className="flex items-center gap-2 font-semibold">
-                        <AlertCircle className="h-4 w-4" />
+                <div className="analysis-error">
+                    <div className="analysis-error-header">
+                        <AlertCircle className="error-icon" />
                         Kunde inte ladda jämförelsen
                     </div>
                     <p>{comparisonError}</p>
@@ -68,7 +69,7 @@ export default function WasteAnalysisPanels({
 
             {/* No comparison */}
             {!comparisonLoading && !comparisonError && !comparisonData && (
-                <div className="rounded-xl border border-gray-200 bg-gray-50 p-4 text-sm text-gray-600">
+                <div className="analysis-no-comparison">
                     <p>
                         Öppna planeringsverktyget via en fastighet under <strong>Mina fastigheter</strong> för att se kostnader och jämförelser.
                     </p>
@@ -78,8 +79,7 @@ export default function WasteAnalysisPanels({
             {/* Panels */}
             {!comparisonLoading && !comparisonError && comparisonData && (
                 <>
-                    {/* Section 1: Total Waste Comparison */}
-                    <section className="rounded-2xl border border-gray-200 bg-white p-4 mb-6">
+                    <section className="analysis-section">
                         <TotalWasteComparisonPanel
                             designStats={designStats}
                             combinedRows={combinedRows}
@@ -90,8 +90,7 @@ export default function WasteAnalysisPanels({
                         />
                     </section>
 
-                    {/* Section 2: Environmental Benchmark */}
-                    <section className="rounded-2xl border border-gray-200 bg-white p-4">
+                    <section className="analysis-section">
                         <EnvironmentalBenchmarkPanel
                             designStats={designStats}
                             combinedRows={combinedRows}

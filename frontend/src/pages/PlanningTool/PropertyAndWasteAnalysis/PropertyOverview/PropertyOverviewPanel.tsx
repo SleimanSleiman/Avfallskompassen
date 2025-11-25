@@ -3,6 +3,7 @@ import WasteTypeSummaryPanel from './WasteTypeSummaryPanel/WasteTypeSummaryPanel
 import type { Property } from '../../../../lib/Property';
 import type { ContainerDTO } from '../../../../lib/Container';
 import type { PropertyComparison } from '../../../../lib/Comparison';
+import './css/overviewPanel.css'
 
 export default function PropertyOverviewPanel({
     propertyHighlights,
@@ -14,18 +15,18 @@ export default function PropertyOverviewPanel({
 }: Props) {
     return (
         <>
-            <div className="mt-4 rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
-                <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+            <div className="overview-wrapper">
+                <div className="overview-grid">
                     {propertyHighlights.map(({ key, Icon, title, value, tone, helper }) => (
-                        <div key={key} className="flex items-center gap-3 rounded-xl border border-gray-200/70 bg-gray-50/60 p-3">
-                            <span className="flex h-10 w-10 items-center justify-center rounded-full bg-white text-nsr-teal shadow-sm">
-                                <Icon className="h-5 w-5" />
+                        <div key={key} className="overview-card">
+                            <span className="overview-icon-wrapper">
+                                <Icon className="overview-icon" />
                             </span>
-                            <div className="min-w-0">
-                                <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-500">{title}</p>
-                                <p className={`truncate text-sm font-medium leading-tight ${tone}`}>{value}</p>
+                            <div className="overview-text">
+                                <p className="overview-title">{title}</p>
+                                <p className={`overview-value ${tone}`}>{value}</p>
                                 {helper ? (
-                                    <p className="text-[11px] text-gray-400">{helper}</p>
+                                    <p className="overview-helper">{helper}</p>
                                 ) : null}
                             </div>
                         </div>
@@ -33,7 +34,7 @@ export default function PropertyOverviewPanel({
                 </div>
             </div>
 
-            <div className="mt-4">
+            <div className="overview-summary-wrapper">
                 <WasteTypeSummaryPanel
                     comparisonData={comparisonData}
                     comparisonLoading={comparisonLoading}
@@ -43,5 +44,5 @@ export default function PropertyOverviewPanel({
                 />
             </div>
         </>
-    )
+    );
 }

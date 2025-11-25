@@ -1,5 +1,6 @@
 import type { BenchmarkDefinition, CarbonSavingDefinition, Trend, SummaryTone, SummarySize, TrendBadgeSize, BenchmarkStatus } from "./types";
 import { TrendingUp, TrendingDown, Minus, CheckCircle, AlertCircle } from "lucide-react";
+import '../css/constants.css'
 
 export const WEEK_PER_YEAR = 52;
 
@@ -20,31 +21,29 @@ export const CO2_SAVING_DEFINITIONS: CarbonSavingDefinition[] = [
 ];
 
 export const TREND_CONFIG: Record<Trend, { label: string; className: string; Icon: typeof TrendingUp }> = {
-    better: { label: "Lägre än snittet", className: "bg-emerald-100 text-emerald-700 border border-emerald-200", Icon: TrendingDown },
-    equal: { label: "I nivå med snittet", className: "bg-blue-100 text-blue-700 border border-blue-200", Icon: Minus },
-    worse: { label: "Högre än snittet", className: "bg-amber-100 text-amber-700 border border-amber-200", Icon: TrendingUp },
+    better: { label: "Lägre än snittet", className: "trend-config-better", Icon: TrendingDown },
+    equal: { label: "I nivå med snittet", className: "trend-config-equal", Icon: Minus },
+    worse: { label: "Högre än snittet", className: "trend-config-worse", Icon: TrendingUp },
 };
 
-export const PANEL_SECTION_CLASS = "rounded-3xl border border-gray-100 bg-white/95 shadow-lg backdrop-blur-sm p-5";
-
 export const SUMMARY_TONE_STYLES: Record<SummaryTone, { title: string; value: string }> = {
-    positive: { title: "text-emerald-700", value: "text-emerald-900" },
-    neutral: { title: "text-gray-600", value: "text-gray-900" },
-    negative: { title: "text-amber-700", value: "text-amber-900" },
+    positive: { title: "summary-tone-positive-title", value: "summary-tone-positive-value" },
+    neutral: { title: "summary-tone-neutral-title", value: "summary-tone-neutral-value" },
+    negative: { title: "summary-tone-negative-title", value: "summary-tone-negative-value" },
 };
 
 export const SUMMARY_SIZE_STYLES: Record<SummarySize, { container: string; headerGap: string; title: string; value: string; description: string }> = {
-    default: { container: "gap-2 p-3", headerGap: "gap-3", title: "text-[11px]", value: "text-xl", description: "text-[11px] leading-relaxed" },
-    compact: { container: "gap-1.5 p-2", headerGap: "gap-2", title: "text-[13px]", value: "text-sm", description: "text-[13px] leading-snug" },
+    default: { container: "summary-size-default-container", headerGap: "summary-size-default-headerGap", title: "text-[11px]", value: "summary-size-default-value", description: "summary-size-default-description" },
+    compact: { container: "summary-size-compact-container", headerGap: "summary-size-compact-headerGap", title: "summary-size-compact-title", value: "summary-size-compact-value", description: "summary-size-compact-description" },
 };
 
 export const BENCHMARK_STATUS_STYLES: Record<BenchmarkStatus, { label: string; className: string; Icon: typeof CheckCircle; tone: SummaryTone }> = {
-    missing: { label: "Kärl saknas", className: "border-gray-200 bg-gray-100 text-gray-500", Icon: Minus, tone: "neutral" },
-    within: { label: "Grön flagga", className: "border-emerald-200 bg-emerald-100 text-emerald-700", Icon: CheckCircle, tone: "positive" },
-    over: { label: "Över riktmärket", className: "border-amber-200 bg-amber-100 text-amber-700", Icon: AlertCircle, tone: "negative" },
+    missing: { label: "Kärl saknas", className: "benchmark-status-missing", Icon: Minus, tone: "neutral" },
+    within: { label: "Grön flagga", className: "benchmark-status-within", Icon: CheckCircle, tone: "positive" },
+    over: { label: "Över riktmärket", className: "benchmark-status-over", Icon: AlertCircle, tone: "negative" },
 };
 
 export const TREND_BADGE_SIZE_STYLES: Record<TrendBadgeSize, { wrapper: string; icon: string }> = {
-    default: { wrapper: "gap-1 px-2.5 py-1 text-xs", icon: "h-3.5 w-3.5" },
-    compact: { wrapper: "gap-1 px-2 py-0.5 text-[12px]", icon: "h-3 w-3" },
+    default: { wrapper: "trend-badge-default-wrapper", icon: "trend-badge-default-icon" },
+    compact: { wrapper: "trend-badge-compact-wrapper", icon: "trend-badge-compact-icon" },
 };

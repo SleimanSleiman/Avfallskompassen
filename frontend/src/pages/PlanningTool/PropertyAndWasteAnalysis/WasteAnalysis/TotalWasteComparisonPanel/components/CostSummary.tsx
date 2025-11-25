@@ -2,6 +2,7 @@ import SummaryStat from "../../components/SummaryStat";
 import TrendBadge from "../../../components/TrendBadge";
 import { formatCurrency } from "../../../utils/utils";
 import { TREND_CONFIG } from "../../../utils/constants";
+import '../../css/wasteComparison.css'
 
 type CostSummaryProps = {
     propertyCostValue: number | null;
@@ -27,22 +28,22 @@ export default function CostSummary({
             tone={costTone}
             size="compact"
             badge={<TrendBadge trend={costTrend} size="compact">{TREND_CONFIG[costTrend].label}</TrendBadge>}
-            description={(
-                <div className="grid gap-1.5 text-[12px] leading-snug text-gray-500">
-                    <div className="flex items-center justify-between gap-2">
+            description={
+                <div className="summary-grid">
+                    <div className="summary-row">
                         <span>Snitt i gruppen</span>
-                        <span className="font-semibold text-gray-900">{formatCurrency(costAverage)}</span>
+                        <span className="summary-row-label">{formatCurrency(costAverage)}</span>
                     </div>
-                    <div className="flex items-center justify-between gap-2">
+                    <div className="summary-row">
                         <span>Per lägenhet</span>
-                        <span className="font-semibold text-gray-900">{formatCurrency(costPerApartment)}</span>
+                        <span className="summary-row-label">{formatCurrency(costPerApartment)}</span>
                     </div>
-                    <div className="flex items-center justify-between gap-2 pt-0.5">
+                    <div className="summary-row summary-row-pt">
                         <span>Avvikelse</span>
-                        <span className="font-semibold text-gray-900">{costGapSummary}</span>
+                        <span className="summary-row-label">{costGapSummary}</span>
                     </div>
                 </div>
-            )}
+            }
         />
     );
 }

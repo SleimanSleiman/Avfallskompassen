@@ -5,6 +5,7 @@ import BenchmarkBar from "./components/BenchmarkBar";
 import { BENCHMARK_STATUS_STYLES, WASTE_BENCHMARKS } from "../../utils/constants"
 import { findRowForBenchmark } from "../../utils/builders"
 import { formatLitersPerWeek } from "../../utils/utils";
+import '../css/benchmarkPanel.css'
 
 type EnvironmentalBenchmarkPanelProps = {
     designStats: ReturnType<typeof buildDesignStats>;
@@ -23,15 +24,15 @@ export default function EnvironmentalBenchmarkPanel({
         : [];
 
     return (
-        <section className="lg:col-span-2">
-            <h3 className="text-sm font-semibold text-gray-800">Riktmärken per lägenhet (liter/vecka)</h3>
-            <p className="mt-1 text-xs text-gray-500">
+        <section className="benchmark-section-wrapper">
+            <h3 className="benchmark-panel-title">Riktmärken per lägenhet (liter/vecka)</h3>
+            <p className="benchmark-panel-description">
                 Grön markering betyder att ni ligger inom NSR:s rekommendation. Gränsvärdena utgår från den mängd respektive fraktion bör ligga på för att miljörummet ska klassas som resurseffektivt.
             </p>
 
-            <div className="mt-3 grid auto-rows-fr gap-2.5 [grid-template-columns:repeat(auto-fit,minmax(160px,1fr))]">
+            <div className="benchmark-grid">
                 {activeBenchmarks.length === 0 && (
-                    <div className="rounded-lg border border-gray-200 bg-gray-50/80 p-4 text-xs text-gray-500">
+                    <div className="benchmark-empty">
                         Lägg till fraktioner i ritningen för att se riktmärken per lägenhet.
                     </div>
                 )}
@@ -42,13 +43,14 @@ export default function EnvironmentalBenchmarkPanel({
                     const averageValue = row?.averagePerWeek ?? null;
                     const hasData = designHasContainers && propertyValue != null;
                     const withinTarget = hasData && propertyValue <= def.benchmark;
-                    const status = !hasData
-                        ? "missing"
-                        : withinTarget
-                        ? "within"
-                        : "over";
 
-                    const { label: statusLabel, className: statusClassName, Icon: StatusIcon, tone: statusTone } = BENCHMARK_STATUS_STYLES[status];
+                    const status = !hasData ? "missing" : withinTarget ? "within" : "over";
+                    const {
+                        label: statusLabel,
+                        className: statusClassName,
+                        Icon: StatusIcon,
+                        tone: statusTone,
+                    } = BENCHMARK_STATUS_STYLES[status];
 
                     return (
                         <SummaryStat
@@ -58,31 +60,38 @@ export default function EnvironmentalBenchmarkPanel({
                             tone={statusTone}
                             size="compact"
                             badge={
-                                <span className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[12px] font-semibold uppercase tracking-tight ${statusClassName}`}>
-                                    <StatusIcon className="h-3 w-3" />
+                                <span className={`benchmark-badge ${statusClassName}`}>
+                                    <StatusIcon className="benchmark-icon" />
                                     {statusLabel}
                                 </span>
                             }
                             description={
-                                <div className="flex h-full flex-col justify-end gap-1.5 text-[12px]">
-                                    <div className="flex items-center justify-between gap-4">
-                                        <span className="text-gray-500">Snitt i gruppen</span>
-                                        <span className="text-[12px] font-semibold text-gray-900">{formatLitersPerWeek(averageValue)}</span>
+                                <div className="benchmark-description">
+                                    <div className="benchmark-row">
+                                        <span className="benchmark-row-label">Snitt i gruppen</span>
+                                        <span className="benchmark-row-value">{formatLitersPerWeek(averageValue)}</span>
                                     </div>
-                                    <div className="flex items-center justify-between gap-4">
-                                        <span className="text-gray-500">Riktmärke</span>
-                                        <span className="text-[12px] font-semibold text-gray-900">{def.benchmark} L</span>
+                                    <div className="benchmark-row">
+                                        <span className="benchmark-row-label">Riktmärke</span>
+                                        <span className="benchmark-row-value">{def.benchmark} L</span>
                                     </div>
+
                                     {hasData ? (
                                         <>
-                                            <BenchmarkBar className="mt-1" value={propertyValue} benchmark={def.benchmark} />
-                                            <div className="flex items-center justify-between gap-4">
-                                                <span className="text-gray-500">Avvikelse</span>
-                                                <span className="text-[12px] font-semibold text-gray-900">{row?.wasteDiff ?? "—"}</span>
+                                            <BenchmarkBar
+                                                className="benchmark-bar-wrapper"
+                                                value={propertyValue}
+                                                benchmark={def.benchmark}
+                                            />
+                                            <div className="benchmark-row">
+                                                <span className="benchmark-row-label">Avvikelse</span>
+                                                <span className="benchmark-row-value">{row?.wasteDiff ?? "—"}</span>
                                             </div>
                                         </>
                                     ) : (
-                                        <p className="text-[12px] text-gray-500">Lägg till kärl i ritningen för att se riktmärket.</p>
+                                        <p className="benchmark-row-label">
+                                            Lägg till kärl i ritningen för att se riktmärket.
+                                        </p>
                                     )}
                                 </div>
                             }

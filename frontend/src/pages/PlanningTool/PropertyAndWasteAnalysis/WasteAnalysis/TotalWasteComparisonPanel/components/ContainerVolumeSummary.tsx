@@ -1,5 +1,6 @@
 import SummaryStat from "../../components/SummaryStat";
 import TrendBadge from "../../../components/TrendBadge";
+import '../../css/wasteComparison.css'
 
 type ContainerVolumeSummaryProps = {
     totalVolumeLabel: string;
@@ -25,18 +26,18 @@ export default function ContainerVolumeSummary({
             tone={containerTone}
             size="compact"
             badge={<TrendBadge trend={containerTrend} size="compact">{containerLabel}</TrendBadge>}
-            description={(
-                <div className="grid gap-1.5 text-[12px] leading-snug text-gray-500">
-                    <div className="flex items-center justify-between gap-2">
+            description={
+                <div className="summary-grid">
+                    <div className="summary-row">
                         <span>Snitt i gruppen</span>
-                        <span className="font-semibold text-gray-900">{containerAverageVolume ?? "—"} L</span>
+                        <span className="summary-row-label">{containerAverageVolume ?? "—"} L</span>
                     </div>
-                    <div className="flex items-center justify-between gap-2">
+                    <div className="summary-row">
                         <span>Avvikelse</span>
-                        <span className="font-semibold text-gray-900">{containerGapSummary}</span>
+                        <span className="summary-row-label">{containerGapSummary}</span>
                     </div>
                 </div>
-            )}
+            }
         />
     );
 }

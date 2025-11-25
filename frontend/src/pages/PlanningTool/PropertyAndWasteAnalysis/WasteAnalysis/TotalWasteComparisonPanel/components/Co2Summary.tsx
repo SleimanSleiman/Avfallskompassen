@@ -1,4 +1,5 @@
 import SummaryStat from "../../components/SummaryStat";
+import '../../css/wasteComparison.css'
 
 type Co2SummaryProps = {
     co2CardValue: string;
@@ -24,22 +25,22 @@ export default function Co2Summary({
             tone={co2Tone}
             size="compact"
             description={co2HasData ? (
-                <div className="grid gap-1.5 text-[12px] leading-snug text-gray-500">
-                    <div className="flex items-center justify-between gap-2">
+                <div className="summary-grid">
+                    <div className="summary-row">
                         <span>Per lägenhet</span>
-                        <span className="font-semibold text-gray-900">{co2PerApartmentLabel}</span>
+                        <span className="summary-row-label">{co2PerApartmentLabel}</span>
                     </div>
-                    <div className="flex items-center justify-between gap-2">
+                    <div className="summary-row">
                         <span>Per vecka</span>
-                        <span className="font-semibold text-gray-900">{co2PerWeekLabel}</span>
+                        <span className="summary-row-label">{co2PerWeekLabel}</span>
                     </div>
-                    <div className="flex items-center justify-between gap-2">
+                    <div className="summary-row">
                         <span>Störst effekt</span>
-                        <span className="font-semibold text-gray-900">{co2TopLabel}</span>
+                        <span className="summary-row-label">{co2TopLabel}</span>
                     </div>
                 </div>
             ) : (
-                <div className="text-[12px] leading-snug text-gray-500">
+                <div className="summary-empty">
                     Lägg till sorterade fraktioner för att uppskatta klimatvinsten.
                 </div>
             )}
