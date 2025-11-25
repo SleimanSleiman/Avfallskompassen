@@ -85,75 +85,75 @@ export default function AdminPlanningEditor({
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header Bar */}
-      <div className="sticky top-0 z-50 border-b bg-white shadow-sm">
-        <div className="mx-auto max-w-7xl px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <button
-                onClick={onBack}
-                className="flex items-center gap-2 text-nsr-teal hover:text-nsr-tealDark transition-colors"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M15 19l-7-7 7-7"
-                  />
-                </svg>
-                <span className="font-medium">Tillbaka</span>
-              </button>
-              <div className="h-6 w-px bg-gray-300"></div>
-              <div>
-                <h1 className="text-lg font-black text-nsr-ink">
-                  Redigera: {plan.name}
-                </h1>
-                <p className="text-sm text-gray-600">
-                  Fastighet: {property.address} • Användare: {user.username} • 
-                  {(() => {
-                    const defaultVersionNumber = plan.activeVersionNumber ?? plan.versions[plan.versions.length - 1].versionNumber;
-                    const selectedVersionNumber = plan.selectedVersion ?? defaultVersionNumber;
-                    const selectedVersion = plan.versions.find((v) => v.versionNumber === selectedVersionNumber);
-                    const isViewingActive = selectedVersionNumber === defaultVersionNumber;
-                    return (
-                      <>
-                        Visar version {selectedVersionNumber} av {plan.versions.length}
-                        {isViewingActive ? (
-                          <span className="ml-2 text-xs bg-nsr-teal/20 text-nsr-teal px-2 py-0.5 rounded-full font-medium">Aktiv</span>
-                        ) : (
-                          <span className="ml-2 text-xs text-orange-600 font-medium">(Äldre version – spara skapar ny version)</span>
-                        )}
-                        {selectedVersion?.versionName && (
-                          <span className="ml-2 text-xs text-gray-500">- {selectedVersion.versionName}</span>
-                        )}
-                        {plan.versions.length >= 6 && (
-                          <span className="ml-2 text-xs text-orange-600 font-medium">(Max 6 versioner)</span>
-                        )}
-                      </>
-                    );
-                  })()}
-                </p>
-              </div>
+    <div className="flex min-h-screen flex-col bg-gray-50 overflow-x-hidden">
+      {/* Admin overlay header */}
+      <div className="border-b border-gray-200 bg-white/95 px-4 py-4 shadow-sm backdrop-blur lg:sticky lg:top-0 lg:z-50">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <div className="flex flex-1 items-start gap-4">
+            <button
+              onClick={onBack}
+              className="flex items-center gap-2 text-nsr-teal transition-colors hover:text-nsr-tealDark"
+            >
+              <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M15 19l-7-7 7-7"
+                />
+              </svg>
+              <span className="font-medium">Tillbaka</span>
+            </button>
+            <div className="hidden h-6 w-px bg-gray-300 lg:block" />
+            <div className="flex-1">
+              <h1 className="text-lg font-black text-nsr-ink">
+                Redigera: {plan.name}
+              </h1>
+              <p className="text-sm text-gray-600">
+                Fastighet: {property.address} • Användare: {user.username} •
+                {(() => {
+                  const defaultVersionNumber = plan.activeVersionNumber ?? plan.versions[plan.versions.length - 1].versionNumber;
+                  const selectedVersionNumber = plan.selectedVersion ?? defaultVersionNumber;
+                  const selectedVersion = plan.versions.find((v) => v.versionNumber === selectedVersionNumber);
+                  const isViewingActive = selectedVersionNumber === defaultVersionNumber;
+                  return (
+                    <>
+                      {' '}Visar version {selectedVersionNumber} av {plan.versions.length}
+                      {isViewingActive ? (
+                        <span className="ml-2 inline-flex items-center rounded-full bg-nsr-teal/15 px-2 py-0.5 text-xs font-semibold text-nsr-teal">
+                          Aktiv
+                        </span>
+                      ) : (
+                        <span className="ml-2 text-xs font-semibold text-orange-600">
+                          (Äldre version – spara skapar ny version)
+                        </span>
+                      )}
+                      {selectedVersion?.versionName && (
+                        <span className="ml-2 text-xs text-gray-500">- {selectedVersion.versionName}</span>
+                      )}
+                      {plan.versions.length >= 6 && (
+                        <span className="ml-2 text-xs font-semibold text-orange-600">(Max 6 versioner)</span>
+                      )}
+                    </>
+                  );
+                })()}
+              </p>
             </div>
-            <div className="flex items-center gap-3">
-              {hasUnsavedChanges && (
-                <span className="text-sm text-gray-500">Osparade ändringar</span>
-              )}
-              <button onClick={handleSaveClick} className="btn-primary">
-                Spara version
-              </button>
-            </div>
+          </div>
+          <div className="flex items-center gap-3">
+            {hasUnsavedChanges && (
+              <span className="text-sm text-gray-500">Osparade ändringar</span>
+            )}
+            <button onClick={handleSaveClick} className="btn-primary">
+              Spara version
+            </button>
           </div>
         </div>
       </div>
 
-      {/* Planning Tool */}
-      <div className="mx-auto max-w-7xl px-4 py-6">
-        <div className="rounded-2xl border bg-white p-6 shadow-soft">
-          <PlanningTool />
-        </div>
+      {/* Shared planning tool surface */}
+      <div className="flex-1">
+        <PlanningTool />
       </div>
 
       {/* Save Version Modal */}
@@ -180,4 +180,3 @@ export default function AdminPlanningEditor({
     </div>
   );
 }
-

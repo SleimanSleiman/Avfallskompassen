@@ -9,6 +9,7 @@ import { getWasteRoomsByPropertyId } from '../lib/WasteRoom';
 import type { WasteRoom } from '../lib/WasteRoom';
 import { deleteWasteRoom } from '../lib/WasteRoomRequest';
 import Message from '../components/ShowStatus';
+import LoadingBar from '../components/LoadingBar';
 
 export default function PropertyPage() {
     const [properties, setProperties] = useState<Property[]>([]);
@@ -459,9 +460,8 @@ async function onDeleteWasteRoom(propertyId: number, wasteRoomId: number) {
         
        <div className="grid grid-cols-1 gap-6 p-6 sm:grid-cols-2 lg:grid-cols-3">
                            {loadingProperties ? (
-                               <div className="col-span-full flex flex-col items-center justify-center py-16">
-                                   <div className="animate-spin rounded-full h-12 w-12 border-4 border-gray-300 border-t-nsr-teal mb-4" />
-                                   <p className="text-gray-600">Laddar fastigheter...</p>
+                               <div className="col-span-full py-12">
+                                   <LoadingBar message="Laddar fastigheter..." />
                                </div>
                            ) : filteredProperties.length === 0 ? (
                                <div className="col-span-full flex flex-col items-center justify-center py-16 text-center text-gray-500">

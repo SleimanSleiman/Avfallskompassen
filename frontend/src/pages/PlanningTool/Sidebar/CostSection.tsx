@@ -3,7 +3,8 @@ import InfoTooltip from "../components/InfoTooltip";
 import type { PropertyComparison, WasteAmountComparison, CollectionFrequencyComparison } from "../../../lib/Comparison";
 import type { Property } from "../../../lib/Property";
 import type { ContainerInRoom } from "../Types";
-import { Loader2, TrendingDown, TrendingUp, Minus, AlertCircle, CheckCircle } from "lucide-react";
+import { TrendingDown, TrendingUp, Minus, AlertCircle, CheckCircle } from "lucide-react";
+import LoadingBar from "../../../components/LoadingBar";
 
 type CostSectionProps = {
     comparisonData: PropertyComparison | null;
@@ -739,9 +740,8 @@ export default function CostSection({
             </div>
 
             {comparisonLoading && (
-                <div className="flex flex-1 items-center justify-center text-gray-500">
-                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                    Hämtar jämförelsedata...
+                <div className="py-4">
+                    <LoadingBar message="Hämtar jämförelsedata..." />
                 </div>
             )}
 
@@ -980,9 +980,8 @@ export function WasteTypeComparisonPanel({
             </div>
 
             {comparisonLoading && (
-                <div className="mt-6 flex items-center gap-2 text-sm text-gray-500">
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    Hämtar jämförelsedata...
+                <div className="mt-6">
+                    <LoadingBar message="Hämtar jämförelsedata..." />
                 </div>
             )}
 

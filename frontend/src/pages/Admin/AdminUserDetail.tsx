@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import type { AdminUser } from '../AdminPage';
 import AdminPlanningEditor from './AdminPlanningEditor';
+import LoadingBar from '../../components/LoadingBar';
 import { get } from '../../lib/api';
 
 // Data types
@@ -244,14 +245,16 @@ export default function AdminUserDetail({ user, onBack }: AdminUserDetailProps) 
 
   if (loading) {
     return (
-      <main className="mx-auto max-w-7xl px-4 py-8">
-        <div className="rounded-2xl border bg-white p-6 shadow-soft text-center">Laddar fastigheter och planeringar…</div>
+      <main className="mx-auto w-full max-w-7xl px-4 py-8 overflow-x-hidden">
+        <div className="rounded-2xl border bg-white p-6 shadow-soft text-center">
+          <LoadingBar message="Laddar fastigheter och planeringar…" />
+        </div>
       </main>
     );
   }
 
   return (
-    <main className="mx-auto max-w-7xl px-4 py-8">
+    <main className="mx-auto w-full max-w-7xl px-4 py-8 overflow-x-hidden">
       {/* Header */}
       <div className="mb-8 rounded-2xl border border-gray-200 bg-white p-6 shadow-soft">
         <button
@@ -592,4 +595,3 @@ export default function AdminUserDetail({ user, onBack }: AdminUserDetailProps) 
     </main>
   );
 }
-

@@ -1,5 +1,6 @@
 import { useState, useMemo, useEffect } from 'react';
 import AdminUserDetail from './Admin/AdminUserDetail';
+import LoadingBar from '../components/LoadingBar';
 import { get } from '../lib/api';
 
 // Data types
@@ -164,14 +165,16 @@ export default function AdminPage() {
 
   if (loading) {
     return (
-      <main className="mx-auto max-w-7xl px-4 py-8">
-        <div className="rounded-2xl border bg-white p-6 shadow-soft text-center">Laddar användardata…</div>
+      <main className="mx-auto w-full max-w-7xl px-4 py-8 overflow-x-hidden">
+        <div className="rounded-2xl border bg-white p-6 shadow-soft text-center">
+          <LoadingBar message="Laddar användardata…" />
+        </div>
       </main>
     );
   }
 
   return (
-    <main className="mx-auto max-w-7xl px-4 py-8">
+    <main className="mx-auto w-full max-w-7xl px-4 py-8 overflow-x-hidden">
       {/* Header */}
       <div className="mb-8 rounded-2xl border bg-white p-6 shadow-soft">
         <div className="mb-3">
@@ -427,4 +430,3 @@ export default function AdminPage() {
     </main>
   );
 }
-
