@@ -20,7 +20,14 @@ function PlanningToolWrapper({ planData }: { planData: any }) {
   const [initialized, setInitialized] = useState(false);
   
   if (typeof window !== 'undefined' && !initialized) {
-    console.log('PlanningToolWrapper - Initial setup of localStorage');
+    console.log('PlanningToolWrapper - Initial setup of localStorage:', {
+      hasX: !!planData.x,
+      hasY: !!planData.y,
+      x: planData.x,
+      y: planData.y,
+      containerCount: planData.containers?.length,
+      doorCount: planData.doors?.length
+    });
     localStorage.removeItem('trashRoomData');
     localStorage.removeItem('enviormentRoomData');
     localStorage.setItem('trashRoomData', JSON.stringify(planData));
@@ -51,6 +58,8 @@ export default function AdminPlanningEditor({
     return {
       length: selectedVersion.roomWidth,
       width: selectedVersion.roomHeight,
+      x: selectedVersion.x,
+      y: selectedVersion.y,
       property: property,
       planId: plan.id,
       wasteRoomId: selectedVersion.wasteRoomId,
@@ -135,8 +144,8 @@ export default function AdminPlanningEditor({
       const requestPayload = {
         length: currentPlanData.length || selectedVersion.roomWidth,
         width: currentPlanData.width || selectedVersion.roomHeight,
-        x: currentPlanData.x ?? 150,
-        y: currentPlanData.y ?? 150,
+        x: currentPlanData.x ?? selectedVersion.x ?? 150,
+        y: currentPlanData.y ?? selectedVersion.y ?? 150,
         doors,
         containers,
         propertyId: property.id,
@@ -145,7 +154,12 @@ export default function AdminPlanningEditor({
         versionToReplace: versionToReplace || undefined
       };
       
+      console.log('========== SAVE REQUEST PAYLOAD ==========');
       console.log('Full request payload being sent to backend:', requestPayload);
+      console.log('Room position - x:', requestPayload.x, 'y:', requestPayload.y);
+      console.log('Room dimensions - length:', requestPayload.length, 'width:', requestPayload.width);
+      console.log('Containers:', requestPayload.containers.map(c => ({ id: c.id, x: c.x, y: c.y })));
+      console.log('Doors:', requestPayload.doors.map(d => ({ x: d.x, y: d.y, wall: d.wall })));
       console.log('Property ID:', property.id, 'Room Name:', plan.name);
 
       // Call the backend API to save the new version

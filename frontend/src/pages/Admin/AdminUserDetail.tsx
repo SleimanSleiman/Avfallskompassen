@@ -19,6 +19,8 @@ export type PlanVersion = {
   versionNumber: number;
   roomWidth: number;
   roomHeight: number;
+  x: number; // Room x position on canvas
+  y: number; // Room y position on canvas
   doors: any[];
   containers: any[];
   createdBy: 'user' | 'admin';
@@ -116,6 +118,8 @@ export default function AdminUserDetail({ user, onBack }: AdminUserDetailProps) 
                     versionNumber: v.versionNumber || 1,
                     roomWidth: v.length || v.roomWidth || 0,
                     roomHeight: v.width || v.roomHeight || 0,
+                    x: v.x ?? 150,
+                    y: v.y ?? 150,
                     doors: v.doors || [],
                     containers: v.containers || [],
                     createdBy: (v.createdBy || 'user') as 'user' | 'admin',
@@ -152,6 +156,8 @@ export default function AdminUserDetail({ user, onBack }: AdminUserDetailProps) 
                         versionNumber: firstRoom.versionNumber || 1,
                         roomWidth: firstRoom.length || firstRoom.roomWidth || 0,
                         roomHeight: firstRoom.width || firstRoom.roomHeight || 0,
+                        x: firstRoom.x ?? 150,
+                        y: firstRoom.y ?? 150,
                         doors: firstRoom.doors || [],
                         containers: firstRoom.containers || [],
                         createdBy: (firstRoom.createdBy || 'user') as 'user' | 'admin',
@@ -289,6 +295,8 @@ export default function AdminUserDetail({ user, onBack }: AdminUserDetailProps) 
                   versionNumber: v.versionNumber || 1,
                   roomWidth: v.length || v.roomWidth || 0,
                   roomHeight: v.width || v.roomHeight || 0,
+                  x: v.x ?? 150,
+                  y: v.y ?? 150,
                   doors: v.doors || [],
                   containers: v.containers || [],
                   createdBy: (v.createdBy || 'user') as 'user' | 'admin',
