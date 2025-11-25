@@ -1,3 +1,7 @@
+/**
+ * WasteAnalysisPanels component
+ * Displays total waste comparison and environmental benchmark panels with proper loading and error handling.
+ */
 import { useMemo } from "react";
 import { Loader2, AlertCircle } from "lucide-react";
 import TotalWasteComparisonPanel from "./TotalWasteComparisonPanel/TotalWasteComparisonPanel";
@@ -26,6 +30,7 @@ export default function WasteAnalysisPanels({
     containersInRoom,
 }: WasteAnalysisPanelsProps) {
 
+    //Compute design stats and comparison rows using custom hook
     const {
         safeApartments,
         designStats,
@@ -48,7 +53,7 @@ export default function WasteAnalysisPanels({
                 <InfoTooltip text="Se hur ditt miljörum står sig mot liknande fastigheter i samma kommun." />
             </div>
 
-            {/* Loading */}
+            {/*Loading state*/}
             {comparisonLoading && (
                 <div className="analysis-loading">
                     <Loader2 className="loading-icon" />
@@ -56,7 +61,7 @@ export default function WasteAnalysisPanels({
                 </div>
             )}
 
-            {/* Error */}
+            {/* Error state */}
             {!comparisonLoading && comparisonError && (
                 <div className="analysis-error">
                     <div className="analysis-error-header">
@@ -67,7 +72,7 @@ export default function WasteAnalysisPanels({
                 </div>
             )}
 
-            {/* No comparison */}
+            {/* No comparison data */}
             {!comparisonLoading && !comparisonError && !comparisonData && (
                 <div className="analysis-no-comparison">
                     <p>
@@ -76,7 +81,7 @@ export default function WasteAnalysisPanels({
                 </div>
             )}
 
-            {/* Panels */}
+            {/*Panels for total comparison and environmental benchmark*/}
             {!comparisonLoading && !comparisonError && comparisonData && (
                 <>
                     <section className="analysis-section">

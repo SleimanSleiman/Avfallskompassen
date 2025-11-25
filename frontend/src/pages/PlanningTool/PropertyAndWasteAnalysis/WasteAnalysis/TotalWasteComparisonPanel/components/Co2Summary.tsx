@@ -1,3 +1,7 @@
+/**
+ * Co2Summary component
+ * Displays annual CO₂ savings per property and per week, with summary labels.
+ */
 import SummaryStat from "../../components/SummaryStat";
 import '../../css/wasteComparison.css'
 
@@ -25,6 +29,7 @@ export default function Co2Summary({
             tone={co2Tone}
             size="compact"
             description={co2HasData ? (
+                //Display CO₂ metrics per apartment, per week, and largest contributor
                 <div className="summary-grid">
                     <div className="summary-row">
                         <span>Per lägenhet</span>
@@ -40,6 +45,7 @@ export default function Co2Summary({
                     </div>
                 </div>
             ) : (
+                //Fallback message if no CO₂ data is available
                 <div className="summary-empty">
                     Lägg till sorterade fraktioner för att uppskatta klimatvinsten.
                 </div>

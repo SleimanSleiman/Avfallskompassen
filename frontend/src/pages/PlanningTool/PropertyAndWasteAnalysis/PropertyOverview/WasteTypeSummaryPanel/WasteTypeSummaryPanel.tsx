@@ -1,3 +1,7 @@
+/**
+ * WasteTypeComparisonPanel component
+ * Displays waste type comparison table and handles loading, errors, and empty states.
+ */
 import React, { useMemo } from "react";
 import { Loader2, AlertCircle } from "lucide-react";
 import { useWasteComparison } from "../../hooks/useWasteComparison";
@@ -20,6 +24,7 @@ export default function WasteTypeComparisonPanel({
     containersInRoom,
 }: WasteTypeComparisonPanelProps) {
 
+    //Compute comparison rows using custom hook
     const {
       combinedRows,
     } = useWasteComparison({
@@ -28,7 +33,10 @@ export default function WasteTypeComparisonPanel({
       containersInRoom,
     });
 
+    //Determine if comparison data is available
     const hasComparison = Boolean(comparisonData);
+
+    //Determine if the design has any containers
     const designHasContainers = containersInRoom.length > 0;
 
 return (
@@ -40,6 +48,7 @@ return (
                 </p>
             </div>
 
+            {/*Loading state*/}
             {comparisonLoading && (
                 <div className="summary-loading">
                     <Loader2 className="summary-spinner" />
@@ -47,6 +56,7 @@ return (
                 </div>
             )}
 
+            {/*Error state*/}
             {!comparisonLoading && comparisonError && (
                 <div className="summary-error">
                     <div className="summary-error-header">
@@ -57,6 +67,7 @@ return (
                 </div>
             )}
 
+            {/*No comparison data available*/}
             {!comparisonLoading && !comparisonError && !hasComparison && (
                 <div className="summary-empty">
                     <p>
@@ -65,6 +76,7 @@ return (
                 </div>
             )}
 
+            {/*No containers in design*/}
             {!comparisonLoading && !comparisonError && hasComparison && !designHasContainers && (
                 <div className="summary-warning">
                     <div className="summary-warning-header">
@@ -77,12 +89,14 @@ return (
                 </div>
             )}
 
+            {/*Comparison data exists but no matching rows*/}
             {!comparisonLoading && !comparisonError && hasComparison && designHasContainers && combinedRows.length === 0 && (
                 <div className="summary-empty">
                     <p>Jämförelsedata saknas för de fraktioner som finns i ritningen.</p>
                 </div>
             )}
 
+            {/*Render waste table when data is available*/}
             {!comparisonLoading &&
                 !comparisonError &&
                 hasComparison &&

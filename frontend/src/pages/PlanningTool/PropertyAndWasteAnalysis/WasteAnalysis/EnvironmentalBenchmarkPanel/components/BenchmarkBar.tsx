@@ -1,3 +1,7 @@
+/**
+ * BenchmarkBar component
+ * Displays a horizontal bar indicating progress toward a benchmark value.
+ */
 import '../../css/benchmarkPanel.css'
 
 export default function BenchmarkBar({ value, benchmark, className = "mt-2" }: { value: number | null; benchmark: number; className?: string }) {

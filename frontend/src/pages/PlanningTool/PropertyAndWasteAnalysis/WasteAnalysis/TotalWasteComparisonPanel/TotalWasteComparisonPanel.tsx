@@ -1,3 +1,7 @@
+/**
+ * TotalWasteComparisonPanel component
+ * Displays summaries for cost, container volume, container overview, and CO₂ for a property.
+ */
 import { useMemo } from "react";
 import type { PropertyComparison } from "../../../../../lib/Comparison";
 import type { CombinedRow } from "../../utils/types";
@@ -24,16 +28,27 @@ export default function TotalWasteComparisonPanel({
     safeApartments,
 }: TotalWasteComparisonPanelProps) {
 
+    //Compute cost-related stats
     const costData = useCostComparison({ designStats, comparisonData, safeApartments, combinedRows });
+
+    //Compute container volume/frequency stats
     const containerData = useContainerComparison({ designStats, comparisonData });
+
+    //Compute CO₂-related stats
     const co2Data = useCo2Comparison({ designStats, combinedRows, safeApartments });
 
+    //Determine if design contains any containers
     const designHasContainers = designStats.containerCount > 0;
 
     return (
         <section className="total-waste-panel">
+            {/*Render cost summary*/}
             <CostSummary {...costData} />
+
+            {/*Render container volume summary*/}
             <ContainerVolumeSummary {...containerData} />
+
+            {/*Render container overview summary*/}
             <ContainerOverviewSummary
                 designHasContainers={designStats.containerCount > 0}
                 containerCount={designStats.containerCount}
@@ -41,6 +56,8 @@ export default function TotalWasteComparisonPanel({
                 averageFrequencyAll={containerData.averageFrequencyAll}
                 dominantCostRow={costData.dominantCostRow}
             />
+
+            {/*Render CO₂ summary*/}
             <Co2Summary {...co2Data} />
         </section>
     );

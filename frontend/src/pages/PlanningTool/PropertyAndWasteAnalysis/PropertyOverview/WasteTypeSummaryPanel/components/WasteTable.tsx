@@ -1,3 +1,7 @@
+/**
+ * WasteTable component
+ * Renders a table of waste type comparison data, including cost, container count, frequency, and volume.
+ */
 import {
     formatCurrency,
     formatPercentage,
@@ -31,6 +35,7 @@ export default function WasteTable({ rows }) {
                                 {row.displayName}
                             </td>
 
+                            {/*Cost and percentage*/}
                             <td className="table-cell">
                                 {row.totalCost != null ? (
                                     <div className="table-cell-col">
@@ -49,10 +54,12 @@ export default function WasteTable({ rows }) {
                                 )}
                             </td>
 
+                            {/*Container count*/}
                             <td className="table-cell-strong">
                                 {row.containerCount ?? "—"}
                             </td>
 
+                            {/*Frequency with trend badge*/}
                             <td className="table-cell">
                                 {row.propertyFrequency != null ||
                                 row.averageFrequency != null ? (
@@ -89,14 +96,17 @@ export default function WasteTable({ rows }) {
                                 )}
                             </td>
 
+                            {/*Annual volume*/}
                             <td className="table-cell-strong">
                                 {formatVolume(row.propertyAnnualVolume)}
                             </td>
 
+                            {/*Volume per apartment per week*/}
                             <td className="table-cell-strong">
                                 {formatLitersPerWeek(row.propertyPerWeek)}
                             </td>
 
+                            {/*Average volume per apartment per week*/}
                             <td className="table-cell-strong">
                                 {formatLitersPerWeek(row.averagePerWeek)}
                             </td>

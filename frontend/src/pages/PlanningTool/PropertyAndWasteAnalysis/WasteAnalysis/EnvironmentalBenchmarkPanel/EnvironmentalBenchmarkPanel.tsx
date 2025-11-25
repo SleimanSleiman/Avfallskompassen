@@ -1,3 +1,7 @@
+/**
+ * EnvironmentalBenchmarkPanel component
+ * Displays per-apartment waste benchmarks with status badges and comparison to averages.
+ */
 import type { CombinedRow } from "../../utils/types";
 import type { ContainerInRoom } from "../../../Types";
 import SummaryStat from "../components/SummaryStat";
@@ -17,8 +21,10 @@ export default function EnvironmentalBenchmarkPanel({
     designStats,
     combinedRows,
 }: EnvironmentalBenchmarkPanelProps) {
+    //Check if design has any containers
     const designHasContainers = designStats.containerCount > 0;
 
+    //Determine which benchmarks are active
     const activeBenchmarks = designHasContainers
         ? WASTE_BENCHMARKS
         : [];
@@ -31,12 +37,14 @@ export default function EnvironmentalBenchmarkPanel({
             </p>
 
             <div className="benchmark-grid">
+                {/*No active benchmarks message*/}
                 {activeBenchmarks.length === 0 && (
                     <div className="benchmark-empty">
                         Lägg till fraktioner i ritningen för att se riktmärken per lägenhet.
                     </div>
                 )}
 
+                {/*Render each benchmark*/}
                 {activeBenchmarks.map((def) => {
                     const row = findRowForBenchmark(def, combinedRows);
                     const propertyValue = row?.propertyPerWeek ?? null;
@@ -67,6 +75,7 @@ export default function EnvironmentalBenchmarkPanel({
                             }
                             description={
                                 <div className="benchmark-description">
+                                    {/*Average and benchmark values*/}
                                     <div className="benchmark-row">
                                         <span className="benchmark-row-label">Snitt i gruppen</span>
                                         <span className="benchmark-row-value">{formatLitersPerWeek(averageValue)}</span>
@@ -76,6 +85,7 @@ export default function EnvironmentalBenchmarkPanel({
                                         <span className="benchmark-row-value">{def.benchmark} L</span>
                                     </div>
 
+                                    {/*Benchmark bar and deviation if data exists*/}
                                     {hasData ? (
                                         <>
                                             <BenchmarkBar
@@ -89,6 +99,7 @@ export default function EnvironmentalBenchmarkPanel({
                                             </div>
                                         </>
                                     ) : (
+                                        //Message if no container data
                                         <p className="benchmark-row-label">
                                             Lägg till kärl i ritningen för att se riktmärket.
                                         </p>

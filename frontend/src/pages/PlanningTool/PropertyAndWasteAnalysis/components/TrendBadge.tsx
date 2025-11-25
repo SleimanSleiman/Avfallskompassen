@@ -1,3 +1,7 @@
+/**
+ * TrendBadge component
+ * Displays a badge with a trend icon and label, supports different sizes.
+ */
 import React from "react";
 import { TREND_CONFIG, TREND_BADGE_SIZE_STYLES } from "../utils/constants";
 import type { Trend, TrendBadgeSize } from "../utils/types";

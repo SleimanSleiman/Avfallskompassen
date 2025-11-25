@@ -1,3 +1,7 @@
+/**
+ * CostSummary component
+ * Displays annual cost with comparison to group average, per apartment, and trend information.
+ */
 import SummaryStat from "../../components/SummaryStat";
 import TrendBadge from "../../../components/TrendBadge";
 import { formatCurrency } from "../../../utils/utils";
@@ -27,7 +31,9 @@ export default function CostSummary({
             value={formatCurrency(propertyCostValue)}
             tone={costTone}
             size="compact"
+            //Show trend badge indicating cost performance
             badge={<TrendBadge trend={costTrend} size="compact">{TREND_CONFIG[costTrend].label}</TrendBadge>}
+            //Show cost details for average, per apartment, and deviation
             description={
                 <div className="summary-grid">
                     <div className="summary-row">

@@ -1,3 +1,7 @@
+/**
+ * useCo2Comparison hook
+ * Computes annual CO₂ savings per property based on container volumes and CO2 factors.
+ */
 import { useMemo } from "react";
 import { CO2_SAVING_DEFINITIONS, WEEK_PER_YEAR } from "../../../utils/constants";
 import { normalizeWasteTypeKey, formatNumber, formatCo2 } from "../../../utils/utils";
@@ -12,8 +16,10 @@ export function useCo2Comparison({
     combinedRows: CombinedRow[];
     safeApartments: number;
 }) {
+    //Determine if the design has containers
     const designHasContainers = designStats.containerCount > 0;
 
+    //Build map of waste type to CO2 factor
     const co2FactorMap = useMemo(() => {
         const map = new Map<string, number>();
         CO2_SAVING_DEFINITIONS.forEach((def) => {
@@ -23,6 +29,7 @@ export function useCo2Comparison({
         return map;
     }, []);
 
+    //Compute total CO2 savings and identify top contributing row
     const {
         total: totalCo2Savings,
         topRow: topCo2Row,
@@ -59,21 +66,24 @@ export function useCo2Comparison({
         return { total, topRow, topValue };
     }, [designHasContainers, combinedRows, co2FactorMap]);
 
-
+    //Determine if CO2 data is available
     const co2HasData = totalCo2Savings > 0;
 
+    //Format CO2 card value for display
     const co2CardValue = co2HasData ? formatCo2(totalCo2Savings) : "—";
 
+    //Determine summary tone
     const co2Tone: SummaryTone = !designHasContainers
         ? "negative"
         : co2HasData
         ? "positive"
         : "neutral";
 
+    //Compute per apartment and per week values
     const co2PerApartment = co2HasData ? totalCo2Savings / safeApartments : null;
-
     const co2PerWeek = co2HasData ? totalCo2Savings / WEEK_PER_YEAR : null;
 
+    //Format labels
     const co2PerApartmentLabel = co2PerApartment != null
         ? `${formatNumber(co2PerApartment, { maximumFractionDigits: 1 })} kg CO₂e`
         : "—";
