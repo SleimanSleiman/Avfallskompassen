@@ -2,6 +2,7 @@ package com.avfallskompassen.controller;
 
 import com.avfallskompassen.dto.LockTypeDto;
 import com.avfallskompassen.dto.PropertySimpleDTO;
+import com.avfallskompassen.dto.UserStatsDTO;
 import com.avfallskompassen.dto.request.PropertyRequest;
 import com.avfallskompassen.dto.response.PropertyResponse;
 import com.avfallskompassen.dto.PropertyDTO;
@@ -93,6 +94,14 @@ public class PropertyController {
     @GetMapping("/wasterooms")
     public ResponseEntity<List<PropertyDTO>> getAllPropertiesWithWasteRooms() {
         List<PropertyDTO> dto = propertyService.getPropertiesWithWasteRooms();
+        System.out.println("Denna metoden kallades");
+
+        return ResponseEntity.ok(dto);
+    }
+
+    @GetMapping("/user/property/wasteroom/count")
+    public ResponseEntity<List<UserStatsDTO>> getUserInfoCount() {
+        List<UserStatsDTO> dto = propertyService.getUsersInfoCount();
         System.out.println("Denna metoden kallades");
 
         return ResponseEntity.ok(dto);

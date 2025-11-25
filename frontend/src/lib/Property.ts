@@ -120,6 +120,13 @@ export async function getMyPropertiesWithWasteRooms(): Promise<Property[]> {
     });
 }
 
+export async function getUserStats(): Promise<any> {
+    return await api<any>('/api/properties/user/property/wasteroom/count', {
+        method: 'GET',
+        headers: getAuthHeaders()
+    });
+}
+
 export async function getUsersPropertiesWithWasteRooms(username : string): Promise<Property[]> {
     console.log(getAuthHeaders);
     return await api<Property[]>('/api/properties/admin/user-properties-wasterooms', {

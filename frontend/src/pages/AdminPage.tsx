@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import AdminUserDetail from './Admin/AdminUserDetail';
 import { get } from '../lib/api';
-import { getPropertiesWithWasteRooms } from '../lib/Property';
+import { getPropertiesWithWasteRooms, getUserStats } from '../lib/Property';
 
 // Data types
 export type AdminUser = {
@@ -47,50 +47,30 @@ export default function AdminPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedUser, setSelectedUser] = useState<AdminUser | null>(null);
   const [users, setUsers] = useState<AdminUser[]>(EMPTY_USERS);
-  const [properties, setProperties] = useState<PropertyDTO[]>([]);
   const [loading, setLoading] = useState(true);
+  const [propertiesCount, setPropertiesCount] = useState(0);
 
   useEffect(() => {
     async function load() {
       setLoading(true);
       try {
-        const backendUsers = await get<BackendUser[]>('/api/admin/users');
-        const props = await getPropertiesWithWasteRooms();
+        const userStats = await getUserStats();
 
-        // Map properties to their creators
-        const propertiesByUser = new Map<string, PropertyDTO[]>();
-        props.forEach((p) => {
-          const username = p.createdByUsername || '';
-          if (!propertiesByUser.has(username)) propertiesByUser.set(username, []);
-          propertiesByUser.get(username)!.push(p);
-        });
+        let numOfProperties = 0;
+        for(const row of userStats) {
+          numOfProperties += row.propertiesCount;
+        }
+        setPropertiesCount(numOfProperties);
 
-        // For each property, fetch wasterooms and accumulate plans count per user
-        const plansCountByUser = new Map<string, number>();
-        await Promise.all(
-          props.map(async (p) => {
-            try {
-              const rooms = p.wasteRooms;
-              const username = p.createdByUsername || '';
-              plansCountByUser.set(username, (plansCountByUser.get(username) || 0) + (rooms?.length || 0));
-            } catch (e) {
-              // if fetch fails for a property, ignore and continue
-              console.warn('Failed to fetch wasterooms for property', p.id, e);
-            }
-          })
-        );
-
-        const mapped: AdminUser[] = backendUsers.map((bu) => ({
-          id: bu.id,
-          username: bu.username,
-          email: undefined,
-          createdAt: bu.createdAt || null,
-          propertiesCount: (propertiesByUser.get(bu.username) || []).length,
-          plansCount: plansCountByUser.get(bu.username) || 0,
+        const mapped: AdminUser[] = userStats.map((user) => ({
+          id: user.id,
+          username: user.username,
+          createdAt: user.createdAt || null,
+          propertiesCount: user.propertiesCount ?? 0,
+          plansCount: user.wasteRoomsCount ?? 0,
         }));
 
         setUsers(mapped);
-        setProperties(props);
       } catch (e) {
         console.error('Failed to load admin data', e);
       } finally {
@@ -164,7 +144,7 @@ export default function AdminPage() {
             <div>
               <p className="text-sm text-gray-600 brodtext">Totalt antal fastigheter</p>
               <p className="mt-2 text-3xl font-black text-nsr-ink">
-                {properties.length}
+                {propertiesCount}
               </p>
             </div>
             <div className="w-12 h-12 bg-nsr-accent/10 rounded-xl flex items-center justify-center">
@@ -198,7 +178,7 @@ export default function AdminPage() {
         <div className="relative">
           <input
             type="text"
-            placeholder="Sök på användarnamn eller e-post..."
+            placeholder="Sök på användarnamn"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full rounded-xl border-gray-300 shadow-sm pl-10 pr-3 py-3 focus:border-nsr-teal focus:ring-nsr-teal"

@@ -3,6 +3,7 @@ package com.avfallskompassen.services;
 import com.avfallskompassen.dto.LockTypeDto;
 import com.avfallskompassen.dto.PropertyDTO;
 import com.avfallskompassen.dto.PropertySimpleDTO;
+import com.avfallskompassen.dto.UserStatsDTO;
 import com.avfallskompassen.dto.request.PropertyRequest;
 import com.avfallskompassen.model.Property;
 
@@ -28,6 +29,8 @@ public interface PropertyService {
     Optional<Property> findById(Long id);
 
     List<Property> getAllProperties();
+
+    List<UserStatsDTO> getUsersInfoCount();
 
     List<PropertyDTO> getPropertiesWithWasteRooms();
 

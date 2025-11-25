@@ -82,6 +82,23 @@ public interface PropertyRepository extends JpaRepository<Property, Long> {
     """)
     List<Property> getAllPropertiesWithWasteRooms();
 
+    @Query("""
+        SELECT 
+            p.createdBy.id,
+            p.createdBy.username,
+            MIN(p.createdAt),
+            COUNT(DISTINCT p),
+            COUNT(wr)
+        FROM Property p
+        LEFT JOIN p.wasteRooms wr
+        GROUP BY 
+            p.createdBy.id,
+            p.createdBy.username
+    """)
+    List<Object[]> getUserPropertyAndWasteRoomStats();
+
+
+
 
     /**
      * Find similar properties for comparison.

@@ -1,9 +1,6 @@
 package com.avfallskompassen.services.impl;
 
-import com.avfallskompassen.dto.LockTypeDto;
-import com.avfallskompassen.dto.PropertyDTO;
-import com.avfallskompassen.dto.PropertySimpleDTO;
-import com.avfallskompassen.dto.WasteRoomDTO;
+import com.avfallskompassen.dto.*;
 import com.avfallskompassen.dto.request.PropertyRequest;
 import com.avfallskompassen.model.*;
 import com.avfallskompassen.repository.MunicipalityRepository;
@@ -14,9 +11,8 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import java.time.LocalDateTime;
+import java.util.*;
 
 /**
  * Service class for property-related operations.
@@ -120,6 +116,22 @@ public class PropertyServiceImpl implements PropertyService {
         return properties.stream().
                 map(PropertyDTO::new)
                 .toList();
+    }
+
+    public List<UserStatsDTO> getUsersInfoCount() {
+        List<Object[]> rawRows = propertyRepository.getUserPropertyAndWasteRoomStats();
+        List<UserStatsDTO> userStatsDTO = new LinkedList<>();
+
+        for (Object[] row : rawRows) {
+            Long userId = ((Number) row[0]).longValue();
+            String username = (String) row[1];
+            LocalDateTime createdAt = (LocalDateTime) row[2];
+            Long propertiesCount = ((Number) row[3]).longValue();
+            Long wasteRoomsCount = ((Number) row[4]).longValue();
+
+            userStatsDTO.add(new UserStatsDTO(userId, username, createdAt, propertiesCount, wasteRoomsCount));
+        }
+        return userStatsDTO;
     }
 
     /**
