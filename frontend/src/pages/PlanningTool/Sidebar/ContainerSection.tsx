@@ -101,7 +101,11 @@ export default function ContainerSection({
 
                                 {/* Loading overlay */}
                                 {isLoadingContainers && selectedType === type.name && (
-                                    <div className="absolute inset-0 flex items-center justify-center bg-white/80 rounded z-10">
+                                    <div
+                                        role="status"
+                                        aria-live="polite"
+                                        className="absolute inset-0 flex items-center justify-center bg-white/80 rounded z-10"
+                                    >
                                         <div className="w-full max-w-[220px]">
                                             <LoadingBar message="Laddar kärl..." />
                                         </div>
