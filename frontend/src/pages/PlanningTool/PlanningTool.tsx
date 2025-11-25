@@ -13,12 +13,13 @@ import type { ContainerDTO } from '../../lib/Container';
 import { useComparison } from './hooks/useComparison';
 import { useLayoutHistory } from './hooks/UseLayoutHistory';
 import { useSaveRoom, useWasteRoomRequestBuilder } from './hooks/UseSaveRoom';
+import { usePropertyHighlights } from './hooks/usePropertyHighlights';
 
 //Components
 import RoomCanvas from './RoomCanvas/RoomCanvas';
-import Sidebar from './Sidebar/Sidebar';
-import { WasteTypeComparisonPanel } from "./Sidebar/CostSection";
 import ActionPanel from './ActionPanel';
+import PropertyOverviewPanel from './PropertyAndWasteAnalysis/PropertyOverview/PropertyOverviewPanel';
+import WasteAnalysisPanels from './PropertyAndWasteAnalysis/WasteAnalysis/WasteAnalysisPanels'
 
 //Hooks
 import { useRoom } from './hooks/UseRoom';
@@ -169,56 +170,7 @@ export default function PlanningTool() {
     const propertyId = _savedProperty ? JSON.parse(_savedProperty).propertyId : (_savedPropertyId ? Number(_savedPropertyId) : null);
 
     const { data: comparisonData, loading: comparisonLoading, error: comparisonError } = useComparison(propertyId);
-
-    const displayAddress = comparisonData?.address ?? selectedProperty?.address ?? null;
-    const apartmentCount = comparisonData?.numberOfApartments ?? selectedProperty?.numberOfApartments ?? null;
-    const comparisonGroupSize = comparisonData?.costComparison?.comparisonGroupSize
-        ?? comparisonData?.containerSizeComparison?.comparisonGroupSize
-        ?? 0;
-    const similarPropertiesLabel = comparisonLoading
-        ? "Hämtar jämförelsedata..."
-        : comparisonData
-            ? comparisonGroupSize > 1
-                ? `${comparisonGroupSize} liknande fastigheter i jämförelsen`
-                : comparisonGroupSize === 1
-                    ? "1 liknande fastighet i jämförelsen"
-                    : "Inga matchande fastigheter i jämförelsen"
-            : "Jämförelsedata saknas";
-
-    const formattedApartmentCount = apartmentCount && apartmentCount > 0
-        ? apartmentCount.toLocaleString("sv-SE")
-        : null;
-    const hasComparisonPeers = Boolean(comparisonData) && comparisonGroupSize > 0;
-
-    const propertyHighlights = [
-        {
-            key: "address",
-            title: "Adress",
-            value: displayAddress ?? "Ingen fastighet vald",
-            Icon: MapPin,
-            tone: displayAddress ? "text-gray-900" : "text-gray-400",
-            helper: displayAddress ? null : "Välj en fastighet för att se detaljer",
-        },
-        {
-            key: "apartments",
-            title: "Lägenheter",
-            value: formattedApartmentCount ? `${formattedApartmentCount} st` : "Saknas",
-            Icon: Home,
-            tone: formattedApartmentCount ? "text-gray-900" : "text-gray-400",
-        },
-        {
-            key: "comparison",
-            title: "Jämförelseunderlag",
-            value: similarPropertiesLabel,
-            Icon: Users,
-            tone: hasComparisonPeers ? "text-gray-900" : "text-gray-500",
-            helper: comparisonLoading
-                ? "Data uppdateras"
-                : hasComparisonPeers
-                    ? " "
-                    : "Jämförelsedata saknas för vald fastighet",
-        },
-    ];
+    const propertyHighlights = usePropertyHighlights(comparisonData, comparisonLoading, selectedProperty);
 
     const { saveRoom, isSaving, error } = useSaveRoom();
     const { buildWasteRoomRequest } = useWasteRoomRequestBuilder(isContainerInsideRoom);
@@ -235,7 +187,7 @@ export default function PlanningTool() {
             <div className="flex w-full flex-1 flex-col gap-4 lg:flex-row lg:gap-6">
 
                 {/* ─────────────── Canvas ──────────────── */}
-                  <div className="relative w-full  flex flex-col">
+                <div className="relative w-full  flex flex-col">
                     {/* RoomCanvas displays the room, containers, and doors */}
                     <RoomCanvas
                         room={room}
@@ -305,40 +257,18 @@ export default function PlanningTool() {
                         </div>
                     )}
 
-                    <div className="mt-4 rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
-                        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-                            {propertyHighlights.map(({ key, Icon, title, value, tone, helper }) => (
-                                <div key={key} className="flex items-center gap-3 rounded-xl border border-gray-200/70 bg-gray-50/60 p-3">
-                                    <span className="flex h-10 w-10 items-center justify-center rounded-full bg-white text-nsr-teal shadow-sm">
-                                        <Icon className="h-5 w-5" />
-                                    </span>
-                                    <div className="min-w-0">
-                                        <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-500">{title}</p>
-                                        <p className={`truncate text-sm font-medium leading-tight ${tone}`}>{value}</p>
-                                        {helper ? (
-                                            <p className="text-[11px] text-gray-400">{helper}</p>
-                                        ) : null}
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-
-                    <div className="mt-4    ">
-                        <WasteTypeComparisonPanel
-                            comparisonData={comparisonData}
-                            comparisonLoading={comparisonLoading}
-                            comparisonError={comparisonError}
-                            selectedProperty={selectedProperty}
-                            containersInRoom={containersInRoom}
-                        />
-                    </div>
+                    <PropertyOverviewPanel
+                        propertyHighlights={propertyHighlights}
+                        comparisonData={comparisonData}
+                        comparisonLoading={comparisonLoading}
+                        comparisonError={comparisonError}
+                        selectedProperty={selectedProperty}
+                        containersInRoom={containersInRoom}
+                    />
                 </div>
 
-                {/* ─────────────── Sidebar ──────────────── */}
-                 <div className="w-full  lg:pl-6 flex flex-col">
-                    <Sidebar
-                        //Comparison data
+                <div className="w-full lg:pl-6 flex flex-col">
+                    <WasteAnalysisPanels
                         comparisonData={comparisonData}
                         comparisonLoading={comparisonLoading}
                         comparisonError={comparisonError}
