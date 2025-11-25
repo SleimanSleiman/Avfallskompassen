@@ -273,23 +273,21 @@ public class WasteRoomServiceImpl implements WasteRoomService {
             String clean = base64.replaceAll("\\s", "");
             String[] parts = clean.split(",");
             String imageBase64 = parts.length > 1 ? parts[1] : parts[0];
-
             byte[] decodedBytes = java.util.Base64.getDecoder().decode(imageBase64);
 
-            // Create folder manually
-            File folder = new File("src/main/resources/static/images/wasterooms/");
+            // Save to folder
+            File folder = new File("uploads/wasterooms/");
             if (!folder.exists()) {
                 folder.mkdirs();
             }
 
             File file = new File(folder, roomId + ".png");
 
-            // Save file using FileOutputStream
             try (FileOutputStream fos = new FileOutputStream(file)) {
                 fos.write(decodedBytes);
             }
 
-            // Store URL in database
+            // Store url to database
             room.setThumbnailUrl("/images/wasterooms/" + roomId + ".png");
 
             System.out.println("Thumbnail saved to: " + file.getAbsolutePath());
