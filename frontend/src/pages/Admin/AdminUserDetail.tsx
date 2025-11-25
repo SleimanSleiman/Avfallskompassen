@@ -25,6 +25,7 @@ export type PlanVersion = {
   adminUsername?: string; // Only set if createdBy === 'admin'
   createdAt: string;
   versionName?: string;
+  wasteRoomId?: number; // Added for localStorage sync
 };
 
 export type RoomPlan = {

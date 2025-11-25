@@ -17,11 +17,14 @@ type AdminPlanningEditorProps = {
 
 // Wrapper component that ensures localStorage is set before PlanningTool mounts
 function PlanningToolWrapper({ planData }: { planData: any }) {
-  // Set localStorage during render, before any child components initialize
-  if (typeof window !== 'undefined') {
+  const [initialized, setInitialized] = useState(false);
+  
+  if (typeof window !== 'undefined' && !initialized) {
+    console.log('PlanningToolWrapper - Initial setup of localStorage');
     localStorage.removeItem('trashRoomData');
     localStorage.removeItem('enviormentRoomData');
     localStorage.setItem('trashRoomData', JSON.stringify(planData));
+    setInitialized(true);
   }
   
   return <PlanningTool isAdminMode={true} />;
@@ -50,8 +53,10 @@ export default function AdminPlanningEditor({
       width: selectedVersion.roomHeight,
       property: property,
       planId: plan.id,
+      wasteRoomId: selectedVersion.wasteRoomId,
       userId: user.id,
       version: selectedVersion.versionNumber,
+      name: plan.name,
       doors: selectedVersion.doors,
       containers: selectedVersion.containers,
     };
@@ -65,7 +70,15 @@ export default function AdminPlanningEditor({
     setSaving(true);
     try {
       const savedData = localStorage.getItem('trashRoomData');
+      console.log('========== READING FROM LOCALSTORAGE ==========');
+      console.log('Raw localStorage data:', savedData);
       const currentPlanData = savedData ? JSON.parse(savedData) : {};
+      console.log('Parsed currentPlanData:', {
+        hasContainers: !!currentPlanData.containers,
+        containerCount: currentPlanData.containers?.length,
+        hasDoors: !!currentPlanData.doors,
+        doorCount: currentPlanData.doors?.length
+      });
       
       const selectedVersionNumber = plan.selectedVersion ?? plan.activeVersionNumber ?? plan.versions[plan.versions.length - 1].versionNumber;
       const selectedVersion = plan.versions.find((v) => v.versionNumber === selectedVersionNumber) || plan.versions[plan.versions.length - 1];
@@ -88,9 +101,12 @@ export default function AdminPlanningEditor({
       
       console.log('Mapped doors for backend:', doors);
 
-      // Prepare containers in the correct format for the backend
       const rawContainers = currentPlanData.containers || selectedVersion.containers || [];
+      console.log('========== SAVE VERSION DEBUG ==========');
       console.log('Raw containers before mapping:', rawContainers);
+      console.log('Number of containers:', rawContainers.length);
+      console.log('currentPlanData.containers length:', currentPlanData.containers?.length);
+      console.log('selectedVersion.containers length:', selectedVersion.containers?.length);
       
       const containers: ContainerPositionRequest[] = rawContainers.map((c: any) => {
         // Try multiple ways to get the container type ID
@@ -100,7 +116,10 @@ export default function AdminPlanningEditor({
           extractedId: containerId,
           x: c.x,
           y: c.y,
-          angle: c.rotation ?? c.angle
+          angle: c.rotation ?? c.angle,
+          hasContainer: !!c.container,
+          hasContainerDTO: !!c.containerDTO,
+          containerName: c.container?.name ?? c.containerDTO?.name
         });
         
         return {
