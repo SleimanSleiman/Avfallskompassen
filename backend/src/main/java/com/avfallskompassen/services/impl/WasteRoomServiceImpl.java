@@ -287,10 +287,7 @@ public class WasteRoomServiceImpl implements WasteRoomService {
                 fos.write(decodedBytes);
             }
 
-            // Store url to database
             room.setThumbnailUrl("/images/wasterooms/" + roomId + ".png");
-
-            System.out.println("Thumbnail saved to: " + file.getAbsolutePath());
         }
         catch (Exception e) {
             throw new RuntimeException("Failed to save thumbnail", e);

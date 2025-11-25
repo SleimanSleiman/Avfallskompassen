@@ -173,16 +173,13 @@ export default function RoomCanvas({
     const generateThumbnail = (): string | null => { 
         if (!stageRef.current) 
             return null; 
+        
         const uri = stageRef.current.toDataURL({ 
             mimeType: "image/png", 
             quality: 0.9, 
             pixelRatio: 1 
         }); 
-        console.log({ uri }); 
-        const win = window.open();
-        if (win) {
-            win.document.write(`<img src="${uri}" style="width:100%; height:auto;" />`);
-        }
+
         return uri; 
     };
 
