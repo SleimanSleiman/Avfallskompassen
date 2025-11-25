@@ -32,8 +32,6 @@ public interface PropertyService {
 
     List<UserStatsDTO> getUsersInfoCount();
 
-    List<PropertyDTO> getPropertiesWithWasteRooms();
-
     List<Property> findByLockType(LockTypeDto lockType);
 
     boolean deleteProperty(Long id);

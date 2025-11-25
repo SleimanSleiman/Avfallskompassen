@@ -234,6 +234,11 @@ public class WasteRoomServiceImpl implements WasteRoomService {
                 ));
     }
 
+    /**
+     * Maps a {@link WasteRoom} to a {@link WasteRoomDTO}
+     * @param entity The waste rooms to be mapped
+     * @return DTO containing info from waste room
+     */
     private WasteRoomDTO mapWasteRoomToDTO(WasteRoom entity) {
         List<ContainerPositionDTO> containers =
                 containerService.getContainersByWasteRoomId(entity.getId());

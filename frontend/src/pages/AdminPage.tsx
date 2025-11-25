@@ -1,7 +1,6 @@
 import { useState, useMemo, useEffect } from 'react';
 import AdminUserDetail from './Admin/AdminUserDetail';
-import { get } from '../lib/api';
-import { getPropertiesWithWasteRooms, getUserStats } from '../lib/Property';
+import { getUserStats } from '../lib/Property';
 
 // Data types
 export type AdminUser = {
@@ -55,6 +54,7 @@ export default function AdminPage() {
       setLoading(true);
       try {
         const userStats = await getUserStats();
+        console.log(userStats);
 
         let numOfProperties = 0;
         for(const row of userStats) {
@@ -63,8 +63,8 @@ export default function AdminPage() {
         setPropertiesCount(numOfProperties);
 
         const mapped: AdminUser[] = userStats.map((user) => ({
-          id: user.id,
-          username: user.username,
+          id: user.id ?? undefined,
+          username: user.username ?? "",
           createdAt: user.createdAt || null,
           propertiesCount: user.propertiesCount ?? 0,
           plansCount: user.wasteRoomsCount ?? 0,

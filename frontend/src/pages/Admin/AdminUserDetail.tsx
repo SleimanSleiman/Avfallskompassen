@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect } from 'react';
 import type { AdminUser } from '../AdminPage';
 import AdminPlanningEditor from './AdminPlanningEditor';
 import { get } from '../../lib/api';
-import { getPropertiesWithWasteRooms, getUsersPropertiesWithWasteRooms } from '../../lib/Property';
+import { getUsersPropertiesWithWasteRooms } from '../../lib/Property';
 
 // Data types
 export type AdminProperty = {
@@ -58,12 +58,7 @@ export default function AdminUserDetail({ user, onBack }: AdminUserDetailProps) 
       setLoading(true);
       try {
         // Fetch all properties (admin endpoint) and filter by creator username
-        //const allProps = await get<any[]>('/api/properties');
-        //const userProps = allProps.filter((p) => p.createdByUsername === user.username);
-
-        console.log("This is the username - ", user.username);
         const userProps = await getUsersPropertiesWithWasteRooms(user.username);
-        console.log(userProps);
 
         const mappedProps: AdminProperty[] = userProps.map((p) => ({
           id: Number(p.id),

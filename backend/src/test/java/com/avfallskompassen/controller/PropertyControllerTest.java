@@ -2,20 +2,35 @@ package com.avfallskompassen.controller;
 
 import com.avfallskompassen.dto.LockTypeDto;
 import com.avfallskompassen.dto.PropertySimpleDTO;
+import com.avfallskompassen.dto.UserStatsDTO;
 import com.avfallskompassen.dto.request.PropertyRequest;
 import com.avfallskompassen.dto.response.PropertyResponse;
 import com.avfallskompassen.dto.PropertyDTO;
-import com.avfallskompassen.model.LockType;
 import com.avfallskompassen.model.Municipality;
 import com.avfallskompassen.model.Property;
 import com.avfallskompassen.model.PropertyType;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.RequestPostProcessor;
 import org.springframework.web.server.ResponseStatusException;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 
 import java.math.BigDecimal;
 import java.util.Arrays;
@@ -24,10 +39,14 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+@SpringBootTest
+@AutoConfigureMockMvc
 @ExtendWith(MockitoExtension.class)
 public class PropertyControllerTest {
-
+    @Autowired
+    private MockMvc mockMvc;
     @Mock
     private com.avfallskompassen.services.PropertyService propertyService;
 
@@ -316,5 +335,94 @@ public class PropertyControllerTest {
         assertEquals(500, resp.getStatusCodeValue());
         assertNull(resp.getBody());
         verify(propertyService).getSimplePropertiesByUser("chris");
+    }
+
+    @Test
+    void getUserStats_ReturnOK() {
+        SecurityContext context = SecurityContextHolder.createEmptyContext();
+        context.setAuthentication(
+                new UsernamePasswordAuthenticationToken(
+                        "admin",
+                        "password",
+                        List.of(new SimpleGrantedAuthority("ROLE_ADMIN"))
+                )
+        );
+        SecurityContextHolder.setContext(context);
+
+        List<UserStatsDTO> mockUserStats = List.of(new UserStatsDTO());
+        Mockito.when(propertyService.getUsersInfoCount()).thenReturn(mockUserStats);
+
+        ResponseEntity<List<UserStatsDTO>> response = controller.getUserStats();
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(mockUserStats, response.getBody());
+    }
+
+
+
+    @Test
+    void getUserStats_NotAdmin() throws Exception {
+        List<UserStatsDTO> mockUserStats = List.of(new UserStatsDTO());
+
+        mockMvc.perform(get("/api/properties/user/stats"))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void getMyPropertiesWithWasteRooms_ReturnOK() {
+        String username = "Anton";
+
+        List<PropertyDTO> mockList = List.of(new PropertyDTO());
+        Mockito.when(propertyService.getPropertiesWithRoomsByUser(username))
+                .thenReturn(mockList);
+
+        ResponseEntity<List<PropertyDTO>> response =
+                controller.getMyPropertiesWithWasteRooms(username);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(mockList, response.getBody());
+    }
+
+    @Test
+    void getMyPropertiesWithWasteRooms_MissingName_Return403() {
+        ResponseEntity<List<PropertyDTO>> response =
+                controller.getMyPropertiesWithWasteRooms(null);
+
+        assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
+    }
+
+    @Test
+    void getUsersPropertiesWithWasteRooms_ReturnOK() throws Exception {
+        SecurityContext context = SecurityContextHolder.createEmptyContext();
+        context.setAuthentication(
+                new UsernamePasswordAuthenticationToken(
+                        "admin",
+                        "password",
+                        List.of(new SimpleGrantedAuthority("ROLE_ADMIN"))
+                )
+        );
+        SecurityContextHolder.setContext(context);
+
+        List<PropertyDTO> mockList = List.of(new PropertyDTO());
+        Mockito.when(propertyService.getPropertiesWithRoomsByUser("Anton"))
+                .thenReturn(mockList);
+
+        ResponseEntity<List<PropertyDTO>> response =
+                controller.getUsersPropertiesWithWasteRooms("Anton");
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(mockList, response.getBody());
+
+    }
+
+    @Test
+    void getUsersPropertiesWithWasteRooms_NotAdmin_Return403() throws Exception {
+        List<PropertyDTO> mockList = List.of(new PropertyDTO());
+
+        mockMvc.perform(
+                        get("/api/properties/admin/user-properties-wasterooms")
+                                .header("X-Username", "anton")
+                )
+                .andExpect(status().isForbidden());
     }
 }

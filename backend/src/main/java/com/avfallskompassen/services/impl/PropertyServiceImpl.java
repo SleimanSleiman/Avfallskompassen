@@ -102,7 +102,12 @@ public class PropertyServiceImpl implements PropertyService {
         return propertyRepository.findByCreatedByUsername(username);
     }
 
-    public List<PropertyDTO> getPropertiesWithRoomsByUser(String username) {
+    /**
+     *
+     * @param username
+     * @return
+     */
+    public List<PropertyDTO> getPropertiesWithRoomsByUser(String username) { // TODO ------------------------ WRITE TESTS
         List<Property> properties = propertyRepository.findAllByUserWithRooms(username);
 
         return properties.stream()
@@ -110,15 +115,11 @@ public class PropertyServiceImpl implements PropertyService {
                 .toList();
     }
 
-    public List<PropertyDTO> getPropertiesWithWasteRooms() {
-        List<Property> properties = propertyRepository.getAllPropertiesWithWasteRooms();
-
-        return properties.stream().
-                map(PropertyDTO::new)
-                .toList();
-    }
-
-    public List<UserStatsDTO> getUsersInfoCount() {
+    /**
+     *
+     * @return
+     */
+    public List<UserStatsDTO> getUsersInfoCount() { // TODO --------------------------------- WRITE TESTS
         List<Object[]> rawRows = propertyRepository.getUserPropertyAndWasteRoomStats();
         List<UserStatsDTO> userStatsDTO = new LinkedList<>();
 

@@ -12,6 +12,7 @@ import com.avfallskompassen.services.PropertyService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import com.avfallskompassen.exception.ExceptionResponseUtil;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -91,18 +92,14 @@ public class PropertyController {
         return ResponseEntity.ok(propertyDTOs);
     }
 
-    @GetMapping("/wasterooms")
-    public ResponseEntity<List<PropertyDTO>> getAllPropertiesWithWasteRooms() {
-        List<PropertyDTO> dto = propertyService.getPropertiesWithWasteRooms();
-        System.out.println("Denna metoden kallades");
-
-        return ResponseEntity.ok(dto);
-    }
-
-    @GetMapping("/user/property/wasteroom/count")
-    public ResponseEntity<List<UserStatsDTO>> getUserInfoCount() {
+    /**
+     * Collects basic info about all users in the system, such as username, number of properties and waste rooms, etc.
+     * @return A list of DTO:s containing information about users
+     */
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/user/stats")
+    public ResponseEntity<List<UserStatsDTO>> getUserStats() {
         List<UserStatsDTO> dto = propertyService.getUsersInfoCount();
-        System.out.println("Denna metoden kallades");
 
         return ResponseEntity.ok(dto);
     }
@@ -158,7 +155,8 @@ public class PropertyController {
     /**
      * Get all properties and their waste rooms created by a specific user - Returns DTOs to avoid proxy issues.
      */
-    @GetMapping("/admin/user-properties-wasterooms") // --> TODO Add admin control
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/admin/user-properties-wasterooms")
     public ResponseEntity<List<PropertyDTO>> getUsersPropertiesWithWasteRooms(
             @RequestHeader(value = "X-Username", required = false) String username) {
 

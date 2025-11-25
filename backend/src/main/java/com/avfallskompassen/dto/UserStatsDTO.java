@@ -2,6 +2,10 @@ package com.avfallskompassen.dto;
 
 import java.time.LocalDateTime;
 
+/**
+ * DTO containing data relevant to admin about users
+ * @author Anton Persson
+ */
 public class UserStatsDTO {
     private Long userId;
     private String username;
@@ -16,6 +20,10 @@ public class UserStatsDTO {
         this.createdAt = createdAt;
         this.propertiesCount = propertiesCount;
         this.wasteRoomsCount = wasteRoomsCount;
+    }
+
+    public UserStatsDTO() {
+
     }
 
     public Long getUserId() {
