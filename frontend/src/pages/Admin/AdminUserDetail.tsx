@@ -122,6 +122,7 @@ export default function AdminUserDetail({ user, onBack }: AdminUserDetailProps) 
                     adminUsername: v.adminUsername,
                     createdAt: v.createdAt || new Date().toISOString(),
                     versionName: v.versionName,
+                    wasteRoomId: v.wasteRoomId,
                   }));
 
                   const planId = prop.id * 1000 + plans.length + 1;
@@ -294,6 +295,7 @@ export default function AdminUserDetail({ user, onBack }: AdminUserDetailProps) 
                   adminUsername: v.adminUsername,
                   createdAt: v.createdAt || new Date().toISOString(),
                   versionName: v.versionName,
+                  wasteRoomId: v.wasteRoomId,
                 }));
 
                 const newPlanId = prop.id * 1000 + plans.length + 1;
