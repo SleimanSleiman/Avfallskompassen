@@ -4,6 +4,8 @@ import type { AdminUser } from '../AdminPage';
 import type { AdminProperty, RoomPlan } from './AdminUserDetail';
 import AdminSaveVersionModal from './AdminSaveVersionModal';
 import { currentUser } from '../../lib/Auth';
+import { createAdminVersion } from '../../lib/WasteRoomRequest';
+import type { DoorRequest, ContainerPositionRequest } from '../../lib/WasteRoomRequest';
 
 type AdminPlanningEditorProps = {
   plan: RoomPlan;
@@ -62,10 +64,8 @@ export default function AdminPlanningEditor({
   const handleConfirmSave = async () => {
     setSaving(true);
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
       const savedData = localStorage.getItem('trashRoomData');
-      const planData = savedData ? JSON.parse(savedData) : {};
+      const currentPlanData = savedData ? JSON.parse(savedData) : {};
       
       const selectedVersionNumber = plan.selectedVersion ?? plan.activeVersionNumber ?? plan.versions[plan.versions.length - 1].versionNumber;
       const selectedVersion = plan.versions.find((v) => v.versionNumber === selectedVersionNumber) || plan.versions[plan.versions.length - 1];
@@ -73,13 +73,74 @@ export default function AdminPlanningEditor({
       const admin = currentUser();
       const adminUsername = admin?.username || 'admin';
 
+      // Prepare doors in the correct format for the backend
+      const rawDoors = currentPlanData.doors || selectedVersion.doors || [];
+      console.log('Raw doors before mapping:', rawDoors);
+      
+      const doors: DoorRequest[] = rawDoors.map((d: any) => ({
+        x: d.x ?? 0,
+        y: d.y ?? 0,
+        width: d.width ?? 1.2,
+        wall: d.wall ?? 'bottom',
+        angle: d.rotation ?? d.angle ?? 0,
+        swingDirection: d.swingDirection ?? 'inward'
+      }));
+      
+      console.log('Mapped doors for backend:', doors);
+
+      // Prepare containers in the correct format for the backend
+      const rawContainers = currentPlanData.containers || selectedVersion.containers || [];
+      console.log('Raw containers before mapping:', rawContainers);
+      
+      const containers: ContainerPositionRequest[] = rawContainers.map((c: any) => {
+        // Try multiple ways to get the container type ID
+        const containerId = c.container?.id ?? c.containerDTO?.id ?? c.containerType?.id ?? c.id;
+        console.log('Container mapping:', { 
+          original: c, 
+          extractedId: containerId,
+          x: c.x,
+          y: c.y,
+          angle: c.rotation ?? c.angle
+        });
+        
+        return {
+          id: containerId,
+          x: c.x ?? 0,
+          y: c.y ?? 0,
+          angle: c.rotation ?? c.angle ?? 0
+        };
+      });
+      
+      console.log('Mapped containers for backend:', containers);
+
+      const requestPayload = {
+        length: currentPlanData.length || selectedVersion.roomWidth,
+        width: currentPlanData.width || selectedVersion.roomHeight,
+        x: currentPlanData.x ?? 150,
+        y: currentPlanData.y ?? 150,
+        doors,
+        containers,
+        propertyId: property.id,
+        versionName: versionName || undefined,
+        adminUsername,
+        versionToReplace: versionToReplace || undefined
+      };
+      
+      console.log('Full request payload being sent to backend:', requestPayload);
+      console.log('Property ID:', property.id, 'Room Name:', plan.name);
+
+      // Call the backend API to save the new version
+      const savedVersion = await createAdminVersion(property.id, plan.name, requestPayload);
+      console.log('Backend response - saved version:', savedVersion);
+
+      // Also call onSave to update local state
       onSave(
         {
-          roomWidth: planData.length || selectedVersion.roomWidth,
-          roomHeight: planData.width || selectedVersion.roomHeight,
+          roomWidth: currentPlanData.length || selectedVersion.roomWidth,
+          roomHeight: currentPlanData.width || selectedVersion.roomHeight,
           versionName: versionName || undefined,
-          doors: planData.doors || selectedVersion.doors,
-          containers: planData.containers || selectedVersion.containers,
+          doors: selectedVersion.doors,
+          containers: selectedVersion.containers,
           versionToReplace: versionToReplace || undefined,
         },
         adminUsername
@@ -89,8 +150,12 @@ export default function AdminPlanningEditor({
       setVersionName('');
       setVersionToReplace(null);
       setHasUnsavedChanges(false);
+      
+      // Show success message
+      alert('Version sparad!');
     } catch (error) {
       console.error('Error saving plan:', error);
+      alert('Fel vid sparande av version. Se konsolen för detaljer.');
     } finally {
       setSaving(false);
     }

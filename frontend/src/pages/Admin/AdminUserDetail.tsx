@@ -73,36 +73,96 @@ export default function AdminUserDetail({ user, onBack }: AdminUserDetailProps) 
           createdAt: p.createdAt || new Date().toISOString(),
         }));
 
-        // For each property, fetch waste rooms and build simple RoomPlan objects
+        // For each property, fetch waste rooms and build RoomPlan objects with all versions
         const plans: RoomPlan[] = [];
         await Promise.all(
           mappedProps.map(async (prop) => {
             try {
               const rooms = await get<any[]>(`/api/properties/${prop.id}/wasterooms`);
-              (rooms || []).forEach((r: any, idx: number) => {
-                const planId = prop.id * 1000 + (idx + 1);
-                const plan: RoomPlan = {
-                  id: planId,
-                  propertyId: prop.id,
-                  userId: user.id,
-                  name: r.name || `Miljörum ${idx + 1}`,
-                  versions: [
-                    {
-                      versionNumber: 1,
-                      roomWidth: r.length || r.roomWidth || 0,
-                      roomHeight: r.width || r.roomHeight || 0,
-                      doors: r.doors || [],
-                      containers: r.containers || [],
-                      createdBy: 'user',
-                      createdAt: r.createdAt || new Date().toISOString(),
-                    },
-                  ],
-                  createdAt: prop.createdAt,
-                  updatedAt: new Date().toISOString(),
-                  activeVersionNumber: 1,
-                };
-                plans.push(plan);
+              
+              // Group rooms by name to get all versions
+              const roomsByName = new Map<string, any[]>();
+              (rooms || []).forEach((r: any) => {
+                const roomName = r.name || 'Miljörum';
+                if (!roomsByName.has(roomName)) {
+                  roomsByName.set(roomName, []);
+                }
+                roomsByName.get(roomName)!.push(r);
               });
+
+              // For each unique room name, fetch all versions and create a RoomPlan
+              for (const [roomName, roomVersions] of roomsByName.entries()) {
+                try {
+                  // Fetch all versions for this room
+                  const allVersions = await get<any[]>(
+                    `/api/admin/properties/${prop.id}/wasterooms/${encodeURIComponent(roomName)}/versions`
+                  );
+
+                  console.log(`Fetched versions for room "${roomName}":`, allVersions);
+
+                  // Check if we got valid data
+                  if (!allVersions || allVersions.length === 0) {
+                    console.warn(`No versions returned for room "${roomName}", using fallback`);
+                    throw new Error('No versions found');
+                  }
+
+                  // Find the active version
+                  const activeVersion = allVersions.find((v: any) => v.isActive) || allVersions[0];
+                  const activeVersionNumber = activeVersion?.versionNumber || 1;
+
+                  // Map all versions to PlanVersion format
+                  const versions: PlanVersion[] = allVersions.map((v: any) => ({
+                    versionNumber: v.versionNumber || 1,
+                    roomWidth: v.length || v.roomWidth || 0,
+                    roomHeight: v.width || v.roomHeight || 0,
+                    doors: v.doors || [],
+                    containers: v.containers || [],
+                    createdBy: (v.createdBy || 'user') as 'user' | 'admin',
+                    adminUsername: v.adminUsername,
+                    createdAt: v.createdAt || new Date().toISOString(),
+                    versionName: v.versionName,
+                  }));
+
+                  const planId = prop.id * 1000 + plans.length + 1;
+                  const plan: RoomPlan = {
+                    id: planId,
+                    propertyId: prop.id,
+                    userId: user.id,
+                    name: roomName,
+                    versions: versions.sort((a, b) => a.versionNumber - b.versionNumber),
+                    createdAt: prop.createdAt,
+                    updatedAt: activeVersion?.updatedAt || new Date().toISOString(),
+                    activeVersionNumber: activeVersionNumber,
+                  };
+                  plans.push(plan);
+                } catch (versionError) {
+                  console.warn(`Failed to fetch versions for room "${roomName}":`, versionError);
+                  // Fallback: create a plan with single version from the first room data
+                  const firstRoom = roomVersions[0];
+                  const planId = prop.id * 1000 + plans.length + 1;
+                  const plan: RoomPlan = {
+                    id: planId,
+                    propertyId: prop.id,
+                    userId: user.id,
+                    name: roomName,
+                    versions: [
+                      {
+                        versionNumber: firstRoom.versionNumber || 1,
+                        roomWidth: firstRoom.length || firstRoom.roomWidth || 0,
+                        roomHeight: firstRoom.width || firstRoom.roomHeight || 0,
+                        doors: firstRoom.doors || [],
+                        containers: firstRoom.containers || [],
+                        createdBy: (firstRoom.createdBy || 'user') as 'user' | 'admin',
+                        createdAt: firstRoom.createdAt || new Date().toISOString(),
+                      },
+                    ],
+                    createdAt: prop.createdAt,
+                    updatedAt: new Date().toISOString(),
+                    activeVersionNumber: firstRoom.versionNumber || 1,
+                  };
+                  plans.push(plan);
+                }
+              }
             } catch (e) {
               console.warn('Failed to fetch wasterooms for property', prop.id, e);
             }
@@ -178,56 +238,92 @@ export default function AdminUserDetail({ user, onBack }: AdminUserDetailProps) 
     );
   };
 
-  const handleSavePlanVersion = (planId: number, planData: any, adminUsername: string) => {
-    // In real implementation, this would save to backend
-    setRoomPlans((prev) =>
-      prev.map((plan) => {
-        if (plan.id !== planId) return plan;
-
-        const currentVersions = plan.versions || [];
-        const latestVersion = currentVersions[currentVersions.length - 1];
-        const newVersionNumber = latestVersion ? latestVersion.versionNumber + 1 : 1;
-
-        // Create new version
-        const newVersion: PlanVersion = {
-          versionNumber: newVersionNumber,
-          roomWidth: planData.roomWidth || latestVersion?.roomWidth || plan.versions[0].roomWidth,
-          roomHeight: planData.roomHeight || latestVersion?.roomHeight || plan.versions[0].roomHeight,
-          doors: planData.doors || latestVersion?.doors || [],
-          containers: planData.containers || latestVersion?.containers || [],
-          createdBy: 'admin',
-          adminUsername: adminUsername,
-          createdAt: new Date().toISOString(),
-          versionName: planData.versionName,
-        };
-
-        let updatedVersions: PlanVersion[];
-        
-        if (currentVersions.length >= 6 && planData.versionToReplace) {
-          // Replace the selected version
-          updatedVersions = currentVersions
-            .filter(v => v.versionNumber !== planData.versionToReplace)
-            .concat(newVersion)
-            .sort((a, b) => a.versionNumber - b.versionNumber); // Keep sorted by version number
-        } else if (currentVersions.length >= 6) {
-          // Fallback: remove oldest if no version specified (shouldn't happen with new UI)
-          updatedVersions = [...currentVersions, newVersion].slice(-6);
-        } else {
-          // Just add the new version
-          updatedVersions = [...currentVersions, newVersion];
-        }
-
-        const updatedPlan = {
-          ...plan,
-          versions: updatedVersions,
-          activeVersionNumber: newVersionNumber,
-          updatedAt: new Date().toISOString(),
-        };
-
-        return updatedPlan;
-      })
-    );
+  const handleSavePlanVersion = async (planId: number, planData: any, adminUsername: string) => {
+    // After backend save, reload all room plans to get the latest versions
     setSelectedPlan(null);
+    setLoading(true);
+    
+    try {
+      // Refetch all properties and room plans to get updated versions
+      const allProps = await get<any[]>('/api/properties');
+      const userProps = allProps.filter((p) => p.createdByUsername === user.username);
+
+      const mappedProps: AdminProperty[] = userProps.map((p) => ({
+        id: Number(p.id),
+        userId: user.id,
+        address: p.address || '',
+        numberOfApartments: p.numberOfApartments || 0,
+        municipalityName: p.municipalityName || p.municipality || '',
+        lockName: (p.lockTypeDto && p.lockTypeDto.name) || p.lockName || '',
+        accessPathLength: p.accessPathLength || 0,
+        createdAt: p.createdAt || new Date().toISOString(),
+      }));
+
+      const plans: RoomPlan[] = [];
+      await Promise.all(
+        mappedProps.map(async (prop) => {
+          try {
+            const rooms = await get<any[]>(`/api/properties/${prop.id}/wasterooms`);
+            
+            const roomsByName = new Map<string, any[]>();
+            (rooms || []).forEach((r: any) => {
+              const roomName = r.name || 'Miljörum';
+              if (!roomsByName.has(roomName)) {
+                roomsByName.set(roomName, []);
+              }
+              roomsByName.get(roomName)!.push(r);
+            });
+
+            for (const [roomName, roomVersions] of roomsByName.entries()) {
+              try {
+                const allVersions = await get<any[]>(
+                  `/api/admin/properties/${prop.id}/wasterooms/${encodeURIComponent(roomName)}/versions`
+                );
+
+                const activeVersion = allVersions.find((v: any) => v.isActive) || allVersions[0];
+                const activeVersionNumber = activeVersion?.versionNumber || 1;
+
+                const versions: PlanVersion[] = allVersions.map((v: any) => ({
+                  versionNumber: v.versionNumber || 1,
+                  roomWidth: v.length || v.roomWidth || 0,
+                  roomHeight: v.width || v.roomHeight || 0,
+                  doors: v.doors || [],
+                  containers: v.containers || [],
+                  createdBy: (v.createdBy || 'user') as 'user' | 'admin',
+                  adminUsername: v.adminUsername,
+                  createdAt: v.createdAt || new Date().toISOString(),
+                  versionName: v.versionName,
+                }));
+
+                const newPlanId = prop.id * 1000 + plans.length + 1;
+                const plan: RoomPlan = {
+                  id: newPlanId,
+                  propertyId: prop.id,
+                  userId: user.id,
+                  name: roomName,
+                  versions: versions.sort((a, b) => a.versionNumber - b.versionNumber),
+                  createdAt: prop.createdAt,
+                  updatedAt: activeVersion?.updatedAt || new Date().toISOString(),
+                  activeVersionNumber: activeVersionNumber,
+                };
+                plans.push(plan);
+              } catch (versionError) {
+                console.warn(`Failed to fetch versions for room ${roomName}:`, versionError);
+              }
+            }
+          } catch (e) {
+            console.warn('Failed to fetch wasterooms for property', prop.id, e);
+          }
+        })
+      );
+
+      setProperties(mappedProps);
+      setRoomPlans(plans);
+    } catch (e) {
+      console.error('Failed to reload data after save:', e);
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (selectedPlan) {
@@ -459,6 +555,12 @@ export default function AdminUserDetail({ user, onBack }: AdminUserDetailProps) 
                         ) : (
                           <div className="space-y-4">
                             {plans.map((plan) => {
+                              // Safety check: ensure plan has versions
+                              if (!plan.versions || plan.versions.length === 0) {
+                                console.warn('Plan has no versions:', plan);
+                                return null;
+                              }
+                              
                               const activeVersion = plan.versions.find((v) => v.versionNumber === plan.activeVersionNumber) || plan.versions[plan.versions.length - 1];
                               const hasMultipleVersions = plan.versions.length > 1;
                               return (
