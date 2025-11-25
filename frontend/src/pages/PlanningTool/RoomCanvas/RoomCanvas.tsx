@@ -80,6 +80,7 @@ type RoomCanvasProps = {
     undo?: () => void;
     redo?: () => void;
     saveRoom?: () => void;
+    isAdminMode?: boolean;
 };
 
 export default function RoomCanvas({
@@ -134,6 +135,7 @@ export default function RoomCanvas({
     undo,
     redo,
     saveRoom,
+    isAdminMode = false,
 }: RoomCanvasProps) {
     const [isDraggingContainer, setIsDraggingContainer] = useState(false);
     const [msg, setMsg] = useState<string | null>(null);
@@ -230,6 +232,7 @@ export default function RoomCanvas({
                         redo={redo}
                         selectedContainerInfo={selectedContainerInfo}
                         setSelectedContainerInfo={setSelectedContainerInfo}
+                        isAdminMode={isAdminMode}
                     />
 
                     {/* Konva Stage */}

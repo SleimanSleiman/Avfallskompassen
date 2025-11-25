@@ -24,7 +24,7 @@ function PlanningToolWrapper({ planData }: { planData: any }) {
     localStorage.setItem('trashRoomData', JSON.stringify(planData));
   }
   
-  return <PlanningTool />;
+  return <PlanningTool isAdminMode={true} />;
 }
 
 export default function AdminPlanningEditor({

@@ -26,8 +26,11 @@ import { useDoors } from './hooks/UseDoors';
 import { useContainers } from './hooks/UseContainers';
 import { useServiceTypes } from './hooks/UseServiceTypes';
 
+type PlanningToolProps = {
+    isAdminMode?: boolean;
+};
 
-export default function PlanningTool() {
+export default function PlanningTool({ isAdminMode = false }: PlanningToolProps) {
 
     /* ──────────────── Room state & logic ──────────────── */
     const {
@@ -281,6 +284,7 @@ export default function PlanningTool() {
                         undo={undo}
                         redo={redo}
                         saveRoom={handleSaveRoom}
+                        isAdminMode={isAdminMode}
                     />
 
                     {/* ActionPanel for selected container or door */}
