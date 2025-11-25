@@ -35,6 +35,10 @@ public class WasteRoomRequest {
     @NotNull
     private Long propertyId;
 
+    private String versionName;
+    private String adminUsername;
+    private Integer versionToReplace;
+
     public WasteRoomRequest(double length, double width, double x,
                             double y, List<DoorRequest> doors,
                             List<ContainerPositionRequest> containers,
@@ -47,6 +51,9 @@ public class WasteRoomRequest {
         this.containers = containers;
         this.propertyId = propertyId;
         this.name = name;
+    }
+
+    public WasteRoomRequest() {
     }
 
     public double getLength() {
@@ -111,5 +118,29 @@ public class WasteRoomRequest {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getVersionName() {
+        return versionName;
+    }
+
+    public void setVersionName(String versionName) {
+        this.versionName = versionName;
+    }
+
+    public String getAdminUsername() {
+        return adminUsername;
+    }
+
+    public void setAdminUsername(String adminUsername) {
+        this.adminUsername = adminUsername;
+    }
+
+    public Integer getVersionToReplace() {
+        return versionToReplace;
+    }
+
+    public void setVersionToReplace(Integer versionToReplace) {
+        this.versionToReplace = versionToReplace;
     }
 }

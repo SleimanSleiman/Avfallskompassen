@@ -47,6 +47,21 @@ public class WasteRoom {
     @JoinColumn(name = "property_id", nullable = false)
     private Property property;
 
+    @Column(name = "version_number", nullable = false)
+    private int versionNumber = 1;
+
+    @Column(name = "created_by", nullable = false, length = 50)
+    private String createdBy = "user";
+
+    @Column(name = "admin_username")
+    private String adminUsername;
+
+    @Column(name = "version_name")
+    private String versionName;
+
+    @Column(name = "is_active")
+    private Boolean isActive = true;
+
     @PrePersist
     public void onCreate() {
         createdAt = LocalDateTime.now();
@@ -89,4 +104,19 @@ public class WasteRoom {
 
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
+
+    public int getVersionNumber() { return versionNumber; }
+    public void setVersionNumber(int versionNumber) { this.versionNumber = versionNumber; }
+
+    public String getCreatedBy() { return createdBy; }
+    public void setCreatedBy(String createdBy) { this.createdBy = createdBy; }
+
+    public String getAdminUsername() { return adminUsername; }
+    public void setAdminUsername(String adminUsername) { this.adminUsername = adminUsername; }
+
+    public String getVersionName() { return versionName; }
+    public void setVersionName(String versionName) { this.versionName = versionName; }
+
+    public Boolean getIsActive() { return isActive; }
+    public void setIsActive(Boolean isActive) { this.isActive = isActive; }
 }
