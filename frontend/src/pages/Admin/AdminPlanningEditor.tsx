@@ -1,9 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import PlanningTool from '../PlanningTool/PlanningTool';
 import type { AdminUser } from '../AdminPage';
 import type { AdminProperty, RoomPlan } from './AdminUserDetail';
 import AdminSaveVersionModal from './AdminSaveVersionModal';
-import { currentUser } from '../../lib/auth';
+import { currentUser } from '../../lib/Auth';
 
 type AdminPlanningEditorProps = {
   plan: RoomPlan;
@@ -12,6 +12,18 @@ type AdminPlanningEditorProps = {
   onSave: (planData: any, adminUsername: string) => void;
   onBack: () => void;
 };
+
+// Wrapper component that ensures localStorage is set before PlanningTool mounts
+function PlanningToolWrapper({ planData }: { planData: any }) {
+  // Set localStorage during render, before any child components initialize
+  if (typeof window !== 'undefined') {
+    localStorage.removeItem('trashRoomData');
+    localStorage.removeItem('enviormentRoomData');
+    localStorage.setItem('trashRoomData', JSON.stringify(planData));
+  }
+  
+  return <PlanningTool />;
+}
 
 export default function AdminPlanningEditor({
   plan,
@@ -26,11 +38,12 @@ export default function AdminPlanningEditor({
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [versionToReplace, setVersionToReplace] = useState<number | null>(null);
 
-  useEffect(() => {
+  // Prepare the plan data
+  const planData = useMemo(() => {
     const defaultVersionNumber = plan.selectedVersion ?? plan.activeVersionNumber ?? plan.versions[plan.versions.length - 1].versionNumber;
     const selectedVersion = plan.versions.find((v) => v.versionNumber === defaultVersionNumber) || plan.versions[plan.versions.length - 1];
 
-    const planData = {
+    return {
       length: selectedVersion.roomWidth,
       width: selectedVersion.roomHeight,
       property: property,
@@ -40,7 +53,6 @@ export default function AdminPlanningEditor({
       doors: selectedVersion.doors,
       containers: selectedVersion.containers,
     };
-    localStorage.setItem('trashRoomData', JSON.stringify(planData));
   }, [plan, property, user]);
 
   const handleSaveClick = () => {
@@ -152,7 +164,10 @@ export default function AdminPlanningEditor({
       {/* Planning Tool */}
       <div className="mx-auto max-w-7xl px-4 py-6">
         <div className="rounded-2xl border bg-white p-6 shadow-soft">
-          <PlanningTool />
+          <PlanningToolWrapper 
+            key={`${plan.id}-${plan.selectedVersion ?? plan.activeVersionNumber}`}
+            planData={planData}
+          />
         </div>
       </div>
 
