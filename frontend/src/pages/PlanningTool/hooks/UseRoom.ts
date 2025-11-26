@@ -32,7 +32,6 @@ export function useRoom() {
     try {
       const parsed = JSON.parse(saved);
 
-
       const widthMeters = parsed?.width ?? defaultWidthMeters;
       const heightMeters = parsed?.height ?? parsed?.length ?? defaultHeightMeters;
 

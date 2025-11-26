@@ -136,7 +136,7 @@ public class ContainerDTO {
 
         return new ContainerDTO(
                 plan.getId(),
-                type != null ? type.getName() : null,
+                type != null ? plan.getMunicipalityService().getServiceType().getName() : null,
                 type != null ? type.getSize() : 0,
                 type != null ? type.getWidth() : 0,
                 type != null ? type.getDepth() : 0,
