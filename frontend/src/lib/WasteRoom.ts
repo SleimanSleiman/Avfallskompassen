@@ -16,6 +16,18 @@ export type WasteRoom = {
     property: Property;
 }
 
+export type SimpleWasteRoom = {
+    propertyId: number;
+    length: number;
+    width: number;
+    x: number;
+    y: number;
+    containers: ContainerPosition[];
+    doors: Door[];
+    wasteRoomId: number;
+    name: string;
+}
+
 export type Door = {
     id : number;
     width : number;
