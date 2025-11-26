@@ -4,6 +4,7 @@
  */
 import SummaryStat from "../../components/SummaryStat";
 import '../../css/wasteComparison.css'
+import InfoTooltip from "../../../../components/InfoTooltip"
 
 type Co2SummaryProps = {
     co2CardValue: string;
@@ -25,6 +26,11 @@ export default function Co2Summary({
     return (
         <SummaryStat
             title="Årlig CO₂-besparing"
+            badge={
+                <InfoTooltip
+                    text="CO₂-besparingen beräknas baserat på mängden återvunnet material och dess miljöpåverkan jämfört med att inte återvinna. Ju fler kärl och bättre sortering, desto större besparing."
+                />
+            }
             value={co2CardValue}
             tone={co2Tone}
             size="compact"
