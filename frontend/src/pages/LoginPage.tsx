@@ -9,6 +9,7 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [rememberMe, setRememberMe] = useState(false); 
   const navigate = useNavigate();
 
   async function onSubmit(e: React.FormEvent) {
@@ -16,9 +17,9 @@ export default function LoginPage() {
     setMsg(null);
     setError(null);
     setLoading(true);
-    
+
     try {
-      const res = await login(username, password);
+      const res = await login(username, password, rememberMe); 
       if (res.success) {
         setMsg(res.message || 'Inloggning lyckades');
         // Navigate to dashboard after successful login
@@ -104,6 +105,8 @@ export default function LoginPage() {
                     <input 
                       type="checkbox" 
                       className="rounded text-nsr-teal focus:ring-nsr-teal" 
+                      checked={rememberMe} 
+                      onChange={(e) => setRememberMe(e.target.checked)} 
                     />
                     Kom ihåg mig
                   </label>

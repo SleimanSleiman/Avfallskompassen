@@ -5,6 +5,7 @@ interface InfoTooltipProps {
     text: string;
     className?: string;
     panelWidthClass?: string;
+    style?: React.CSSProperties; 
 }
 
 /**
