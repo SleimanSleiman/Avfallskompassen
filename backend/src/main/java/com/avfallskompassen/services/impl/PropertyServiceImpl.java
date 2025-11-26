@@ -107,7 +107,7 @@ public class PropertyServiceImpl implements PropertyService {
      * @param username
      * @return
      */
-    public List<PropertyDTO> getPropertiesWithRoomsByUser(String username) { // TODO ------------------------ WRITE TESTS
+    public List<PropertyDTO> getPropertiesWithRoomsByUser(String username) {
         List<Property> properties = propertyRepository.findAllByUserWithRooms(username);
 
         return properties.stream()
@@ -119,7 +119,7 @@ public class PropertyServiceImpl implements PropertyService {
      *
      * @return
      */
-    public List<UserStatsDTO> getUsersInfoCount() { // TODO --------------------------------- WRITE TESTS
+    public List<UserStatsDTO> getUsersInfoCount() {
         List<Object[]> rawRows = propertyRepository.getUserPropertyAndWasteRoomStats();
         List<UserStatsDTO> userStatsDTO = new LinkedList<>();
 
