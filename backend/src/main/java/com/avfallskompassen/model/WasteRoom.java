@@ -1,6 +1,8 @@
 package com.avfallskompassen.model;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -37,9 +39,11 @@ public class WasteRoom {
     @OneToMany(mappedBy = "wasteRoom", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Door> doors;
 
+    @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
+    @UpdateTimestamp
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
@@ -50,15 +54,9 @@ public class WasteRoom {
     @Column(name = "thumbnail")
     private String thumbnailUrl;
 
-    @PrePersist
-    public void onCreate() {
-        createdAt = LocalDateTime.now();
-    }
 
-    @PreUpdate
-    public void onUpdate() {
-        updatedAt = LocalDateTime.now();
-    }
+    //public void onCreate() {createdAt = LocalDateTime.now();}
+    //public void onUpdate() {updatedAt = LocalDateTime.now();}
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }

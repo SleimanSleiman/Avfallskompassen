@@ -11,9 +11,10 @@ import com.avfallskompassen.services.ContainerService;
 import com.avfallskompassen.services.WasteRoomService;
 import org.springframework.stereotype.Service;
 
-import javax.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -67,6 +68,7 @@ public class WasteRoomServiceImpl implements WasteRoomService {
 
         WasteRoom savedRoom = wasteRoomRepository.save(wasteRoom);
         saveThumbnail(request.getThumbnailBase64(), savedRoom.getId(), savedRoom);
+        savedRoom.setUpdatedAt(LocalDateTime.now());
         savedRoom = wasteRoomRepository.save(savedRoom);
 
         return WasteRoomDTO.fromEntity(savedRoom);
@@ -137,9 +139,9 @@ public class WasteRoomServiceImpl implements WasteRoomService {
 
         WasteRoom updated = wasteRoomRepository.save(wasteRoom);
 
-        //Save thumbnail
-        saveThumbnail(request.getThumbnailBase64(), wasteRoomId, updated);
 
+        saveThumbnail(request.getThumbnailBase64(), wasteRoomId, updated);
+        updated.setUpdatedAt(LocalDateTime.now());
         updated = wasteRoomRepository.save(updated);
         return WasteRoomDTO.fromEntity(updated);
     }

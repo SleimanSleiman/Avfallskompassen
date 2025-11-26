@@ -3,19 +3,19 @@ import type { Property } from './Property.ts';
 import type { ContainerDTO } from './Container.ts'
 
 export type WasteRoom = {
-    wasteRoomId? : number;
-    name? : string;
-    length : number;
-    width : number;
-    x : number;
-    y : number;
+    wasteRoomId: number;
+    propertyId: number;
+    name?: string;
+    length: number;
+    width: number;
+    x: number;
+    y: number;
     containers?: ContainerPosition[];
     doors?: Door[];
     createdAt: string;
     updatedAt?: string;
-    property: Property;
     thumbnailUrl: string;
-}
+};
 
 export type Door = {
     id : number;

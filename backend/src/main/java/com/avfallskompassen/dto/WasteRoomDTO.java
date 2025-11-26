@@ -2,6 +2,7 @@ package com.avfallskompassen.dto;
 
 import com.avfallskompassen.model.WasteRoom;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -21,6 +22,8 @@ public class WasteRoomDTO {
     private Long wasteRoomId;
     private String name;
     private String thumbnailUrl;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 
     // Constructors
     public WasteRoomDTO() {}
@@ -94,8 +97,22 @@ public class WasteRoomDTO {
     public void setName(String name) { this.name = name; }
 
     public String getThumbnailUrl() {return thumbnailUrl;}
-
     public void setThumbnailUrl(String thumbnailUrl) {this.thumbnailUrl = thumbnailUrl;}
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
 
     /**
      * Method for converting an entity object to a DTO object
@@ -122,7 +139,10 @@ public class WasteRoomDTO {
                 entity.getId(),
                 entity.getName()
         );
+        dto.setCreatedAt(entity.getCreatedAt());
         dto.setThumbnailUrl(entity.getThumbnailUrl());
+        dto.setUpdatedAt(entity.getUpdatedAt());
+
         return dto;
     }
 }
