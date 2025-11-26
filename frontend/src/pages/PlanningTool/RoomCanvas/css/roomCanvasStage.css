@@ -1,0 +1,44 @@
+/* Stage wrapper */
+.stage-wrapper {
+    @apply relative w-full overflow-hidden rounded-2xl;
+}
+
+.stage-wrapper-active {
+    @apply ring-4 ring-blue-300 ring-offset-2;
+}
+
+/* Inner content wrapper for messages */
+.stage-content-wrapper {
+    @apply relative w-full overflow-x-auto rounded-2xl text-lg;
+}
+
+/* Stage with grid background */
+.page-grid-bg {
+    @apply rounded-2xl;
+    border: 0.5px solid #d6c8b8;
+    background-color: #e6e4e1;
+    background-image:
+        linear-gradient(#d6c8b8 1px, transparent 1px),
+        linear-gradient(90deg, #d6c8b8 1px, transparent 1px);
+}
+
+.page-grid-bg:focus {
+    @apply outline-none;
+}
+
+/* Container + toolbar wrapper */
+.container-panel-wrapper {
+    @apply flex flex-col gap-4 w-full relative;
+}
+
+.toolbar-wrapper {
+    @apply relative w-full;
+}
+
+/* Messages */
+.message-success {
+    @apply text-green-600;
+}
+.message-error {
+    @apply text-red-600;
+}

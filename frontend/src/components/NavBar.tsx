@@ -1,5 +1,5 @@
 import { Link, NavLink } from 'react-router-dom';
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { currentUser, logout } from '../lib/Auth';
 
 export default function NavBar() {
@@ -8,17 +8,13 @@ export default function NavBar() {
   const isAdmin = String(user?.role || '').toUpperCase().includes('ADMIN');
 
   useEffect(() => {
-    // Update user state when component mounts
     setUser(currentUser());
 
-    // Listen for storage changes (e.g., when user logs in/out in another tab)
     const handleStorageChange = () => {
       setUser(currentUser());
     };
 
     window.addEventListener('storage', handleStorageChange);
-    
-    // Custom event for same-tab login/logout
     window.addEventListener('auth-change', handleStorageChange);
 
     return () => {
@@ -53,7 +49,7 @@ export default function NavBar() {
 
             <button className="md:hidden text-white" onClick={() => setOpen(v => !v)} aria-label="Toggle navigation">
               <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" stroke="currentColor">
-                <path strokeWidth="2" strokeLinecap="round" d="M4 6h16M4 12h16M4 18h16"/>
+                <path strokeWidth="2" strokeLinecap="round" d="M4 6h16M4 12h16M4 18h16" />
               </svg>
             </button>
 
@@ -74,7 +70,7 @@ export default function NavBar() {
               ) : (
                 <>
                   <NavLink to="/dashboard" className={({ isActive }) => `nav-link hover:text-white transition-colors ${isActive ? 'nav-link-active' : ''}`}>Dashboard</NavLink>
-                  <NavLink to="/statistics" className={({ isActive}) => `nav-link hover:text-white transition-colors ${isActive ? 'nav-link-active' : ''}`}>Statistik</NavLink>
+                  <NavLink to="/statistics" className={({ isActive }) => `nav-link hover:text-white transition-colors ${isActive ? 'nav-link-active' : ''}`}>Statistik</NavLink>
                   <NavLink to="/properties" className={({ isActive }) => `nav-link hover:text-white transition-colors ${isActive ? 'nav-link-active' : ''}`}>Mina fastigheter</NavLink>
                   <NavLink to="/planningTool" className={({ isActive }) => `nav-link hover:text-white transition-colors ${isActive ? 'nav-link-active' : ''}`}>Planeringsverktyg</NavLink>
                   <NavLink to="/reports" className={({ isActive }) => `nav-link hover:text-white transition-colors ${isActive ? 'nav-link-active' : ''}`}>Rapporter</NavLink>

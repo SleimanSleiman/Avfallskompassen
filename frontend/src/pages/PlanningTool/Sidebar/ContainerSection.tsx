@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import type { ContainerDTO } from "../../../lib/Container";
 import { DRAG_DATA_FORMAT } from "../Constants";
 import InfoTooltip from "../components/InfoTooltip";
+import LoadingBar from "../../../components/LoadingBar";
 
 /* ─────────────── Container Props ─────────────── */
 type ContainerSectionProps = {
@@ -102,9 +103,12 @@ export default function ContainerSection({
                                 {isLoadingContainers && selectedType === type.name && (
                                     <div
                                         role="status"
-                                        className="absolute inset-0 flex items-center justify-center bg-white/70 rounded z-10"
+                                        aria-live="polite"
+                                        className="absolute inset-0 flex items-center justify-center bg-white/80 rounded z-10"
                                     >
-                                        <div className="animate-spin rounded-full h-8 w-8 border-4 border-gray-400 border-t-transparent" />
+                                        <div className="w-full max-w-[220px]">
+                                            <LoadingBar message="Laddar kärl..." />
+                                        </div>
                                     </div>
                                 )}
 
