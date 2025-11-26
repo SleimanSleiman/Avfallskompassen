@@ -104,7 +104,8 @@ describe("CostSection", () => {
         renderCostSection();
 
         expect(screen.getByText("Kostnader och jämförelse")).toBeInTheDocument();
-        expect(screen.getByTestId("mock-tooltip")).toHaveTextContent(
+        const tooltips = screen.getAllByTestId("mock-tooltip");
+        expect(tooltips[0]).toHaveTextContent(
             "Se hur ditt miljörum står sig mot liknande fastigheter"
         );
     });

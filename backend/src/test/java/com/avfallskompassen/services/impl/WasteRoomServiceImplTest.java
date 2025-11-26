@@ -74,7 +74,7 @@ class WasteRoomServiceImplTest {
         assertEquals(List.of(), result.getContainers());
         assertEquals(List.of(), result.getDoors());
 
-        verify(wasteRoomRepository, times(1)).save(any(WasteRoom.class));
+        verify(wasteRoomRepository, times(2)).save(any(WasteRoom.class));
     }
 
     @Test
@@ -107,7 +107,7 @@ class WasteRoomServiceImplTest {
         assertNull(result.getContainers());
         assertNull(result.getDoors());
 
-        verify(wasteRoomRepository, times(1)).save(any(WasteRoom.class));
+        verify(wasteRoomRepository, times(2)).save(any(WasteRoom.class));
     }
 
     @Test
@@ -257,7 +257,7 @@ class WasteRoomServiceImplTest {
         assertEquals(1.0, result.getX());
         assertEquals(2.0, result.getY());
 
-        verify(wasteRoomRepository, times(1)).save(any(WasteRoom.class));
+        verify(wasteRoomRepository, times(2)).save(any(WasteRoom.class));
     }
 
     @Test
@@ -307,7 +307,7 @@ class WasteRoomServiceImplTest {
         assertEquals(1, result.getContainers().size());
         assertEquals(0, result.getDoors().size());
 
-        verify(wasteRoomRepository, times(1)).save(any(WasteRoom.class));
+        verify(wasteRoomRepository, times(2)).save(any(WasteRoom.class));
     }
 
     @Test

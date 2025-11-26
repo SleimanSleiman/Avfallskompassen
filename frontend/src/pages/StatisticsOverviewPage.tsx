@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getPropertiesSimple } from "../lib/Statistics";
+import LoadingBar from "../components/LoadingBar";
 
 interface Property {
   id: number;
@@ -50,7 +51,7 @@ export default function StatisticsOverviewPage() {
     if (loading) {
       return (
         <main className="mx-auto max-w-7xl px-4 py-8">
-          <p className="text-gray-600">Laddar fastigheter...</p>
+          <LoadingBar message="Laddar fastigheter..." />
         </main>
       );
     }

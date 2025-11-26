@@ -10,6 +10,7 @@ import NotificationCenter from './components/NotificationCenter';
 import { currentUser } from './lib/Auth';
 import PlanningTool from './pages/PlanningTool/PlanningTool';
 import AdminPage from './pages/AdminPage';
+import AllWasteroomPage from "./pages/AllWasteroomPage";
 
 function Dashboard() {
   const user = currentUser();
@@ -25,8 +26,22 @@ function Dashboard() {
             Du är inloggad som <span className="font-black text-nsr-teal">{user?.username}</span>
           </p>
           <p className="mt-2 text-lg brodtext text-gray-600">
-            Här kan du hantera dina fastigheter, planera miljörum och optimera kostnader.
+            {isAdmin
+              ? "Här kan du som administratör hantera fastigheter, planera, uppdatera och välja vilka miljörum som ska vara aktiva – samtidigt som du får full kostnadskontroll."
+              : "Här kan du hantera dina fastigheter, planera miljörum och optimera kostnader."}
           </p>
+          {isAdmin && (
+            <a
+              href="/admin"
+              className="mt-6 inline-flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold shadow-soft transition"
+              style={{ backgroundColor: "#e8c222", color: "#111827" }}
+            >
+              Gå till adminpanelen
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+              </svg>
+            </a>
+          )}
         </div>
 
         {/* Quick Actions Grid */}
@@ -164,6 +179,14 @@ export default function App() {
               <StatisticsPage />
             </ProtectedRoute>
           } />
+          <Route
+          path="/allWasteroom/:propertyId"
+          element={
+            <ProtectedRoute>
+              <AllWasteroomPage />
+            </ProtectedRoute>
+          }
+        />
         </Routes>
       </div>
       <Footer />
