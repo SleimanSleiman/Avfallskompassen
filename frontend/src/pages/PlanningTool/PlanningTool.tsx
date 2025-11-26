@@ -223,8 +223,14 @@ export default function PlanningTool() {
     const { saveRoom, isSaving, error } = useSaveRoom();
     const { buildWasteRoomRequest } = useWasteRoomRequestBuilder(isContainerInsideRoom);
 
-    const handleSaveRoom = async () => {
-        const roomRequest = buildWasteRoomRequest(room, doors, containersInRoom, propertyId);
+    const handleSaveRoom = async (thumbnailBase64: string | "null") => {
+        if (!propertyId) {
+            console.error("No propertyId, cannot save room.");
+            return;
+        }
+
+        const roomRequest = buildWasteRoomRequest(room, doors, containersInRoom, propertyId, thumbnailBase64);
+
         const savedRoom = await saveRoom(roomRequest);
         room.id = savedRoom?.wasteRoomId;
     };

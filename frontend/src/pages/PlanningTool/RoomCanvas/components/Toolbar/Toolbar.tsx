@@ -21,7 +21,7 @@ type ToolbarProps = {
     handleSelectDoor: (id: number | null) => void;
     room: Room;
     setRoom: (room: Room) => void;
-    saveRoom?: () => Promise<void>;
+    saveRoom?: (thumbnailBase64: string | null) => Promise<void>;
     doorsLength: number;
     setMsg: (msg: string | null) => void;
     setError: (error: string | null) => void;
@@ -29,6 +29,8 @@ type ToolbarProps = {
     redo?: () => void;
     selectedContainerInfo: ContainerDTO | null;
     setSelectedContainerInfo: (container: ContainerDTO | null) => void;
+    generateThumbnail: () => string | null;
+
 };
 
 export default function Toolbar({
@@ -48,6 +50,7 @@ export default function Toolbar({
     redo,
     selectedContainerInfo,
     setSelectedContainerInfo,
+    generateThumbnail,
 }: ToolbarProps) {
 
     const [isRoomPromptOpen, setIsRoomPromptOpen] = useState(false);
@@ -103,20 +106,18 @@ export default function Toolbar({
     const handleSaveRoom = async () => {
         setMsg("");
         setError("");
-        if (typeof saveRoom === "function") {
-            if (doorsLength > 0) {
-                try {
-                    await saveRoom();
-                    setTimeout(() => setMsg("Rummet har sparats"), 10);
-                    setTimeout(() => setError(null), 10);
-                } catch {
-                    setTimeout(() => setError("Rummet gick inte att spara. Vänligen försök senare igen"), 10);
-                    setTimeout(() => setMsg(null), 10);
-                }
-            } else {
-                setTimeout(() => setError("Det måste finnas en dörr innan du sparar rummet"), 10);
-                setTimeout(() => setMsg(null), 10);
-            }
+        if (!saveRoom) return;
+        if (doorsLength === 0) {
+            setTimeout(() => setError("Det måste finnas en dörr innan du sparar rummet"), 10);
+            return;
+        }
+        try {
+            const thumbnail = generateThumbnail();  
+            await saveRoom(thumbnail);               
+
+            setTimeout(() => setMsg("Rummet har sparats"), 10);
+        } catch (err) {
+            setTimeout(() => setError("Rummet gick inte att spara. Vänligen försök senare igen"), 10);
         }
     };
 
