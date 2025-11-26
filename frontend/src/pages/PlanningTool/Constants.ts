@@ -39,3 +39,5 @@ export const ROOM_HORIZONTAL_OFFSET = 0;
 
 //Drag-and-drop data format for containers
 export const DRAG_DATA_FORMAT = 'application/avfallskompassen-container';
+
+export const GRID_SIZE_PX = 1 / SCALE;
