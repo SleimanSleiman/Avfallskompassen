@@ -99,13 +99,13 @@ export default function AdminPage() {
   const filteredProperties = useMemo(() => {
     if (!searchQuery.trim()) return [];
     const q = searchQuery.toLowerCase().trim();
-    return properties.filter((p) => {
+    return users.filter((p) => {
       const address = (p.address || '').toLowerCase();
       const municipality = (p.municipalityName || '').toLowerCase();
       // Only include if address or municipality actually contains the search term
       return (address.length > 0 && address.includes(q)) || (municipality.length > 0 && municipality.includes(q));
     });
-  }, [searchQuery, properties]);
+  }, [searchQuery, users]);
 
   // Group filtered properties by user
   const propertiesByUser = useMemo(() => {

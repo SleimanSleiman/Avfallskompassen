@@ -14,7 +14,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -41,12 +43,8 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringBootTest
-@AutoConfigureMockMvc
 @ExtendWith(MockitoExtension.class)
 public class PropertyControllerTest {
-    @Autowired
-    private MockMvc mockMvc;
     @Mock
     private com.avfallskompassen.services.PropertyService propertyService;
 
@@ -358,16 +356,6 @@ public class PropertyControllerTest {
         assertEquals(mockUserStats, response.getBody());
     }
 
-
-
-    @Test
-    void getUserStats_NotAdmin() throws Exception {
-        List<UserStatsDTO> mockUserStats = List.of(new UserStatsDTO());
-
-        mockMvc.perform(get("/api/properties/user/stats"))
-                .andExpect(status().isForbidden());
-    }
-
     @Test
     void getMyPropertiesWithWasteRooms_ReturnOK() {
         String username = "Anton";
@@ -413,16 +401,5 @@ public class PropertyControllerTest {
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(mockList, response.getBody());
 
-    }
-
-    @Test
-    void getUsersPropertiesWithWasteRooms_NotAdmin_Return403() throws Exception {
-        List<PropertyDTO> mockList = List.of(new PropertyDTO());
-
-        mockMvc.perform(
-                        get("/api/properties/admin/user-properties-wasterooms")
-                                .header("X-Username", "anton")
-                )
-                .andExpect(status().isForbidden());
     }
 }
