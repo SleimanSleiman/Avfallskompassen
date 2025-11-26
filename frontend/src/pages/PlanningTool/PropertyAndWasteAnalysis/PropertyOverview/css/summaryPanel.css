@@ -16,7 +16,7 @@
 
 /* Loading */
 .summary-loading {
-    @apply mt-6 flex items-center gap-2 text-sm text-gray-500;
+    @apply mt-6;
 }
 
 .summary-spinner {

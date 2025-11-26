@@ -7,6 +7,7 @@ import { Loader2, AlertCircle } from "lucide-react";
 import { useWasteComparison } from "../../hooks/useWasteComparison";
 import WasteTable from "./components/WasteTable";
 import '../css/summaryPanel.css'
+import LoadingBar from "../../../../../components/LoadingBar";
 
 type WasteTypeComparisonPanelProps = {
     comparisonData: PropertyComparison | null;
@@ -49,8 +50,7 @@ return (
             {/*Loading state*/}
             {comparisonLoading && (
                 <div className="summary-loading">
-                    <Loader2 className="summary-spinner" />
-                    Hämtar jämförelsedata...
+                    <LoadingBar message="Hämtar jämförelsedata..." />
                 </div>
             )}
 

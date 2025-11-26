@@ -13,6 +13,7 @@ import type { ContainerInRoom } from "../../Types";
 import { buildDesignStats, mapWasteComparisons, mapFrequencyComparisons, buildCombinedRows } from "../utils/builders";
 import { useWasteComparison } from "../hooks/useWasteComparison";
 import './css/analysisPanels.css'
+import LoadingBar from "../../../../../components/LoadingBar";
 
 type WasteAnalysisPanelsProps = {
     comparisonData: PropertyComparison | null;
@@ -58,8 +59,7 @@ export default function WasteAnalysisPanels({
             {/*Loading state*/}
             {comparisonLoading && (
                 <div className="analysis-loading">
-                    <Loader2 className="loading-icon" />
-                    Hämtar jämförelsedata...
+                    <LoadingBar message="Hämtar jämförelsedata..." />
                 </div>
             )}
 
