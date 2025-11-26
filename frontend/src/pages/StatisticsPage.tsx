@@ -2,9 +2,8 @@ import { useEffect, useState } from 'react';
 import React from 'react';
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { useParams, useLocation, Link } from 'react-router-dom';
-import { getCollectionFee, getAnnualCost, getPropertyContainers, type AnnualCostDTO } from '../lib/Statistics';
+import {getCollectionFee, getAnnualCost, getPropertyContainers, type AnnualCostDTO} from '../lib/Statistics'
 import { useComparison } from './PlanningTool/hooks/useComparison';
-import LoadingBar from '../components/LoadingBar';
 
 //TODO: Ändra hårdkodade uträkningen av grön/gul/röd till riktiga värden som kan ändras via admin panel.
 //TODO: Bryt ut delar och bygga komponenter av dem.
@@ -303,11 +302,7 @@ export default function StatisticsPage() {
   const toggleWasteGroup = (type: string) =>
     setOpenWasteGroups((prev) => ({ ...prev, [type]: !prev[type] }));
 
-  if (loading) return (
-    <main className="mx-auto max-w-7xl px-4 py-8">
-      <LoadingBar message="Laddar statistik..." />
-    </main>
-  );
+  if (loading) return <main className="mx-auto max-w-7xl px-4 py-8"><p className="text-gray-600">Laddar statistik...</p></main>;
   if (error) return <main className="mx-auto max-w-7xl px-4 py-8"><div className="rounded-lg border border-red-200 bg-red-50 p-4 text-red-700">{error}</div></main>;
   if (!data) return <main className="mx-auto max-w-7xl px-4 py-8"><p className="text-gray-600">Ingen statistik hittades.</p></main>;
 

@@ -8,24 +8,22 @@ export function useSaveRoom() {
     const [isSaving, setIsSaving] = useState(false);
     const [error, setError] = useState<string | null>(null);
     
-    const saveRoom = async (roomRequest: RoomRequest) => {
+    const saveRoom = async (roomRequest : RoomRequest) => {
         setIsSaving(true);
         setError(null);
 
         try {
             const roomId = roomRequest.wasteRoomId;
-            let savedRoom;
-
+            var savedRoom;
             if (roomId == null) {
                 savedRoom = await createWasteRoom(roomRequest);
             } else {
-                savedRoom = await updateWasteRoom(roomRequest);
+                savedRoom = updateWasteRoom(roomRequest);
             }
 
             return savedRoom;
         } catch (err) {
-            console.error("Error saving room:", err);
-            setError("Kunde inte spara rummet");
+            console.error('Error saving room:', err);
         } finally {
             setIsSaving(false);
         }
@@ -41,8 +39,7 @@ export function useWasteRoomRequestBuilder(
         room : Room,
         doors : Door[],
         containers : ContainerInRoom[],
-        propertyId : number,
-        thumbnailBase64: string
+        propertyId : number
     ) : RoomRequest => {
         const validContainers = containers.filter(c =>
             isContainerInsideRoom(
@@ -71,8 +68,7 @@ export function useWasteRoomRequestBuilder(
                 angle: c.rotation,
             })),
             propertyId,
-            name : room.name,
-            thumbnailBase64: thumbnailBase64 ?? undefined
+            name : room.name
         };
     };
 

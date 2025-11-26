@@ -47,9 +47,6 @@ public class WasteRoom {
     @JoinColumn(name = "property_id", nullable = false)
     private Property property;
 
-    @Column(name = "thumbnail")
-    private String thumbnailUrl;
-
     @PrePersist
     public void onCreate() {
         createdAt = LocalDateTime.now();
@@ -92,8 +89,4 @@ public class WasteRoom {
 
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
-
-    public String getThumbnailUrl() {return thumbnailUrl;}
-
-    public void setThumbnailUrl(String thumbnailUrl) {this.thumbnailUrl = thumbnailUrl;}
 }

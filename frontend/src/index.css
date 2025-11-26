@@ -7,18 +7,8 @@
   font-size: 15px;
 }
 
-html {
-  width: 100%;
-  overflow-x: hidden;
-}
-
 body {
   @apply text-nsr-ink bg-white font-sans overflow-x-hidden;
-}
-
-#root {
-  width: 100%;
-  overflow-x: hidden;
 }
 
 /* Reusable buttons */

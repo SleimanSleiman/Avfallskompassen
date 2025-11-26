@@ -3,8 +3,7 @@ import InfoTooltip from "../components/InfoTooltip";
 import type { PropertyComparison, WasteAmountComparison, CollectionFrequencyComparison } from "../../../lib/Comparison";
 import type { Property } from "../../../lib/Property";
 import type { ContainerInRoom } from "../Types";
-import { TrendingDown, TrendingUp, Minus, AlertCircle, CheckCircle } from "lucide-react";
-import LoadingBar from "../../../components/LoadingBar";
+import { Loader2, TrendingDown, TrendingUp, Minus, AlertCircle, CheckCircle } from "lucide-react";
 
 type CostSectionProps = {
     comparisonData: PropertyComparison | null;
@@ -740,8 +739,9 @@ export default function CostSection({
             </div>
 
             {comparisonLoading && (
-                <div className="py-4">
-                    <LoadingBar message="Hämtar jämförelsedata..." />
+                <div className="flex flex-1 items-center justify-center text-gray-500">
+                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                    Hämtar jämförelsedata...
                 </div>
             )}
 
@@ -833,11 +833,6 @@ export default function CostSection({
 
                             <SummaryStat
                             title="Årlig CO₂-besparing"
-                            badge={
-                                <InfoTooltip
-                                    text="CO₂-besparingen beräknas baserat på mängden återvunnet material och dess miljöpåverkan jämfört med att inte återvinna. Ju fler kärl och bättre sortering, desto större besparing."
-                                />
-                            }
                             value={co2CardValue}
                             tone={co2Tone}
                             size="compact"
@@ -985,8 +980,9 @@ export function WasteTypeComparisonPanel({
             </div>
 
             {comparisonLoading && (
-                <div className="mt-6">
-                    <LoadingBar message="Hämtar jämförelsedata..." />
+                <div className="mt-6 flex items-center gap-2 text-sm text-gray-500">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Hämtar jämförelsedata...
                 </div>
             )}
 

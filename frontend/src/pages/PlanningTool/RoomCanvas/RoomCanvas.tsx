@@ -1,42 +1,66 @@
 /**
  * RoomCanvas Component
- * Renders the interactive Konva Stage for designing a room.
- * Includes:
- * - Room shape with draggable corner handles for resizing.
- * - Doors and door measurements.
- * - Containers with drag-and-drop functionality.
- * - Toolbar and container panel UI.
- * - Blocked zones overlay when dragging containers or doors.
+ * Renders the Konva Stage with the room shape, corner handles, doors, and containers.
  */
-
-import { Stage, Layer } from "react-konva";
-import { useState, type Dispatch, type SetStateAction, useRef} from "react";
-import RoomShape from "./components/Room/RoomShape";
-import CornerHandles from "./components/Room/CornerHandles";
-import BlockedZones from "./components/Room/BlockedZones"
-import DoorsLayer from "./components/Door/DoorsLayer";
-import DoorMeasurementLayer from "./components/Door/DoorMeasurementLayer/DoorMeasurementLayer";
-import ContainersLayer from "./components/Container/ContainersLayer";
-import ContainerPanel from "./components/Container/ContainerPanel";
-import Toolbar from "./components/Toolbar/Toolbar";
-import useContainerPanel from "./hooks/useContainerPanel";
-import useContainerZones from "./hooks/useContainerZones";
-import { STAGE_WIDTH, STAGE_HEIGHT, GRID_SIZE_PX } from "../Constants";
+import { Stage, Layer, Group, Rect, Text } from "react-konva";
+import { useCallback, useEffect, useRef, useState, type Dispatch, type SetStateAction } from "react";
+import type { LucideIcon } from "lucide-react";
+import RoomShape from "./RoomShape";
+import CornerHandles from "./CornerHandles";
+import DoorsLayer from "./DoorsLayer";
+import ContainersLayer from "./ContainersLayer";
+import DoorMeasurementLayer from "./DoorMeasurementLayer";
+import RoomSizePrompt from "../../../components/RoomSizePrompt";
+import DoorWidthPrompt from "../../../components/DoorWidthPrompt";
+import {
+    STAGE_WIDTH,
+    STAGE_HEIGHT,
+    SCALE,
+    DRAG_DATA_FORMAT,
+    MARGIN,
+    ROOM_HORIZONTAL_OFFSET,
+    ROOM_VERTICAL_OFFSET,
+    MIN_WIDTH,
+    MIN_HEIGHT,
+    clamp,
+} from "../Constants";
 import type { Room, ContainerInRoom, Door } from "../Types";
 import type { ContainerDTO } from "../../../lib/Container";
+import {
+    Save,
+    Ruler,
+    DoorOpen,
+    PillBottle,
+    X,
+    Apple,
+    Battery,
+    CupSoda,
+    Droplet,
+    InspectionPanel,
+    BottleWine,
+    GlassWater,
+    Leaf,
+    Package,
+    Package2,
+    Plug,
+    Recycle,
+    Shirt,
+    Trash2,
+    TriangleAlert,
+    Undo,
+    Redo,
+} from "lucide-react";
 import Message from "../../../components/ShowStatus";
-import './css/roomCanvasStage.css'
 
 /* ─────────────── RoomCanvas Props ──────────────── */
 type RoomCanvasProps = {
-    /* ───────────── Room & Corner Props ───────────── */
+    //Room and corner props
     room: Room;
     corners: { x: number; y: number }[];
-    setRoom: (room: Room) => void;
     handleDragCorner: (index: number, pos: { x: number; y: number }) => void;
-    isContainerInsideRoom: (rect: { x: number; y: number; width: number; height: number }, room: Room) => boolean;
+    setRoom: (room: Room) => void;
 
-    /* ───────────── Door Props ───────────── */
+    //Door props
     doors: Door[];
     selectedDoorId: number | null;
     handleSelectDoor: (id: number | null) => void;
@@ -44,26 +68,26 @@ type RoomCanvasProps = {
     handleAddDoor: (door: { width: number }) => boolean;
     doorZones: { x: number; y: number; width: number; height: number }[];
 
-    /* ───────────── Container Props ───────────── */
+    //Container props
     containers: ContainerInRoom[];
     selectedContainerId: number | null;
-    handleSelectContainer: (id: number | null) => void;
     handleDragContainer: (id: number, pos: { x: number; y: number }) => void;
     moveAllContainers: (dx: number, dy: number) => void;
+    handleSelectContainer: (id: number | null) => void;
     setSelectedContainerInfo: (v: ContainerDTO | null) => void;
     selectedContainerInfo: ContainerDTO | null;
-    draggedContainer: ContainerDTO | null;
     getContainerZones: (excludeId?: number) => { x: number; y: number; width: number; height: number }[];
+    draggedContainer: ContainerDTO | null;
+    isContainerInsideRoom: (rect: { x: number; y: number; width: number; height: number },room: Room) => boolean;
 
-    /* ───────────── Drag & Drop Props ───────────── */
+
+    //Drag & Drop props
     stageWrapperRef: React.RefObject<HTMLDivElement | null>;
     handleStageDrop: (event: React.DragEvent<HTMLDivElement>) => void;
     handleStageDragOver: (event: React.DragEvent<HTMLDivElement>) => void;
     handleStageDragLeave: (event: React.DragEvent<HTMLDivElement>) => void;
     isStageDropActive: boolean;
-    setIsStageDropActive: (v: boolean) => void;
-
-    /* ───────────── Container Panel / Service Props ───────────── */
+    //Container selection props
     serviceTypes: { id: number; name: string }[];
     selectedType: string | null;
     setSelectedType: (value: string | null) => void;
@@ -73,51 +97,71 @@ type RoomCanvasProps = {
     isLoadingContainers: boolean;
     fetchContainers: (service: { id: number; name: string }) => Promise<void>;
     handleAddContainer: (container: ContainerDTO, position?: { x: number; y: number }) => void;
-    onContainerPanelHeightChange?: (height: number) => void;
+    setIsStageDropActive: (v: boolean) => void;
     setDraggedContainer: Dispatch<SetStateAction<ContainerDTO | null>>;
-
-    /* ───────────── Misc / Utilities ───────────── */
+    onContainerPanelHeightChange?: (height: number) => void;
     undo?: () => void;
     redo?: () => void;
-    saveRoom?: (thumbnailBase64: string | null) => void;
+    saveRoom?: () => void;
+};
+
+type ServiceTypeIconRule = {
+    keywords: string[];
+    Icon: LucideIcon;
+};
+
+const SERVICE_TYPE_ICON_RULES: ServiceTypeIconRule[] = [
+    { keywords: ["mat", "bio", "organ"], Icon: Apple },
+    { keywords: ["rest", "bränn", "hush"], Icon: Trash2 },
+    { keywords: ["plast"], Icon: CupSoda },
+    { keywords: ["papper", "kartong", "tidning"], Icon: Package },
+    { keywords: ["ofärgat", "ofarget", "uncolored", "uncoloured", "klarglas"], Icon: GlassWater },
+    { keywords: ["färgat", "farget", "colored"], Icon: BottleWine },
+    { keywords: ["glas"], Icon: GlassWater },
+    { keywords: ["metall", "skrot"], Icon: InspectionPanel },
+    { keywords: ["farl", "kem"], Icon: TriangleAlert },
+    { keywords: ["el", "elektr"], Icon: Plug },
+    { keywords: ["batter"], Icon: Battery },
+    { keywords: ["textil", "kläd"], Icon: Shirt },
+    { keywords: ["träd", "grön", "kompost"], Icon: Leaf },
+    { keywords: ["olja", "vätska"], Icon: Droplet },
+    { keywords: ["återbruk", "återvinn"], Icon: Recycle },
+    { keywords: ["förpack", "emballage"], Icon: Package2 }
+];
+
+const getServiceTypeIcon = (name: string): LucideIcon => {
+    const normalized = name.toLowerCase();
+    const match = SERVICE_TYPE_ICON_RULES.find(rule =>
+        rule.keywords.some(keyword => normalized.includes(keyword))
+    );
+    return match?.Icon ?? Package2;
 };
 
 export default function RoomCanvas({
-    /* ───────────── Room & Corner Props ───────────── */
     room,
     corners,
-    setRoom,
     handleDragCorner,
-    isContainerInsideRoom,
-
-    /* ───────────── Door Props ───────────── */
+    setRoom,
     doors,
     selectedDoorId,
-    handleSelectDoor,
     handleDragDoor,
+    handleSelectDoor,
     handleAddDoor,
-    doorZones,
-
-    /* ───────────── Container Props ───────────── */
     containers,
     selectedContainerId,
-    handleSelectContainer,
     handleDragContainer,
     moveAllContainers,
+    handleSelectContainer,
     setSelectedContainerInfo,
     selectedContainerInfo,
-    draggedContainer,
-    getContainerZones,
-
-    /* ───────────── Drag & Drop Props ───────────── */
     stageWrapperRef,
     handleStageDrop,
     handleStageDragOver,
     handleStageDragLeave,
     isStageDropActive,
-    setIsStageDropActive,
-
-    /* ───────────── Container Panel / Service Props ───────────── */
+    doorZones,
+    getContainerZones,
+    draggedContainer,
     serviceTypes,
     selectedType,
     setSelectedType,
@@ -127,38 +171,172 @@ export default function RoomCanvas({
     isLoadingContainers,
     fetchContainers,
     handleAddContainer,
-    onContainerPanelHeightChange,
+    setIsStageDropActive,
     setDraggedContainer,
-
-    /* ───────────── Misc / Utilities ───────────── */
+    onContainerPanelHeightChange,
     undo,
     redo,
     saveRoom,
+    isContainerInsideRoom,
 }: RoomCanvasProps) {
+    //State to track if a container is being dragged
     const [isDraggingContainer, setIsDraggingContainer] = useState(false);
+    const isDraggingExistingContainer = isDraggingContainer && selectedContainerId !== null;
     const [msg, setMsg] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
 
-    //Handle container panel state and ref
-    const {
-        isOpen: isContainerPanelOpen,
-        setIsOpen: setIsContainerPanelOpen,
-        close: closeContainerPanel,
-        ref: containerPanelRef
-    } = useContainerPanel({
-        onContainerPanelHeightChange,
-        setIsStageDropActive,
-        setDraggedContainer
-    });
+    const safeUndo = useCallback(() => {
+        if (typeof undo === "function") {
+            undo();
+        }
+    }, [undo]);
 
-    //Compute blocked zones for doors and containers
-    const zones = useContainerZones({
-        isDraggingContainer,
-        selectedContainerId: selectedContainerId,
-        draggedContainer: draggedContainer,
-        getContainerZones: getContainerZones,
-        doorZones: doorZones
-      });
+    const safeRedo = useCallback(() => {
+        if (typeof redo === "function") {
+            redo();
+        }
+    }, [redo]);
+
+    //Determine which container zones to show
+    const containerZonesToShow = isDraggingExistingContainer
+      ? getContainerZones(selectedContainerId)
+      : draggedContainer
+        ? getContainerZones()
+        : [];
+
+    //State to control room size prompt visibility
+    const [isRoomPromptOpen, setIsRoomPromptOpen] = useState(false);
+    const [isDoorPromptOpen, setIsDoorPromptOpen] = useState(false);
+    const [isContainerPanelOpen, setIsContainerPanelOpen] = useState(false);
+    const containerPanelRef = useRef<HTMLDivElement | null>(null);
+
+    useEffect(() => {
+        const element = containerPanelRef.current;
+        if (!element) {
+            onContainerPanelHeightChange?.(0);
+            return;
+        }
+
+        const updateHeight = () => {
+            onContainerPanelHeightChange?.(element.getBoundingClientRect().height);
+        };
+
+        updateHeight();
+
+        const win = typeof window !== "undefined" ? (window as unknown as {
+            ResizeObserver?: typeof ResizeObserver;
+            addEventListener?: (type: string, listener: EventListenerOrEventListenerObject) => void;
+            removeEventListener?: (type: string, listener: EventListenerOrEventListenerObject) => void;
+        }) : undefined;
+        if (!win) {
+            return;
+        }
+
+        if (typeof win.ResizeObserver === "function") {
+            const observer = new win.ResizeObserver(() => updateHeight());
+            observer.observe(element);
+            return () => observer.disconnect();
+        }
+
+        if (typeof win.addEventListener === "function") {
+            win.addEventListener("resize", updateHeight);
+            return () => {
+                if (typeof win.removeEventListener === "function") {
+                    win.removeEventListener("resize", updateHeight);
+                }
+            };
+        }
+    }, [onContainerPanelHeightChange, isContainerPanelOpen]);
+
+    const handleConfirmRoomSize = (name: string, length: number, width: number) => {
+        // length and width are expected in mm; convert to canvas px using SCALE
+        const widthPx = width / SCALE;
+        const heightPx = length / SCALE;
+
+        const maxWidthPx = STAGE_WIDTH - 2 * MARGIN;
+        const maxHeightPx = STAGE_HEIGHT - 2 * MARGIN;
+
+        const newWidth = clamp(widthPx, MIN_WIDTH, maxWidthPx);
+        const newHeight = clamp(heightPx, MIN_HEIGHT, maxHeightPx);
+
+        const newX = clamp(room.x, MARGIN, STAGE_WIDTH - MARGIN - newWidth);
+        const newY = clamp(room.y, MARGIN, STAGE_HEIGHT - MARGIN - newHeight);
+
+        setRoom({
+            ...room,
+            name,
+            x: newX,
+            y: newY,
+            width: newWidth,
+            height: newHeight,
+        });
+        setIsRoomPromptOpen(false);
+    };
+
+    const handleAddDoorWithPrompt = (width: number) => {
+        const success = handleAddDoor({ width });
+        if (success) {
+            setIsDoorPromptOpen(false);
+        }
+    };
+
+    const closeContainerPanel = useCallback(() => {
+        setIsContainerPanelOpen(false);
+        setIsStageDropActive(false);
+        setDraggedContainer(null);
+    }, [setIsContainerPanelOpen, setIsStageDropActive, setDraggedContainer]);
+
+    const handleSelectServiceType = async (type: { id: number; name: string }) => {
+        if (selectedType === type.name) {
+            setSelectedType(null);
+            setSelectedSize({});
+            return;
+        }
+
+        setSelectedType(type.name);
+        setSelectedSize({});
+        await fetchContainers(type);
+    };
+
+    const handleToggleSize = (typeId: number, size: number) => {
+        setSelectedSize(prev => ({
+            ...prev,
+            [typeId]: prev[typeId] === size ? null : size,
+        }));
+    };
+
+    useEffect(() => {
+        if (!isContainerPanelOpen) return;
+
+        const handleKeyDown = (event: KeyboardEvent) => {
+            if (event.key === "Escape") {
+                closeContainerPanel();
+            }
+        };
+
+        window.addEventListener("keydown", handleKeyDown);
+        return () => window.removeEventListener("keydown", handleKeyDown);
+    }, [isContainerPanelOpen, closeContainerPanel]);
+
+    const activeType = selectedType
+        ? serviceTypes.find(type => type.name === selectedType) ?? null
+        : null;
+
+    const containersForActiveType = activeType
+        ? availableContainers.filter(container => container.serviceTypeId === activeType.id)
+        : [];
+
+    const sizeOptions = activeType
+        ? Array.from(new Set(containersForActiveType.map(container => container.size))).sort((a, b) => a - b)
+        : [];
+
+    const activeSize = activeType ? selectedSize[activeType.id] ?? null : null;
+
+    const filteredContainers = activeType
+        ? (activeSize != null
+            ? containersForActiveType.filter(container => container.size === activeSize)
+            : containersForActiveType)
+        : [];
 
     //Moves a room and the containers inside it
     const handleMoveRoom = (newX: number, newY: number) => {
@@ -169,151 +347,415 @@ export default function RoomCanvas({
         moveAllContainers(dx, dy);
     };
 
-    const stageRef = useRef<any>(null);
-    const generateThumbnail = (): string | null => { 
-        if (!stageRef.current) 
-            return null; 
-        
-        const uri = stageRef.current.toDataURL({ 
-            mimeType: "image/png", 
-            quality: 0.9, 
-            pixelRatio: 1 
-        }); 
-
-        return uri; 
-    };
 
     /* ──────────────── Render ──────────────── */
     return (
         <div
             ref={stageWrapperRef}
-            className={isStageDropActive ? "stage-wrapper stage-wrapper-active" : "stage-wrapper"}
+            className={`relative w-full overflow-x-auto rounded-2xl ${isStageDropActive ? 'ring-4 ring-blue-300 ring-offset-2' : ''}`}
             onDrop={handleStageDrop}
             onDragOver={handleStageDragOver}
             onDragLeave={handleStageDragLeave}
         >
-
-            {/* Feedback messages */}
-            <div className="stage-content-wrapper">
-                {msg && <Message message={msg} type="success" />}
-                {error && <Message message={error} type="error" />}
-            </div>
-
-            {/* Panel for viewing containers */}
-            <div className="container-panel-wrapper">
-                <ContainerPanel
+            <div className="flex flex-col gap-4">
+                <div
                     ref={containerPanelRef}
-                    isOpen={isContainerPanelOpen}
-                    closePanel={closeContainerPanel}
-                    serviceTypes={serviceTypes}
-                    selectedType={selectedType}
-                    setSelectedType={setSelectedType}
-                    availableContainers={availableContainers}
-                    selectedSize={selectedSize}
-                    setSelectedSize={setSelectedSize}
-                    fetchContainers={fetchContainers}
-                    handleAddContainer={handleAddContainer}
-                    setSelectedContainerInfo={setSelectedContainerInfo}
-                    isLoadingContainers={isLoadingContainers}
-                    setIsStageDropActive={setIsStageDropActive}
-                    setDraggedContainer={setDraggedContainer}
-                />
+                    className={`transition-all duration-300 ease-out overflow-hidden ${isContainerPanelOpen ? "max-h-[75vh] opacity-100" : "max-h-0 opacity-0 pointer-events-none"}`}
+                >
+                    <div className="relative rounded-2xl border border-gray-200 bg-white shadow-xl">
+                        <div className="flex items-start justify-between gap-5 px-4 py-4 sm:px-6">
+                            <div>
+                                <h3 className="text-sm font-semibold text-gray-900">Välj sopkärl</h3>
+                                <p className="text-xs text-gray-500">Öppna en tjänst nedan, filtrera på volym och dra kärlet till ritningen eller använd Lägg till.</p>
+                            </div>
+                            <button
+                                onClick={closeContainerPanel}
+                                className="p-1 rounded-full text-gray-500 hover:text-gray-700 hover:bg-gray-100"
+                                aria-label="Stäng sopkärlspanelen"
+                            >
+                                <X className="w-4 h-4" />
+                            </button>
+                        </div>
 
-                {/* Toolbar menu */}
-                <div className="toolbar-wrapper">
-                    <Toolbar
-                        roomName={room.name}
-                        isContainerPanelOpen={isContainerPanelOpen}
-                        toggleContainerPanel={() => {
-                            if (isContainerPanelOpen) {
-                                closeContainerPanel();
+                        <div className="px-4 pb-6 sm:px-6">
+                            {serviceTypes.length === 0 ? (
+                                <p className="text-sm text-gray-500">Inga avfallstjänster kunde hämtas just nu.</p>
+                            ) : (
+                                <div className="mb-3">
+                                    <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-9 xl:grid-cols-13">
+                                        {serviceTypes.map((type) => {
+                                            const isSelected = selectedType === type.name;
+                                            const IconComponent = getServiceTypeIcon(type.name);
+
+                                            return (
+                                                <button
+                                                    key={type.id}
+                                                    title={type.name}
+                                                    onClick={() => handleSelectServiceType(type)}
+                                                    className="flex flex-col items-center gap-1 text-xs font-medium text-gray-600 focus:outline-none"
+                                                >
+                                                    <span
+                                                        className={`flex h-12 w-full items-center justify-center rounded-xl border text-sm font-semibold transition ${isSelected ? "bg-nsr-teal text-white border-nsr-teal" : "bg-white text-gray-700 border-gray-300 hover:bg-nsr-teal/10"}`}
+                                                    >
+                                                        <IconComponent className="h-5 w-5" aria-hidden="true" />
+                                                    </span>
+                                                    <span className={`text-[11px] leading-tight text-center ${isSelected ? "text-nsr-teal" : "text-gray-600"}`}>
+                                                        {type.name}
+                                                    </span>
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+                            )}
+
+                            <div className="max-h-[50vh] overflow-y-auto pr-1">
+                                {!activeType ? (
+                                    <p className="text-sm text-gray-500">Välj en avfallstjänst för att visa tillgängliga sopkärl.</p>
+                                ) : isLoadingContainers ? (
+                                    <div className="flex items-center justify-center py-10">
+                                        <div className="h-10 w-10 animate-spin rounded-full border-4 border-gray-300 border-t-transparent" />
+                                    </div>
+                                ) : containersForActiveType.length === 0 ? (
+                                    <p className="text-sm text-gray-500">Inga kärl hittades för {activeType.name}.</p>
+                                ) : (
+                                    <div className="space-y-4">
+                                        {sizeOptions.length > 0 && (
+                                            <div className="flex flex-wrap gap-2">
+                                                {sizeOptions.map((size) => (
+                                                    <button
+                                                        key={`${activeType.id}-${size}`}
+                                                        onClick={() => handleToggleSize(activeType.id, size)}
+                                                        className={`rounded-lg border px-3 py-1 text-xs font-semibold transition ${activeSize === size ? "bg-nsr-teal text-white border-nsr-teal" : "bg-white text-gray-700 hover:bg-nsr-teal/10"}`}
+                                                    >
+                                                        {size} L
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        )}
+
+                                        <div className="max-h-[165px] overflow-y-auto pr-1">
+                                            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                                                {filteredContainers.length === 0 && (
+                                                    <p className="col-span-full text-xs text-gray-500">Ingen matchande volym. Välj en annan volym.</p>
+                                                )}
+
+                                                {filteredContainers.map((container) => (
+                                                    <div
+                                                        key={container.id}
+                                                        className="flex flex-col rounded-2xl border border-gray-200 bg-white p-3 shadow-sm"
+                                                    >
+                                                        <div className="flex items-start gap-3">
+                                                            <img
+                                                                src={`http://localhost:8081${container.imageFrontViewUrl}`}
+                                                                alt={container.name}
+                                                                className="h-16 w-16 flex-shrink-0 object-contain cursor-move"
+                                                                draggable
+                                                                onDragStart={(event) => {
+                                                                    event.dataTransfer.effectAllowed = "copy";
+                                                                    event.dataTransfer.setData(DRAG_DATA_FORMAT, JSON.stringify(container));
+                                                                    event.dataTransfer.setData("text/plain", container.name);
+                                                                    setIsStageDropActive(true);
+                                                                    setDraggedContainer(container);
+                                                                }}
+                                                                onDragEnd={() => {
+                                                                    setIsStageDropActive(false);
+                                                                    setDraggedContainer(null);
+                                                                }}
+                                                            />
+                                                            <div className="flex flex-1 flex-col gap-1 text-xs text-gray-600">
+                                                                <p className="text-sm font-semibold text-gray-900">{container.name}</p>
+                                                                <p>{container.width} × {container.height} × {container.depth} mm</p>
+                                                                <p>Tömningsfrekvens: {container.emptyingFrequencyPerYear}/år</p>
+                                                                <p>Kostnad: {container.cost} kr/år</p>
+                                                            </div>
+                                                        </div>
+                                                        <div className="mt-3 flex gap-2">
+                                                            <button
+                                                                onClick={() => handleAddContainer(container)}
+                                                                className="flex-1 rounded-lg border border-emerald-600 px-3 py-2 text-xs font-semibold text-emerald-700 hover:bg-emerald-50 transition"
+                                                            >
+                                                                Lägg till
+                                                            </button>
+                                                            <button
+                                                                onClick={() => setSelectedContainerInfo(container)}
+                                                                className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-xs font-semibold text-gray-600 hover:bg-gray-100 transition"
+                                                            >
+                                                                Info
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Feedback messages */}
+                <div
+                    ref={stageWrapperRef}
+                    className="relative w-full overflow-x-auto rounded-2xl text-lg"
+                >
+
+                    {msg && <Message message={msg} type="success" />}
+                    {error && <Message message={error} type="error" />}
+                </div>
+
+                <div className="relative w-full">
+                    {/* Top-left action buttons */}
+                    <div className="absolute top-4 left-4 flex flex-row items-center gap-2 z-50">
+                {/* Change room size */}
+                <button
+                    onClick={() => {
+                        setIsRoomPromptOpen(true);
+                        handleSelectContainer(null);
+                        handleSelectDoor(null);
+                    }}
+                    className="flex items-center justify-start bg-gray-200 hover:bg-gray-300 text-gray-800 px-2 py-1 rounded-lg transition-all duration-300 shadow-sm group overflow-hidden"
+                >
+                    <Ruler className="w-5 h-5 flex-shrink-0" />
+                    <span className="ml-2 text-sm font-medium opacity-0 w-0 group-hover:opacity-100 group-hover:w-auto transition-all duration-300 whitespace-nowrap">
+                        Ändra rumsdimensioner
+                    </span>
+                </button>
+
+                {/* Add door */}
+                <button
+                    onClick={() => setIsDoorPromptOpen(true)}
+                    className="flex items-center justify-start bg-blue-50 text-blue-700 hover:bg-blue-100 hover:text-blue-800 px-2 py-1 rounded-lg transition-all duration-300 shadow-sm group overflow-hidden"
+                >
+                    <DoorOpen className="w-5 h-5 flex-shrink-0" />
+                    <span className="ml-2 text-sm font-medium opacity-0 w-0 group-hover:opacity-100 group-hover:w-auto transition-all duration-300 whitespace-nowrap">
+                        Lägg till dörr
+                    </span>
+                </button>
+
+                {/* Add container */}
+                <button
+                    onClick={() => {
+                        if (isContainerPanelOpen) {
+                            closeContainerPanel();
+                        } else {
+                            setIsContainerPanelOpen(true);
+                        }
+                    }}
+                    className={`flex items-center justify-start px-2 py-1 rounded-lg transition-all duration-300 shadow-sm group overflow-hidden ${isContainerPanelOpen ? "bg-emerald-600 text-white hover:bg-emerald-500" : "bg-emerald-50 text-emerald-700 hover:bg-emerald-100 hover:text-emerald-800"}`}
+                >
+                    <PillBottle className="w-5 h-5 flex-shrink-0" />
+                    <span className="ml-2 text-sm font-medium opacity-0 w-0 group-hover:opacity-100 group-hover:w-auto transition-all duration-300 whitespace-nowrap">
+                        Lägg till sopkärl
+                    </span>
+                </button>
+
+                {/* Save design */}
+                <button
+                    onClick={async () => {
+                        setMsg("");
+                        setError("");
+                        if (typeof saveRoom === "function") {
+                            if (doors.length > 0) {
+                                try {
+                                    await saveRoom();
+                                    setTimeout(() => setMsg("Rummet har sparats"),10);
+                                    setTimeout(() => setError(null),10);
+                                } catch (err) {
+                                    setTimeout(() => setError("Rummet gick inte att spara. Vänligen försök senare igen"), 10);
+                                    setTimeout(() => setMsg(null), 10);
+                                }
                             } else {
-                                setIsContainerPanelOpen(true);
+                                setTimeout(() => setError("Det måste finnas en dörr innan du sparar rummet"), 10);
+                                setTimeout(() => setMsg(null), 10);
                             }
-                        }}
-                        handleAddDoor={handleAddDoor}
-                        handleSelectContainer={handleSelectContainer}
-                        handleSelectDoor={handleSelectDoor}
-                        room={room}
-                        setRoom={setRoom}
-                        saveRoom={saveRoom}
-                        doorsLength={doors.length}
-                        setMsg={setMsg}
-                        setError={setError}
-                        undo={undo}
-                        redo={redo}
-                        selectedContainerInfo={selectedContainerInfo}
-                        setSelectedContainerInfo={setSelectedContainerInfo}
-                        generateThumbnail={generateThumbnail}
-                    />
+                        }
+                    }}
+                    className="flex items-center justify-start bg-green-50 text-green-700 hover:bg-green-100 hover:text-green-800 px-2 py-1 rounded-lg transition-all duration-300 shadow-sm group overflow-hidden"
+                >
+                    <Save className="w-5 h-5 flex-shrink-0" />
+                    <span className="ml-2 text-sm font-medium opacity-0 w-0 group-hover:opacity-100 group-hover:w-auto transition-all duration-300 whitespace-nowrap">
+                        Spara design
+                    </span>
+                </button>
+                
+                {/* Undo */}
+                <button
+                    onClick={safeUndo}
+                    className="flex items-center justify-start bg-blue-50 text-blue-700 hover:bg-blue-100 hover:text-blue-800 px-2 py-1 rounded-lg transition-all duration-300 shadow-sm group overflow-hidden"
+                    title="Ångra (Ctrl+Z)"
+                >
+                    <Undo className="w-5 h-5 flex-shrink-0" />
+                    <span className="ml-2 text-sm font-medium opacity-0 w-0 group-hover:opacity-100 group-hover:w-auto transition-all duration-300 whitespace-nowrap">
+                        Ångra
+                    </span>
+                </button>
+
+                {/* Redo */}
+                <button
+                    onClick={safeRedo}
+                    className="flex items-center justify-start bg-blue-50 text-blue-700 hover:bg-blue-100 hover:text-blue-800 px-2 py-1 rounded-lg transition-all duration-300 shadow-sm group overflow-hidden"
+                    title="Gör om (Ctrl+Y)"
+                >
+                    <Redo className="w-5 h-5 flex-shrink-0" />
+                    <span className="ml-2 text-sm font-medium opacity-0 w-0 group-hover:opacity-100 group-hover:w-auto transition-all duration-300 whitespace-nowrap">
+                        Gör om
+                    </span>
+                </button>
+
+                {/* Room name */}
+                {room.name && (
+                    <div className="bg-white bg-opacity-80 px-3 py-1 rounded-lg shadow-sm text-sm font-semibold text-gray-900">
+                        {"Namn: " + room.name}
+                    </div>
+                )}
+            </div>
 
                     {/* Konva Stage */}
                     <Stage
-                        ref={stageRef}
-                        width={STAGE_WIDTH}
-                        height={STAGE_HEIGHT}
-                        onMouseDown={(e) => {
-                            //Deselect when clicking on empty area
-                            if (e.target === e.target.getStage()) {
-                                handleSelectContainer(null);
-                                handleSelectDoor(null);
-                                setSelectedContainerInfo(null);
-                            }
-                        }}
-                        className="page-grid-bg"
-                        style={{ backgroundSize: `${GRID_SIZE_PX}px ${GRID_SIZE_PX}px` }}
-                    >
-                        <Layer>
-                            {/* Room rectangle */}
-                            <RoomShape
-                                room={room}
-                                handleSelectContainer={handleSelectContainer}
-                                handleSelectDoor={handleSelectDoor}
-                                setSelectedContainerInfo={setSelectedContainerInfo}
-                                onMove={handleMoveRoom}
-                            />
+                width={STAGE_WIDTH}
+                height={STAGE_HEIGHT}
+                onMouseDown={(e) => {
+                    //Deselect when clicking on empty area
+                    if (e.target === e.target.getStage()) {
+                        handleSelectContainer(null);
+                        handleSelectDoor(null);
+                        setSelectedContainerInfo(null);
+                    }
+                }}
+                className="border border-gray-300 bg-gray-50 rounded-2xl w-full"
+            >
+                <Layer>
+                    {/* Room rectangle */}
+                    <RoomShape
+                        room={room}
+                        handleSelectContainer={handleSelectContainer}
+                        handleSelectDoor={handleSelectDoor}
+                        setSelectedContainerInfo={setSelectedContainerInfo}
+                        onMove={handleMoveRoom}
+                    />
 
-                            {/* Draggable corners for resizing the room */}
-                            <CornerHandles
-                                corners={corners}
-                                room={room}
-                                handleDragCorner={handleDragCorner}
-                            />
+                    {/* Draggable corners for resizing the room */}
+                    <CornerHandles
+                        corners={corners}
+                        room={room}
+                        handleDragCorner={handleDragCorner}
+                    />
 
-                            {/* Door layer*/}
-                            <DoorsLayer
-                                doors={doors}
-                                selectedDoorId={selectedDoorId}
-                                room={room}
-                                handleDragDoor={handleDragDoor}
-                                handleSelectDoor={handleSelectDoor}
-                            />
+                    {/* Door layer*/}
+                    <DoorsLayer
+                        doors={doors}
+                        selectedDoorId={selectedDoorId}
+                        room={room}
+                        handleDragDoor={handleDragDoor}
+                        handleSelectDoor={handleSelectDoor}
+                    />
 
-                            {/* Measurements between door and corners*/}
-                            <DoorMeasurementLayer
-                                doors={doors}
-                                room={room}
-                            />
+                    {/* Measurements between door and corners*/}
+                    <DoorMeasurementLayer
+                        doors={doors}
+                        room={room}
+                    />
 
-                            {/* Containers layer */}
-                            <ContainersLayer
-                                containersInRoom={containers}
-                                selectedContainerId={selectedContainerId}
-                                handleDragContainer={handleDragContainer}
-                                handleSelectContainer={handleSelectContainer}
-                                room={room}
-                                doorZones={doorZones}
-                                getContainerZones={getContainerZones}
-                                setIsDraggingContainer={setIsDraggingContainer}
-                                isContainerInsideRoom={isContainerInsideRoom}
-                            />
+                    {/* Highlighted zones a container cannot be placed */}
+                    {(isDraggingContainer || draggedContainer) &&
+                        [...doorZones, ...containerZonesToShow]
+                        .filter(Boolean) // <— remove undefined or null
+                        .map((zone, i) => (
+                            <Group key={`zone-${i}`} x={zone.x} y={zone.y} listening={false} data-testid={`zone-${i}`}>
+                                <Rect
+                                     x={0}
+                                     y={0}
+                                     width={zone.width}
+                                     height={zone.height}
+                                     fill="red"
+                                     opacity={0.15}
+                                     cornerRadius={4}
+                                />
 
-                            {/* Blocked zones overlay */}
-                            {(isDraggingContainer || draggedContainer) && <BlockedZones zones={zones} />}
-                        </Layer>
+                                <Rect
+                                    x={0}
+                                    y={0}
+                                    width={zone.width}
+                                    height={zone.height}
+                                    stroke="red"
+                                    strokeWidth={2}
+                                    dash={[6, 4]}
+                                    cornerRadius={4}
+                                />
+                            </Group>
+                        ))
+                    }
+
+                    {/* Containers layer */}
+                    <ContainersLayer
+                        containersInRoom={containers}
+                        selectedContainerId={selectedContainerId}
+                        handleDragContainer={handleDragContainer}
+                        handleSelectContainer={handleSelectContainer}
+                        room={room}
+                        doorZones={doorZones}
+                        getContainerZones={getContainerZones}
+                        setIsDraggingContainer={setIsDraggingContainer}
+                        isContainerInsideRoom={isContainerInsideRoom}
+                    />
+                </Layer>
                     </Stage>
+
+                    {/* Selected container information */}
+                    {selectedContainerInfo && (
+                        <div className="absolute bottom-4 left-4 z-40 w-[320px] sm:w-[360px] rounded-2xl border border-gray-200 bg-white shadow-xl p-4">
+                    <div className="flex items-start justify-between">
+                        <div>
+                            <h3 className="text-sm font-semibold text-gray-900">{selectedContainerInfo.name}</h3>
+                            <p className="text-xs text-gray-500">{selectedContainerInfo.size} L · {selectedContainerInfo.cost} kr/år</p>
+                        </div>
+                        <button
+                            onClick={() => setSelectedContainerInfo(null)}
+                            className="p-1 rounded-full text-gray-500 hover:text-gray-700 hover:bg-gray-100"
+                            aria-label="Stäng information"
+                        >
+                            <X className="w-4 h-4" />
+                        </button>
+                    </div>
+                    <div className="mt-3 flex gap-3">
+                        <img
+                            src={`http://localhost:8081${selectedContainerInfo.imageFrontViewUrl}`}
+                            alt={selectedContainerInfo.name}
+                            className="h-20 w-20 flex-shrink-0 object-contain"
+                        />
+                        <div className="flex flex-1 flex-col gap-1 text-xs text-gray-600">
+                            <p>Mått: {selectedContainerInfo.width} × {selectedContainerInfo.height} × {selectedContainerInfo.depth} mm</p>
+                            <p>Tömningsfrekvens: {selectedContainerInfo.emptyingFrequencyPerYear}/år</p>
+                            <p>Service: {selectedContainerInfo.serviceTypeName}</p>
+                            {[190, 240, 243, 370].includes(selectedContainerInfo.size) && (
+                                <p className="rounded-lg bg-amber-50 px-2 py-1 text-amber-700">
+                                    Kompatibel med lock-i-lock (100 kr/år per lock)
+                                </p>
+                            )}
+                        </div>
+                    </div>
+                        </div>
+                    )}
                 </div>
             </div>
+
+            {/* Room Size Prompt */}
+            {isRoomPromptOpen && (
+                <RoomSizePrompt
+                    onConfirm={(name, length, width) => handleConfirmRoomSize(name, length, width)}
+                    onCancel={() => setIsRoomPromptOpen(false)}
+                />
+            )}
+
+            {/* Door Width Prompt */}
+            {isDoorPromptOpen && (
+                <DoorWidthPrompt
+                    onConfirm={handleAddDoorWithPrompt}
+                    onCancel={() => setIsDoorPromptOpen(false)}
+                />
+            )}
         </div>
     );
 }
