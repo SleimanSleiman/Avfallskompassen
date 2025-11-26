@@ -11,6 +11,7 @@ export type RoomRequest = {
     containers: ContainerPositionRequest[];
     propertyId : number;
     wasteRoomId : number;
+    thumbnailBase64?: string;
 }
 
 export type DoorRequest = {

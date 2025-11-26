@@ -2,11 +2,11 @@
  * RoomShape Component
  * Renders a rectangular room shape with dimensions on a Konva canvas.
  */
-import { Rect, Text } from "react-konva";
-import type { Room } from "../Types";
-import { SCALE, STAGE_WIDTH, STAGE_HEIGHT, MARGIN, clamp } from "../Constants";
 
-/* ─────────────── RoomShape Props ──────────────── */
+import { Rect, Text } from "react-konva";
+import type { Room } from "../../../Types";
+import { SCALE, STAGE_WIDTH, STAGE_HEIGHT, MARGIN, clamp } from "../../../Constants";
+
 type RoomShapeProps = {
     room: Room;
     handleSelectDoor: (id: number) => void;
@@ -35,11 +35,11 @@ export default function RoomShape({
                 y={room.y}
                 width={room.width}
                 height={room.height}
-                fill="#bde0fe"
-                stroke="#1e6091"
+                fill="#d9d9d9"
+                stroke="#7a7a7a"
                 strokeWidth={2}
                 draggable
-                //a open hand is shown when hovering over the room
+                //Open hand on hover
                 onMouseEnter={(e) => {
                     const container = e.target.getStage()?.container();
                     if (container) container.style.cursor = 'grab';
@@ -48,7 +48,7 @@ export default function RoomShape({
                     const container = e.target.getStage()?.container();
                     if (container) container.style.cursor = 'default';
                 }}
-                //a closed hand is shown when dragging the room
+                //Closed hand while dragging
                 onDragStart={(e) => {
                     const container = e.target.getStage()?.container();
                     if (container) container.style.cursor = 'grabbing';
@@ -59,6 +59,7 @@ export default function RoomShape({
                 }}
 
                 onDragMove={(e) => {
+                    //Clamp room movement to canvas bounds
                     const { x, y } = e.target.position();
                     const clampedX = clamp(x, MARGIN, STAGE_WIDTH - room.width - MARGIN);
                     const clampedY = clamp(y, MARGIN, STAGE_HEIGHT - room.height - MARGIN);
@@ -66,7 +67,7 @@ export default function RoomShape({
                     onMove(clampedX, clampedY);
                     e.target.position({ x: clampedX, y: clampedY });
                 }}
-                // Deselect when clicking on an empty area of the room
+                //Deselect when clicking empty room
                 onMouseDown={(e) => {
                     handleSelectContainer(null);
                     handleSelectDoor(null);
