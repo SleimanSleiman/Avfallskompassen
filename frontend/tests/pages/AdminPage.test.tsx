@@ -12,6 +12,7 @@ const mockGet = vi.mocked(getUserStats);
 vi.mock("../../src/pages/Admin/AdminUserDetail", () => ({
   default: ({ user, onBack }: any) => (
     <div data-testid="admin-user-detail">
+      <h2>Användarinformation</h2>
       <p>Detail for {user.username}</p>
       <button onClick={onBack}>Back</button>
     </div>
@@ -21,6 +22,7 @@ vi.mock("../../src/pages/Admin/AdminUserDetail", () => ({
 describe("AdminPage", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockGet.mockReset();
   });
 
   it("shows loading state initially", async () => {
@@ -78,7 +80,6 @@ describe("AdminPage", () => {
     expect(screen.queryByText("alice")).not.toBeInTheDocument();
   });
 
-  /*
   it("opens user detail view when selecting a user", async () => {
     mockGet.mockResolvedValueOnce([{ id: 1, username: "alice" }]);
 
@@ -109,5 +110,5 @@ describe("AdminPage", () => {
 
     expect(screen.getByText("Användare (1)")).toBeInTheDocument();
   });
-  */
+
 });
