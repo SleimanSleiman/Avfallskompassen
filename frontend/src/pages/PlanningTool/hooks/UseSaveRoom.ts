@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { post } from '../../../lib/api';
 import { createWasteRoom, updateWasteRoom, type ContainerPositionRequest, type DoorRequest, type RoomRequest } from "../../../lib/WasteRoomRequest";
 import type { ContainerInRoom, Door, Room } from "../Types";
 import { SCALE } from "../Constants";
@@ -18,7 +17,7 @@ export function useSaveRoom() {
             if (roomId == null) {
                 savedRoom = await createWasteRoom(roomRequest);
             } else {
-                savedRoom = updateWasteRoom(roomRequest);
+                savedRoom = await updateWasteRoom(roomRequest);
             }
 
             return savedRoom;
