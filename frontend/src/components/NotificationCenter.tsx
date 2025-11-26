@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { getMyProperties } from '../lib/property';
 import type { Property } from '../lib/property';
+import LoadingBar from './LoadingBar';
 
 // Determine notification threshold in seconds.
 // Frontend uses VITE_NOTIFICATION_THRESHOLD_SECONDS (set in .env) if available.
@@ -81,7 +82,9 @@ export default function NotificationCenter() {
     return (
       <div className="mb-6 rounded-2xl border bg-white p-6 shadow-soft">
         <h2 className="text-lg font-black">Meddelanden</h2>
-        <p className="text-sm text-gray-500 mt-2">Läser meddelanden...</p>
+        <div className="mt-4">
+          <LoadingBar message="Läser meddelanden..." />
+        </div>
       </div>
     );
   }

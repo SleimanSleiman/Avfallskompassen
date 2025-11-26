@@ -45,7 +45,7 @@ public class PropertyComparisonController {
      * @return comparison data including costs, container sizes, waste amounts, and collection frequencies
      */
     @GetMapping("/{propertyId}/comparison")
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasAnyRole('USER','ADMIN')")
     public ResponseEntity<?> getPropertyComparison(@PathVariable Long propertyId) {
         try {
             PropertyComparisonDTO comparison = comparisonService.getPropertyComparison(propertyId);
@@ -63,7 +63,7 @@ public class PropertyComparisonController {
     }
 
     @GetMapping("/{propertyId}/comparison/cost")
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasAnyRole('USER','ADMIN')")
     public ResponseEntity<?> getCostComparison(@PathVariable Long propertyId) {
         try {
             CostComparisonDTO comparison = comparisonService.getCostComparison(propertyId);
@@ -81,7 +81,7 @@ public class PropertyComparisonController {
     }
 
     @GetMapping("/{propertyId}/comparison/container-size")
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasAnyRole('USER','ADMIN')")
     public ResponseEntity<?> getContainerSizeComparison(@PathVariable Long propertyId) {
         try {
             ContainerSizeComparisonDTO comparison = comparisonService.getContainerSizeComparison(propertyId);
@@ -99,7 +99,7 @@ public class PropertyComparisonController {
     }
 
     @GetMapping("/{propertyId}/comparison/waste-amounts")
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasAnyRole('USER','ADMIN')")
     public ResponseEntity<?> getWasteAmountComparisons(@PathVariable Long propertyId) {
         try {
             List<WasteAmountComparisonDTO> comparison = comparisonService.getWasteAmountComparisons(propertyId);
@@ -117,7 +117,7 @@ public class PropertyComparisonController {
     }
 
     @GetMapping("/{propertyId}/comparison/frequencies")
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasAnyRole('USER','ADMIN')")
     public ResponseEntity<?> getFrequencyComparisons(@PathVariable Long propertyId) {
         try {
             List<CollectionFrequencyComparisonDTO> comparison = comparisonService.getFrequencyComparisons(propertyId);
