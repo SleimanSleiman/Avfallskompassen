@@ -13,7 +13,7 @@ import type { ContainerInRoom } from "../../Types";
 import { buildDesignStats, mapWasteComparisons, mapFrequencyComparisons, buildCombinedRows } from "../utils/builders";
 import { useWasteComparison } from "../hooks/useWasteComparison";
 import './css/analysisPanels.css'
-import LoadingBar from "../../../../../components/LoadingBar";
+import LoadingBar from "../../../../components/LoadingBar";
 
 type WasteAnalysisPanelsProps = {
     comparisonData: PropertyComparison | null;

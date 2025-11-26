@@ -57,7 +57,7 @@ export function usePropertyHighlights(
                     ? "Data uppdateras"
                     : hasComparisonPeers
                         ? " "
-                        : "Jämförelsedata saknas för vald fastighet",
+                        : "Inga liknande fastigheter hittades för jämförelse",
             },
         ];
 

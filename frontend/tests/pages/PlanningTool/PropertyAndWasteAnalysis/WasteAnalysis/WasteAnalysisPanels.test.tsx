@@ -24,6 +24,12 @@ vi.mock("../../../../../src/pages/PlanningTool/components/InfoTooltip", () => ({
     default: (props: any) => <div data-testid="info-tooltip">{props.text}</div>,
 }));
 
+vi.mock("../../../../../src/components/LoadingBar", () => ({
+    default: (props: any) => (
+        <div data-testid="loading-bar">{props.message}</div>
+    ),
+}));
+
 vi.mock("lucide-react", () => ({
     Loader2: () => <div data-testid="loader" />,
     AlertCircle: () => <div data-testid="alert-circle" />,
@@ -45,7 +51,7 @@ describe("WasteAnalysisPanels", () => {
             />
         );
 
-        expect(screen.getByTestId("loader")).toBeDefined();
+        expect(screen.getByTestId("loading-bar")).toBeDefined();
         expect(screen.getByText("Hämtar jämförelsedata...")).toBeDefined();
     });
 
