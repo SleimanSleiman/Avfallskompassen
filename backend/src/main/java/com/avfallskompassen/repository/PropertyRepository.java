@@ -77,24 +77,17 @@ public interface PropertyRepository extends JpaRepository<Property, Long> {
     List<Property> findAllByUserWithRooms(String username);
 
     @Query("""
-        SELECT DISTINCT p FROM Property p
-        LEFT JOIN FETCH p.wasteRooms wr
-    """)
-    List<Property> getAllPropertiesWithWasteRooms();
-
-    @Query("""
-        SELECT 
-            p.createdBy.id,
-            p.createdBy.username,
-            MIN(p.createdAt),
-            COUNT(DISTINCT p),
-            COUNT(wr)
-        FROM Property p
-        LEFT JOIN p.wasteRooms wr
-        GROUP BY 
-            p.createdBy.id,
-            p.createdBy.username
-    """)
+    SELECT 
+        u.id,
+        u.username,
+        u.createdAt,
+        COUNT(DISTINCT p.id),
+        COUNT(wr.id)
+    FROM User u
+    LEFT JOIN Property p ON p.createdBy.id = u.id
+    LEFT JOIN p.wasteRooms wr
+    GROUP BY u.id, u.username, u.createdAt
+""")
     List<Object[]> getUserPropertyAndWasteRoomStats();
 
 

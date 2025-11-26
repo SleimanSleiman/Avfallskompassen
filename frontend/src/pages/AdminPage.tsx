@@ -2,7 +2,6 @@ import { useState, useMemo, useEffect } from 'react';
 import AdminUserDetail from './Admin/AdminUserDetail';
 import { getUserStats } from '../lib/Property';
 import LoadingBar from '../components/LoadingBar';
-import { get } from '../lib/api';
 
 // Data types
 export type AdminUser = {
