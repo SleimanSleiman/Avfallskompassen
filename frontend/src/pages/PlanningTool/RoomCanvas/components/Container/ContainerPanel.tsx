@@ -9,6 +9,7 @@ import { Apple, Trash2, CupSoda, Package, Package2, GlassWater, BottleWine, Insp
 import type { LucideIcon } from "lucide-react";
 import type { ContainerDTO } from "../../../../../lib/Container";
 import { DRAG_DATA_FORMAT } from "../../../Constants";
+import LoadingBar from "../../../../../components/LoadingBar";
 import './css/roomCanvasPanel.css'
 
 type ContainerPanelProps = {
@@ -193,9 +194,8 @@ const ContainerPanel = forwardRef(function ContainerPanel(
                         {!activeType ? (
                             <p className="empty-text">Välj en avfallstjänst för att visa tillgängliga sopkärl.</p>
                         ) : isLoadingContainers ? (
-                            //Loading spinner
                             <div className="loading-wrapper">
-                                <div className="spinner" />
+                                <LoadingBar message="Laddar kärl..." />
                             </div>
                         ) : containersForActiveType.length === 0 ? (
                             <p className="empty-text">Inga kärl hittades för {activeType.name}.</p>

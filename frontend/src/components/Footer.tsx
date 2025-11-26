@@ -12,36 +12,38 @@ export default function Footer() {
 
       {/* Footer content on dark background */}
       <div className="bg-nsr-teal text-white">
-        <div className="mx-auto max-w-7xl px-4 py-10">
-          <div className="grid gap-8 md:grid-cols-3">
-            <div>
-              <h3 className="font-semibold mb-3">Kontakta kundservice</h3>
-              <ul className="space-y-2 text-sm text-white/80">
-                <li>Telefon: 0123-456 789</li>
-                <li>E-post: support@nsr.se</li>
-              </ul>
-            </div>
-            <div>
-              <h3 className="font-semibold mb-3">Om NSR</h3>
-              <ul className="space-y-2 text-sm text-white/80">
-                <li>Hållbarhet</li>
-                <li>Information</li>
-                <li>Nyheter</li>
-              </ul>
-            </div>
-            <div>
-              <h3 className="font-semibold mb-3">Snabblänkar</h3>
-              <ul className="space-y-2 text-sm text-white/80">
-                <li>Avgifter & priser</li>
-                <li>Tömning & schema</li>
-                <li>Sorteringsguide</li>
-              </ul>
-            </div>
+        <div className="mx-auto w-full max-w-7xl px-4 py-10">
+          <div className="grid gap-4 sm:gap-6 lg:gap-8 sm:grid-cols-2 lg:grid-cols-3">
+            {[
+              {
+                title: "Kontakta kundservice",
+                items: ["Telefon: 0123-456 789", "E-post: support@nsr.se"],
+              },
+              {
+                title: "Om NSR",
+                items: ["Hållbarhet", "Information", "Nyheter"],
+              },
+              {
+                title: "Snabblänkar",
+                items: ["Avgifter & priser", "Tömning & schema", "Sorteringsguide"],
+              },
+            ].map((section) => (
+              <div key={section.title} className="text-center sm:text-left">
+                <h3 className="font-semibold mb-3">{section.title}</h3>
+                <ul className="space-y-2 text-sm text-white/80">
+                  {section.items.map((item) => (
+                    <li key={item}>{item}</li>
+                  ))}
+                </ul>
+              </div>
+            ))}
           </div>
 
-          <div className="mt-8 border-t border-white/10 pt-4 flex items-center justify-between text-xs text-white/70">
-            <span>© {new Date().getFullYear()} NSR. Alla rättigheter förbehållna.</span>
-            <div className="flex items-center gap-3">
+          <div className="mt-10 border-t border-white/10 pt-4 flex flex-col gap-4 text-xs text-white/70 sm:flex-row sm:items-center sm:justify-between">
+            <span className="text-center sm:text-left">
+              © {new Date().getFullYear()} NSR. Alla rättigheter förbehållna.
+            </span>
+            <div className="flex items-center justify-center gap-3 sm:justify-end">
               <img
                 src="/src/assets/avfallskompassen_logo.png"
                 alt="Avfallskompassen logo"

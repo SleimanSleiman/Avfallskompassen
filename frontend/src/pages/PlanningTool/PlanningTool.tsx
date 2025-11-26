@@ -20,6 +20,7 @@ import RoomCanvas from './RoomCanvas/RoomCanvas';
 import ActionPanel from './ActionPanel';
 import PropertyOverviewPanel from './PropertyAndWasteAnalysis/PropertyOverview/PropertyOverviewPanel';
 import WasteAnalysisPanels from './PropertyAndWasteAnalysis/WasteAnalysis/WasteAnalysisPanels'
+import { Tooltip } from "../../components/Tooltip";
 
 //Hooks
 import { useRoom } from './hooks/UseRoom';
@@ -120,8 +121,6 @@ export default function PlanningTool() {
         if (room.containers && room.containers.length > 0) saveContainers(room.containers);
     }, [room.id, setDoors, saveContainers]);
 
-
-
     /* ──────────────── Service Types (API data) ──────────────── */
     const serviceTypes = useServiceTypes();
 
@@ -172,11 +171,17 @@ export default function PlanningTool() {
     const { data: comparisonData, loading: comparisonLoading, error: comparisonError } = useComparison(propertyId);
     const propertyHighlights = usePropertyHighlights(comparisonData, comparisonLoading, selectedProperty);
 
-    const { saveRoom, isSaving, error } = useSaveRoom();
+    const { saveRoom } = useSaveRoom();
     const { buildWasteRoomRequest } = useWasteRoomRequestBuilder(isContainerInsideRoom);
 
-    const handleSaveRoom = async () => {
-        const roomRequest = buildWasteRoomRequest(room, doors, containersInRoom, propertyId);
+    const handleSaveRoom = async (thumbnailBase64: string | "null") => {
+        if (!propertyId) {
+            console.error("No propertyId, cannot save room.");
+            return;
+        }
+
+        const roomRequest = buildWasteRoomRequest(room, doors, containersInRoom, propertyId, thumbnailBase64);
+
         const savedRoom = await saveRoom(roomRequest);
         room.id = savedRoom?.wasteRoomId;
     };
