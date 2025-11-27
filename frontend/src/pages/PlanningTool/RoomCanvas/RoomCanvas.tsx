@@ -10,7 +10,7 @@
  */
 
 import { Stage, Layer } from "react-konva";
-import { useState, type Dispatch, type SetStateAction } from "react";
+import { useState, type Dispatch, type SetStateAction, useRef} from "react";
 import RoomShape from "./components/Room/RoomShape";
 import CornerHandles from "./components/Room/CornerHandles";
 import BlockedZones from "./components/Room/BlockedZones"
@@ -79,7 +79,7 @@ type RoomCanvasProps = {
     /* ───────────── Misc / Utilities ───────────── */
     undo?: () => void;
     redo?: () => void;
-    saveRoom?: () => void;
+    saveRoom?: (thumbnailBase64: string | null) => void;
     isAdminMode?: boolean;
 };
 
@@ -171,6 +171,20 @@ export default function RoomCanvas({
         moveAllContainers(dx, dy);
     };
 
+    const stageRef = useRef<any>(null);
+    const generateThumbnail = (): string | null => {
+        if (!stageRef.current)
+            return null;
+
+        const uri = stageRef.current.toDataURL({
+            mimeType: "image/png",
+            quality: 0.9,
+            pixelRatio: 1
+        });
+
+        return uri;
+    };
+
     /* ──────────────── Render ──────────────── */
     return (
         <div
@@ -233,10 +247,12 @@ export default function RoomCanvas({
                         selectedContainerInfo={selectedContainerInfo}
                         setSelectedContainerInfo={setSelectedContainerInfo}
                         isAdminMode={isAdminMode}
+                        generateThumbnail={generateThumbnail}
                     />
 
                     {/* Konva Stage */}
                     <Stage
+                        ref={stageRef}
                         width={STAGE_WIDTH}
                         height={STAGE_HEIGHT}
                         onMouseDown={(e) => {

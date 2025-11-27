@@ -27,13 +27,14 @@ public class WasteRoomDTO {
     private Boolean isActive;
     private String createdAt;
     private String updatedAt;
+    private String thumbnailUrl;
 
     // Constructors
     public WasteRoomDTO() {}
 
     public WasteRoomDTO(Long propertyId, double length, double width, double x, double y,
                         List<ContainerPositionDTO> containers, List<DoorDTO> doors, Long wasteRoomId, String name,
-                        int versionNumber, String createdBy, String adminUsername, String versionName, 
+                        int versionNumber, String createdBy, String adminUsername, String versionName,
                         Boolean isActive, String createdAt, String updatedAt) {
         this.propertyId = propertyId;
         this.length = length;
@@ -108,6 +109,10 @@ public class WasteRoomDTO {
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
 
+    public String getThumbnailUrl() {return thumbnailUrl;}
+
+    public void setThumbnailUrl(String thumbnailUrl) {this.thumbnailUrl = thumbnailUrl;}
+
     public int getVersionNumber() { return versionNumber; }
     public void setVersionNumber(int versionNumber) { this.versionNumber = versionNumber; }
 
@@ -135,7 +140,7 @@ public class WasteRoomDTO {
      * @return A converted DTO
      */
     public static WasteRoomDTO fromEntity(WasteRoom entity) {
-        return new WasteRoomDTO(
+        WasteRoomDTO dto = new WasteRoomDTO(
                 entity.getProperty().getId(),
                 entity.getLength(),
                 entity.getWidth(),
@@ -161,5 +166,7 @@ public class WasteRoomDTO {
                 entity.getCreatedAt() != null ? entity.getCreatedAt().toString() : null,
                 entity.getUpdatedAt() != null ? entity.getUpdatedAt().toString() : null
         );
+        dto.setThumbnailUrl(entity.getThumbnailUrl());
+        return dto;
     }
 }

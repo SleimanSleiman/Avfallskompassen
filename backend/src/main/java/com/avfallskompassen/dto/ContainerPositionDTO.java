@@ -60,7 +60,7 @@ public class ContainerPositionDTO {
         dto.setX(entity.getX());
         dto.setY(entity.getY());
         dto.setAngle(entity.getAngle());
-        dto.setContainerPlanId(entity.getContainerPlan() != null ? entity.getContainerPlan().getId() : null);
+        dto.setContainerDTO(ContainerDTO.fromEntity(entity.getContainerPlan()));
         dto.setWasteRoomId(entity.getWasteRoom() != null ? entity.getWasteRoom().getId() : null);
         return dto;
     }

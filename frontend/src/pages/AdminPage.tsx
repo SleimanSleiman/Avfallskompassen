@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import AdminUserDetail from './Admin/AdminUserDetail';
-import { get } from '../lib/api';
+import { getUserStats } from '../lib/Property';
+import LoadingBar from '../components/LoadingBar';
 
 // Data types
 export type AdminUser = {
@@ -51,50 +52,31 @@ export default function AdminPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedUser, setSelectedUser] = useState<AdminUser | null>(null);
   const [users, setUsers] = useState<AdminUser[]>(EMPTY_USERS);
-  const [properties, setProperties] = useState<PropertyDTO[]>([]);
   const [loading, setLoading] = useState(true);
+  const [propertiesCount, setPropertiesCount] = useState(0);
 
   useEffect(() => {
     async function load() {
       setLoading(true);
       try {
-        const backendUsers = await get<BackendUser[]>('/api/admin/users');
-        const props = await get<PropertyDTO[]>('/api/properties');
+        const userStats = await getUserStats();
+        console.log(userStats);
 
-        // Map properties to their creators
-        const propertiesByUser = new Map<string, PropertyDTO[]>();
-        props.forEach((p) => {
-          const username = p.createdByUsername || '';
-          if (!propertiesByUser.has(username)) propertiesByUser.set(username, []);
-          propertiesByUser.get(username)!.push(p);
-        });
+        let numOfProperties = 0;
+        for(const row of userStats) {
+          numOfProperties += row.propertiesCount;
+        }
+        setPropertiesCount(numOfProperties);
 
-        // For each property, fetch wasterooms and accumulate plans count per user
-        const plansCountByUser = new Map<string, number>();
-        await Promise.all(
-          props.map(async (p) => {
-            try {
-              const rooms = await get<any[]>(`/api/properties/${p.id}/wasterooms`);
-              const username = p.createdByUsername || '';
-              plansCountByUser.set(username, (plansCountByUser.get(username) || 0) + (rooms?.length || 0));
-            } catch (e) {
-              // if fetch fails for a property, ignore and continue
-              console.warn('Failed to fetch wasterooms for property', p.id, e);
-            }
-          })
-        );
-
-        const mapped: AdminUser[] = backendUsers.map((bu) => ({
-          id: bu.id,
-          username: bu.username,
-          email: undefined,
-          createdAt: bu.createdAt || null,
-          propertiesCount: (propertiesByUser.get(bu.username) || []).length,
-          plansCount: plansCountByUser.get(bu.username) || 0,
+        const mapped: AdminUser[] = userStats.map((user) => ({
+          id: user.id ?? undefined,
+          username: user.username ?? "",
+          createdAt: user.createdAt || null,
+          propertiesCount: user.propertiesCount ?? 0,
+          plansCount: user.wasteRoomsCount ?? 0,
         }));
 
         setUsers(mapped);
-        setProperties(props);
       } catch (e) {
         console.error('Failed to load admin data', e);
       } finally {
@@ -118,13 +100,13 @@ export default function AdminPage() {
   const filteredProperties = useMemo(() => {
     if (!searchQuery.trim()) return [];
     const q = searchQuery.toLowerCase().trim();
-    return properties.filter((p) => {
+    return users.filter((p) => {
       const address = (p.address || '').toLowerCase();
       const municipality = (p.municipalityName || '').toLowerCase();
       // Only include if address or municipality actually contains the search term
       return (address.length > 0 && address.includes(q)) || (municipality.length > 0 && municipality.includes(q));
     });
-  }, [searchQuery, properties]);
+  }, [searchQuery, users]);
 
   // Group filtered properties by user
   const propertiesByUser = useMemo(() => {
@@ -164,14 +146,16 @@ export default function AdminPage() {
 
   if (loading) {
     return (
-      <main className="mx-auto max-w-7xl px-4 py-8">
-        <div className="rounded-2xl border bg-white p-6 shadow-soft text-center">Laddar användardata…</div>
+      <main className="mx-auto w-full max-w-7xl px-4 py-8 overflow-x-hidden">
+        <div className="rounded-2xl border bg-white p-6 shadow-soft text-center">
+          <LoadingBar message="Laddar användardata…" />
+        </div>
       </main>
     );
   }
 
   return (
-    <main className="mx-auto max-w-7xl px-4 py-8">
+    <main className="mx-auto w-full max-w-7xl px-4 py-8 overflow-x-hidden">
       {/* Header */}
       <div className="mb-8 rounded-2xl border bg-white p-6 shadow-soft">
         <div className="mb-3">
@@ -203,7 +187,7 @@ export default function AdminPage() {
             <div>
               <p className="text-sm text-gray-600 brodtext">Totalt antal fastigheter</p>
               <p className="mt-2 text-3xl font-black text-nsr-ink">
-                {properties.length}
+                {propertiesCount}
               </p>
             </div>
             <div className="w-12 h-12 bg-nsr-accent/10 rounded-xl flex items-center justify-center">
@@ -237,7 +221,7 @@ export default function AdminPage() {
         <div className="relative">
           <input
             type="text"
-            placeholder="Sök på användarnamn, e-post eller fastighetsadress..."
+            placeholder="Sök på användarnamn"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full rounded-xl border-gray-300 shadow-sm pl-10 pr-3 py-2.5 sm:py-3 text-sm sm:text-base focus:border-nsr-teal focus:ring-nsr-teal"
@@ -427,4 +411,3 @@ export default function AdminPage() {
     </main>
   );
 }
-

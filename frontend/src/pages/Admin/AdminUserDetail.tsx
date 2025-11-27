@@ -1,7 +1,9 @@
 import { useState, useMemo, useEffect } from 'react';
 import type { AdminUser } from '../AdminPage';
 import AdminPlanningEditor from './AdminPlanningEditor';
+import LoadingBar from '../../components/LoadingBar';
 import { get } from '../../lib/api';
+import { getUsersPropertiesWithWasteRooms } from '../../lib/Property';
 
 // Data types
 export type AdminProperty = {
@@ -62,8 +64,7 @@ export default function AdminUserDetail({ user, onBack }: AdminUserDetailProps) 
       setLoading(true);
       try {
         // Fetch all properties (admin endpoint) and filter by creator username
-        const allProps = await get<any[]>('/api/properties');
-        const userProps = allProps.filter((p) => p.createdByUsername === user.username);
+        const userProps = await getUsersPropertiesWithWasteRooms(user.username);
 
         const mappedProps: AdminProperty[] = userProps.map((p) => ({
           id: Number(p.id),
@@ -76,13 +77,13 @@ export default function AdminUserDetail({ user, onBack }: AdminUserDetailProps) 
           createdAt: p.createdAt || new Date().toISOString(),
         }));
 
-        // For each property, fetch waste rooms and build RoomPlan objects with all versions
+        // For each property, map waste rooms and build simple RoomPlan objects
         const plans: RoomPlan[] = [];
         await Promise.all(
-          mappedProps.map(async (prop) => {
+          mappedProps.map(async (prop, idx) => {
             try {
               const rooms = await get<any[]>(`/api/properties/${prop.id}/wasterooms`);
-              
+
               // Group rooms by name to get all versions
               const roomsByName = new Map<string, any[]>();
               (rooms || []).forEach((r: any) => {
@@ -250,7 +251,7 @@ export default function AdminUserDetail({ user, onBack }: AdminUserDetailProps) 
     // After backend save, reload all room plans to get the latest versions
     setSelectedPlan(null);
     setLoading(true);
-    
+
     try {
       // Refetch all properties and room plans to get updated versions
       const allProps = await get<any[]>('/api/properties');
@@ -272,7 +273,7 @@ export default function AdminUserDetail({ user, onBack }: AdminUserDetailProps) 
         mappedProps.map(async (prop) => {
           try {
             const rooms = await get<any[]>(`/api/properties/${prop.id}/wasterooms`);
-            
+
             const roomsByName = new Map<string, any[]>();
             (rooms || []).forEach((r: any) => {
               const roomName = r.name || 'Miljörum';
@@ -351,14 +352,16 @@ export default function AdminUserDetail({ user, onBack }: AdminUserDetailProps) 
 
   if (loading) {
     return (
-      <main className="mx-auto max-w-7xl px-4 py-8">
-        <div className="rounded-2xl border bg-white p-6 shadow-soft text-center">Laddar fastigheter och planeringar…</div>
+      <main className="mx-auto w-full max-w-7xl px-4 py-8 overflow-x-hidden">
+        <div className="rounded-2xl border bg-white p-6 shadow-soft text-center">
+          <LoadingBar message="Laddar fastigheter och planeringar…" />
+        </div>
       </main>
     );
   }
 
   return (
-    <main className="mx-auto max-w-7xl px-4 py-8">
+    <main className="mx-auto w-full max-w-7xl px-4 py-8 overflow-x-hidden">
       {/* Header */}
       <div className="mb-8 rounded-2xl border border-gray-200 bg-white p-6 shadow-soft">
         <button
@@ -571,7 +574,7 @@ export default function AdminUserDetail({ user, onBack }: AdminUserDetailProps) 
                                 console.warn('Plan has no versions:', plan);
                                 return null;
                               }
-                              
+
                               const activeVersion = plan.versions.find((v) => v.versionNumber === plan.activeVersionNumber) || plan.versions[plan.versions.length - 1];
                               const hasMultipleVersions = plan.versions.length > 1;
                               return (
@@ -705,4 +708,3 @@ export default function AdminUserDetail({ user, onBack }: AdminUserDetailProps) 
     </main>
   );
 }
-

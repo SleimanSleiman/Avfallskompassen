@@ -48,6 +48,9 @@ export type PropertyResponse = {
     municipalityName?: string;
 };
 
+const MAX_ACCESS_PATH_LENGTH = 100; 
+const MAX_NUMBER_OF_APARTMENTS = 300; 
+
 function getAuthHeaders(): Record<string, string> | undefined {
     const user = currentUser();
     return user?.username ? { 'X-Username': user.username } : undefined;
@@ -79,6 +82,20 @@ function normalizePropertyResponse(data: any): PropertyResponse | null {
 }
 
 export async function createProperty(property: PropertyRequest): Promise<PropertyResponse> {
+    if (property.accessPathLength > MAX_ACCESS_PATH_LENGTH) {
+        return {
+            success: false,
+            message: `Dragvägen får inte överstiga ${MAX_ACCESS_PATH_LENGTH} meter.`,
+        };
+    }
+
+    if (property.numberOfApartments > MAX_NUMBER_OF_APARTMENTS) {
+        return {
+            success: false,
+            message: `Antalet lägenheter får inte överstiga ${MAX_NUMBER_OF_APARTMENTS}.`,
+        };
+    }
+
     const data = await api<any>('/api/properties', {
         method: 'POST',
         headers: {
@@ -110,6 +127,29 @@ export async function getMyProperties(): Promise<Property[]> {
     return await api<Property[]>('/api/properties/my-properties', {
         method: 'GET',
         headers: getAuthHeaders()
+    });
+}
+
+export async function getMyPropertiesWithWasteRooms(): Promise<Property[]> {
+    return await api<Property[]>('/api/properties/my-properties-wasterooms', {
+        method: 'GET',
+        headers: getAuthHeaders()
+    });
+}
+
+export async function getUserStats(): Promise<any> {
+    return await api<any>('/api/properties/user/stats', {
+        method: 'GET',
+        headers: getAuthHeaders()
+    });
+}
+
+export async function getUsersPropertiesWithWasteRooms(username : string): Promise<Property[]> {
+    return await api<Property[]>('/api/properties/admin/user-properties-wasterooms', {
+        method: 'GET',
+        headers: {
+            'X-Username': username,
+        },
     });
 }
 

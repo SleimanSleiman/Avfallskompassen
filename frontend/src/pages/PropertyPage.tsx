@@ -1,14 +1,13 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { createProperty, getMyProperties, deleteProperty, updateProperty,getMunicipalities, getLockTypes } from '../lib/Property';
+import { createProperty, deleteProperty, updateProperty,getMunicipalities, getLockTypes, getMyPropertiesWithWasteRooms } from '../lib/Property';
 import type { Municipality, Property, PropertyRequest } from '../lib/Property';
 import { currentUser } from '../lib/Auth';
 import RoomSizePrompt from '../components/RoomSizePrompt';
 import ConfirmModal from '../components/ConfirmModal';
-import { getWasteRoomsByPropertyId } from '../lib/WasteRoom';
-import type { WasteRoom } from '../lib/WasteRoom';
 import { deleteWasteRoom } from '../lib/WasteRoomRequest';
 import Message from '../components/ShowStatus';
+import LoadingBar from '../components/LoadingBar';
 
 export default function PropertyPage() {
     const [properties, setProperties] = useState<Property[]>([]);
@@ -87,18 +86,9 @@ export default function PropertyPage() {
     async function loadProperties() {
         try {
             setLoadingProperties(true);
-            const data = await getMyProperties();
+            const data = await getMyPropertiesWithWasteRooms();
+            console.log(data);
             setProperties(data);
-
-            const propertiesWithRooms = await Promise.all(
-                data.map(async (property) => {
-                    const wasteRooms = await getWasteRoomsByPropertyId(property.id);
-                    console.log(`Property ${property.id} waste rooms:`, wasteRooms);
-                    return { ...property, wasteRooms };
-                })
-            );
-
-            setProperties(propertiesWithRooms);
         } catch (err: any) {
             setError('Kunde inte ladda fastigheter: ' + err.message);
         } finally {
@@ -119,7 +109,6 @@ export default function PropertyPage() {
     const propertyId = savedProperty && savedProperty !== 'undefined' && savedProperty !== 'null'
         ? Number(savedProperty)
         : null;
-    console.log('Selected Property ID from localStorage:', propertyId);
     
     const filteredProperties = useMemo(() => {
         const q = query.trim().toLowerCase();
@@ -459,9 +448,8 @@ async function onDeleteWasteRoom(propertyId: number, wasteRoomId: number) {
         
        <div className="grid grid-cols-1 gap-6 p-6 sm:grid-cols-2 lg:grid-cols-3">
                            {loadingProperties ? (
-                               <div className="col-span-full flex flex-col items-center justify-center py-16">
-                                   <div className="animate-spin rounded-full h-12 w-12 border-4 border-gray-300 border-t-nsr-teal mb-4" />
-                                   <p className="text-gray-600">Laddar fastigheter...</p>
+                               <div className="col-span-full py-12">
+                                   <LoadingBar message="Laddar fastigheter..." />
                                </div>
                            ) : filteredProperties.length === 0 ? (
                                <div className="col-span-full flex flex-col items-center justify-center py-16 text-center text-gray-500">
@@ -488,70 +476,21 @@ async function onDeleteWasteRoom(propertyId: number, wasteRoomId: number) {
                     <div className="mt-3 text-xs text-gray-500">Skapad: {new Date(property.createdAt).toLocaleDateString('sv-SE')}</div>
                       {/* ===== Waste Rooms Section ===== */}
                       <div className="mt-3">
-                        <span className="text-gray-500 text-sm font-medium">Miljörum:</span>
-                                                <div className="mt-1 space-y-1">
-                                                    {property.wasteRooms && property.wasteRooms.length > 0 ? (
-                                                        property.wasteRooms.map((room, index) => (
-                                                            <div
-                                                                key={room.id ?? room.wasteRoomId ?? index}
-                                                                className="flex items-center justify-between border border-gray-200 rounded px-2 py-1 bg-white"
-                                                            >
-                                                                <button
-                                                                    className="w-60 text-left rounded border border-gray-200 px-2 py-1"
-                                                                    onClick={() => {
-                                                                        const fullRoomData = {
-                                                                            ...room,
-                                                                            wasteRoomId: room.wasteRoomId ?? room.id,
-                                                                            containers: (room.containers ?? []).map((c: any) => ({
-                                                                                ...c,
-                                                                                containerType: c.containerType ?? { imageTopViewUrl: "", width: 1, depth: 1 },
-                                                                            })),
-                                                                            doors: room.doors ?? [],
-                                                                        };
-
-                                                                        localStorage.setItem("enviormentRoomData", JSON.stringify(fullRoomData));
-                                                                        localStorage.setItem("selectedProperty", JSON.stringify({ propertyId: property.id }));
-                                                                        localStorage.setItem("selectedPropertyId", String(property.id));
-                                                                        window.location.href = '/planningTool';
-                                                                    }}
-                                                                >
-                                                                    {room.name ?? `Miljörum ${index + 1}`}
-                                                                </button>
-                                                                <button
-                                                                    className="ml-2 text-red-500 hover:text-red-700 text-sm px-1"
-                                                                    onClick={(e) => {
-                                                                        e.stopPropagation();
-                                                                        if (confirm("Är du säker på att du vill radera detta miljörum?")) {
-                                                                            onDeleteWasteRoom(property.id, room.wasteRoomId ?? room.id);
-                                                                        }
-                                                                    }}
-                                                                >
-                                                                    <svg
-                                                                        xmlns="http://www.w3.org/2000/svg"
-                                                                        fill="none"
-                                                                        viewBox="0 0 24 24"
-                                                                        strokeWidth={1.5}
-                                                                        stroke="currentColor"
-                                                                        className="w-5 h-5"
-                                                                    >
-                                                                        <path
-                                                                            strokeLinecap="round"
-                                                                            strokeLinejoin="round"
-                                                                            d="M6 7h12M9 7V4h6v3m-7 4v7m4-7v7m4-7v7M4 7h16"
-                                                                        />
-                                                                    </svg>
-                                                                </button>
-                                                            </div>
-                                                        ))
-                                                    ) : (
-                                                        <p className="text-gray-400 text-sm">Inga miljörum tillgängliga.</p>
-                                                    )}
-                                                </div>
+                        
                       </div>
                       {/* ===== End Waste Rooms Section ===== */}
                   </div>
                 </div>
                 <div className="mt-4 flex flex-wrap gap-2">
+                    <button
+                        className="btn-secondary-sm"
+                        onClick={() => {
+                            localStorage.setItem("selectedPropertyAddress", property.address);
+                            window.location.href = `/allWasteroom/${property.id}`;
+                        }}
+                    >
+                        Visa alla miljörum
+                    </button>
                   <button className="btn-secondary-sm" onClick={() => createWasteRoom(property)}>Skapa miljörum</button>
                   <button className="btn-secondary-sm" onClick={() => handleEdit(property)}>Redigera</button>
                   <button

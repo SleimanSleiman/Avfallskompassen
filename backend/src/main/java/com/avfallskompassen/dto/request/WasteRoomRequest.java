@@ -34,7 +34,7 @@ public class WasteRoomRequest {
 
     @NotNull
     private Long propertyId;
-
+    private String thumbnailBase64;
     private String versionName;
     private String adminUsername;
     private Integer versionToReplace;
@@ -142,5 +142,13 @@ public class WasteRoomRequest {
 
     public void setVersionToReplace(Integer versionToReplace) {
         this.versionToReplace = versionToReplace;
+    }
+
+    public String getThumbnailBase64() {
+        return thumbnailBase64;
+    }
+
+    public void setThumbnailBase64(String thumbnailBase64) {
+        this.thumbnailBase64 = thumbnailBase64;
     }
 }

@@ -2,16 +2,22 @@ package com.avfallskompassen.controller;
 
 import com.avfallskompassen.dto.LockTypeDto;
 import com.avfallskompassen.dto.PropertySimpleDTO;
+import com.avfallskompassen.dto.UserStatsDTO;
 import com.avfallskompassen.dto.request.PropertyRequest;
 import com.avfallskompassen.dto.response.PropertyResponse;
 import com.avfallskompassen.dto.PropertyDTO;
-import com.avfallskompassen.model.LockType;
 import com.avfallskompassen.model.Municipality;
 import com.avfallskompassen.model.Property;
 import com.avfallskompassen.model.PropertyType;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mockito;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.server.ResponseStatusException;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -24,10 +30,10 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(MockitoExtension.class)
 public class PropertyControllerTest {
-
     @Mock
     private com.avfallskompassen.services.PropertyService propertyService;
 
@@ -316,5 +322,73 @@ public class PropertyControllerTest {
         assertEquals(500, resp.getStatusCodeValue());
         assertNull(resp.getBody());
         verify(propertyService).getSimplePropertiesByUser("chris");
+    }
+
+    @Test
+    void getUserStats_ReturnOK() {
+        SecurityContext context = SecurityContextHolder.createEmptyContext();
+        context.setAuthentication(
+                new UsernamePasswordAuthenticationToken(
+                        "admin",
+                        "password",
+                        List.of(new SimpleGrantedAuthority("ROLE_ADMIN"))
+                )
+        );
+        SecurityContextHolder.setContext(context);
+
+        List<UserStatsDTO> mockUserStats = List.of(new UserStatsDTO());
+        Mockito.when(propertyService.getUsersInfoCount()).thenReturn(mockUserStats);
+
+        ResponseEntity<List<UserStatsDTO>> response = controller.getUserStats();
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(mockUserStats, response.getBody());
+    }
+
+    @Test
+    void getMyPropertiesWithWasteRooms_ReturnOK() {
+        String username = "Anton";
+
+        List<PropertyDTO> mockList = List.of(new PropertyDTO());
+        Mockito.when(propertyService.getPropertiesWithRoomsByUser(username))
+                .thenReturn(mockList);
+
+        ResponseEntity<List<PropertyDTO>> response =
+                controller.getMyPropertiesWithWasteRooms(username);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(mockList, response.getBody());
+    }
+
+    @Test
+    void getMyPropertiesWithWasteRooms_MissingName_Return403() {
+        ResponseEntity<List<PropertyDTO>> response =
+                controller.getMyPropertiesWithWasteRooms(null);
+
+        assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
+    }
+
+    @Test
+    void getUsersPropertiesWithWasteRooms_ReturnOK() throws Exception {
+        SecurityContext context = SecurityContextHolder.createEmptyContext();
+        context.setAuthentication(
+                new UsernamePasswordAuthenticationToken(
+                        "admin",
+                        "password",
+                        List.of(new SimpleGrantedAuthority("ROLE_ADMIN"))
+                )
+        );
+        SecurityContextHolder.setContext(context);
+
+        List<PropertyDTO> mockList = List.of(new PropertyDTO());
+        Mockito.when(propertyService.getPropertiesWithRoomsByUser("Anton"))
+                .thenReturn(mockList);
+
+        ResponseEntity<List<PropertyDTO>> response =
+                controller.getUsersPropertiesWithWasteRooms("Anton");
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(mockList, response.getBody());
+
     }
 }
