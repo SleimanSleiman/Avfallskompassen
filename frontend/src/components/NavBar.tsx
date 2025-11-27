@@ -1,4 +1,4 @@
-import { Link, NavLink } from 'react-router-dom';
+import { Link, NavLink, useLocation } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { currentUser, logout } from '../lib/Auth';
 
@@ -6,6 +6,8 @@ export default function NavBar() {
   const [open, setOpen] = useState(false);
   const [user, setUser] = useState(currentUser());
   const isAdmin = String(user?.role || '').toUpperCase().includes('ADMIN');
+  const location = useLocation();
+  const hideMenu = ["/login", "/register"].includes(location.pathname);
 
   useEffect(() => {
     setUser(currentUser());
@@ -47,12 +49,15 @@ export default function NavBar() {
               />
             </Link>
 
+            {!hideMenu && (
             <button className="md:hidden text-white" onClick={() => setOpen(v => !v)} aria-label="Toggle navigation">
               <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" stroke="currentColor">
                 <path strokeWidth="2" strokeLinecap="round" d="M4 6h16M4 12h16M4 18h16" />
               </svg>
             </button>
+            )}
 
+            {!hideMenu && (
             <nav className="hidden md:flex items-center gap-6 text-white font-black text-lg">
               {isAdmin ? (
                 <>
@@ -95,11 +100,12 @@ export default function NavBar() {
                 </>
               )}
             </nav>
+            )}
           </div>
         </div>
       </div>
       <div className="h-3 w-full bg-nsr-tealDark" />
-      {open && (
+      {open && !hideMenu && (
         <div className="md:hidden bg-white border-b">
           <nav className="mx-auto max-w-7xl px-4 py-3 flex flex-col gap-3 font-black">
             {isAdmin ? (
