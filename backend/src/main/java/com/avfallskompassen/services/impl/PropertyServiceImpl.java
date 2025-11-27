@@ -1,13 +1,8 @@
 package com.avfallskompassen.services.impl;
 
-import com.avfallskompassen.dto.LockTypeDto;
-import com.avfallskompassen.dto.PropertySimpleDTO;
+import com.avfallskompassen.dto.*;
 import com.avfallskompassen.dto.request.PropertyRequest;
-import com.avfallskompassen.model.LockType;
-import com.avfallskompassen.model.Property;
-import com.avfallskompassen.model.PropertyType;
-import com.avfallskompassen.model.Municipality;
-import com.avfallskompassen.model.User;
+import com.avfallskompassen.model.*;
 import com.avfallskompassen.repository.MunicipalityRepository;
 import com.avfallskompassen.repository.PropertyRepository;
 import com.avfallskompassen.services.PropertyService;
@@ -16,20 +11,21 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.*;
 
 /**
  * Service class for property-related operations.
- * 
+ *
  * @author Akmal Safi
  * @author Sleiman Sleiman
  */
 @Service
 @Transactional
 public class PropertyServiceImpl implements PropertyService {
-    
+
     private PropertyRepository propertyRepository;
     private com.avfallskompassen.repository.MunicipalityRepository municipalityRepository;
     private UserService userService;
@@ -53,17 +49,17 @@ public class PropertyServiceImpl implements PropertyService {
         if (userOptional.isEmpty()) {
             throw new RuntimeException("User not found: " + username);
         }
-        
+
         User user = userOptional.get();
 
         if (lockType == null) {
             throw new RuntimeException("Lock type not found or not provided");
         }
-        
+
         if (propertyRepository.existsByAddress(request.getAddress())) {
             throw new RuntimeException("Property with this address already exists");
         }
-        
+
         try {
             // Parse property type from request, default to FLERBOSTADSHUS if not provided
             PropertyType propertyType = PropertyType.FLERBOSTADSHUS;
@@ -91,10 +87,10 @@ public class PropertyServiceImpl implements PropertyService {
                 lockType1,
                 propertyType,
                 request.getAccessPathLength(),
-                user  
+                user
             );
             property.setMunicipality(municipality);
-            
+
             return propertyRepository.save(property);
         } catch (DataIntegrityViolationException e) {
             throw new RuntimeException("Failed to create property: duplicate address");
@@ -106,6 +102,41 @@ public class PropertyServiceImpl implements PropertyService {
      */
     public List<Property> getPropertiesByUser(String username) {
         return propertyRepository.findByCreatedByUsername(username);
+    }
+
+    /**
+     * Collects every property and their rooms from a specific user.
+     * @param username The username of the user whose properties are to be collected
+     * @return List of {@link PropertyDTO}, that also contains {@link WasteRoomDTO}
+     */
+    public List<PropertyDTO> getPropertiesWithRoomsByUser(String username) {
+        List<Property> properties = propertyRepository.findAllByUserWithRooms(username);
+
+        return properties.stream()
+                .map(PropertyDTO::new)
+                .toList();
+    }
+
+    /**
+     * Collects general info about the all the users in the database.
+     * Look at {@link PropertyRepository#getUserPropertyAndWasteRoomStats} to see
+     * exactly what is being inserted into the object array that is processed.
+     * @return Raw data from DB transformed into a list of {@link UserStatsDTO}
+     */
+    public List<UserStatsDTO> getUsersInfoCount() {
+        List<Object[]> rawRows = propertyRepository.getUserPropertyAndWasteRoomStats();
+        List<UserStatsDTO> userStatsDTO = new LinkedList<>();
+
+        for (Object[] row : rawRows) {
+            Long userId = ((Number) row[0]).longValue();
+            String username = (String) row[1];
+            LocalDateTime createdAt = LocalDateTime.ofInstant((Instant) row[2], ZoneId.systemDefault());
+            Long propertiesCount = ((Number) row[3]).longValue();
+            Long wasteRoomsCount = ((Number) row[4]).longValue();
+
+            userStatsDTO.add(new UserStatsDTO(userId, username, createdAt, propertiesCount, wasteRoomsCount));
+        }
+        return userStatsDTO;
     }
 
     /**
@@ -142,7 +173,7 @@ public class PropertyServiceImpl implements PropertyService {
         }
         return Optional.empty();
     }
-    
+
     /**
      * Find property by ID.
      * @param id the property ID
@@ -151,7 +182,7 @@ public class PropertyServiceImpl implements PropertyService {
     public Optional<Property> findById(Long id) {
         return propertyRepository.findById(id);
     }
-    
+
     /**
      * Find property by address.
      * @param address the property address
@@ -160,7 +191,7 @@ public class PropertyServiceImpl implements PropertyService {
     public Optional<Property> findByAddress(String address) {
         return propertyRepository.findByAddress(address);
     }
-    
+
     /**
      * Get all properties.
      * @return list of all properties
@@ -168,7 +199,7 @@ public class PropertyServiceImpl implements PropertyService {
     public List<Property> getAllProperties() {
         return propertyRepository.findAll();
     }
-    
+
     /**
      * Find properties by lock type.
      * @param lockTypeDto the lock type
@@ -177,7 +208,7 @@ public class PropertyServiceImpl implements PropertyService {
     public List<Property> findByLockType(LockTypeDto lockTypeDto) {
         return propertyRepository.findByLockType_id(lockTypeDto.getId());
     }
-    
+
     /**
      * Delete property by ID.
      * @param id the property ID

@@ -68,6 +68,31 @@ public interface PropertyRepository extends JpaRepository<Property, Long> {
      */
     boolean existsByIdAndCreatedBy(Long propertyId, User user);
 
+
+    @Query("""
+        SELECT DISTINCT p FROM Property p
+        LEFT JOIN FETCH p.wasteRooms wr
+        WHERE p.createdBy.username = :username
+    """)
+    List<Property> findAllByUserWithRooms(String username);
+
+    @Query("""
+    SELECT 
+        u.id,
+        u.username,
+        u.createdAt,
+        COUNT(DISTINCT p.id),
+        COUNT(wr.id)
+    FROM User u
+    LEFT JOIN Property p ON p.createdBy.id = u.id
+    LEFT JOIN p.wasteRooms wr
+    GROUP BY u.id, u.username, u.createdAt
+""")
+    List<Object[]> getUserPropertyAndWasteRoomStats();
+
+
+
+
     /**
      * Find similar properties for comparison.
      * Properties are similar if they have the same property type, same municipality,

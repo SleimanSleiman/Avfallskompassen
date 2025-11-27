@@ -1,12 +1,10 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { createProperty, getMyProperties, deleteProperty, updateProperty,getMunicipalities, getLockTypes } from '../lib/Property';
+import { createProperty, deleteProperty, updateProperty,getMunicipalities, getLockTypes, getMyPropertiesWithWasteRooms } from '../lib/Property';
 import type { Municipality, Property, PropertyRequest } from '../lib/Property';
 import { currentUser } from '../lib/Auth';
 import RoomSizePrompt from '../components/RoomSizePrompt';
 import ConfirmModal from '../components/ConfirmModal';
-import { getWasteRoomsByPropertyId } from '../lib/WasteRoom';
-import type { WasteRoom } from '../lib/WasteRoom';
 import { deleteWasteRoom } from '../lib/WasteRoomRequest';
 import Message from '../components/ShowStatus';
 import LoadingBar from '../components/LoadingBar';
@@ -88,18 +86,9 @@ export default function PropertyPage() {
     async function loadProperties() {
         try {
             setLoadingProperties(true);
-            const data = await getMyProperties();
+            const data = await getMyPropertiesWithWasteRooms();
+            console.log(data);
             setProperties(data);
-
-            const propertiesWithRooms = await Promise.all(
-                data.map(async (property) => {
-                    const wasteRooms = await getWasteRoomsByPropertyId(property.id);
-                    console.log(`Property ${property.id} waste rooms:`, wasteRooms);
-                    return { ...property, wasteRooms };
-                })
-            );
-
-            setProperties(propertiesWithRooms);
         } catch (err: any) {
             setError('Kunde inte ladda fastigheter: ' + err.message);
         } finally {
@@ -120,7 +109,6 @@ export default function PropertyPage() {
     const propertyId = savedProperty && savedProperty !== 'undefined' && savedProperty !== 'null'
         ? Number(savedProperty)
         : null;
-    console.log('Selected Property ID from localStorage:', propertyId);
     
     const filteredProperties = useMemo(() => {
         const q = query.trim().toLowerCase();
