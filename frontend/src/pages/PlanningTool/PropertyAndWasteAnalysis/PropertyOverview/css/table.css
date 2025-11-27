@@ -1,0 +1,66 @@
+.table-wrapper {
+    @apply mt-6 overflow-x-auto;
+}
+
+.table {
+    @apply min-w-full text-left text-sm text-gray-600;
+}
+
+.table-head {
+    @apply bg-gray-50/80 text-sm uppercase tracking-wide text-gray-500;
+}
+
+.table-th {
+    @apply py-2 pr-4;
+}
+
+.table-body {
+    @apply divide-y divide-gray-100;
+}
+
+.table-row {
+    @apply odd:bg-gray-50/40;
+}
+
+/* Cells */
+.table-cell {
+    @apply py-2 pr-4 text-sm;
+}
+
+.table-cell-strong {
+    @apply py-2 pr-4 text-sm font-medium text-gray-800;
+}
+
+.table-empty {
+    @apply text-gray-400;
+}
+
+/* Cost column */
+.table-cell-col {
+    @apply flex flex-col;
+}
+
+.table-cost {
+    @apply text-base font-semibold text-gray-900;
+}
+
+.table-cost-sub {
+    @apply text-sm text-gray-500;
+}
+
+/* Frequency column */
+.table-frequency {
+    @apply flex items-center gap-2;
+}
+
+.table-frequency-col {
+    @apply flex flex-col;
+}
+
+.table-frequency-primary {
+    @apply text-sm text-gray-800;
+}
+
+.table-frequency-secondary {
+    @apply text-sm text-gray-500;
+}
