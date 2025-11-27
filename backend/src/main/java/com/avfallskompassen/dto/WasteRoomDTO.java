@@ -29,7 +29,7 @@ public class WasteRoomDTO {
     public WasteRoomDTO() {}
 
     public WasteRoomDTO(Long propertyId, double length, double width, double x, double y,
-                        List<ContainerPositionDTO> containers, List<DoorDTO> doors, Long wasteRoomId, String name) {
+                        List<ContainerPositionDTO> containers, List<DoorDTO> doors, Long wasteRoomId, String name, LocalDateTime updatedAt, LocalDateTime createdAt, String thumbnailUrl) {
         this.propertyId = propertyId;
         this.length = length;
         this.width = width;
@@ -39,6 +39,9 @@ public class WasteRoomDTO {
         this.doors = doors;
         this.wasteRoomId = wasteRoomId;
         this.name = name;
+        this.updatedAt = updatedAt;
+        this.createdAt = createdAt;
+        this.thumbnailUrl = thumbnailUrl;
     }
 
     public Long getPropertyId() {
@@ -137,11 +140,11 @@ public class WasteRoomDTO {
                         .collect(Collectors.toList())
                         : null,
                 entity.getId(),
-                entity.getName()
+                entity.getName(),
+                entity.getUpdatedAt(),
+                entity.getCreatedAt(),
+                entity.getThumbnailUrl()
         );
-        dto.setCreatedAt(entity.getCreatedAt());
-        dto.setThumbnailUrl(entity.getThumbnailUrl());
-        dto.setUpdatedAt(entity.getUpdatedAt());
 
         return dto;
     }

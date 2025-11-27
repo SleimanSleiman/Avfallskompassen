@@ -24,6 +24,7 @@ export default function AllaMiljoRumPage() {
 
             try {
                 const data = await getWasteRoomsByPropertyId(Number(propertyId));
+                console.log(data);
 
                 const sorted = data.sort(
                     (a, b) =>

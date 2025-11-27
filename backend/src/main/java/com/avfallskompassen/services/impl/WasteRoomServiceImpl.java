@@ -259,12 +259,11 @@ public class WasteRoomServiceImpl implements WasteRoomService {
                         ? entity.getDoors().stream().map(DoorDTO::fromEntity).toList()
                         : new ArrayList<>(),
                 entity.getId(),
-                entity.getName()
+                entity.getName(),
+                entity.getUpdatedAt(),
+                entity.getCreatedAt(),
+                entity.getThumbnailUrl()
         );
-
-        dto.setThumbnailUrl(entity.getThumbnailUrl());
-        dto.setCreatedAt(entity.getCreatedAt());
-        dto.setUpdatedAt(entity.getUpdatedAt());
         return dto;
     }
 
