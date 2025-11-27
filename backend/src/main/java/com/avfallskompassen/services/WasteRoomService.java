@@ -18,4 +18,8 @@ public interface WasteRoomService {
     WasteRoomDTO updateWasteRoom(Long wasteRoomId, WasteRoomRequest wasteRoomRequest);
 
     void deleteWasteRoom(Long wasteRoomId);
+
+    WasteRoomDTO saveAdminVersion(Long propertyId, String roomName, WasteRoomRequest request);
+
+    List<WasteRoomDTO> getAllVersionsByPropertyAndName(Long propertyId, String roomName);
 }
