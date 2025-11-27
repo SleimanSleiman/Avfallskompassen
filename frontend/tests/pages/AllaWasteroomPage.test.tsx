@@ -135,4 +135,45 @@ describe("AllaMiljoRumPage (Vitest)", () => {
 
         expect(screen.getByTestId("room-size-prompt")).toBeInTheDocument();
     });
+
+    it("sorts rooms by updatedAt (newest first)", async () => {
+        const rooms = [
+            {
+                id: 1,
+                name: "Old Room",
+                length: 5,
+                width: 5,
+                updatedAt: "2023-01-01T10:00:00",
+            },
+            {
+                id: 2,
+                name: "New Room",
+                length: 6,
+                width: 6,
+                updatedAt: "2024-01-01T10:00:00",
+            },
+            {
+                id: 3,
+                name: "No UpdatedAt",
+                length: 7,
+                width: 7,
+            },
+        ];
+
+        (getWasteRoomsByPropertyId as any).mockResolvedValue(rooms);
+
+        renderWithRoute();
+
+        await waitFor(() => screen.getByText("New Room"));
+
+        const renderedNames = screen
+            .getAllByRole("heading", { level: 2 })
+            .map((h) => h.textContent);
+
+        expect(renderedNames).toEqual([
+            "New Room",    
+            "Old Room",    
+            "No UpdatedAt" 
+        ]);
+    });
 });

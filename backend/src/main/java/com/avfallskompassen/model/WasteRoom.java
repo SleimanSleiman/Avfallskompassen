@@ -55,8 +55,8 @@ public class WasteRoom {
     private String thumbnailUrl;
 
 
-    //public void onCreate() {createdAt = LocalDateTime.now();}
-    //public void onUpdate() {updatedAt = LocalDateTime.now();}
+    public void onCreate() {createdAt = LocalDateTime.now();}
+    public void onUpdate() {updatedAt = LocalDateTime.now();}
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }

@@ -263,6 +263,8 @@ public class WasteRoomServiceImpl implements WasteRoomService {
         );
 
         dto.setThumbnailUrl(entity.getThumbnailUrl());
+        dto.setCreatedAt(entity.getCreatedAt());
+        dto.setUpdatedAt(entity.getUpdatedAt());
         return dto;
     }
 
