@@ -1,0 +1,3 @@
+.trendbadge-style {
+    @apply inline-flex flex-wrap items-center justify-center whitespace-normal rounded-full text-center font-semibold shadow-sm;
+}

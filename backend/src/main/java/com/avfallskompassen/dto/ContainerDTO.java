@@ -1,5 +1,8 @@
 package com.avfallskompassen.dto;
 
+import com.avfallskompassen.model.ContainerPlan;
+import com.avfallskompassen.model.ContainerType;
+
 import java.math.BigDecimal;
 
 /**
@@ -123,4 +126,26 @@ public class ContainerDTO {
     public void setId(Long id) {
         this.id = id;
     }
+
+    public static ContainerDTO fromEntity(ContainerPlan plan) {
+        if (plan == null) {
+            return null;
+        }
+
+        ContainerType type = plan.getContainerType();
+
+        return new ContainerDTO(
+                plan.getId(),
+                type != null ? plan.getMunicipalityService().getServiceType().getName() : null,
+                type != null ? type.getSize() : 0,
+                type != null ? type.getWidth() : 0,
+                type != null ? type.getDepth() : 0,
+                type != null ? type.getHeight() : 0,
+                type != null ? type.getImageFrontViewUrl() : null,
+                plan.getImageTopViewUrl(), 
+                plan.getEmptyingFrequencyPerYear(),
+                plan.getCost()
+        );
+    }
+
 }

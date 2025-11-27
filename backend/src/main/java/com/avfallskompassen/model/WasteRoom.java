@@ -1,6 +1,7 @@
 package com.avfallskompassen.model;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.BatchSize;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -32,9 +33,11 @@ public class WasteRoom {
     private double y;
 
     @OneToMany(mappedBy = "wasteRoom", cascade = CascadeType.ALL, orphanRemoval = true)
+    @BatchSize(size = 50)
     private List<ContainerPosition> containers;
 
     @OneToMany(mappedBy = "wasteRoom", cascade = CascadeType.ALL, orphanRemoval = true)
+    @BatchSize(size = 50)
     private List<Door> doors;
 
     @Column(name = "created_at", nullable = false, updatable = false)
@@ -46,6 +49,9 @@ public class WasteRoom {
     @ManyToOne
     @JoinColumn(name = "property_id", nullable = false)
     private Property property;
+
+    @Column(name = "thumbnail")
+    private String thumbnailUrl;
 
     @PrePersist
     public void onCreate() {
@@ -89,4 +95,8 @@ public class WasteRoom {
 
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
+
+    public String getThumbnailUrl() {return thumbnailUrl;}
+
+    public void setThumbnailUrl(String thumbnailUrl) {this.thumbnailUrl = thumbnailUrl;}
 }

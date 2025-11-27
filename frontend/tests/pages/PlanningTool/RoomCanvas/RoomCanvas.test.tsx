@@ -1,135 +1,146 @@
-import { render, screen, fireEvent } from "@testing-library/react";
-import "@testing-library/jest-dom";
-import { describe, it, beforeEach, afterEach, vi, expect } from "vitest";
+import React from "react";
+import { render, fireEvent } from "@testing-library/react";
+import { describe, it, expect, vi } from "vitest";
 import RoomCanvas from "../../../../src/pages/PlanningTool/RoomCanvas/RoomCanvas";
-import { createRef, type ComponentProps, type ReactNode } from "react";
+import type { Room, Door, ContainerInRoom } from "../../../../src/pages/PlanningTool/Types";
+import type { ContainerDTO } from "../../../../src/lib/Container";
 
-type DummyProps = { children?: ReactNode } & Record<string, unknown>;
-type GroupProps = DummyProps & { ["data-testid"]?: string };
-
-type RoomCanvasProps = ComponentProps<typeof RoomCanvas>;
-
-vi.mock("react-konva", () => {
-    const Stage = ({ children }: DummyProps) => <div>{children}</div>;
-    const Layer = ({ children }: DummyProps) => <div>{children}</div>;
-    const Group = ({ children, ["data-testid"]: dataTestId }: GroupProps) => (
-        <div data-testid={typeof dataTestId === "string" ? dataTestId : "group"}>{children}</div>
-    );
-    const Rect = ({ children }: DummyProps) => <div data-testid="rect">{children}</div>;
-    const Circle = ({ children }: DummyProps) => <div data-testid="circle">{children}</div>;
-    const Image = ({ children }: DummyProps) => <div data-testid="image">{children}</div>;
-    const Text = ({ children }: DummyProps) => <div data-testid="text">{children}</div>;
-
-    return {
-        Stage,
-        Layer,
-        Group,
-        Rect,
-        Circle,
-        Image,
-        Text,
-    };
-});
-
-vi.mock("../../../../src/pages/PlanningTool/RoomCanvas/ContainersLayer", () => ({
-    __esModule: true,
-    default: ({ setIsDraggingContainer }: { setIsDraggingContainer: (value: boolean) => void }) => {
-        setIsDraggingContainer(true);
-        return <div data-testid="mock-containers-layer" />;
-    },
-}));
-
-vi.mock("../../../../src/components/RoomSizePrompt", () => ({
-    __esModule: true,
-    default: ({ onConfirm, onCancel }: { onConfirm: (length: number, width: number) => void; onCancel: () => void }) => (
-        <div data-testid="room-size-prompt">
-            <button onClick={() => onConfirm(400, 300)} data-testid="confirm-room-size">Confirm</button>
-            <button onClick={onCancel} data-testid="cancel-room-size">Cancel</button>
+vi.mock("../../../../src/pages/PlanningTool/RoomCanvas/components/Toolbar/Toolbar", () => ({
+    default: (props: any) => (
+        <div data-testid="toolbar">
+            <button onClick={props.toggleContainerPanel}>Toggle Panel</button>
+            <button onClick={props.undo}>Undo</button>
+            <button onClick={props.redo}>Redo</button>
+            <button onClick={props.handleAddDoor}>Add Door</button>
         </div>
     ),
 }));
 
-const room = { x: 0, y: 0, width: 500, height: 400 };
-const doorZones = [{ x: 100, y: 50, width: 120, height: 40 }];
+vi.mock("../../../../src/pages/PlanningTool/RoomCanvas/components/Container/ContainerPanel", () => ({
+    default: (props: any) => <div data-testid="container-panel">{props.isOpen ? "Open" : "Closed"}</div>,
+}));
 
-const defaultProps: RoomCanvasProps = {
-    room,
-    corners: [
+vi.mock("react-konva", async () => {
+    const actual = await vi.importActual<typeof import("react-konva")>("react-konva");
+    return {
+        ...actual,
+        Stage: (props: any) => <div data-testid="stage" {...props}>{props.children}</div>,
+        Layer: (props: any) => <div data-testid="layer">{props.children}</div>,
+    };
+});
+
+describe("RoomCanvas component", () => {
+    const mockRoom: Room = { id: 1, name: "Room 1", x: 0, y: 0, width: 500, height: 400 };
+    const mockCorners = [
         { x: 0, y: 0 },
         { x: 500, y: 0 },
         { x: 500, y: 400 },
         { x: 0, y: 400 },
-    ],
-    handleDragCorner: vi.fn(),
-    setRoom: vi.fn(),
-    doors: [],
-    selectedDoorId: null,
-    handleDragDoor: vi.fn(),
-    handleSelectDoor: vi.fn(),
-    handleAddDoor: () => true,
-    containers: [],
-    selectedContainerId: null,
-    handleDragContainer: vi.fn(),
-    handleSelectContainer: vi.fn(),
-    setSelectedContainerInfo: vi.fn(),
-    selectedContainerInfo: null,
-    stageWrapperRef: createRef<HTMLDivElement>(),
-    handleStageDrop: vi.fn(),
-    handleStageDragOver: vi.fn(),
-    handleStageDragLeave: vi.fn(),
-    isStageDropActive: false,
-    doorZones,
-    getContainerZones: vi.fn(() => []),
-    draggedContainer: null,
-    serviceTypes: [{ id: 1, name: "Restavfall" }],
-    selectedType: null,
-    setSelectedType: vi.fn(),
-    availableContainers: [],
-    selectedSize: {},
-    setSelectedSize: vi.fn() as RoomCanvasProps["setSelectedSize"],
-    isLoadingContainers: false,
-    fetchContainers: async () => {},
-    handleAddContainer: vi.fn(),
-    setIsStageDropActive: vi.fn(),
-    setDraggedContainer: vi.fn(),
-};
+    ];
+    const mockDoors: Door[] = [{ id: 1, width: 80, wall: "top", rotation: 0, x: 100, y: 0 }];
+    const mockContainers: ContainerInRoom[] = [];
+    const mockContainerDTO: ContainerDTO = { id: 1, name: "Container 1", size: 190, cost: 100, width: 100, height: 200, depth: 100, emptyingFrequencyPerYear: 1, serviceTypeName: "Standard", imageFrontViewUrl: "/img.png" };
 
-const renderRoomCanvas = (override?: Partial<RoomCanvasProps>) => render(<RoomCanvas {...defaultProps} {...override} />);
+    const defaultProps = {
+        room: mockRoom,
+        corners: mockCorners,
+        setRoom: vi.fn(),
+        handleDragCorner: vi.fn(),
+        isContainerInsideRoom: vi.fn().mockReturnValue(true),
 
-describe("RoomCanvas", () => {
-    beforeEach(() => {
-        globalThis.alert = vi.fn();
+        doors: mockDoors,
+        selectedDoorId: null,
+        handleSelectDoor: vi.fn(),
+        handleDragDoor: vi.fn(),
+        handleAddDoor: vi.fn(),
+        doorZones: [],
+
+        containers: mockContainers,
+        selectedContainerId: null,
+        handleSelectContainer: vi.fn(),
+        handleDragContainer: vi.fn(),
+        moveAllContainers: vi.fn(),
+        setSelectedContainerInfo: vi.fn(),
+        selectedContainerInfo: null,
+        draggedContainer: null,
+        getContainerZones: vi.fn(),
+
+        stageWrapperRef: React.createRef<HTMLDivElement>(),
+        handleStageDrop: vi.fn(),
+        handleStageDragOver: vi.fn(),
+        handleStageDragLeave: vi.fn(),
+        isStageDropActive: false,
+        setIsStageDropActive: vi.fn(),
+
+        serviceTypes: [],
+        selectedType: null,
+        setSelectedType: vi.fn(),
+        availableContainers: [mockContainerDTO],
+        selectedSize: {},
+        setSelectedSize: vi.fn(),
+        isLoadingContainers: false,
+        fetchContainers: vi.fn(),
+        handleAddContainer: vi.fn(),
+        setDraggedContainer: vi.fn(),
+    };
+
+    it("renders the RoomCanvas component with toolbar, stage, and panel", () => {
+        const { getByTestId } = render(<RoomCanvas {...defaultProps} />);
+        expect(getByTestId("toolbar")).toBeTruthy();
+        expect(getByTestId("stage")).toBeTruthy();
+        expect(getByTestId("layer")).toBeTruthy();
+        expect(getByTestId("container-panel")).toHaveTextContent("Closed");
     });
 
-    afterEach(() => {
-        vi.restoreAllMocks();
+    it("toggles container panel when toolbar button is clicked", () => {
+        const { getByTestId } = render(<RoomCanvas {...defaultProps} />);
+        const toggleButton = getByTestId("toolbar").querySelector("button")!;
+        fireEvent.click(toggleButton);
+        expect(getByTestId("container-panel")).toBeTruthy();
     });
 
-    it("renders highlighted zones when a container is being dragged", () => {
-        renderRoomCanvas();
+    it("calls undo, redo, and addDoor handlers", () => {
+        const undo = vi.fn();
+        const redo = vi.fn();
+        const handleAddDoor = vi.fn();
 
-        const zoneGroup = screen.getByTestId("zone-0");
-        expect(zoneGroup).toBeInTheDocument();
+        const { getByText } = render(
+            <RoomCanvas {...defaultProps} undo={undo} redo={redo} saveRoom={vi.fn()} />
+        );
 
-        const rects = zoneGroup.querySelectorAll('[data-testid="rect"]');
-        expect(rects.length).toBeGreaterThan(0);
+        fireEvent.click(getByText("Undo"));
+        fireEvent.click(getByText("Redo"));
+        fireEvent.click(getByText("Add Door"));
+
+        expect(undo).toHaveBeenCalledTimes(1);
+        expect(redo).toHaveBeenCalledTimes(1);
+        expect(defaultProps.handleAddDoor).toHaveBeenCalledTimes(1);
     });
 
-    it("opens the RoomSizePrompt when clicking the ruler button", () => {
-        renderRoomCanvas();
+    it("clears selection when clicking on empty stage area", () => {
+        const handleSelectContainer = vi.fn();
+        const handleSelectDoor = vi.fn();
+        const setSelectedContainerInfo = vi.fn();
 
-        const rulerButton = screen.getByRole("button", { name: /ändra rumsdimensioner/i });
-        fireEvent.click(rulerButton);
+        const { getByTestId } = render(
+            <RoomCanvas
+                {...defaultProps}
+                handleSelectContainer={handleSelectContainer}
+                handleSelectDoor={handleSelectDoor}
+                setSelectedContainerInfo={setSelectedContainerInfo}
+            />
+        );
 
-        expect(screen.getByTestId("room-size-prompt")).toBeInTheDocument();
-    });
+        const stage = getByTestId("stage");
 
-    it("calls alert when clicking save design button", () => {
-        renderRoomCanvas();
+        fireEvent.mouseDown(stage, {
+            target: {
+                getStage: () => stage,
+            },
+        });
 
-        const saveButton = screen.getByRole("button", { name: /spara design/i });
-        fireEvent.click(saveButton);
-
-        // expect(globalThis.alert).toHaveBeenCalledWith("Spara funktionalitet kommer snart!");
+        expect(handleSelectContainer).toHaveBeenCalledWith(null);
+        expect(handleSelectDoor).toHaveBeenCalledWith(null);
+        expect(setSelectedContainerInfo).toHaveBeenCalledWith(null);
     });
 });

@@ -42,9 +42,16 @@ public class ContainerServiceImplTest {
         ContainerType type = new ContainerType();
         type.setName("200L Kärl");
 
+        ServiceType serviceType = new ServiceType();
+        serviceType.setName("sevice");
+
+        MunicipalityService municipalityService = new MunicipalityService();
+        municipalityService.setServiceType(serviceType);
+
         ContainerPlan plan = new ContainerPlan();
         plan.setContainerType(type);
         plan.setImageTopViewUrl(null);
+        plan.setMunicipalityService(municipalityService);
 
         when(repository.findByMunicipalityService_Municipality_IdAndMunicipalityService_ServiceType_Id(1L,2L))
                 .thenReturn(List.of(plan));

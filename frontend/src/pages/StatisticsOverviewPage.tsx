@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { getPropertiesSimple } from "../lib/Statistics";
+import LoadingBar from "../components/LoadingBar";
 import {
     getAnnualCost,
     getCollectionFee,
@@ -45,8 +47,8 @@ export default function StatisticsOverviewPage() {
             state: {
                 propertyName: p.address,
                 numberOfApartments: p.numberOfApartments,
-                lockPrice: p.lockPrice
-            }
+                lockPrice: p.lockPrice,
+            },
         });
     }
 
@@ -104,11 +106,11 @@ export default function StatisticsOverviewPage() {
     }
 
     if (loading) {
-        return (
-            <main className="mx-auto max-w-7xl px-4 py-8">
-                <p className="text-gray-600">Laddar fastigheter...</p>
-            </main>
-        );
+      return (
+        <main className="mx-auto max-w-7xl px-4 py-8">
+          <LoadingBar message="Laddar fastigheter..." />
+        </main>
+      );
     }
 
     if (error) {

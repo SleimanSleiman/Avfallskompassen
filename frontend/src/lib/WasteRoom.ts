@@ -14,6 +14,7 @@ export type WasteRoom = {
     createdAt: string;
     updatedAt?: string;
     property: Property;
+    thumbnailUrl: string;
 }
 
 export type SimpleWasteRoom = {

@@ -1,0 +1,48 @@
+/* Outer wrapper */
+.overview-wrapper {
+    @apply mt-4 rounded-2xl border border-gray-200 bg-white p-4 shadow-sm;
+}
+
+/* Grid layout */
+.overview-grid {
+    @apply grid gap-3 sm:grid-cols-2 xl:grid-cols-3;
+}
+
+/* Each highlight card */
+.overview-card {
+    @apply flex items-center gap-3 rounded-xl border border-gray-200/70
+           bg-gray-50/60 p-3;
+}
+
+/* Icon circle */
+.overview-icon-wrapper {
+    @apply flex h-10 w-10 items-center justify-center rounded-full
+           bg-white text-nsr-teal shadow-sm;
+}
+
+.overview-icon {
+    @apply h-5 w-5;
+}
+
+/* Text block */
+.overview-text {
+    @apply min-w-0;
+}
+
+.overview-title {
+    @apply text-[11px] font-semibold uppercase tracking-wide text-gray-500;
+}
+
+.overview-value {
+    @apply truncate text-sm font-medium leading-tight;
+}
+
+/* Optional helper text */
+.overview-helper {
+    @apply text-[11px] text-gray-400;
+}
+
+/* Wrapper around WasteTypeSummaryPanel */
+.overview-summary-wrapper {
+    @apply mt-4;
+}

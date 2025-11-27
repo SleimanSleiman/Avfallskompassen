@@ -1,6 +1,9 @@
 package com.avfallskompassen.dto;
 
 import com.avfallskompassen.model.Property;
+import com.avfallskompassen.model.WasteRoom;
+
+import java.util.List;
 // timestamps are exposed as ISO strings for frontend compatibility
 
 /**
@@ -19,6 +22,7 @@ public class PropertyDTO {
     private Long municipalityId;
     private String municipalityName;
     private String createdByUsername;
+    private List<WasteRoomDTO> wasteRooms;
     
     // Constructors
     public PropertyDTO() {}
@@ -29,13 +33,19 @@ public class PropertyDTO {
         this.numberOfApartments = property.getNumberOfApartments();
         this.propertyType = property.getPropertyType() != null ? property.getPropertyType().getDisplayName() : null;
         this.lockTypeDto = property.getLockType() != null? new LockTypeDto(property.getLockType()) : null;
-    this.accessPathLength = property.getAccessPathLength();
-    this.createdAt = property.getCreatedAt() != null ? property.getCreatedAt().toString() : null;
-    this.updatedAt = property.getUpdatedAt() != null ? property.getUpdatedAt().toString() : null;
-    this.lastNotifiedAt = property.getLastNotifiedAt() != null ? property.getLastNotifiedAt().toString() : null;
+        this.accessPathLength = property.getAccessPathLength();
+        this.createdAt = property.getCreatedAt() != null ? property.getCreatedAt().toString() : null;
+        this.updatedAt = property.getUpdatedAt() != null ? property.getUpdatedAt().toString() : null;
+        this.lastNotifiedAt = property.getLastNotifiedAt() != null ? property.getLastNotifiedAt().toString() : null;
         this.municipalityId = property.getMunicipality() != null ? property.getMunicipality().getId() : null;
         this.municipalityName = property.getMunicipality() != null ? property.getMunicipality().getName() : null;
         this.createdByUsername = property.getCreatedBy() != null ? property.getCreatedBy().getUsername() : null;
+
+        if (property.getWasteRooms() != null) {
+            this.wasteRooms = property.getWasteRooms().stream()
+                    .map(WasteRoomDTO::fromEntity)
+                    .toList();
+        }
     }
     
     // Getters and Setters
@@ -96,5 +106,13 @@ public class PropertyDTO {
 
     public String getLockName() {
         return lockTypeDto != null ? lockTypeDto.getName() : null;
+    }
+
+    public List<WasteRoomDTO> getWasteRooms() {
+        return wasteRooms;
+    }
+
+    public void setWasteRooms(List<WasteRoomDTO> wasteRooms) {
+        this.wasteRooms = wasteRooms;
     }
 }
