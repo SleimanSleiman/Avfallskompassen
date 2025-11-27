@@ -137,7 +137,7 @@ public class ContainerServiceImpl implements ContainerService {
 
         return new ContainerDTO(
                 plan.getId(),
-                type.getName(),
+                plan.getMunicipalityService().getServiceType().getName(),
                 type.getSize(),
                 type.getWidth(),
                 type.getDepth(),

@@ -10,11 +10,12 @@ import {
   createProperty,
   deleteProperty,
   updateProperty,
+  getMyPropertiesWithWasteRooms,
 } from "../../src/lib/Property";
 import { getWasteRoomsByPropertyId } from "../../src/lib/WasteRoom";
 
 vi.mock("../../src/lib/Property", () => ({
-  getMyProperties: vi.fn(),
+  getMyPropertiesWithWasteRooms: vi.fn(),
   getMunicipalities: vi.fn(),
   getLockTypes: vi.fn(),
   createProperty: vi.fn(),
@@ -50,18 +51,35 @@ describe("PropertyPage", () => {
     { id: 1, name: "Standard" },
   ]);
 
-  vi.mocked(getMyProperties).mockResolvedValue([
-  {
-    id: 10,
-    address: "Storgatan 1",
-    municipalityId: 1,
-    numberOfApartments: 10,
-    accessPathLength: 5,
-    lockName: "Standard",
-    createdAt: new Date().toISOString(),
-    wasteRooms: [],
-  },
-]);
+  vi.mocked(getMyPropertiesWithWasteRooms).mockResolvedValue([
+    {
+      id: 10,
+      address: "Storgatan 1",
+      municipalityId: 28,
+      municipalityName: "Båstad",
+      numberOfApartments: 10,
+      accessPathLength: 5,
+      lockName: "Kodlås",
+      lockTypeDto: { id: 4, name: "Kodlås", cost: 0 },
+      createdAt: new Date().toISOString(),
+      createdByUsername: "Anton",
+      wasteRooms: [
+        {
+          wasteRoomId: 16,
+          propertyId: 68,
+          containers: [
+            { id: 1, x: 220, y: 220, angle: 5, containerDTO: {} },
+          ],
+          doors: [],
+          length: 6,
+          width: 6,
+          x: 200,
+          y: 200,
+        },
+      ],
+    },
+  ]);
+
 
   vi.mocked(getWasteRoomsByPropertyId).mockResolvedValue([]);
 });
@@ -69,12 +87,12 @@ describe("PropertyPage", () => {
   it("loads and displays properties on mount", async () => {
     renderPage();
 
-    expect(getMyProperties).toHaveBeenCalled();
+    expect(getMyPropertiesWithWasteRooms).toHaveBeenCalled();
     expect(await screen.findByText("Storgatan 1")).toBeInTheDocument();
   });
 
   it("shows loading state when properties are loading", () => {
-    vi.mocked(getMyProperties).mockImplementation(
+    vi.mocked(getMyPropertiesWithWasteRooms).mockImplementation(
       () => new Promise(() => {}) // Never resolves
     );
 

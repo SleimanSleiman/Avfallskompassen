@@ -1,6 +1,7 @@
 package com.avfallskompassen.model;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.BatchSize;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -32,9 +33,11 @@ public class WasteRoom {
     private double y;
 
     @OneToMany(mappedBy = "wasteRoom", cascade = CascadeType.ALL, orphanRemoval = true)
+    @BatchSize(size = 50)
     private List<ContainerPosition> containers;
 
     @OneToMany(mappedBy = "wasteRoom", cascade = CascadeType.ALL, orphanRemoval = true)
+    @BatchSize(size = 50)
     private List<Door> doors;
 
     @Column(name = "created_at", nullable = false, updatable = false)

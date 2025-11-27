@@ -2,6 +2,7 @@ package com.avfallskompassen.controller;
 
 import com.avfallskompassen.dto.LockTypeDto;
 import com.avfallskompassen.dto.PropertySimpleDTO;
+import com.avfallskompassen.dto.UserStatsDTO;
 import com.avfallskompassen.dto.request.PropertyRequest;
 import com.avfallskompassen.dto.response.PropertyResponse;
 import com.avfallskompassen.dto.PropertyDTO;
@@ -11,6 +12,7 @@ import com.avfallskompassen.services.PropertyService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import com.avfallskompassen.exception.ExceptionResponseUtil;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -89,6 +91,18 @@ public class PropertyController {
                 
         return ResponseEntity.ok(propertyDTOs);
     }
+
+    /**
+     * Collects basic info about all users in the system, such as username, number of properties and waste rooms, etc.
+     * @return A list of DTO:s containing information about users
+     */
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/user/stats")
+    public ResponseEntity<List<UserStatsDTO>> getUserStats() {
+        List<UserStatsDTO> dto = propertyService.getUsersInfoCount();
+
+        return ResponseEntity.ok(dto);
+    }
     
     /**
      * Get all properties created by the current user - Returns DTOs to avoid proxy issues.
@@ -121,6 +135,40 @@ public class PropertyController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
+
+    /**
+     * Get all properties and their waste rooms created by the current user - Returns DTOs to avoid proxy issues.
+     */
+    @GetMapping("/my-properties-wasterooms")
+    public ResponseEntity<List<PropertyDTO>> getMyPropertiesWithWasteRooms(
+            @RequestHeader(value = "X-Username", required = false) String username) {
+
+        if (username == null || username.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        List<PropertyDTO> dto = propertyService.getPropertiesWithRoomsByUser(username);
+
+        return ResponseEntity.ok(dto);
+    }
+
+    /**
+     * Get all properties and their waste rooms created by a specific user - Returns DTOs to avoid proxy issues.
+     */
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/admin/user-properties-wasterooms")
+    public ResponseEntity<List<PropertyDTO>> getUsersPropertiesWithWasteRooms(
+            @RequestHeader(value = "X-Username", required = false) String username) {
+
+        if (username == null || username.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        List<PropertyDTO> dto = propertyService.getPropertiesWithRoomsByUser(username);
+
+        return ResponseEntity.ok(dto);
+    }
+
 
     /**
      * Gets all properties created by current user - Returns a simplified version of the property DTO.
