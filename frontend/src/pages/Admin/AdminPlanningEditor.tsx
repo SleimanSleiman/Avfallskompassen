@@ -56,8 +56,8 @@ export default function AdminPlanningEditor({
     const selectedVersion = plan.versions.find((v) => v.versionNumber === defaultVersionNumber) || plan.versions[plan.versions.length - 1];
 
     return {
-      length: selectedVersion.roomWidth,
-      width: selectedVersion.roomHeight,
+      length: selectedVersion.roomHeight,
+      width: selectedVersion.roomWidth,
       x: selectedVersion.x,
       y: selectedVersion.y,
       property: property,
@@ -86,7 +86,9 @@ export default function AdminPlanningEditor({
         hasContainers: !!currentPlanData.containers,
         containerCount: currentPlanData.containers?.length,
         hasDoors: !!currentPlanData.doors,
-        doorCount: currentPlanData.doors?.length
+        doorCount: currentPlanData.doors?.length,
+          x: currentPlanData.x,
+          y: currentPlanData.y
       });
       
       const selectedVersionNumber = plan.selectedVersion ?? plan.activeVersionNumber ?? plan.versions[plan.versions.length - 1].versionNumber;
@@ -140,12 +142,14 @@ export default function AdminPlanningEditor({
       });
       
       console.log('Mapped containers for backend:', containers);
+      const roomX = currentPlanData.x !== undefined ? currentPlanData.x : selectedVersion.x ?? 150;
+      const roomY = currentPlanData.y !== undefined ? currentPlanData.y : selectedVersion.y ?? 150;
 
       const requestPayload = {
-        length: currentPlanData.length || selectedVersion.roomWidth,
-        width: currentPlanData.width || selectedVersion.roomHeight,
-        x: currentPlanData.x ?? selectedVersion.x ?? 150,
-        y: currentPlanData.y ?? selectedVersion.y ?? 150,
+        length: currentPlanData.width || selectedVersion.roomHeight,
+        width: currentPlanData.length || selectedVersion.roomWidth,
+        x: roomX,
+        y: roomY,
         doors,
         containers,
         propertyId: property.id,
@@ -153,6 +157,24 @@ export default function AdminPlanningEditor({
         adminUsername,
         versionToReplace: versionToReplace || undefined
       };
+
+        if (requestPayload.length > 9) {
+            alert("Room height cannot exceed 9 meters.");
+            setSaving(false);
+            return;
+        }
+
+        if (requestPayload.width > 12) {
+            alert("Room width cannot exceed 12 meters.");
+            setSaving(false);
+            return;
+        }
+
+        if (requestPayload.length < 2.5 || requestPayload.width < 2.5) {
+            alert("Room dimensions must be at least 2.5 meters.");
+            setSaving(false);
+            return;
+        }
       
       console.log('========== SAVE REQUEST PAYLOAD ==========');
       console.log('Full request payload being sent to backend:', requestPayload);
@@ -162,6 +184,9 @@ export default function AdminPlanningEditor({
       console.log('Doors:', requestPayload.doors.map(d => ({ x: d.x, y: d.y, wall: d.wall })));
       console.log('Property ID:', property.id, 'Room Name:', plan.name);
 
+        console.log("Width:", requestPayload.width);
+        console.log("Length:", requestPayload.length);
+
       // Call the backend API to save the new version
       const savedVersion = await createAdminVersion(property.id, plan.name, requestPayload);
       console.log('Backend response - saved version:', savedVersion);
@@ -169,8 +194,10 @@ export default function AdminPlanningEditor({
       // Also call onSave to update local state
       onSave(
         {
-          roomWidth: currentPlanData.length || selectedVersion.roomWidth,
-          roomHeight: currentPlanData.width || selectedVersion.roomHeight,
+          roomWidth: currentPlanData.width || selectedVersion.roomWidth,
+          roomHeight: currentPlanData.length || selectedVersion.roomHeight,
+            x: roomX,
+            y: roomY,
           versionName: versionName || undefined,
           doors: selectedVersion.doors,
           containers: selectedVersion.containers,

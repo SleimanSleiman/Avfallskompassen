@@ -116,8 +116,8 @@ export default function AdminUserDetail({ user, onBack }: AdminUserDetailProps) 
                   // Map all versions to PlanVersion format
                   const versions: PlanVersion[] = allVersions.map((v: any) => ({
                     versionNumber: v.versionNumber || 1,
-                    roomWidth: v.length || v.roomWidth || 0,
-                    roomHeight: v.width || v.roomHeight || 0,
+                    roomWidth: v.width || v.roomWidth || 0,
+                    roomHeight: v.length || v.roomHeight || 0,
                     x: v.x ?? 150,
                     y: v.y ?? 150,
                     doors: v.doors || [],
@@ -154,8 +154,8 @@ export default function AdminUserDetail({ user, onBack }: AdminUserDetailProps) 
                     versions: [
                       {
                         versionNumber: firstRoom.versionNumber || 1,
-                        roomWidth: firstRoom.length || firstRoom.roomWidth || 0,
-                        roomHeight: firstRoom.width || firstRoom.roomHeight || 0,
+                        roomWidth: firstRoom.width || firstRoom.roomWidth || 0,
+                        roomHeight: firstRoom.length || firstRoom.roomHeight || 0,
                         x: firstRoom.x ?? 150,
                         y: firstRoom.y ?? 150,
                         doors: firstRoom.doors || [],
@@ -293,8 +293,8 @@ export default function AdminUserDetail({ user, onBack }: AdminUserDetailProps) 
 
                 const versions: PlanVersion[] = allVersions.map((v: any) => ({
                   versionNumber: v.versionNumber || 1,
-                  roomWidth: v.length || v.roomWidth || 0,
-                  roomHeight: v.width || v.roomHeight || 0,
+                  roomWidth: v.width || v.roomWidth || 0,
+                  roomHeight: v.length || v.roomHeight || 0,
                   x: v.x ?? 150,
                   y: v.y ?? 150,
                   doors: v.doors || [],
