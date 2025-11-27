@@ -138,7 +138,11 @@ export default function Toolbar({
 
             {/* Add door */}
             <button
-                onClick={() => setIsDoorPromptOpen(true)}
+                onClick={() => {
+                    setIsDoorPromptOpen(true)
+                    handleSelectContainer(null);
+                    handleSelectDoor(null);
+                }}
                 className="group toolbar-btn"
             >
                 <DoorOpen className="toolbar-icon" />
