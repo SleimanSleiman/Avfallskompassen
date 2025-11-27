@@ -2,7 +2,6 @@
  * DoorVisual Component
  * Draws the arc and line that represent a door and its swing direction.
  */
-
 import { Arc, Line } from "react-konva";
 import { SCALE } from "../../../../Constants";
 
