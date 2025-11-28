@@ -32,7 +32,7 @@ export default function Sidebar({
             <div className="flex flex-col gap-4 flex-1">
 
                 {/* ---------- Lower box: Costs ---------- */}
-                <div className="flex flex-col border rounded-2xl bg-white px-3 py-3 sm:p-4 transition-all duration-300 min-w-0 flex-1">
+                <div id="statistic-panel" className="flex flex-col border rounded-2xl bg-white px-3 py-3 sm:p-4 transition-all duration-300 min-w-0 flex-1">
                     <CostSection
                         comparisonData={comparisonData}
                         comparisonLoading={comparisonLoading}
