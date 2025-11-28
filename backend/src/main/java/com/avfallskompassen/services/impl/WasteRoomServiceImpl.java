@@ -9,11 +9,16 @@ import com.avfallskompassen.model.*;
 import com.avfallskompassen.repository.*;
 import com.avfallskompassen.services.ContainerService;
 import com.avfallskompassen.services.WasteRoomService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -29,6 +34,16 @@ public class WasteRoomServiceImpl implements WasteRoomService {
     private final WasteRoomRepository wasteRoomRepository;
     private final PropertyRepository propertyRepository;
     private final ContainerService containerService;
+
+    @Value("${supabase.url}")
+    private String supabaseUrl;
+
+    @Value("${supabase.bucket}")
+    private String supabaseBucket;
+
+    @Value("${supabase.service-key}")
+    private String supabaseServiceKey;
+
 
     public WasteRoomServiceImpl(
             WasteRoomRepository wasteRoomRepository,
@@ -288,7 +303,7 @@ public class WasteRoomServiceImpl implements WasteRoomService {
             byte[] decodedBytes = java.util.Base64.getDecoder().decode(imageBase64);
 
             // Save to folder
-            File folder = new File("uploads/wasterooms/");
+           /* File folder = new File("uploads/wasterooms/");
             if (!folder.exists()) {
                 folder.mkdirs();
             }
@@ -299,12 +314,40 @@ public class WasteRoomServiceImpl implements WasteRoomService {
                 fos.write(decodedBytes);
             }
 
-            room.setThumbnailUrl("/images/wasterooms/" + roomId + ".png");
+            room.setThumbnailUrl("/images/wasterooms/" + roomId + ".png");*/
+            saveThumbnailToSupabase(decodedBytes, roomId, room);
         }
         catch (Exception e) {
             throw new RuntimeException("Failed to save thumbnail", e);
         }
     }
+
+    private void saveThumbnailToSupabase(byte[] imageBytes, Long roomId, WasteRoom room) {
+        try {
+            String filePath = roomId + ".png";
+            String uploadUrl = supabaseUrl + "/storage/v1/object/" + supabaseBucket + "/" + filePath;
+
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(uploadUrl))
+                    .header("Authorization", "Bearer " + supabaseServiceKey)
+                    .header("Content-Type", "image/png")
+                    .PUT(HttpRequest.BodyPublishers.ofByteArray(imageBytes))
+                    .build();
+
+            HttpClient client = HttpClient.newHttpClient();
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+            if (response.statusCode() >= 200 && response.statusCode() < 300) {
+                String publicUrl = supabaseUrl + "/storage/v1/object/public/" + supabaseBucket + "/" + filePath;
+                room.setThumbnailUrl(publicUrl);
+            } else {
+                throw new RuntimeException("Failed to upload image to Supabase: " + response.body());
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Error uploading thumbnail to Supabase", e);
+        }
+    }
+
 
     /**
      * Saves an admin version of a waste room. Creates a new waste room entry with version info.
