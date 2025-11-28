@@ -123,7 +123,7 @@ export default function Toolbar({
     };
 
     return (
-        <div className="toolbar-panel">
+        <div id="toolbar-panel" className="toolbar-panel">
             {/* Change room size */}
             <button
                 onClick={() => {

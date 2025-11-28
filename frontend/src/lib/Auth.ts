@@ -6,16 +6,20 @@ export type LoginResponse = {
   username?: string;
   role?: string;
   token?: string;
+  hasSeenPlanningToolManual?: boolean;
 };
 
 export async function login(username: string, password: string, rememberMe: boolean = true): Promise<LoginResponse> {
   const res = await post<LoginResponse>('/api/auth/login', { username, password });
   if (res.success) {
     const storage = rememberMe ? localStorage : sessionStorage; 
-    storage.setItem('auth_user', JSON.stringify({ username: res.username, role: res.role, token: res.token }));
+    storage.setItem('auth_user', JSON.stringify({ username: res.username, role: res.role, 
+      token: res.token, hasSeenPlanningToolManual: res.hasSeenPlanningToolManual
+    }));
     // Dispatch event to notify components of auth change
     window.dispatchEvent(new Event('auth-change'));
-  }
+  }w
+
   return res;
 }
 
@@ -31,7 +35,7 @@ export async function register(username: string, password: string): Promise<Logi
 
 export function currentUser() {
   const raw = localStorage.getItem('auth_user') || sessionStorage.getItem('auth_user'); // Check both storages
-  return raw ? (JSON.parse(raw) as { username?: string; role?: string; token?: string }) : null;
+  return raw ? (JSON.parse(raw) as { username?: string; role?: string; token?: string; hasSeenPlanningToolManual?: boolean}) : null;
 }
 
 export function logout() {

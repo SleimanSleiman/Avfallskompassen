@@ -9,6 +9,8 @@ import { MapPin, Home, Users } from "lucide-react";
 //Lib
 import type { Property } from '../../lib/Property';
 import type { ContainerDTO } from '../../lib/Container';
+import { currentUser } from '../../lib/Auth';
+
 
 import { useComparison } from './hooks/useComparison';
 import { useLayoutHistory } from './hooks/UseLayoutHistory';
@@ -28,6 +30,9 @@ import { useDoors } from './hooks/UseDoors';
 import { useContainers } from './hooks/UseContainers';
 import { useServiceTypes } from './hooks/UseServiceTypes';
 import { SCALE } from './Constants';
+
+import { driver } from "driver.js";
+import "driver.js/dist/driver.css";
 
 type PlanningToolProps = {
     isAdminMode?: boolean;
@@ -233,9 +238,117 @@ export default function PlanningTool({ isAdminMode = false }: PlanningToolProps)
         room.id = savedRoom?.wasteRoomId;
     };
 
+    const [shouldShowTour, setShouldShowTour] = useState(false);
+
+    useEffect(() => {
+        const hasSeen = localStorage.getItem("hasSeenPlanningToolManual");
+
+        // If null or "false" then show tour
+        if (hasSeen === null || hasSeen === "false") {
+            setShouldShowTour(true);
+        }
+    }, []);
+
+    // Auto-start tour once state is ready
+    useEffect(() => {
+        if (shouldShowTour) {
+            startTour();
+        }
+    }, [shouldShowTour]);
+
+    function startTour() {
+        const tour = driver({
+            showProgress: true,
+            overlayOpacity: 0.55,
+            allowClose: true,
+            nextBtnText: "Nästa",
+            prevBtnText: "Föregående",
+            doneBtnText: "Klart",
+
+            onDestroyed: async () => {
+                try {
+                    const user = currentUser();
+                    if (!user?.username) return;
+
+                    // Save locally immediately
+                    localStorage.setItem("hasSeenPlanningToolManual", "true");
+
+                    await fetch(`/api/user/${user.username}/mark-manual-seen`, {
+                        method: "POST",
+                        headers: {
+                            "Authorization": `Bearer ${user.token}`,
+                            "Content-Type": "application/json"
+                        }
+                    });
+                    setShouldShowTour(false);
+
+                } catch (err) {
+                    console.error("Could not update manual state", err);
+                }
+            },
+     
+            steps: [
+                {
+                    element: "#toolbar-panel",
+                    popover: {
+                        title: "Verktygsfält",
+                        description: "Här kan du ändra rummet storlek, lägga dörrar, kärl och spara miljörummet.",
+                        side: "bottom",
+                        align: "center"
+                    }
+                },
+                {
+                    element: "#canvas-stage",
+                    popover: {
+                        title: "Arbetsyta",
+                        description: "Här bygger du miljörummet genom att dra och släppa objekt.",
+                        side: "right",
+                        align: "center"
+                    }
+                },
+                {
+                    element: "#wasteAnalysis-panel",
+                    popover: {
+                        title: "Kostnader och jämförelse",
+                        description: "Här hittar du kostnader, volymer och jämförelser.",
+                        side: "left",
+                        align: "center"
+                    }
+                },
+                {
+                    element: "#property-panel",
+                    popover: {
+                        title: "Fastighetsinformation",
+                        description: "Visar adress, antal lägenheter och jämförelsedata.",
+                        side: "top",
+                        align: "center"
+                    }
+                },
+                {
+                    element: "#comparison-panel",
+                    popover: {
+                        title: "Jämförelse per avfallstyp",
+                        description: "Här visas årskostnader och årvolymer.",
+                        side: "top",
+                        align: "start"
+                    }
+                }
+            ]
+        });
+
+        tour.drive();
+    }
+
     /* ──────────────── Render ──────────────── */
     return (
         <div className="flex h-full w-full flex-col gap-4 p-3 sm:p-5">
+
+            <button
+                onClick={startTour}
+                className="self-end mb-2 px-3 py-1 bg-nsr-teal text-white rounded-lg shadow"
+                >
+                Visa manual
+            </button>
             <div className="flex w-full flex-1 flex-col gap-4 lg:flex-row lg:gap-6">
 
                 {/* ─────────────── Canvas ──────────────── */}
@@ -320,7 +433,7 @@ export default function PlanningTool({ isAdminMode = false }: PlanningToolProps)
                     />
                 </div>
 
-                <div className="w-full lg:pl-6 flex flex-col">
+                <div id="wasteAnalysis-panel" className="w-full lg:pl-6 flex flex-col">
                     <WasteAnalysisPanels
                         comparisonData={comparisonData}
                         comparisonLoading={comparisonLoading}

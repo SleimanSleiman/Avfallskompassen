@@ -249,6 +249,28 @@ async function onDeleteWasteRoom(propertyId: number, wasteRoomId: number) {
     });
   }
 
+  useEffect(() => {
+  async function checkManual() {
+    const user = currentUser();
+    if (!user?.username || !user?.token) return;
+
+    const res = await fetch(`/api/user/${user.username}/has-seen-manual`, {
+      method: "GET",
+      headers: {
+        "Authorization": `Bearer ${user.token}`,
+        "Content-Type": "application/json"
+      }
+    });
+
+    if (res.ok) {
+      const hasSeen = await res.json();
+      localStorage.setItem("hasSeenPlanningToolManual", hasSeen ? "true" : "false");
+    }
+  }
+
+  checkManual();
+}, []);
+
   return (
     <main className="mx-auto max-w-7xl px-4 py-8">
       <ConfirmModal
