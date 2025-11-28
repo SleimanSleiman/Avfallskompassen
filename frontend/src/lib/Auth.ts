@@ -18,7 +18,7 @@ export async function login(username: string, password: string, rememberMe: bool
     }));
     // Dispatch event to notify components of auth change
     window.dispatchEvent(new Event('auth-change'));
-  }w
+  }
 
   return res;
 }
