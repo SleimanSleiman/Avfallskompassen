@@ -1,14 +1,14 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { getPropertiesSimple } from "../lib/Statistics";
 import LoadingBar from "../components/LoadingBar";
 import {
     getAnnualCost,
     getCollectionFee,
     getPropertiesSimple,
-    getPropertyContainers
+    getPropertyContainers, type AnnualCostDTO
 } from "../lib/Statistics";
-import { getWasteRoomsByPropertyId, getSimpleWasteRoom } from "../lib/WasteRoom"; //TODO: Lägg till denna metoden.
+import { getWasteRoomsByPropertyId } from "../lib/WasteRoom";
+import {exportStatisticsPdf} from "./ExportPdf.tsx";
 
 interface Property {
     id: number;
@@ -24,7 +24,6 @@ export default function StatisticsOverviewPage() {
     const [properties, setProperties] = useState<Property[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [roomToExport, setRoomToExport] = useState<any | null>(null);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -52,56 +51,71 @@ export default function StatisticsOverviewPage() {
         });
     }
 
-    async function exportPDF(p: Property) {
+    async function exportStatisticsPdfFromOverview(property: Property) {
         try {
-            const wasteRooms = await getWasteRoomsByPropertyId(p.id);
-            if (!wasteRooms.length) throw new Error("Inget avfallsrum hittades");
-
-            const wasteRoom = wasteRooms[0];
-
-            const [containersData, annualCostData, collectionFeeData] = await Promise.all([ //TODO: Ändra så att TypeSimpleWasteRoom faktiskt stämmer.
-                getSimpleWasteRoom(p.id),
-                getAnnualCost(p.id),
-                getCollectionFee(p.id)
+            const [
+                containers,
+                annualCost,
+                collectionFee
+            ] = await Promise.all([
+                getPropertyContainers(property.id),
+                getAnnualCost(property.id),
+                getCollectionFee(property.id),
             ]);
 
-            const formattedContainers = containersData.map(c => ({
-                ...c,
-                containerName: c.containerName,
-                size: c.size,
-                quantity: c.quantity,
-                emptyingFrequency: c.emptyingFrequency,
-                cost: c.cost,
-                imageTopViewUrl: c.imageTopViewUrl || "" // fallback
-            }));
+            const grouped = containers.reduce((acc, c) => {
+                (acc[c.fractionType] ||= []).push(c);
+                return acc;
+            }, {} as Record<string, any[]>);
 
-            const statistics = {
-                containers: formattedContainers,
-                annualCost: annualCostData,
-                collectionFee: Number(collectionFeeData?.cost) || 0,
-                numberOfApartments: p.numberOfApartments ?? 0
-            };
+            const containerSummaries = Object.entries(grouped).map(([type, list]) => {
+                const totalVolume = list.reduce((s, c) => s + c.size * c.quantity, 0);
+                const totalQuantity = list.reduce((s, c) => s + c.quantity, 0);
+                const totalAnnualVolume = list.reduce((s, c) => s + c.size * c.quantity * c.emptyingFrequency, 0);
+                const litersPerWeekPerApartment = property.numberOfApartments
+                    ? totalAnnualVolume / 52 / property.numberOfApartments
+                    : 0;
 
-            setRoomToExport({ //TODO: Säkerställ detta med olika DTO's senare. Så jäkla många olika.
-                wasteRoom,
-                doors: wasteRoom.doors || [],
-                containers: (wasteRoom.containers || []).map(c => ({
-                    ...c,
-                    container: {
-                        ...c.containerDTO,
-                        imageTopViewUrl: c.containerDTO?.imageTopViewUrl || ""
-                    },
-                    x: c.x ?? 0,
-                    y: c.y ?? 0,
-                    width: c.containerDTO.width ?? 50,
-                    height: c.containerDTO.height ?? 50,
-                    rotation: c.angle ?? 0
-                })),
-                statistics
+                const costPerYear = list.reduce((sum, c) => {
+                    const containerCost = Number(c.cost) || 0;
+                    const qty = Number(c.quantity) || 0;
+                    const freq = Number(c.emptyingFrequency) || 0;
+                    const lock = Number(collectionFee?.cost) || 0;
+                    return sum + (qty * lock * freq) + (qty * containerCost);
+                }, 0);
+
+                const indicator =
+                    litersPerWeekPerApartment > 45
+                        ? { label: "Hög nivå" }
+                        : litersPerWeekPerApartment > 30
+                            ? { label: "Medel nivå" }
+                            : { label: "Låg nivå" };
+
+                return {
+                    type,
+                    containers: list,
+                    totalVolume,
+                    totalQuantity,
+                    totalAnnualVolume,
+                    litersPerWeekPerApartment,
+                    costPerYear,
+                    indicator,
+                };
             });
-        } catch (err: any) {
-            console.error("Export failed", err);
-            alert(err.message || "Export failed");
+
+            console.table(containerSummaries);
+
+            exportStatisticsPdf(
+                property.address,
+                property.numberOfApartments || 0,
+                containerSummaries,
+                { annualCost },
+                collectionFee?.cost || 0
+            );
+
+        } catch (err) {
+            console.error("PDF export failed", err);
+            alert("Kunde inte generera PDF");
         }
     }
 
@@ -165,7 +179,7 @@ export default function StatisticsOverviewPage() {
 
                                     <button
                                         className="inline-flex items-center justify-center rounded-xl2 px-3 py-1 text-sm font-medium border border-gray-300 bg-white text-gray-700 hover:bg-gray-50"
-                                        onClick={() => exportPDF(p)}
+                                        onClick={() => exportStatisticsPdfFromOverview(p)}
                                     >
                                         Exportera PDF
                                     </button>
