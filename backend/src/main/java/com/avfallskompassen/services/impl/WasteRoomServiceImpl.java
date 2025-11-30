@@ -104,6 +104,20 @@ public class WasteRoomServiceImpl implements WasteRoomService {
     }
 
     /**
+     * Collects list of waste rooms that are connected to a certain property
+     *
+     * @param propertyId The id of the property whose waste rooms are to be collected
+     * @return A list of DTO containing the information about the waste room from the database
+     */
+    @Override
+    public WasteRoomImgDTO getActiveWasteRoomByPropertyId(Long propertyId) {
+        WasteRoom room = wasteRoomRepository.findByPropertyId(propertyId);
+
+        WasteRoomImgDTO dto = new WasteRoomImgDTO(room.getThumbnailUrl());
+        return dto;
+    }
+
+    /**
      * Processes the data from a request to update a waste room and saves the updated version in the database
      *
      * @param wasteRoomId Id to the waste room to be updated

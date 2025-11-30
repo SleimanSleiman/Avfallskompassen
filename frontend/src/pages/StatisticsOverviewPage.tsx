@@ -7,7 +7,7 @@ import {
     getPropertiesSimple,
     getPropertyContainers, type AnnualCostDTO
 } from "../lib/Statistics";
-import { getWasteRoomsByPropertyId } from "../lib/WasteRoom";
+import { getActiveWasteRoomsByPropertyId } from "../lib/WasteRoom";
 import {exportStatisticsPdf} from "./ExportPdf.tsx";
 
 interface Property {
@@ -110,7 +110,8 @@ export default function StatisticsOverviewPage() {
                 property.numberOfApartments || 0,
                 containerSummaries,
                 { annualCost },
-                collectionFee?.cost || 0
+                collectionFee?.cost || 0,
+
             );
 
         } catch (err) {

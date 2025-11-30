@@ -16,4 +16,6 @@ public interface WasteRoomRepository extends JpaRepository<WasteRoom, Long> {
     List<WasteRoom> findByPropertyId(Long propertyId);
 
     Optional<WasteRoom> findById(Long id);
+
+    WasteRoom findByWasteRoomId(Long propertyId);
 }

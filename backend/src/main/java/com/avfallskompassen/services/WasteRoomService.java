@@ -1,6 +1,7 @@
 package com.avfallskompassen.services;
 
 import com.avfallskompassen.dto.WasteRoomDTO;
+import com.avfallskompassen.dto.WasteRoomImgDTO;
 import com.avfallskompassen.dto.request.WasteRoomRequest;
 
 import java.util.List;
@@ -14,6 +15,8 @@ public interface WasteRoomService {
     WasteRoomDTO getWasteRoomById(Long id);
 
     List<WasteRoomDTO> getWasteRoomsByPropertyId(Long id);
+
+    WasteRoomImgDTO getActiveWasteRoomByPropertyId(Long id);
 
     WasteRoomDTO updateWasteRoom(Long wasteRoomId, WasteRoomRequest wasteRoomRequest);
 
