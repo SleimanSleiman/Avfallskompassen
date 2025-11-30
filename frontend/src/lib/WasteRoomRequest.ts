@@ -59,3 +59,47 @@ export async function updateWasteRoom(roomRequest: RoomRequest): Promise<WasteRo
         headers,
     });
 }
+
+export type AdminVersionRequest = {
+    x: number;
+    y: number;
+    width: number;
+    length: number;
+    doors: DoorRequest[];
+    containers: ContainerPositionRequest[];
+    propertyId: number;
+    versionName?: string;
+    adminUsername?: string;
+    versionToReplace?: number;
+}
+
+export async function createAdminVersion(
+    propertyId: number,
+    roomName: string,
+    request: AdminVersionRequest
+): Promise<WasteRoom> {
+    const headers = {
+        'Content-Type': 'application/json',
+    };
+
+    return await api<WasteRoom>(
+        `/api/admin/properties/${propertyId}/wasterooms/${encodeURIComponent(roomName)}/version`,
+        {
+            method: 'POST',
+            body: request,
+            headers
+        }
+    );
+}
+
+export async function getAllWasteRoomVersions(
+    propertyId: number,
+    roomName: string
+): Promise<WasteRoom[]> {
+    return await api<WasteRoom[]>(
+        `/api/admin/properties/${propertyId}/wasterooms/${encodeURIComponent(roomName)}/versions`,
+        {
+            method: 'GET'
+        }
+    );
+}

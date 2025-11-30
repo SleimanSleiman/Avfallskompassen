@@ -276,7 +276,14 @@ public class WasteRoomServiceImpl implements WasteRoomService {
                         ? entity.getDoors().stream().map(DoorDTO::fromEntity).toList()
                         : new ArrayList<>(),
                 entity.getId(),
-                entity.getName()
+                entity.getName(),
+                entity.getVersionNumber(),
+                entity.getCreatedBy(),
+                entity.getAdminUsername(),
+                entity.getVersionName(),
+                entity.getIsActive(),
+                entity.getCreatedAt() != null ? entity.getCreatedAt().toString() : null,
+                entity.getUpdatedAt() != null ? entity.getUpdatedAt().toString() : null
         );
 
         dto.setThumbnailUrl(entity.getThumbnailUrl());
@@ -311,5 +318,90 @@ public class WasteRoomServiceImpl implements WasteRoomService {
         catch (Exception e) {
             throw new RuntimeException("Failed to save thumbnail", e);
         }
+    }
+
+    /**
+     * Saves an admin version of a waste room. Creates a new waste room entry with version info.
+     * If versionToReplace is specified, marks that version as inactive.
+     *
+     * @param propertyId The id of the property
+     * @param roomName The name of the waste room
+     * @param request The request containing the waste room data and version info
+     * @return A DTO containing the information about the newly created version
+     */
+    @Override
+    @Transactional
+    public WasteRoomDTO saveAdminVersion(Long propertyId, String roomName, WasteRoomRequest request) {
+        Property property = findPropertyById(propertyId);
+        
+        // Get all existing versions for this room
+        List<WasteRoom> existingVersions = wasteRoomRepository
+                .findByPropertyIdAndNameOrderByVersionNumberAsc(propertyId, roomName);
+        
+        // Calculate next version number
+        int nextVersionNumber = existingVersions.stream()
+                .mapToInt(WasteRoom::getVersionNumber)
+                .max()
+                .orElse(0) + 1;
+        
+        // Create new version
+        WasteRoom newVersion = new WasteRoom();
+        newVersion.setLength(request.getLength());
+        newVersion.setWidth(request.getWidth());
+        newVersion.setX(request.getX());
+        newVersion.setY(request.getY());
+        newVersion.setProperty(property);
+        newVersion.setName(roomName);
+        newVersion.setVersionNumber(nextVersionNumber);
+        newVersion.setCreatedBy("admin");
+        newVersion.setAdminUsername(request.getAdminUsername());
+        newVersion.setVersionName(request.getVersionName());
+        newVersion.setIsActive(false); // Will be set to active after handling versionToReplace
+        
+        List<ContainerPosition> containerPositions = convertContainerRequest(request.getContainers(), newVersion);
+        List<Door> doorPositions = convertDoorRequest(request.getDoors(), newVersion);
+        newVersion.setContainers(containerPositions);
+        newVersion.setDoors(doorPositions);
+        
+        // Handle version replacement or max versions
+        if (request.getVersionToReplace() != null) {
+            // Mark the specified version as inactive (soft delete)
+            existingVersions.stream()
+                    .filter(v -> v.getVersionNumber() == request.getVersionToReplace())
+                    .findFirst()
+                    .ifPresent(v -> {
+                        v.setIsActive(false);
+                        wasteRoomRepository.save(v);
+                    });
+        }
+        
+        // Set all other versions to inactive
+        existingVersions.forEach(v -> {
+            v.setIsActive(false);
+            wasteRoomRepository.save(v);
+        });
+        
+        // Set new version as active
+        newVersion.setIsActive(true);
+        WasteRoom savedRoom = wasteRoomRepository.save(newVersion);
+        
+        return mapWasteRoomToDTO(savedRoom);
+    }
+
+    /**
+     * Gets all versions of a waste room for a specific property and room name
+     *
+     * @param propertyId The id of the property
+     * @param roomName The name of the waste room
+     * @return A list of DTOs containing all versions
+     */
+    @Override
+    public List<WasteRoomDTO> getAllVersionsByPropertyAndName(Long propertyId, String roomName) {
+        List<WasteRoom> versions = wasteRoomRepository
+                .findByPropertyIdAndNameOrderByVersionNumberAsc(propertyId, roomName);
+        
+        return versions.stream()
+                .map(this::mapWasteRoomToDTO)
+                .toList();
     }
 }

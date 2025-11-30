@@ -27,9 +27,13 @@ import { useRoom } from './hooks/UseRoom';
 import { useDoors } from './hooks/UseDoors';
 import { useContainers } from './hooks/UseContainers';
 import { useServiceTypes } from './hooks/UseServiceTypes';
+import { SCALE } from './Constants';
 
+type PlanningToolProps = {
+    isAdminMode?: boolean;
+};
 
-export default function PlanningTool() {
+export default function PlanningTool({ isAdminMode = false }: PlanningToolProps) {
 
     /* ──────────────── Room state & logic ──────────────── */
     const {
@@ -120,6 +124,49 @@ export default function PlanningTool() {
     }
         if (room.containers && room.containers.length > 0) saveContainers(room.containers);
     }, [room.id, setDoors, saveContainers]);
+
+   useEffect(() => {
+        if (typeof window === 'undefined') {
+            console.log('PlanningTool - Skipping sync (no window)');
+            return;
+        }
+
+        // Don't sync if we don't have a room ID (means we're still initializing)
+        if (!room.id) {
+            console.log('PlanningTool - Skipping sync (no room.id)', { room });
+            return;
+        }
+
+        try {
+            const stored = localStorage.getItem('trashRoomData');
+            if (!stored) {
+                console.log('PlanningTool - Skipping sync (no stored data)');
+                return;
+            }
+
+            const parsed = JSON.parse(stored);
+            const updated = {
+                ...parsed,
+                containers: containersInRoom,
+                doors: doors,
+                width: room.height * SCALE, // Convert back to meters
+                length: room.width * SCALE,  // Convert back to meters
+            };
+
+            console.log('PlanningTool - Syncing state to localStorage:', {
+                roomId: room.id,
+                containerCount: containersInRoom.length,
+                doorCount: doors.length,
+                roomDimensions: { width: updated.width, length: updated.length },
+                containers: containersInRoom
+            });
+
+            localStorage.setItem('trashRoomData', JSON.stringify(updated));
+        } catch (error) {
+            console.error('Failed to sync state to localStorage', error);
+        }
+    }, [containersInRoom, doors, room.width, room.height, room.id]);
+
 
     /* ──────────────── Service Types (API data) ──────────────── */
     const serviceTypes = useServiceTypes();
@@ -238,6 +285,7 @@ export default function PlanningTool() {
                         undo={undo}
                         redo={redo}
                         saveRoom={handleSaveRoom}
+                        isAdminMode={isAdminMode}
                     />
 
                     {/* ActionPanel for selected container or door */}
