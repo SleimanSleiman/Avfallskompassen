@@ -1,10 +1,10 @@
 import pdfMake from "pdfmake/build/pdfmake";
 import pdfFonts from "pdfmake/build/vfs_fonts";
-import type {WasteRoom} from "../lib/WasteRoom.ts";
+import type {WasteRoomImgDTO} from "../lib/WasteRoom.ts";
 
 pdfMake.vfs = pdfFonts.vfs;
 
-async function fetchImageAsBase64(url: string): Promise<string> { //TODO: Lägg till denna så att man får en bild på pdf.
+async function fetchImageAsBase64(url: string): Promise<string> {
     const res = await fetch(url, { credentials: "include" });
 
     if (!res.ok) {
@@ -103,17 +103,25 @@ export async function exportStatisticsPdf(
     containerSummaries: any[] = [],
     data: any,
     collectionFee: number,
-    selectedRoom: WasteRoom
+    selectedRoom: WasteRoomImgDTO
 ) {
     const logoBase64 = await fetchImageAsBase64("/src/assets/avfallskompassen_logo.png");
     const table = buildSummaryTable(containerSummaries, collectionFee);
     const totals = data?.annualCost || {};
     let wasteRoomImageBase64: string | null = null;
 
-    if(selectedRoom.thumbnailUrl) {
-        wasteRoomImageBase64 = await fetchImageAsBase64(
-            "http://localhost:8081${selectedRoom.thumbnailUrl"
-        );
+    console.log("thumbnailUrl =", selectedRoom.thumbnailUrl);
+
+    if (selectedRoom.thumbnailUrl) {
+        try {
+            const url = `http://localhost:8081${selectedRoom.thumbnailUrl}`;
+            console.log("Fetching waste room image from:", url);
+
+            wasteRoomImageBase64 = await fetchImageAsBase64(url);
+        } catch (err) {
+            console.error("Failed to load waste room image:", err);
+            wasteRoomImageBase64 = null;
+        }
     }
 
     const wasteRoomImageBlock = wasteRoomImageBase64

@@ -96,10 +96,10 @@ public class WasteRoomController {
      * @return A status code with either an error message or a list containing DTO with information
      * about the waste rooms collected.
      */
-    @GetMapping("/properties/{propertyId}/wasterooms")
-    public ResponseEntity<List<WasteRoomImgDTO>> getActiveWasteRoomsByPropertyId(@PathVariable Long propertyId) {
-        List<WasteRoomImgDTO> rooms = wasteRoomService.getActiveWasteRoomsByPropertyId(propertyId);
-        return ResponseEntity.ok(rooms);
+    @GetMapping("/properties/{propertyId}/active/wasteroom")
+    public ResponseEntity <WasteRoomImgDTO> getActiveWasteRoomsByPropertyId(@PathVariable Long propertyId) {
+        WasteRoomImgDTO room = wasteRoomService.getActiveRoom(propertyId);
+        return ResponseEntity.ok(room);
     }
 
     /**

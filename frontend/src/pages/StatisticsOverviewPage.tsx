@@ -56,11 +56,13 @@ export default function StatisticsOverviewPage() {
             const [
                 containers,
                 annualCost,
-                collectionFee
+                collectionFee,
+                activeRoom
             ] = await Promise.all([
                 getPropertyContainers(property.id),
                 getAnnualCost(property.id),
                 getCollectionFee(property.id),
+                getActiveWasteRoomsByPropertyId(property.id)
             ]);
 
             const grouped = containers.reduce((acc, c) => {
@@ -111,7 +113,7 @@ export default function StatisticsOverviewPage() {
                 containerSummaries,
                 { annualCost },
                 collectionFee?.cost || 0,
-
+                activeRoom,
             );
 
         } catch (err) {
