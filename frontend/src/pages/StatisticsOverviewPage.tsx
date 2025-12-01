@@ -110,6 +110,8 @@ export default function StatisticsOverviewPage() {
             exportStatisticsPdf(
                 property.address,
                 property.numberOfApartments || 0,
+                property.accessPathLength,
+                property.lockName,
                 containerSummaries,
                 { annualCost },
                 collectionFee?.cost || 0,
