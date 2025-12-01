@@ -245,7 +245,7 @@ const ContainerPanel = forwardRef(function ContainerPanel(
                                             />
                                             {/*Container info*/}
                                             <div className="container-info">
-                                                <p className="container-title">{container.name}</p>
+                                                <p className="container-title">{container.name} {container.size}L</p>
                                                 <p>{container.width} × {container.height} × {container.depth} mm</p>
                                                 <p>Tömningsfrekvens: {container.emptyingFrequencyPerYear}/år</p>
                                                 <p>Kostnad: {container.cost} kr/år</p>

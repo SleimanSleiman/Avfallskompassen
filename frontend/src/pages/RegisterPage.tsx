@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { register } from '../lib/Auth';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 export default function RegisterPage() {
   const [username, setUsername] = useState('');
@@ -10,6 +10,7 @@ export default function RegisterPage() {
   const [loading, setLoading] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+    const navigate = useNavigate();
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -31,7 +32,11 @@ export default function RegisterPage() {
     try {
       const res = await register(username, password);
       if (res.success) {
-        setMsg(res.message || 'Kontot har skapats! Du kan nu logga in.');
+        setMsg(res.message || 'Kontot har skapats! Du är nu inloggad.');
+
+        setTimeout(() => {
+          navigate('/dashboard');
+        }, 2000);
         // Clear form on success
         setUsername('');
         setPassword('');

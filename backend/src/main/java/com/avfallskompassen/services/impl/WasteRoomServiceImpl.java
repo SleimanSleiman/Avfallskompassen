@@ -9,12 +9,17 @@ import com.avfallskompassen.model.*;
 import com.avfallskompassen.repository.*;
 import com.avfallskompassen.services.ContainerService;
 import com.avfallskompassen.services.WasteRoomService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import org.springframework.transaction.annotation.Transactional;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.time.LocalDateTime;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -30,6 +35,16 @@ public class WasteRoomServiceImpl implements WasteRoomService {
     private final WasteRoomRepository wasteRoomRepository;
     private final PropertyRepository propertyRepository;
     private final ContainerService containerService;
+
+    @Value("${supabase.url}")
+    private String supabaseUrl;
+
+    @Value("${supabase.bucket}")
+    private String supabaseBucket;
+
+    @Value("${supabase.service-key}")
+    private String supabaseServiceKey;
+
 
     public WasteRoomServiceImpl(
             WasteRoomRepository wasteRoomRepository,
@@ -265,8 +280,13 @@ public class WasteRoomServiceImpl implements WasteRoomService {
                         : new ArrayList<>(),
                 entity.getId(),
                 entity.getName(),
-                entity.getUpdatedAt(),
-                entity.getCreatedAt(),
+                entity.getVersionNumber(),
+                entity.getCreatedBy(),
+                entity.getAdminUsername(),
+                entity.getVersionName(),
+                entity.getIsActive(),
+                entity.getCreatedAt() != null ? entity.getCreatedAt().toString() : null,
+                entity.getUpdatedAt() != null ? entity.getUpdatedAt().toString() : null
                 entity.getThumbnailUrl()
         );
         return dto;
@@ -284,7 +304,7 @@ public class WasteRoomServiceImpl implements WasteRoomService {
             byte[] decodedBytes = java.util.Base64.getDecoder().decode(imageBase64);
 
             // Save to folder
-            File folder = new File("uploads/wasterooms/");
+           /* File folder = new File("uploads/wasterooms/");
             if (!folder.exists()) {
                 folder.mkdirs();
             }
@@ -295,10 +315,123 @@ public class WasteRoomServiceImpl implements WasteRoomService {
                 fos.write(decodedBytes);
             }
 
-            room.setThumbnailUrl("/images/wasterooms/" + roomId + ".png");
+            room.setThumbnailUrl("/images/wasterooms/" + roomId + ".png");*/
+            saveThumbnailToSupabase(decodedBytes, roomId, room);
         }
         catch (Exception e) {
             throw new RuntimeException("Failed to save thumbnail", e);
         }
+    }
+
+    private void saveThumbnailToSupabase(byte[] imageBytes, Long roomId, WasteRoom room) {
+        try {
+            String filePath = roomId + ".png";
+            String uploadUrl = supabaseUrl + "/storage/v1/object/" + supabaseBucket + "/" + filePath;
+
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(uploadUrl))
+                    .header("Authorization", "Bearer " + supabaseServiceKey)
+                    .header("Content-Type", "image/png")
+                    .PUT(HttpRequest.BodyPublishers.ofByteArray(imageBytes))
+                    .build();
+
+            HttpClient client = HttpClient.newHttpClient();
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+            if (response.statusCode() >= 200 && response.statusCode() < 300) {
+                String publicUrl = supabaseUrl + "/storage/v1/object/public/" + supabaseBucket + "/" + filePath;
+                room.setThumbnailUrl(publicUrl);
+            } else {
+                throw new RuntimeException("Failed to upload image to Supabase: " + response.body());
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Error uploading thumbnail to Supabase", e);
+        }
+    }
+
+
+    /**
+     * Saves an admin version of a waste room. Creates a new waste room entry with version info.
+     * If versionToReplace is specified, marks that version as inactive.
+     *
+     * @param propertyId The id of the property
+     * @param roomName The name of the waste room
+     * @param request The request containing the waste room data and version info
+     * @return A DTO containing the information about the newly created version
+     */
+    @Override
+    @Transactional
+    public WasteRoomDTO saveAdminVersion(Long propertyId, String roomName, WasteRoomRequest request) {
+        Property property = findPropertyById(propertyId);
+        
+        // Get all existing versions for this room
+        List<WasteRoom> existingVersions = wasteRoomRepository
+                .findByPropertyIdAndNameOrderByVersionNumberAsc(propertyId, roomName);
+        
+        // Calculate next version number
+        int nextVersionNumber = existingVersions.stream()
+                .mapToInt(WasteRoom::getVersionNumber)
+                .max()
+                .orElse(0) + 1;
+        
+        // Create new version
+        WasteRoom newVersion = new WasteRoom();
+        newVersion.setLength(request.getLength());
+        newVersion.setWidth(request.getWidth());
+        newVersion.setX(request.getX());
+        newVersion.setY(request.getY());
+        newVersion.setProperty(property);
+        newVersion.setName(roomName);
+        newVersion.setVersionNumber(nextVersionNumber);
+        newVersion.setCreatedBy("admin");
+        newVersion.setAdminUsername(request.getAdminUsername());
+        newVersion.setVersionName(request.getVersionName());
+        newVersion.setIsActive(false); // Will be set to active after handling versionToReplace
+        
+        List<ContainerPosition> containerPositions = convertContainerRequest(request.getContainers(), newVersion);
+        List<Door> doorPositions = convertDoorRequest(request.getDoors(), newVersion);
+        newVersion.setContainers(containerPositions);
+        newVersion.setDoors(doorPositions);
+        
+        // Handle version replacement or max versions
+        if (request.getVersionToReplace() != null) {
+            // Mark the specified version as inactive (soft delete)
+            existingVersions.stream()
+                    .filter(v -> v.getVersionNumber() == request.getVersionToReplace())
+                    .findFirst()
+                    .ifPresent(v -> {
+                        v.setIsActive(false);
+                        wasteRoomRepository.save(v);
+                    });
+        }
+        
+        // Set all other versions to inactive
+        existingVersions.forEach(v -> {
+            v.setIsActive(false);
+            wasteRoomRepository.save(v);
+        });
+        
+        // Set new version as active
+        newVersion.setIsActive(true);
+        WasteRoom savedRoom = wasteRoomRepository.save(newVersion);
+        
+        return mapWasteRoomToDTO(savedRoom);
+    }
+
+    /**
+     * Gets all versions of a waste room for a specific property and room name
+     *
+     * @param propertyId The id of the property
+     * @param roomName The name of the waste room
+     * @return A list of DTOs containing all versions
+     */
+    @Override
+    public List<WasteRoomDTO> getAllVersionsByPropertyAndName(Long propertyId, String roomName) {
+        List<WasteRoom> versions = wasteRoomRepository
+                .findByPropertyIdAndNameOrderByVersionNumberAsc(propertyId, roomName);
+        
+        return versions.stream()
+                .map(this::mapWasteRoomToDTO)
+                .toList();
     }
 }

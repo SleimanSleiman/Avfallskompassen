@@ -53,7 +53,7 @@ class WasteRoomControllerTest {
                 new DoorDTO(1L, 0.5, 0.5, 0, 1.0, 0.1, 5L,"top","outward")
         );
 
-        WasteRoomDTO dto = new WasteRoomDTO(2L,10,10,10,10,containers,doors, 5L, "Name", LocalDateTime.now(), LocalDateTime.now(), "/images/testImg.png");
+        WasteRoomDTO dto = new WasteRoomDTO(2L,10,10,10,10,containers,doors, 5L, "Name", 1, "user", null, null, true, null, null);
 
         when(wasteRoomService.saveWasteRoom(any(WasteRoomRequest.class))).thenReturn(dto);
 
@@ -149,7 +149,7 @@ class WasteRoomControllerTest {
                 new DoorDTO(1L, 0.5, 0.5, 0, 1.0, 0.1, 5L,"top","outward")
         );
 
-        WasteRoomDTO dto = new WasteRoomDTO(2L, 10, 10, 10, 10, containers, doors, 5L, "Name", LocalDateTime.now(), LocalDateTime.now(), "/images/testImg.png");
+        WasteRoomDTO dto = new WasteRoomDTO(2L, 10, 10, 10, 10, containers, doors, 5L, "Name", 1, "user", null, null, true, null, null);
 
         when(wasteRoomService.updateWasteRoom(any(Long.class), any(WasteRoomRequest.class))).thenReturn(dto);
 
@@ -235,7 +235,7 @@ class WasteRoomControllerTest {
 
     @Test
     void getWasteRoomById_ReturnsOK() throws Exception {
-        WasteRoomDTO dto = new WasteRoomDTO(1L, 10, 10, 0, 0, List.of(), List.of(), 1L, "Name", LocalDateTime.now(), LocalDateTime.now(), "/images/testImg.png");
+        WasteRoomDTO dto = new WasteRoomDTO(1L, 10, 10, 0, 0, List.of(), List.of(), 1L, "Name", 1, "user", null, null, true, null, null);
 
         when(wasteRoomService.getWasteRoomById(1L)).thenReturn(dto);
 
@@ -257,8 +257,8 @@ class WasteRoomControllerTest {
     @Test
     void getWasteRoomsByPropertyId_ReturnsOK() throws Exception {
         List<WasteRoomDTO> rooms = List.of(
-                new WasteRoomDTO(1L, 10, 10, 0, 0, List.of(), List.of(),3L, "Name", LocalDateTime.now(), LocalDateTime.now(), "/images/testImg.png"),
-                new WasteRoomDTO(1L, 12, 8, 5, 5, List.of(), List.of(),2L, "Name", LocalDateTime.now(), LocalDateTime.now(), "/images/testImg.png")
+                new WasteRoomDTO(1L, 10, 10, 0, 0, List.of(), List.of(),3L, "Name", 1, "user", null, null, true, null, null),
+                new WasteRoomDTO(1L, 12, 8, 5, 5, List.of(), List.of(),2L, "Name", 1, "user", null, null, true, null, null)
         );
 
         when(wasteRoomService.getWasteRoomsByPropertyId(1L)).thenReturn(rooms);

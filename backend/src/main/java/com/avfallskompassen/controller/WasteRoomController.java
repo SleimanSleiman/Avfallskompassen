@@ -158,4 +158,6 @@ public class WasteRoomController {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error while downloading PDF", e);
         }
     }
+
+
 }

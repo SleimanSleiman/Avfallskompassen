@@ -80,6 +80,7 @@ type RoomCanvasProps = {
     undo?: () => void;
     redo?: () => void;
     saveRoom?: (thumbnailBase64: string | null) => void;
+    isAdminMode?: boolean;
 };
 
 export default function RoomCanvas({
@@ -134,6 +135,7 @@ export default function RoomCanvas({
     undo,
     redo,
     saveRoom,
+    isAdminMode = false,
 }: RoomCanvasProps) {
     const [isDraggingContainer, setIsDraggingContainer] = useState(false);
     const [msg, setMsg] = useState<string | null>(null);
@@ -170,17 +172,17 @@ export default function RoomCanvas({
     };
 
     const stageRef = useRef<any>(null);
-    const generateThumbnail = (): string | null => { 
-        if (!stageRef.current) 
-            return null; 
-        
-        const uri = stageRef.current.toDataURL({ 
-            mimeType: "image/png", 
-            quality: 0.9, 
-            pixelRatio: 1 
-        }); 
+    const generateThumbnail = (): string | null => {
+        if (!stageRef.current)
+            return null;
 
-        return uri; 
+        const uri = stageRef.current.toDataURL({
+            mimeType: "image/png",
+            quality: 0.9,
+            pixelRatio: 1
+        });
+
+        return uri;
     };
 
     /* ──────────────── Render ──────────────── */
@@ -244,6 +246,7 @@ export default function RoomCanvas({
                         redo={redo}
                         selectedContainerInfo={selectedContainerInfo}
                         setSelectedContainerInfo={setSelectedContainerInfo}
+                        isAdminMode={isAdminMode}
                         generateThumbnail={generateThumbnail}
                     />
 
@@ -293,6 +296,7 @@ export default function RoomCanvas({
                             <DoorMeasurementLayer
                                 doors={doors}
                                 room={room}
+                                selectedDoorId={selectedDoorId}
                             />
 
                             {/* Containers layer */}

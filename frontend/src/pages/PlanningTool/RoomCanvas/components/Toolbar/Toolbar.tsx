@@ -29,8 +29,8 @@ type ToolbarProps = {
     redo?: () => void;
     selectedContainerInfo: ContainerDTO | null;
     setSelectedContainerInfo: (container: ContainerDTO | null) => void;
+    isAdminMode?: boolean;
     generateThumbnail: () => string | null;
-
 };
 
 export default function Toolbar({
@@ -50,6 +50,7 @@ export default function Toolbar({
     redo,
     selectedContainerInfo,
     setSelectedContainerInfo,
+    isAdminMode = false,
     generateThumbnail,
 }: ToolbarProps) {
 
@@ -112,8 +113,8 @@ export default function Toolbar({
             return;
         }
         try {
-            const thumbnail = generateThumbnail();  
-            await saveRoom(thumbnail);               
+            const thumbnail = generateThumbnail();
+            await saveRoom(thumbnail);
 
             setTimeout(() => setMsg("Rummet har sparats"), 10);
         } catch (err) {
@@ -138,7 +139,11 @@ export default function Toolbar({
 
             {/* Add door */}
             <button
-                onClick={() => setIsDoorPromptOpen(true)}
+                onClick={() => {
+                    setIsDoorPromptOpen(true)
+                    handleSelectContainer(null);
+                    handleSelectDoor(null);
+                }}
                 className="group toolbar-btn"
             >
                 <DoorOpen className="toolbar-icon" />
@@ -154,14 +159,16 @@ export default function Toolbar({
                 <span className="toolbar-label">Lägg till sopkärl</span>
             </button>
 
-            {/* Save design */}
-            <button
-                onClick={handleSaveRoom}
-                className="group toolbar-btn"
-            >
-                <Save className="toolbar-icon" />
-                <span className="toolbar-label">Spara design</span>
-            </button>
+            {/* Save design - Hidden in admin mode */}
+            {!isAdminMode && (
+                <button
+                    onClick={handleSaveRoom}
+                    className="group toolbar-btn"
+                >
+                    <Save className="toolbar-icon" />
+                    <span className="toolbar-label">Spara design</span>
+                </button>
+            )}
 
             {/* Undo */}
             <button

@@ -62,28 +62,67 @@ vi.mock("../../../src/pages/PlanningTool/hooks/UseServiceTypes", () => ({
     ],
 }));
 
+vi.mock("../../../src/pages/PlanningTool/hooks/usePropertyHighlights", () => ({
+    usePropertyHighlights: () => [],
+}));
+
+vi.mock("../../../src/pages/PlanningTool/hooks/UseSaveRoom", () => ({
+    useSaveRoom: () => ({ saveRoom: vi.fn(), isSaving: false, error: null }),
+    useWasteRoomRequestBuilder: () => ({ buildWasteRoomRequest: vi.fn() }),
+}));
+
 // ─────────────── Mock components ───────────────
 vi.mock("../../../src/pages/PlanningTool/RoomCanvas/RoomCanvas", () => ({
     default: () => <div data-testid="mock-room-canvas">RoomCanvas</div>,
 }));
 
-vi.mock("../../../src/pages/PlanningTool/Sidebar/Sidebar", () => ({
-    default: () => <div data-testid="mock-sidebar">Sidebar</div>,
+vi.mock("../../../src/pages/PlanningTool/ActionPanel", () => ({
+    default: ({ selectedContainerId, selectedDoorId }: any) =>
+        selectedContainerId !== null || selectedDoorId !== null
+            ? <div data-testid="mock-action-panel">ActionPanel</div>
+            : null,
 }));
 
-vi.mock("../../../src/pages/PlanningTool/ActionPanel", () => ({
-  default: ({ selectedContainerId, selectedDoorId }: any) =>
-    selectedContainerId !== null || selectedDoorId !== null
-      ? <div data-testid="mock-action-panel">ActionPanel</div>
-      : null,
+vi.mock("../../../src/pages/PlanningTool/PropertyAndWasteAnalysis/WasteAnalysis/WasteAnalysisPanels", () => ({
+    default: () => <div data-testid="mock-waste-panels">WasteAnalysisPanels</div>,
+}));
+
+vi.mock("../../../src/pages/PlanningTool/PropertyAndWasteAnalysis/PropertyOverview/PropertyOverviewPanel", () => ({
+    default: () => <div data-testid="mock-overview-panel">PropertyOverviewPanel</div>,
 }));
 
 describe("PlanningTool", () => {
+    beforeEach(() => {
+        const localStorageMock = (() => {
+            let store: Record<string, string> = {};
+            return {
+                getItem: vi.fn((key: string) => store[key] || null),
+                setItem: vi.fn((key: string, value: string) => {
+                    store[key] = value.toString();
+                }),
+                removeItem: vi.fn((key: string) => {
+                    delete store[key];
+                }),
+                clear: vi.fn(() => {
+                    store = {};
+                }),
+            };
+        })();
+
+        Object.defineProperty(window, "localStorage", {
+            value: localStorageMock,
+            writable: true,
+        });
+
+        window.localStorage.clear();
+    });
+
     //Test rendering of main components
-    it("renders RoomCanvas and Sidebar", () => {
+    it("renders RoomCanvas, WasteAnalysisPanels, and PropertyOverviewPanel", () => {
         render(<PlanningTool />);
         expect(screen.getByTestId("mock-room-canvas")).toBeDefined();
-        expect(screen.getByTestId("mock-sidebar")).toBeDefined();
+        expect(screen.getByTestId("mock-waste-panels")).toBeDefined();
+        expect(screen.getByTestId("mock-overview-panel")).toBeDefined();
     });
 
     //Test that ActionPanel is not rendered initially
