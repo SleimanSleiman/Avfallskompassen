@@ -153,7 +153,8 @@ export default function AllaMiljoRumPage() {
                             <div key={room.id} className="rounded-xl border bg-white p-5 shadow-soft flex flex-col">
                                 {console.log("Thumbnail URL new →", room.thumbnailUrl)}
                                 <img
-                                    src={`http://localhost:8081${room.thumbnailUrl}`}
+                                    //src={`http://localhost:8081${room.thumbnailUrl}`}
+                                    src={room.thumbnailUrl || greybox}
                                     alt="Miljörum bild"
                                     className="w-full h-40 object-cover rounded-lg mb-3"
                                 />
