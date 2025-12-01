@@ -16,10 +16,10 @@ public class WasteStatistics {
     @JoinColumn(name = "property_id", nullable = false)
     private Property property;
 
-    @Column(nullable = false)
+    @Column(name = "\"year\"", nullable = false)
     private int year;
 
-    @Column(nullable = false)
+    @Column(name = "\"month\"", nullable = false)
     private int month;
 
     @Column(nullable = false, precision = 10, scale = 2)

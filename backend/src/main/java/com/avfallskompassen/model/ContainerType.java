@@ -38,6 +38,20 @@ public class ContainerType {
     @Column(nullable = true)
     private String imageTopViewUrl;
 
+    public ContainerType(String name, int size, double width, double depth, double height, String imageFrontViewUrl, String imageTopViewUrl) {
+        this.name = name;
+        this.size = size;
+        this.width = width;
+        this.depth = depth;
+        this.height = height;
+        this.imageFrontViewUrl = imageFrontViewUrl;
+        this.imageTopViewUrl = imageTopViewUrl;
+    }
+
+    public ContainerType() {
+
+    }
+
     public long getId() {
         return id;
     }

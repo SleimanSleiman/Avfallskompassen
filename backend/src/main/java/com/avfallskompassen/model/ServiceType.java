@@ -16,6 +16,14 @@ public class ServiceType {
     @Column(nullable = false)
     private String name;
 
+    public ServiceType(String name) {
+        this.name = name;
+    }
+
+    public ServiceType() {
+
+    }
+
     public long getId() {
         return Id;
     }
