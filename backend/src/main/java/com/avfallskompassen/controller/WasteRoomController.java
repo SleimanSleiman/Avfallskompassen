@@ -94,7 +94,7 @@ public class WasteRoomController {
      * Handles requests for fetching an active waste room
      * @param propertyId Id to property
      * @return A status code with either an error message or a list containing DTO with information
-     * about the waste rooms collected.
+     * about the waste room collected.
      */
     @GetMapping("/properties/{propertyId}/active/wasteroom")
     public ResponseEntity <WasteRoomImgDTO> getActiveWasteRoomsByPropertyId(@PathVariable Long propertyId) {

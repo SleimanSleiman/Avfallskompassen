@@ -105,10 +105,10 @@ public class WasteRoomServiceImpl implements WasteRoomService {
     }
 
     /**
-     * Collects list of waste rooms that are connected to a certain property
+     * Collects the WasteRoom that is marked as active.
      *
      * @param propertyId The id of the property whose waste rooms are to be collected
-     * @return A list of DTO containing the information about the waste room from the database
+     * @return A DTO containing the information about the waste room from the database
      */
     @Override
     public WasteRoomImgDTO getActiveRoom(Long propertyId) {

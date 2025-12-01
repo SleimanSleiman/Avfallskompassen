@@ -3,6 +3,7 @@ package com.avfallskompassen.controller;
 import com.avfallskompassen.dto.ContainerPositionDTO;
 import com.avfallskompassen.dto.DoorDTO;
 import com.avfallskompassen.dto.WasteRoomDTO;
+import com.avfallskompassen.dto.WasteRoomImgDTO;
 import com.avfallskompassen.dto.request.WasteRoomRequest;
 import com.avfallskompassen.exception.BadRequestException;
 import com.avfallskompassen.exception.InternalServerException;
@@ -19,6 +20,8 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -276,6 +279,37 @@ class WasteRoomControllerTest {
         mockMvc.perform(get("/api/properties/{propertyId}/wasterooms", 99L))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.error").value("No waste rooms found"));
+    }
+
+    @Test
+    void getActiveWasteRoomByPropertyId_ReturnsOK() throws Exception {
+        WasteRoomImgDTO room = new WasteRoomImgDTO("https://image.url/thumbnail.png");
+
+        when(wasteRoomService.getActiveRoom(1L)).thenReturn(room);
+
+        mockMvc.perform(get("/api/properties/{propertyId}/active/wasteroom", 1L))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.thumbnailUrl").value("https://image.url/thumbnail.png"));
+
+        verify(wasteRoomService, times(1)).getActiveRoom(1L);
+    }
+
+    @Test
+    void getActiveWasteRoomByPropertyId_NoActiveRoom_ThrowsException() {
+        when(wasteRoomService.getActiveRoom(1L))
+                .thenThrow(new RuntimeException("No active waste room found"));
+
+        Exception exception = assertThrows(Exception.class, () ->
+                mockMvc.perform(get("/api/properties/{propertyId}/active/wasteroom", 1L))
+        );
+
+        assertTrue(exception.getMessage().contains("No active waste room found"));
+    }
+
+    @Test
+    void getActiveWasteRoom_InvalidPropertyId_Returns400() throws Exception {
+        mockMvc.perform(get("/api/properties/{propertyId}/active/wasteroom", "abc"))
+                .andExpect(status().isBadRequest());
     }
 
     @Test

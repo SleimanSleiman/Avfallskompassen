@@ -472,14 +472,14 @@ function createStatisticsSection(
                 createStatCard(
                     "Dragväg & Kostnad/Kärl",
                     `${accessPathLength}m - ${collectionFee} kr`,
-                    FONT_SIZES.medium
+                    FONT_SIZES.medium //Testa med large
                 ),
                 createStatCard("Lås", lockName, FONT_SIZES.medium)
             ],
             columnGap: 10,
             margin: [0, 0, 0, 30]
         },
-        createSectionHeader("Volymer och kostnader", FONT_SIZES.subtitle),
+        createSectionHeader("Volymer och kostnader", FONT_SIZES.subtitle), // Testa med title
         table
     ];
 }

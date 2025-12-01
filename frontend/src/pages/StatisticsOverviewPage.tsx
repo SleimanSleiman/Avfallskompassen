@@ -5,7 +5,7 @@ import {
     getAnnualCost,
     getCollectionFee,
     getPropertiesSimple,
-    getPropertyContainers, type AnnualCostDTO
+    getPropertyContainers,
 } from "../lib/Statistics";
 import { getActiveWasteRoomsByPropertyId } from "../lib/WasteRoom";
 import {exportStatisticsPdf} from "./ExportPdf.tsx";
