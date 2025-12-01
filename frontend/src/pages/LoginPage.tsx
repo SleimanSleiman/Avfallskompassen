@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { login } from '../lib/Auth';
+import { startInactivityTimer } from "../lib/InactivityTimer";
 
 export default function LoginPage() {
   const [username, setUsername] = useState('');
@@ -21,6 +22,7 @@ export default function LoginPage() {
     try {
       const res = await login(username, password, rememberMe); 
       if (res.success) {
+        startInactivityTimer();
         setMsg(res.message || 'Inloggning lyckades');
         // Navigate to dashboard after successful login
         setTimeout(() => {
