@@ -291,8 +291,7 @@ export default function PlanningTool({ isAdminMode = false }: PlanningToolProps)
                     {/* ActionPanel for selected container or door */}
                     {(selectedContainerId !== null || selectedDoorId !== null) && (
                         <div
-                            className="absolute z-50 lg:left-0.5 lg:top-0 hidden lg:flex w-full justify-center lg:justify-start"
-                        >
+                            className="absolute z-50 left-0.5 top-0 flex w-full justify-center lg:justify-start">
                             <ActionPanel
                                 containers={containersInRoom}
                                 doors={doors}

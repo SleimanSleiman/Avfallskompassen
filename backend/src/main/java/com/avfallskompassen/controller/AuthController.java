@@ -104,7 +104,7 @@ public class AuthController {
             }
             LoginResponse response = new LoginResponse(
                 true,
-                "Registrering lyckades",
+                "Registrering lyckades! Du är nu inloggad.",
                 newUser.getUsername(),
                 newUser.getRole(),
                 token

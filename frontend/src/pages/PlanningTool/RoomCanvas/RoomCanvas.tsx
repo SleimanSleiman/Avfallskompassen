@@ -296,6 +296,7 @@ export default function RoomCanvas({
                             <DoorMeasurementLayer
                                 doors={doors}
                                 room={room}
+                                selectedDoorId={selectedDoorId}
                             />
 
                             {/* Containers layer */}

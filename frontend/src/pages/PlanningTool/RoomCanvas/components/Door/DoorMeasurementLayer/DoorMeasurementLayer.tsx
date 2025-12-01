@@ -9,15 +9,17 @@ import type { Door } from "../../../../Types";
 type DoorMeasurementLayerProps = {
     doors: Door[];
     room: { x: number; y: number; width: number; height: number };
+    selectedDoorId: number | null;
 };
 
-export default function DoorMeasurementLayer({ doors, room }: DoorMeasurementLayerProps) {
+export default function DoorMeasurementLayer({ doors, room, selectedDoorId }: DoorMeasurementLayerProps) {
     return (
         <>
-            {doors.map(door => (
-                //Render measurement for each door
-                <DoorMeasurement key={door.id} door={door} room={room} />
-            ))}
+            {doors.map(door =>
+                door.id === selectedDoorId ? (
+                    <DoorMeasurement key={door.id} door={door} room={room} />
+                ) : null
+            )}
         </>
     );
 }
