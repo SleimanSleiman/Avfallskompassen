@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - main
-      - testing/NSR144-sätt_upp_backend_och_automatisk_testning
+      - NSR-418-Backend---Integration-tester
   pull_request:
 
 jobs:
