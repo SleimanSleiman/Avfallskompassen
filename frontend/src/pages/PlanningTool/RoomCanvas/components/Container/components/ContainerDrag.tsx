@@ -12,6 +12,7 @@ export default function ContainerDrag({
     selected,
     room,
     doorZones,
+    otherObjectZones,
     getContainerZones,
     setIsDraggingContainer,
     handleDragContainer,
@@ -37,7 +38,7 @@ export default function ContainerDrag({
         const rect = { x, y, width: w, height: h };
 
         //Collect all no-go zones (doors + container zones)
-        const zones = [...doorZones, ...getContainerZones(container.id)];
+        const zones = [...doorZones, ...otherObjectZones, ...getContainerZones(container.id)];
 
         //True if ANY zone is overlapping the container
         return zones.some(zone => isOverlapping(rect, zone));

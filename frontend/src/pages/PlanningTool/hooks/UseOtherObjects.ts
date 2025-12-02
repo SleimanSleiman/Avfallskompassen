@@ -4,7 +4,7 @@
  */
 import { useState } from "react";
 import type { OtherObjectInRoom, Room } from "../Types";
-import { clamp, isOverlapping, mmToPixels } from "../Constants";
+import { clamp, isOverlapping, mmToPixels, SCALE } from "../Constants";
 
 export function useOtherObjects(
     room: Room,
@@ -12,7 +12,6 @@ export function useOtherObjects(
     setSelectedContainerId: (id: number | null) => void,
     setSelectedDoorId: (id: number | null) => void,
     doorZones: { x: number; y: number; width: number; height: number }[] = [],
-    containerZones: { x: number; y: number; width: number; height: number }[] = []
 ) {
     /* ──────────────── Other Objects state ──────────────── */
     const [otherObjects, setOtherObjects] = useState<OtherObjectInRoom[]>([]);
@@ -36,15 +35,29 @@ export function useOtherObjects(
 
     //Build zones for existing other objects, excluding a specific ID if provided
     function buildOtherObjectZones(objects: OtherObjectInRoom[], excludeId?: number) {
+        const buffer = 0.1 / SCALE; // 10 cm buffer
+
         return objects
             .filter(obj => obj.id !== excludeId)
-            .map(obj => ({
-                x: obj.x,
-                y: obj.y,
-                width: obj.width * 2,
-                height: obj.height * 2,
-            }));
+            .map(obj => {
+                const rotation = obj.rotation || 0;
+                const rot = rotation % 180;
+
+                const width = rot === 90 ? obj.height : obj.width;
+                const height = rot === 90 ? obj.width : obj.height;
+
+                const centerX = obj.x + obj.width / 2;
+                const centerY = obj.y + obj.height / 2;
+
+                return {
+                    x: centerX - (width + buffer * 2) / 2,
+                    y: centerY - (height + buffer * 2) / 2,
+                    width: width + buffer * 2,
+                    height: height + buffer * 2,
+                };
+            });
     }
+
 
     //Validate placement of a new other object
     function validateOtherObjectPlacement(

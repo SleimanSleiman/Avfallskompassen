@@ -13,6 +13,7 @@ export default function ContainerItem({
     selected,
     room,
     doorZones,
+    otherObjectZones,
     getContainerZones,
     handleDragContainer,
     handleSelectContainer,
@@ -34,6 +35,7 @@ export default function ContainerItem({
             selected={selected}
             room={room}
             doorZones={doorZones}
+            otherObjectZones={otherObjectZones}
             getContainerZones={getContainerZones}
             setIsDraggingContainer={setIsDraggingContainer}
             handleDragContainer={handleDragContainer}

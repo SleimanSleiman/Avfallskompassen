@@ -175,7 +175,8 @@ export default function RoomCanvas({
         selectedContainerId: selectedContainerId,
         draggedContainer: draggedContainer,
         getContainerZones: getContainerZones,
-        doorZones: doorZones
+        doorZones: doorZones,
+        otherObjectZones: otherObjectZones,
       });
 
     //Moves a room and the containers inside it
@@ -324,6 +325,7 @@ export default function RoomCanvas({
                                 handleSelectContainer={handleSelectContainer}
                                 room={room}
                                 doorZones={doorZones}
+                                otherObjectZones={otherObjectZones}
                                 getContainerZones={getContainerZones}
                                 setIsDraggingContainer={setIsDraggingContainer}
                                 isContainerInsideRoom={isContainerInsideRoom}

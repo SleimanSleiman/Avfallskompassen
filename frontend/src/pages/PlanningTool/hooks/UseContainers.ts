@@ -71,12 +71,14 @@ function buildContainerZones(
 function validateContainerPlacement(
     newRect: { x: number; y: number; width: number; height: number },
     doorZones: { x: number; y: number; width: number; height: number }[],
-    containerZones: { x: number; y: number; width: number; height: number }[]
+    containerZones: { x: number; y: number; width: number; height: number }[],
+    otherObjectZones: { x: number; y: number; width: number; height: number }[],
 ) {
     const overlapsDoor = doorZones.some(zone => isOverlapping(newRect, zone));
     const overlapsContainer = containerZones.some(zone => isOverlapping(newRect, zone));
+    const overlapsOtherObject = otherObjectZones.some(zone => isOverlapping(newRect, zone));
 
-    return !(overlapsDoor || overlapsContainer);
+    return !(overlapsDoor || overlapsContainer || overlapsOtherObject);
 }
 
 /* ──────────────── Main Hook ──────────────── */
@@ -84,7 +86,8 @@ export function useContainers(
     room: Room,
     setSelectedContainerId: (id: number | null) => void,
     setSelectedDoorId: (id: number | null) => void,
-    doorZones: { x: number; y: number; width: number; height: number }[] = []
+    doorZones: { x: number; y: number; width: number; height: number }[] = [],
+    otherObjectZones: { x: number; y: number; width: number; height: number }[] = []
 ) {
 
     /* ──────────────── Containers State ──────────────── */
@@ -104,7 +107,7 @@ export function useContainers(
         const newRect = createContainerRect(container, x, y);
 
         const containerZones = buildContainerZones(containersInRoom);
-        const isValid = validateContainerPlacement(newRect, doorZones, containerZones);
+        const isValid = validateContainerPlacement(newRect, doorZones, containerZones, otherObjectZones);
 
        //If initial position is invalid, try to find a valid spot
         if (!isValid && !position) {
@@ -117,7 +120,7 @@ export function useContainers(
             for (let tryY = room.y; tryY < room.y + room.height - heightPx; tryY += step) {
                 for (let tryX = room.x; tryX < room.x + room.width - widthPx; tryX += step) {
                     const testRect = { x: tryX, y: tryY, width: widthPx, height: heightPx };
-                    if (validateContainerPlacement(testRect, doorZones, containerZones)) {
+                    if (validateContainerPlacement(testRect, doorZones, containerZones, otherObjectZones)) {
                         x = tryX;
                         y = tryY;
                         foundSpot = true;

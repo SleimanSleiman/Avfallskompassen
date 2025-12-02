@@ -11,7 +11,8 @@ function useContainerZones({
         selectedContainerId,
         draggedContainer,
         getContainerZones,
-        doorZones
+        doorZones,
+        otherObjectZones,
 }) {
     //Determine if the user is dragging an existing container
     const isDraggingExisting = isDraggingContainer && selectedContainerId !== null;
@@ -20,6 +21,7 @@ function useContainerZones({
     const zones = useMemo(() => {
         return [
             ...doorZones, //include door zones
+            ...otherObjectZones, //include other object zones
             ...(isDraggingExisting
                 ? getContainerZones(selectedContainerId) //zones for selected container
                 : draggedContainer
@@ -31,6 +33,7 @@ function useContainerZones({
         selectedContainerId,
         draggedContainer,
         doorZones,
+        otherObjectZones,
         getContainerZones
     ]);
 

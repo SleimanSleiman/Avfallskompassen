@@ -62,6 +62,15 @@ export default function PlanningTool({ isAdminMode = false }: PlanningToolProps)
         doorOffsetRef,
     } = useDoors(room, setSelectedDoorId, setSelectedContainerId);
 
+    /* ──────────────── Other Objects state & logic ──────────────── */
+    const {
+        otherObjects,
+        setOtherObjects,
+        handleAddOtherObject,
+        getOtherObjectZones,
+        handleSelectOtherObject,
+    } = useOtherObjects(room, setSelectedOtherObjectId, setSelectedContainerId, setSelectedDoorId, getDoorZones());
+
     /* ──────────────── Container state & logic ──────────────── */
     const {
         containersInRoom,
@@ -92,16 +101,7 @@ export default function PlanningTool({ isAdminMode = false }: PlanningToolProps)
         redo,
         getContainerZones,
         isContainerInsideRoom,
-    } = useContainers(room, setSelectedContainerId, setSelectedDoorId, getDoorZones());
-
-    /* ──────────────── Other Objects state & logic ──────────────── */
-    const {
-        otherObjects,
-        setOtherObjects,
-        handleAddOtherObject,
-        getOtherObjectZones,
-        handleSelectOtherObject,
-    } = useOtherObjects(room, setSelectedOtherObjectId, setSelectedContainerId, setSelectedDoorId, getDoorZones(), getContainerZones());
+    } = useContainers(room, setSelectedContainerId, setSelectedDoorId, getDoorZones(), getOtherObjectZones());
 
     /* ──────────────── Sync the doors and containers when changes are made to the room ──────────────── */
     useEffect(() => {
