@@ -10,11 +10,6 @@ import { MapPin, Home, Users } from "lucide-react";
 import type { Property } from '../../lib/Property';
 import type { ContainerDTO } from '../../lib/Container';
 
-import { useComparison } from './hooks/useComparison';
-import { useLayoutHistory } from './hooks/UseLayoutHistory';
-import { useSaveRoom, useWasteRoomRequestBuilder } from './hooks/UseSaveRoom';
-import { usePropertyHighlights } from './hooks/usePropertyHighlights';
-
 //Components
 import RoomCanvas from './RoomCanvas/RoomCanvas';
 import ActionPanel from './ActionPanel';
@@ -27,6 +22,12 @@ import { useRoom } from './hooks/UseRoom';
 import { useDoors } from './hooks/UseDoors';
 import { useContainers } from './hooks/UseContainers';
 import { useServiceTypes } from './hooks/UseServiceTypes';
+import { useOtherObjects } from './hooks/UseOtherObjects';
+import { useComparison } from './hooks/useComparison';
+import { useLayoutHistory } from './hooks/UseLayoutHistory';
+import { useSaveRoom, useWasteRoomRequestBuilder } from './hooks/UseSaveRoom';
+import { usePropertyHighlights } from './hooks/usePropertyHighlights';
+
 import { SCALE } from './Constants';
 
 type PlanningToolProps = {
@@ -43,11 +44,12 @@ export default function PlanningTool({ isAdminMode = false }: PlanningToolProps)
         setRoom
     } = useRoom();
 
-
-    /* ──────────────── Door state & logic ──────────────── */
+    // Selected IDs
     const [selectedContainerId, setSelectedContainerId] = useState<number | null>(null);
     const [selectedDoorId, setSelectedDoorId] = useState<number | null>(null);
+    const [selectedOtherObjectId, setSelectedOtherObjectId] = useState<number | null>(null);
 
+    /* ──────────────── Door state & logic ──────────────── */
     const {
         doors,
         setDoors,
@@ -91,6 +93,15 @@ export default function PlanningTool({ isAdminMode = false }: PlanningToolProps)
         getContainerZones,
         isContainerInsideRoom,
     } = useContainers(room, setSelectedContainerId, setSelectedDoorId, getDoorZones());
+
+    /* ──────────────── Other Objects state & logic ──────────────── */
+    const {
+        otherObjects,
+        setOtherObjects,
+        handleAddOtherObject,
+        getOtherObjectZones,
+        handleSelectOtherObject,
+    } = useOtherObjects(room, setSelectedOtherObjectId, setSelectedContainerId, setSelectedDoorId, getDoorZones(), getContainerZones());
 
     /* ──────────────── Sync the doors and containers when changes are made to the room ──────────────── */
     useEffect(() => {
@@ -281,6 +292,13 @@ export default function PlanningTool({ isAdminMode = false }: PlanningToolProps)
                         setDraggedContainer={setDraggedContainer}
                         onContainerPanelHeightChange={setContainerPanelHeight}
                         isContainerInsideRoom={isContainerInsideRoom}
+
+                        otherObjects={otherObjects}
+                        setOtherObjects={setOtherObjects}
+                        handleAddOtherObject={handleAddOtherObject}
+                        otherObjectZones={getOtherObjectZones()}
+                        handleSelectOtherObject={handleSelectOtherObject}
+                        selectedOtherObjectId={selectedOtherObjectId}
 
                         undo={undo}
                         redo={redo}

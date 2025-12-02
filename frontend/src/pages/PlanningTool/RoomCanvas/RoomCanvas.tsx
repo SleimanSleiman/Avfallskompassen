@@ -18,11 +18,12 @@ import DoorsLayer from "./components/Door/DoorsLayer";
 import DoorMeasurementLayer from "./components/Door/DoorMeasurementLayer/DoorMeasurementLayer";
 import ContainersLayer from "./components/Container/ContainersLayer";
 import ContainerPanel from "./components/Container/ContainerPanel";
+import OtherObjectsLayer from "./components/OtherObjects/OtherObjectsLayer";
 import Toolbar from "./components/Toolbar/Toolbar";
 import useContainerPanel from "./hooks/useContainerPanel";
 import useContainerZones from "./hooks/useContainerZones";
 import { STAGE_WIDTH, STAGE_HEIGHT, GRID_SIZE_PX } from "../Constants";
-import type { Room, ContainerInRoom, Door } from "../Types";
+import type { Room, ContainerInRoom, Door, OtherObjectInRoom } from "../Types";
 import type { ContainerDTO } from "../../../lib/Container";
 import Message from "../../../components/ShowStatus";
 import './css/roomCanvasStage.css'
@@ -54,6 +55,13 @@ type RoomCanvasProps = {
     selectedContainerInfo: ContainerDTO | null;
     draggedContainer: ContainerDTO | null;
     getContainerZones: (excludeId?: number) => { x: number; y: number; width: number; height: number }[];
+
+    /* ───────────── Other Objects Props ───────────── */
+    otherObjects: OtherObjectInRoom[];
+    handleAddOtherObject: (name: string, width: number, height: number) => void;
+    otherObjectZones: { x: number; y: number; width: number; height: number }[];
+    handleSelectOtherObject: (id: number | null) => void;
+    selectedOtherObjectId: number | null;
 
     /* ───────────── Drag & Drop Props ───────────── */
     stageWrapperRef: React.RefObject<HTMLDivElement | null>;
@@ -109,6 +117,14 @@ export default function RoomCanvas({
     selectedContainerInfo,
     draggedContainer,
     getContainerZones,
+
+    /* ───────────── Other Objects Props ───────────── */
+    otherObjects,
+    setOtherObjects,
+    handleAddOtherObject,
+    otherObjectZones,
+    handleSelectOtherObject,
+    selectedOtherObjectId,
 
     /* ───────────── Drag & Drop Props ───────────── */
     stageWrapperRef,
@@ -248,6 +264,7 @@ export default function RoomCanvas({
                         setSelectedContainerInfo={setSelectedContainerInfo}
                         isAdminMode={isAdminMode}
                         generateThumbnail={generateThumbnail}
+                        handleAddOtherObject={handleAddOtherObject}
                     />
 
                     {/* Konva Stage */}
@@ -310,6 +327,15 @@ export default function RoomCanvas({
                                 getContainerZones={getContainerZones}
                                 setIsDraggingContainer={setIsDraggingContainer}
                                 isContainerInsideRoom={isContainerInsideRoom}
+                            />
+
+                            {/* Other objects layer */}
+                            <OtherObjectsLayer
+                                otherObjectsInRoom={otherObjects}
+                                handleSelectOtherObject={handleSelectOtherObject}
+                                room={room}
+                                otherObjectZones={otherObjectZones}
+                                selectedOtherObjectId={selectedOtherObjectId}
                             />
 
                             {/* Blocked zones overlay */}

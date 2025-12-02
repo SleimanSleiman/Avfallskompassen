@@ -34,3 +34,13 @@ export type ContainerInRoom = {
     height: number;
     rotation: number;
 };
+
+export type OtherObjectInRoom = {
+    id: number;
+    name: string;
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+    rotation: number;
+};
