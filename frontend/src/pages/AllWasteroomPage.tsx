@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import RoomSizePrompt from "../components/RoomSizePrompt";
 import greybox from "../assets/greybox.png";
 import Message from "../components/ShowStatus";
+import ConfirmModal from "../components/ConfirmModal";
 
 
 export default function AllaMiljoRumPage() {
@@ -16,6 +17,9 @@ export default function AllaMiljoRumPage() {
     const propertyAddress = localStorage.getItem("selectedPropertyAddress");
     const [isCreateRoomOpen, setIsCreateRoomOpen] = useState(false);
     const [search, setSearch] = useState("");
+    const [showConfirm, setShowConfirm] = useState(false);
+    const [roomToDelete, setRoomToDelete] = useState<WasteRoom | null>(null);
+    const [loadingDelete, setLoadingDelete] = useState(false);
         
     /* ──────────────── Messages ──────────────── */
     const [msg, setMsg] = useState<string | null>(null);
@@ -59,10 +63,15 @@ export default function AllaMiljoRumPage() {
         window.location.href = "/planningTool";
     }
 
-    async function removeRoom(room: WasteRoom) {
-        if (!confirm("Är du säker på att du vill ta bort detta miljörum?")) return; // TODO Byt ut mot confirm modal
+    function requestRemoveRoom(room: WasteRoom) {
+        setRoomToDelete(room);
+        setShowConfirm(true);
+    }
 
-        setDeleting(room.id);
+    async function removeRoom(room: WasteRoom) {
+        if (!roomToDelete) return; 
+
+        setLoadingDelete(true);
 
         try {
             await deleteWasteRoom(room.wasteRoomId ?? room.id);
@@ -76,7 +85,9 @@ export default function AllaMiljoRumPage() {
             setError("");
             setTimeout(() => setError("Det gick inte att ta bort rummet"), 10);
         } finally {
-            setDeleting(null);
+            setLoadingDelete(false);
+            setShowConfirm(false);
+            setRoomToDelete(null);
         }
     }
 
@@ -91,7 +102,8 @@ export default function AllaMiljoRumPage() {
 
     return (
         
-        <main className="mx-auto max-w-5xl py-10">           
+        <main className="mx-auto max-w-5xl py-10">   
+                    
             <div className="mb-6 inline-flex items-center gap-2 text-nsr-teal hover:underline cursor-pointer font-medium"
                 onClick={() => window.location.href = "/properties"}> ← Tillbaka till Mina fastigheter
             </div>
@@ -192,7 +204,7 @@ export default function AllaMiljoRumPage() {
                                     <button
                                         className="inline-flex items-center justify-center rounded-xl2 px-3 py-1 text-sm font-medium border border-red-200 bg-red-50 text-red-700 hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-600"
                                         disabled={deleting === room.id}
-                                        onClick={() => removeRoom(room)}
+                                        onClick={() => requestRemoveRoom(room)}
                                     >
                                         {deleting === room.id ? "Tar bort..." : "Ta bort"}
                                     </button>
@@ -219,6 +231,21 @@ export default function AllaMiljoRumPage() {
                     onCancel={() => setIsCreateRoomOpen(false)}
                 />
             )}
+
+            <ConfirmModal
+                open={showConfirm}
+                title="Ta bort miljörum"
+                message="Är du säker på att du vill ta bort detta miljörum?"
+                confirmLabel="Ta bort"
+                cancelLabel="Avbryt"
+                loading={loadingDelete}
+                onCancel={() => {
+                    setShowConfirm(false);
+                    setRoomToDelete(null);
+                }}
+                onConfirm={() => removeRoom(roomToDelete!)}
+            />
+
         </main>
     );
 }
