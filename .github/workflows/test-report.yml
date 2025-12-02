@@ -4,14 +4,14 @@ on:
   push:
     branches:
       - main
-      - testing/NSR144-sätt_upp_backend_och_automatisk_testning
+      - NSR-418-Backend---Integration-tester
   pull_request:
 
 jobs:
   test-backend:
     name: Backend Tests
     runs-on: windows-latest
-    timeout-minutes: 5
+    timeout-minutes: 10
 
     defaults:
       run:
@@ -30,8 +30,8 @@ jobs:
       - name: Build project
         run: mvn clean compile
 
-      - name: Run tests
-        run: mvn test
+      - name: Run unit + integration tests
+        run: mvn verify
 
       - name: Generate Surefire HTML report
         run: mvn surefire-report:report-only
