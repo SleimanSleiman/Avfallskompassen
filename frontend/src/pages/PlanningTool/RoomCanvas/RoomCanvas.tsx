@@ -8,7 +8,6 @@
  * - Toolbar and container panel UI.
  * - Blocked zones overlay when dragging containers or doors.
  */
-
 import { Stage, Layer } from "react-konva";
 import { useState, type Dispatch, type SetStateAction, useRef} from "react";
 import RoomShape from "./components/Room/RoomShape";
@@ -59,7 +58,8 @@ type RoomCanvasProps = {
     /* ───────────── Other Objects Props ───────────── */
     otherObjects: OtherObjectInRoom[];
     handleAddOtherObject: (name: string, width: number, height: number) => void;
-    otherObjectZones: { x: number; y: number; width: number; height: number }[];
+    getOtherObjectZones: (excludeId?: number) => { x: number; y: number; width: number; height: number }[];
+    handleDragOtherObject: (id: number, pos: { x: number; y: number }) => void;
     handleSelectOtherObject: (id: number | null) => void;
     selectedOtherObjectId: number | null;
 
@@ -122,7 +122,8 @@ export default function RoomCanvas({
     otherObjects,
     setOtherObjects,
     handleAddOtherObject,
-    otherObjectZones,
+    handleDragOtherObject,
+    getOtherObjectZones,
     handleSelectOtherObject,
     selectedOtherObjectId,
 
@@ -154,6 +155,7 @@ export default function RoomCanvas({
     isAdminMode = false,
 }: RoomCanvasProps) {
     const [isDraggingContainer, setIsDraggingContainer] = useState(false);
+    const [isDraggingOtherObject, setIsDraggingOtherObject] = useState(false);
     const [msg, setMsg] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
 
@@ -169,15 +171,18 @@ export default function RoomCanvas({
         setDraggedContainer
     });
 
-    //Compute blocked zones for doors and containers
+    //Compute blocked zones for doors, containers and other objects
     const zones = useContainerZones({
         isDraggingContainer,
-        selectedContainerId: selectedContainerId,
-        draggedContainer: draggedContainer,
-        getContainerZones: getContainerZones,
-        doorZones: doorZones,
-        otherObjectZones: otherObjectZones,
-      });
+        isDraggingOtherObject,
+        selectedContainerId,
+        selectedOtherObjectId,
+        draggedContainer,
+        getContainerZones,
+        getOtherObjectZones,
+        doorZones
+    });
+
 
     //Moves a room and the containers inside it
     const handleMoveRoom = (newX: number, newY: number) => {
@@ -325,7 +330,7 @@ export default function RoomCanvas({
                                 handleSelectContainer={handleSelectContainer}
                                 room={room}
                                 doorZones={doorZones}
-                                otherObjectZones={otherObjectZones}
+                                otherObjectZones={getOtherObjectZones()}
                                 getContainerZones={getContainerZones}
                                 setIsDraggingContainer={setIsDraggingContainer}
                                 isContainerInsideRoom={isContainerInsideRoom}
@@ -335,13 +340,19 @@ export default function RoomCanvas({
                             <OtherObjectsLayer
                                 otherObjectsInRoom={otherObjects}
                                 handleSelectOtherObject={handleSelectOtherObject}
+                                handleDragOtherObject={handleDragOtherObject}
                                 room={room}
-                                otherObjectZones={otherObjectZones}
+                                doorZones={doorZones}
+                                containerZones={getContainerZones()}
+                                getOtherObjectZones={getOtherObjectZones}
                                 selectedOtherObjectId={selectedOtherObjectId}
+                                setIsDraggingOtherObject={setIsDraggingOtherObject}
                             />
 
                             {/* Blocked zones overlay */}
-                            {(isDraggingContainer || draggedContainer) && <BlockedZones zones={zones} />}
+                            {(isDraggingContainer || isDraggingOtherObject || draggedContainer) && (
+                                <BlockedZones zones={zones} />
+                            )}
                         </Layer>
                     </Stage>
                 </div>

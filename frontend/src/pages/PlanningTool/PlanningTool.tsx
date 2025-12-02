@@ -67,6 +67,7 @@ export default function PlanningTool({ isAdminMode = false }: PlanningToolProps)
         otherObjects,
         setOtherObjects,
         handleAddOtherObject,
+        handleDragOtherObject,
         getOtherObjectZones,
         handleSelectOtherObject,
     } = useOtherObjects(room, setSelectedOtherObjectId, setSelectedContainerId, setSelectedDoorId, getDoorZones());
@@ -136,7 +137,7 @@ export default function PlanningTool({ isAdminMode = false }: PlanningToolProps)
         if (room.containers && room.containers.length > 0) saveContainers(room.containers);
     }, [room.id, setDoors, saveContainers]);
 
-   useEffect(() => {
+    useEffect(() => {
         if (typeof window === 'undefined') {
             console.log('PlanningTool - Skipping sync (no window)');
             return;
@@ -296,7 +297,8 @@ export default function PlanningTool({ isAdminMode = false }: PlanningToolProps)
                         otherObjects={otherObjects}
                         setOtherObjects={setOtherObjects}
                         handleAddOtherObject={handleAddOtherObject}
-                        otherObjectZones={getOtherObjectZones()}
+                        handleDragOtherObject={handleDragOtherObject}
+                        getOtherObjectZones={getOtherObjectZones}
                         handleSelectOtherObject={handleSelectOtherObject}
                         selectedOtherObjectId={selectedOtherObjectId}
 

@@ -120,6 +120,17 @@ export function useOtherObjects(
         return true;
     }
 
+    /* ──────────────── Drag Other Object In Room ──────────────── */
+    const handleDragOtherObject = (id: number, pos: { x: number; y: number }) => {
+        setOtherObjects(prev =>
+                prev.map(obj =>
+                    obj.id === id
+                        ? { ...obj, x: pos.x, y: pos.y }
+                        : obj
+                )
+            );
+    }
+
     /* ──────────────── Select Other Object ──────────────── */
     const handleSelectOtherObject = (id: number | null) => {
         setSelectedOtherObjectId(id);
@@ -132,6 +143,7 @@ export function useOtherObjects(
         otherObjects,
         setOtherObjects,
         handleAddOtherObject,
+        handleDragOtherObject,
         getOtherObjectZones: (excludeId?: number) => buildOtherObjectZones(otherObjects, excludeId),
         handleSelectOtherObject,
     }
