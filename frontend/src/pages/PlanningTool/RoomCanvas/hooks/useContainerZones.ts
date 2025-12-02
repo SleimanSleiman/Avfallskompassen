@@ -19,7 +19,7 @@ function useContainerZones({
     doorZones,
 }) {
     //Determine if the user is dragging an existing container
-    const isDraggingExisting = isDraggingContainer && selectedContainerId !== null;
+    const isDraggingExistingContainer = isDraggingContainer && selectedContainerId !== null;
 
     //Determine if the user is dragging an existing other object
     const isDraggingExistingOther = isDraggingOtherObject && selectedOtherObjectId !== null;

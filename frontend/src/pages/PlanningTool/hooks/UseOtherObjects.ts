@@ -138,6 +138,23 @@ export function useOtherObjects(
         setSelectedDoorId(null);
     };
 
+    /* ──────────────── Rotate Other Object ──────────────── */
+    const handleRotateOtherObject = (id: number) => {
+        setOtherObjects(prev =>
+            prev.map(obj =>
+                obj.id === id
+                    ? { ...obj, rotation: ((obj.rotation || 0) + 90) % 360 }
+                    : obj
+            )
+        );
+    };
+
+    /* ──────────────── Remove Other Object ──────────────── */
+    const handleRemoveOtherObject = (id: number) => {
+        setOtherObjects(prev => prev.filter(obj => obj.id !== id));
+        setSelectedOtherObjectId(null);
+    };
+
     /* ──────────────── Return ──────────────── */
     return {
         otherObjects,
@@ -146,5 +163,7 @@ export function useOtherObjects(
         handleDragOtherObject,
         getOtherObjectZones: (excludeId?: number) => buildOtherObjectZones(otherObjects, excludeId),
         handleSelectOtherObject,
+        handleRotateOtherObject,
+        handleRemoveOtherObject,
     }
 }

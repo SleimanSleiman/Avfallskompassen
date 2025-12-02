@@ -3,7 +3,7 @@
  * Displays the selected item and provides controls to view info, rotate, or remove it.
  */
 import InfoTooltip from "./components/InfoTooltip";
-import type { ContainerInRoom as Container, Door } from "./Types";
+import type { ContainerInRoom as Container, Door, OtherObjectInRoom } from "./Types";
 import { RotateCcw, Trash2, Info } from "lucide-react";
 import { useRef, useState, useEffect } from 'react';
 
@@ -11,13 +11,22 @@ import { useRef, useState, useEffect } from 'react';
 type ActionPanelProps = {
     containers: Container[];
     doors: Door[];
+    otherObjects: OtherObjectInRoom[];
+
     selectedContainerId: number | null;
     selectedDoorId: number | null;
+    selectedOtherObjectId: number | null;
+
     handleRemoveContainer: (id: number) => void;
     handleRemoveDoor: (id: number) => void;
+    handleRemoveOtherObject: (id: number) => void;
+
     handleRotateDoor: (id: number) => void;
     handleRotateContainer: (id: number) => void;
+    handleRotateOtherObject: (id: number) => void;
+
     handleShowContainerInfo: (id: number) => void;
+
     stageWrapperRef?: React.RefObject<HTMLDivElement | null>;
     pos: { left: number; top: number } | null;
     setPos: React.Dispatch<React.SetStateAction<{ left: number; top: number } | null>>;
@@ -26,20 +35,29 @@ type ActionPanelProps = {
 export default function ActionPanel({
     containers,
     doors,
+    otherObjects,
+
     selectedContainerId,
     selectedDoorId,
+    selectedOtherObjectId,
+
     handleRemoveContainer,
     handleRemoveDoor,
+    handleRemoveOtherObject,
+
     handleRotateDoor,
     handleRotateContainer,
+    handleRotateOtherObject,
+
     handleShowContainerInfo,
+
     stageWrapperRef,
     pos,
     setPos,
 }: ActionPanelProps) {
 
     //Display action panel if an object is selected
-    const isVisible = selectedContainerId !== null || selectedDoorId !== null;
+    const isVisible = selectedContainerId !== null || selectedDoorId !== null || selectedOtherObjectId !== null;
     if (!isVisible ) return null;
 
     const defaultPos = { left: 100, top: 200 };
@@ -58,15 +76,26 @@ export default function ActionPanel({
         } else if (selectedDoorId !== null) {
             const door = doors.find((d) => d.id === selectedDoorId);
             return door ? "Dörr " + door.width * 100 + "cm" : "Inget objekt valt";
+        } else if (selectedOtherObjectId !== null) {
+            const otherObject = otherObjects.find((o) => o.id === selectedOtherObjectId);
+            return otherObject ? otherObject.name : "Inget objekt valt";
         }
         return "Inget objekt valt";
     })();
 
     //Determine button texts based on selection
     const rotateText =
-        selectedDoorId !== null ? "Rotera dörr" : selectedContainerId !== null ? "Rotera kärl" : "Rotera";
+        selectedDoorId !== null ? "Rotera dörr" :
+        selectedContainerId !== null ? "Rotera kärl" :
+        selectedOtherObjectId !== null ? "Rotera objekt" :
+        "Rotera";
+
     const removeText =
-        selectedDoorId !== null ? "Ta bort dörr" : selectedContainerId !== null ? "Ta bort kärl" : "Ta bort";
+        selectedDoorId !== null ? "Ta bort dörr" :
+        selectedContainerId !== null ? "Ta bort kärl" :
+        selectedOtherObjectId !== null ? "Ta bort objekt" :
+        "Ta bort";
+
 
     //Handle rotate action
     const handleRotate = () => {
@@ -76,6 +105,8 @@ export default function ActionPanel({
             handleRotateDoor(door.id);
         } else if (selectedContainerId !== null) {
             handleRotateContainer(selectedContainerId);
+        } else if (selectedOtherObjectId !== null) {
+            handleRotateOtherObject(selectedOtherObjectId);
         }
     }
 
@@ -85,6 +116,8 @@ export default function ActionPanel({
             handleRemoveContainer(selectedContainerId);
         } else if (selectedDoorId !== null) {
             handleRemoveDoor(selectedDoorId);
+        } else if (selectedOtherObjectId !== null) {
+            handleRemoveOtherObject(selectedOtherObjectId);
         }
     }
 
@@ -167,8 +200,8 @@ export default function ActionPanel({
                 {/* Tooltip */}
                 <div className="self-end">
                     <InfoTooltip
-                        text="Markera ett kärl eller en dörr i ritningen för att kunna rotera eller ta bort objektet.
-                        För kärl kan du rotera 90° åt gången. Dörrar växlar mellan öppningsriktningar.
+                        text="Markera ett objekt i ritningen för att kunna rotera eller ta bort det.
+                        För kärl och övriga objekt kan du rotera 90° åt gången. Dörrar växlar mellan öppningsriktningar.
                         Du kan även se mer information om det valda kärlet."
                         panelWidthClass="w-72"
                     />

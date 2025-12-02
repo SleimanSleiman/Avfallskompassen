@@ -70,6 +70,8 @@ export default function PlanningTool({ isAdminMode = false }: PlanningToolProps)
         handleDragOtherObject,
         getOtherObjectZones,
         handleSelectOtherObject,
+        handleRotateOtherObject,
+        handleRemoveOtherObject,
     } = useOtherObjects(room, setSelectedOtherObjectId, setSelectedContainerId, setSelectedDoorId, getDoorZones());
 
     /* ──────────────── Container state & logic ──────────────── */
@@ -309,18 +311,22 @@ export default function PlanningTool({ isAdminMode = false }: PlanningToolProps)
                     />
 
                     {/* ActionPanel for selected container or door */}
-                    {(selectedContainerId !== null || selectedDoorId !== null) && (
+                    {(selectedContainerId !== null || selectedDoorId !== null || selectedOtherObjectId != null) && (
                         <div
                             className="absolute z-50 left-0.5 top-0 flex w-full justify-center lg:justify-start">
                             <ActionPanel
                                 containers={containersInRoom}
                                 doors={doors}
+                                otherObjects={otherObjects}
                                 selectedContainerId={selectedContainerId}
                                 selectedDoorId={selectedDoorId}
+                                selectedOtherObjectId={selectedOtherObjectId}
                                 handleRemoveContainer={handleRemoveContainer}
                                 handleRemoveDoor={handleRemoveDoor}
+                                handleRemoveOtherObject={handleRemoveOtherObject}
                                 handleRotateDoor={handleRotateDoor}
                                 handleRotateContainer={handleRotateContainer}
+                                handleRotateOtherObject={handleRotateOtherObject}
                                 handleShowContainerInfo={handleShowContainerInfo}
                                 stageWrapperRef={stageWrapperRef}
                                 pos={actionPanelPos}
