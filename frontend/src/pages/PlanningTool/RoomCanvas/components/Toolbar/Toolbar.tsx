@@ -4,13 +4,14 @@
  * saving the design, and performing undo/redo actions.
  */
 
-import { React, useState } from "react";
+import { React, useState, useCallback } from "react";
 import { Save, Ruler, DoorOpen, Undo, Redo, PillBottle, X } from "lucide-react";
 import { SCALE, STAGE_WIDTH, STAGE_HEIGHT, MARGIN, clamp, MIN_HEIGHT, MIN_WIDTH } from "../../../Constants"
 import RoomSizePrompt from "../../../../../components/RoomSizePrompt";
 import DoorWidthPrompt from "../../../../../components/DoorWidthPrompt";
 import ContainerInfo from "./ContainerInfo"
 import './css/roomCanvasToolbar.css'
+import LoadingBar from "../../../../../components/LoadingBar";
 
 type ToolbarProps = {
     roomName?: string;
@@ -25,6 +26,7 @@ type ToolbarProps = {
     doorsLength: number;
     setMsg: (msg: string | null) => void;
     setError: (error: string | null) => void;
+    setIsSaving: (saving: boolean) => void;
     undo?: () => void;
     redo?: () => void;
     selectedContainerInfo: ContainerDTO | null;
@@ -46,6 +48,7 @@ export default function Toolbar({
     doorsLength,
     setMsg,
     setError,
+    setIsSaving,
     undo,
     redo,
     selectedContainerInfo,
@@ -56,7 +59,6 @@ export default function Toolbar({
 
     const [isRoomPromptOpen, setIsRoomPromptOpen] = useState(false);
     const [isDoorPromptOpen, setIsDoorPromptOpen] = useState(false);
-
     const [containerInfoPos, setContainerInfoPos] = useState<{ left: number; top: number } | null>(null);
 
     //Safe wrappers for optional undo/redo
@@ -107,9 +109,14 @@ export default function Toolbar({
     const handleSaveRoom = async () => {
         setMsg("");
         setError("");
-        if (!saveRoom) return;
+        setIsSaving(true);
+        if (!saveRoom) {
+            setIsSaving(false);
+            return;
+        }
         if (doorsLength === 0) {
             setTimeout(() => setError("Det måste finnas en dörr innan du sparar rummet"), 10);
+            setIsSaving(false);
             return;
         }
         try {
@@ -119,6 +126,8 @@ export default function Toolbar({
             setTimeout(() => setMsg("Rummet har sparats"), 10);
         } catch (err) {
             setTimeout(() => setError("Rummet gick inte att spara. Vänligen försök senare igen"), 10);
+        } finally {
+            setIsSaving(false);
         }
     };
 

@@ -5,6 +5,7 @@ import { deleteWasteRoom } from "../lib/WasteRoomRequest";
 import { useEffect, useState } from "react";
 import RoomSizePrompt from "../components/RoomSizePrompt";
 import greybox from "../assets/greybox.png";
+import Message from "../components/ShowStatus";
 
 
 export default function AllaMiljoRumPage() {
@@ -15,6 +16,10 @@ export default function AllaMiljoRumPage() {
     const propertyAddress = localStorage.getItem("selectedPropertyAddress");
     const [isCreateRoomOpen, setIsCreateRoomOpen] = useState(false);
     const [search, setSearch] = useState("");
+        
+    /* ──────────────── Messages ──────────────── */
+    const [msg, setMsg] = useState<string | null>(null);
+    const [error, setError] = useState<string | null>(null);
 
 
     useEffect(() => {
@@ -55,7 +60,7 @@ export default function AllaMiljoRumPage() {
     }
 
     async function removeRoom(room: WasteRoom) {
-        if (!confirm("Är du säker på att du vill ta bort detta miljörum?")) return;
+        if (!confirm("Är du säker på att du vill ta bort detta miljörum?")) return; // TODO Byt ut mot confirm modal
 
         setDeleting(room.id);
 
@@ -67,7 +72,9 @@ export default function AllaMiljoRumPage() {
                 prev.filter((r) => (r.wasteRoomId ?? r.id) !== (room.wasteRoomId ?? room.id))
             );
         } catch (err) {
-            alert("Kunde inte radera miljörummet.");
+            setMsg("")
+            setError("");
+            setTimeout(() => setError("Det gick inte att ta bort rummet"), 10);
         } finally {
             setDeleting(null);
         }
@@ -87,6 +94,12 @@ export default function AllaMiljoRumPage() {
         <main className="mx-auto max-w-5xl py-10">           
             <div className="mb-6 inline-flex items-center gap-2 text-nsr-teal hover:underline cursor-pointer font-medium"
                 onClick={() => window.location.href = "/properties"}> ← Tillbaka till Mina fastigheter
+            </div>
+
+            {/* Feedback messages */}
+            <div className="stage-content-wrapper">
+                {msg && <Message message={msg} type="success" />}
+                {error && <Message message={error} type="error" />}
             </div>
 
             <div className="mb-8 rounded-2xl border bg-white p-6 shadow-soft">

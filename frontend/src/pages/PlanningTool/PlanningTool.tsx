@@ -14,6 +14,7 @@ import { useComparison } from './hooks/useComparison';
 import { useLayoutHistory } from './hooks/UseLayoutHistory';
 import { useSaveRoom, useWasteRoomRequestBuilder } from './hooks/UseSaveRoom';
 import { usePropertyHighlights } from './hooks/usePropertyHighlights';
+import Message from '../../components/ShowStatus';
 
 //Components
 import RoomCanvas from './RoomCanvas/RoomCanvas';
@@ -43,6 +44,10 @@ export default function PlanningTool({ isAdminMode = false }: PlanningToolProps)
         setRoom
     } = useRoom();
 
+    /* ──────────────── Messages ──────────────── */
+    const [msg, setMsg] = useState<string | null>(null);
+    const [error, setError] = useState<string | null>(null);
+
 
     /* ──────────────── Door state & logic ──────────────── */
     const [selectedContainerId, setSelectedContainerId] = useState<number | null>(null);
@@ -58,7 +63,7 @@ export default function PlanningTool({ isAdminMode = false }: PlanningToolProps)
         handleSelectDoor,
         getDoorZones,
         doorOffsetRef,
-    } = useDoors(room, setSelectedDoorId, setSelectedContainerId);
+    } = useDoors(room, setSelectedDoorId, setSelectedContainerId, setError, setMsg);
 
     /* ──────────────── Container state & logic ──────────────── */
     const {
@@ -90,7 +95,7 @@ export default function PlanningTool({ isAdminMode = false }: PlanningToolProps)
         redo,
         getContainerZones,
         isContainerInsideRoom,
-    } = useContainers(room, setSelectedContainerId, setSelectedDoorId, getDoorZones());
+    } = useContainers(room, setSelectedContainerId, setSelectedDoorId, getDoorZones(),setError,setMsg);
 
     /* ──────────────── Sync the doors and containers when changes are made to the room ──────────────── */
     useEffect(() => {
@@ -236,6 +241,13 @@ export default function PlanningTool({ isAdminMode = false }: PlanningToolProps)
     /* ──────────────── Render ──────────────── */
     return (
         <div className="flex h-full w-full flex-col gap-4 p-3 sm:p-5">
+
+            {/* Feedback messages */}
+            <div className="stage-content-wrapper">
+                {msg && <Message message={msg} type="success" />}
+                {error && <Message message={error} type="error" />}
+            </div>
+
             <div className="flex w-full flex-1 flex-col gap-4 lg:flex-row lg:gap-6">
 
                 {/* ─────────────── Canvas ──────────────── */}

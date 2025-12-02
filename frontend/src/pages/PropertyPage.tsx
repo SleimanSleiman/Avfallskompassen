@@ -513,22 +513,22 @@ async function onDeleteWasteRoom(propertyId: number, wasteRoomId: number) {
           </div>
       </div>
 
-                        {isCreateRoomOpen && (
-                            <RoomSizePrompt
-                                onConfirm={(name: string, length: number, width: number) => {
-                                    localStorage.setItem(
-                                        'enviormentRoomData',
-                                        JSON.stringify({ name, height: length, width: width })
-                                    );
-                                    localStorage.setItem('selectedProperty', JSON.stringify({ propertyId: selectedProperty?.id }));
-                                    localStorage.setItem('selectedPropertyId', String(selectedProperty?.id));
+      {isCreateRoomOpen && (
+        <RoomSizePrompt
+          onConfirm={(name: string, length: number, width: number) => {
+            localStorage.setItem(
+              'enviormentRoomData',
+              JSON.stringify({ name, height: length, width: width })
+            );
+            localStorage.setItem('selectedProperty', JSON.stringify({ propertyId: selectedProperty?.id }));
+            localStorage.setItem('selectedPropertyId', String(selectedProperty?.id));
 
-                                    setIsCreateRoomOpen(false);
-                                    window.location.href = '/planningTool';
-                                }}
-                                onCancel={() => setIsCreateRoomOpen(false)}
-                            />
-                        )}
-        </main>
-    );
+            setIsCreateRoomOpen(false);
+            window.location.href = '/planningTool';
+          }}
+          onCancel={() => setIsCreateRoomOpen(false)}
+        />
+      )}
+    </main>
+  );
 } 

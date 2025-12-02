@@ -30,9 +30,14 @@ export default function RegisterPage() {
 
     setLoading(true);
     try {
-      const res = await register(username, password);
+      const trimmedUsername = username.replace(/\s+$/, '');
+      const res = await register(trimmedUsername, password);
       if (res.success) {
         setMsg(res.message || 'Kontot har skapats! Du är nu inloggad.');
+        localStorage.removeItem("trashRoomData");
+        localStorage.removeItem('enviormentRoomData');
+        localStorage.removeItem('selectedProperty');
+        localStorage.removeItem('selectedPropertyId');
 
         setTimeout(() => {
           navigate('/dashboard');
