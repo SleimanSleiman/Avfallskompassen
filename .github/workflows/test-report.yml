@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-      - NSR-418-Backend---Integration-tester
   pull_request:
 
 jobs:
