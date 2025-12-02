@@ -3,8 +3,8 @@
  * Manages state and logic for room layout, doors, containers, and service types.
  * Renders the RoomCanvas, Sidebar, and ActionPanel components.
  */
-import { useState, useEffect } from 'react';
-import { MapPin, Home, Users } from "lucide-react";
+import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 //Lib
 import type { Property } from '../../lib/Property';
@@ -27,13 +27,30 @@ import { useRoom } from './hooks/UseRoom';
 import { useDoors } from './hooks/UseDoors';
 import { useContainers } from './hooks/UseContainers';
 import { useServiceTypes } from './hooks/UseServiceTypes';
-import { SCALE } from './Constants';
+import { SCALE, ROOM_HORIZONTAL_OFFSET, ROOM_VERTICAL_OFFSET, STAGE_HEIGHT, STAGE_WIDTH } from './Constants';
+import PlanningToolPopup, { PreparedRoomState } from './components/PlanningToolPopup';
+
+const DEFAULT_ROOM_METERS = 5;
 
 type PlanningToolProps = {
     isAdminMode?: boolean;
 };
 
 export default function PlanningTool({ isAdminMode = false }: PlanningToolProps) {
+    const navigate = useNavigate();
+
+    const defaultRoomState = useMemo(() => {
+        const widthPx = DEFAULT_ROOM_METERS / SCALE;
+        const heightPx = DEFAULT_ROOM_METERS / SCALE;
+        return {
+            widthMeters: DEFAULT_ROOM_METERS,
+            heightMeters: DEFAULT_ROOM_METERS,
+            widthPx,
+            heightPx,
+            x: (STAGE_WIDTH - widthPx) / 2 + ROOM_HORIZONTAL_OFFSET,
+            y: (STAGE_HEIGHT - heightPx) / 2 + ROOM_VERTICAL_OFFSET,
+        };
+    }, []);
 
     /* ──────────────── Room state & logic ──────────────── */
     const {
@@ -173,10 +190,33 @@ export default function PlanningTool({ isAdminMode = false }: PlanningToolProps)
 
 
     const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
+    const [hasCheckedStoredProperty, setHasCheckedStoredProperty] = useState(false);
+    const [showPropertyPicker, setShowPropertyPicker] = useState(false);
+    const clearPlanningStorage = useCallback(() => {
+        if (typeof window === 'undefined') return;
+        localStorage.removeItem('enviormentRoomData');
+        localStorage.removeItem('trashRoomData');
+        localStorage.removeItem('selectedProperty');
+        localStorage.removeItem('selectedPropertyId');
+    }, []);
+
+    useEffect(() => {
+        if (isAdminMode) return;
+        if (!hasCheckedStoredProperty) return;
+
+        if (selectedProperty) {
+            setShowPropertyPicker(false);
+            return;
+        }
+
+        clearPlanningStorage();
+        setShowPropertyPicker(true);
+    }, [isAdminMode, selectedProperty, hasCheckedStoredProperty, clearPlanningStorage]);
     const [containerPanelHeight, setContainerPanelHeight] = useState(0);
 
     useEffect(() => {
         if (typeof window === 'undefined') {
+            setHasCheckedStoredProperty(true);
             return;
         }
 
@@ -196,6 +236,8 @@ export default function PlanningTool({ isAdminMode = false }: PlanningToolProps)
         } catch (error) {
             console.error('Failed to parse stored property data', error);
             setSelectedProperty(null);
+        } finally {
+            setHasCheckedStoredProperty(true);
         }
     }, []);
 
@@ -214,6 +256,22 @@ export default function PlanningTool({ isAdminMode = false }: PlanningToolProps)
     const _savedProperty = typeof window !== 'undefined' ? localStorage.getItem("selectedProperty") : null;
     const _savedPropertyId = typeof window !== 'undefined' ? localStorage.getItem('selectedPropertyId') : null;
     const propertyId = _savedProperty ? JSON.parse(_savedProperty).propertyId : (_savedPropertyId ? Number(_savedPropertyId) : null);
+
+    const handlePopupSelection = useCallback((prepared: PreparedRoomState) => {
+        const { property, propertyId: preparedId, storagePayload, roomState } = prepared;
+        localStorage.setItem('enviormentRoomData', JSON.stringify(storagePayload));
+        localStorage.removeItem('trashRoomData');
+        localStorage.setItem('selectedPropertyId', String(preparedId));
+        localStorage.setItem('selectedProperty', JSON.stringify({ propertyId: preparedId }));
+        setSelectedProperty(property);
+        setRoom(roomState);
+        setShowPropertyPicker(false);
+    }, [setRoom]);
+
+    const goToProperties = useCallback(() => {
+        setShowPropertyPicker(false);
+        navigate('/properties');
+    }, [navigate]);
 
     const { data: comparisonData, loading: comparisonLoading, error: comparisonError } = useComparison(propertyId);
     const propertyHighlights = usePropertyHighlights(comparisonData, comparisonLoading, selectedProperty);
@@ -235,6 +293,7 @@ export default function PlanningTool({ isAdminMode = false }: PlanningToolProps)
 
     /* ──────────────── Render ──────────────── */
     return (
+        <>
         <div className="flex h-full w-full flex-col gap-4 p-3 sm:p-5">
             <div className="flex w-full flex-1 flex-col gap-4 lg:flex-row lg:gap-6">
 
@@ -330,5 +389,14 @@ export default function PlanningTool({ isAdminMode = false }: PlanningToolProps)
                 </div>
             </div>
         </div>
+
+        {!isAdminMode && showPropertyPicker && (
+            <PlanningToolPopup
+                defaultRoomState={defaultRoomState}
+                onSelect={handlePopupSelection}
+                onManageProperties={goToProperties}
+            />
+        )}
+        </>
     );
 }
