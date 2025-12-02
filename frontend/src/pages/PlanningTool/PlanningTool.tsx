@@ -28,7 +28,8 @@ import { useDoors } from './hooks/UseDoors';
 import { useContainers } from './hooks/UseContainers';
 import { useServiceTypes } from './hooks/UseServiceTypes';
 import { SCALE, ROOM_HORIZONTAL_OFFSET, ROOM_VERTICAL_OFFSET, STAGE_HEIGHT, STAGE_WIDTH } from './Constants';
-import PlanningToolPopup, { PreparedRoomState } from './components/PlanningToolPopup';
+import PlanningToolPopup from './components/PlanningToolPopup';
+import type { PreparedRoomState } from './components/PlanningToolPopup';
 
 const DEFAULT_ROOM_METERS = 5;
 
@@ -279,13 +280,14 @@ export default function PlanningTool({ isAdminMode = false }: PlanningToolProps)
     const { saveRoom } = useSaveRoom();
     const { buildWasteRoomRequest } = useWasteRoomRequestBuilder(isContainerInsideRoom);
 
-    const handleSaveRoom = async (thumbnailBase64: string | "null") => {
+    const handleSaveRoom = async (thumbnailBase64: string | null) => {
         if (!propertyId) {
             console.error("No propertyId, cannot save room.");
             return;
         }
 
-        const roomRequest = buildWasteRoomRequest(room, doors, containersInRoom, propertyId, thumbnailBase64);
+        const thumbnail = thumbnailBase64 || "";
+        const roomRequest = buildWasteRoomRequest(room, doors, containersInRoom, propertyId, thumbnail);
 
         const savedRoom = await saveRoom(roomRequest);
         room.id = savedRoom?.wasteRoomId;
