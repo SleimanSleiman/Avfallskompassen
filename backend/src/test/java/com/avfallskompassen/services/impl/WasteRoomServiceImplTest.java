@@ -46,7 +46,7 @@ class WasteRoomServiceImplTest {
 
     @Test
     void saveWasteRoom_ValidRequest_ReturnsDTO() {
-        WasteRoomRequest request = new WasteRoomRequest(10, 5, 12, 2, List.of(), List.of(), 1L, "Name");
+        WasteRoomRequest request = new WasteRoomRequest(10, 5, 12, 2, List.of(), List.of(), List.of(), 1L, "Name");
 
         Property property = new Property();
         property.setId(1L);
@@ -79,7 +79,7 @@ class WasteRoomServiceImplTest {
 
     @Test
     void saveWasteRoom_ValidRequest_NullLists() {
-        WasteRoomRequest request = new WasteRoomRequest(10, 5, 12, 2, null, null, 1L, "Name");
+        WasteRoomRequest request = new WasteRoomRequest(10, 5, 12, 2, null, null, null, 1L, "Name");
 
         Property property = new Property();
         property.setId(1L);
@@ -112,7 +112,7 @@ class WasteRoomServiceImplTest {
 
     @Test
     void saveWasteRoom_InvalidRequest_WrongPropertyId() {
-        WasteRoomRequest request = new WasteRoomRequest(10, 5, 12, 2, null, null, 10203L, "Name");
+        WasteRoomRequest request = new WasteRoomRequest(10, 5, 12, 2, null, null, null, 10203L, "Name");
 
         when(propertyRepository.findById(10203L)).thenReturn(Optional.empty());
 
@@ -220,7 +220,7 @@ class WasteRoomServiceImplTest {
     @Test
     void updateWasteRoom_ValidRequest_ReturnUpdatedDTO() {
         Long wasteRoomId = 1L;
-        WasteRoomRequest request = new WasteRoomRequest(12.5, 8.0, 1.0, 2.0, List.of(), List.of(),1L, "Name");
+        WasteRoomRequest request = new WasteRoomRequest(12.5, 8.0, 1.0, 2.0, List.of(), List.of(), List.of(), 1L, "Name");
 
         Property property = new Property();
         property.setId(1L);
@@ -265,7 +265,7 @@ class WasteRoomServiceImplTest {
         Long wasteRoomId = 1L;
 
         List<ContainerPositionRequest> newContainers = List.of(new ContainerPositionRequest(1L, 5, 5, 0));
-        WasteRoomRequest request = new WasteRoomRequest(12.5, 8.0, 1.0, 2.0, List.of(), newContainers, 1L, "Name");
+        WasteRoomRequest request = new WasteRoomRequest(12.5, 8.0, 1.0, 2.0, List.of(), newContainers, List.of(), 1L, "Name");
 
         Property property = new Property();
         property.setId(1L);
@@ -314,7 +314,7 @@ class WasteRoomServiceImplTest {
     void updateWasteRoom_InvalidRequest_WrongWasteRoomID() {
         Long wrongWasteRoomId = 99L;
 
-        WasteRoomRequest request = new WasteRoomRequest(12.5, 8.0, 1.0, 2.0, List.of(), List.of(), 1L,  "Name");
+        WasteRoomRequest request = new WasteRoomRequest(12.5, 8.0, 1.0, 2.0, List.of(), List.of(), List.of(), 1L,  "Name");
 
         when(wasteRoomRepository.findById(wrongWasteRoomId)).thenReturn(Optional.empty());
 
