@@ -10,6 +10,7 @@ export function useDoors(
     room: Room | null,
     setSelectedDoorId: (id: number | null) => void,
     setSelectedContainerId: (id: number | null) => void,
+    setSelectedOtherObjectId: (id: number | null) => void,
 ) {
 
     /* ──────────────── Door state ──────────────── */
@@ -49,7 +50,7 @@ export function useDoors(
             { id, width, x, y, wall, rotation: getOutwardRotation(wall), swingDirection: "outward" }
         ]);
 
-        setSelectedDoorId(id);
+        handleSelectDoor(id);
         return true;
     };
 
@@ -58,7 +59,7 @@ export function useDoors(
         const door = doors.find(d => d.id === id);
         if (!door) return;
 
-        setSelectedDoorId(id);
+        handleSelectDoor(id);
 
         const widthPx = door.width / SCALE;
 
@@ -238,7 +239,8 @@ export function useDoors(
     /* ──────────────── Select Door ──────────────── */
     const handleSelectDoor = (id: number | null) => {
         setSelectedDoorId(id);
-        setSelectedContainerId(null); // Clear container selection
+        setSelectedContainerId(null);
+        setSelectedOtherObjectId(null);
     };
 
     /* ──────────────── Door Zones & Collision ──────────────── */

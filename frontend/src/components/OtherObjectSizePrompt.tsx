@@ -15,9 +15,9 @@ interface OtherObjectSizePromptProps {
 export default function OtherObjectSizePrompt({
     onConfirm,
     onCancel,
-    maxLength = 10000,
-    maxWidth = 10000,
-    minValue = 500,
+    maxLength = 500,
+    maxWidth = 500,
+    minValue = 30,
 }: OtherObjectSizePromptProps) {
     const [name, setName] = useState("");
     const [length, setLength] = useState("");
@@ -34,17 +34,17 @@ export default function OtherObjectSizePrompt({
         }
 
         if (!(lengthNum >= minValue) || !(widthNum >= minValue)) {
-            setError(`Objektets längd och bredd måste vara minst ${minValue} mm.`);
+            setError(`Objektets längd och bredd måste vara minst ${minValue} cm.`);
             return;
         }
 
         if (lengthNum > maxLength) {
-            setError(`Objektets längd får inte överstiga ${maxLength} mm.`);
+            setError(`Objektets längd får inte överstiga ${maxLength} cm.`);
             return;
         }
 
         if (widthNum > maxWidth) {
-            setError(`Objektets bredd får inte överstiga ${maxWidth} mm.`);
+            setError(`Objektets bredd får inte överstiga ${maxWidth} cm.`);
             return;
         }
 
@@ -55,11 +55,12 @@ export default function OtherObjectSizePrompt({
     return (
         <div className="prompt-overlay">
             <div className="prompt-box">
-                <h2 className="prompt-heading">Ange namn, längd och bredd på objektet</h2>
+                <h2 className="prompt-heading">Här kan du lägga till övriga objekt som finns i rummet. Detta kan vara föremål som tar upp permanent
+                 plats i miljörummet, t.ex. skåp, rör, brandsläckare etc.</h2>
 
                 <input
                     type="text"
-                    placeholder="Objektets namn"
+                    placeholder="T.ex. skåp, brandsläckare etc."
                     value={name}
                     onChange={(e) => {
                         setName(e.target.value);
@@ -69,7 +70,7 @@ export default function OtherObjectSizePrompt({
                 />
                 <input
                     type="number"
-                    placeholder="Längd (mm)"
+                    placeholder="Djup (cm)"
                     value={length}
                     onChange={(e) => {
                         setLength(e.target.value);
@@ -79,7 +80,7 @@ export default function OtherObjectSizePrompt({
                 />
                 <input
                     type="number"
-                    placeholder="Bredd (mm)"
+                    placeholder="Bredd (cm)"
                     value={width}
                     onChange={(e) => {
                         setWidth(e.target.value);

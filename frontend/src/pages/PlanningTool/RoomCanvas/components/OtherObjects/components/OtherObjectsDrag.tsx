@@ -76,6 +76,14 @@ export default function OtherObjectDrag({
 
                 return { x: newX, y: newY };
             }}
+            onDragMove={(e) => {
+                const newX = e.target.x() - object.width / 2;
+                const newY = e.target.y() - object.height / 2;
+
+                handleDragOtherObject(object.id, { x: newX, y: newY });
+
+                setIsOverZone(checkZones(newX, newY, object.rotation));
+            }}
             onDragEnd={(e) => {
                 const newX = e.target.x() - object.width / 2;
                 const newY = e.target.y() - object.height / 2;

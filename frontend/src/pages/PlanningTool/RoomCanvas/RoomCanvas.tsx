@@ -18,6 +18,7 @@ import DoorMeasurementLayer from "./components/Door/DoorMeasurementLayer/DoorMea
 import ContainersLayer from "./components/Container/ContainersLayer";
 import ContainerPanel from "./components/Container/ContainerPanel";
 import OtherObjectsLayer from "./components/OtherObjects/OtherObjectsLayer";
+import OtherObjectMeasurementLayer from "./components/OtherObjects/OtherObjectsMeasurementLayer/OtherObjectsMeasurementLayer";
 import Toolbar from "./components/Toolbar/Toolbar";
 import useContainerPanel from "./hooks/useContainerPanel";
 import useContainerZones from "./hooks/useContainerZones";
@@ -283,6 +284,7 @@ export default function RoomCanvas({
                             if (e.target === e.target.getStage()) {
                                 handleSelectContainer(null);
                                 handleSelectDoor(null);
+                                handleSelectOtherObject(null);
                                 setSelectedContainerInfo(null);
                             }
                         }}
@@ -295,6 +297,7 @@ export default function RoomCanvas({
                                 room={room}
                                 handleSelectContainer={handleSelectContainer}
                                 handleSelectDoor={handleSelectDoor}
+                                handleSelectOtherObject={handleSelectOtherObject}
                                 setSelectedContainerInfo={setSelectedContainerInfo}
                                 onMove={handleMoveRoom}
                             />
@@ -347,6 +350,13 @@ export default function RoomCanvas({
                                 getOtherObjectZones={getOtherObjectZones}
                                 selectedOtherObjectId={selectedOtherObjectId}
                                 setIsDraggingOtherObject={setIsDraggingOtherObject}
+                            />
+
+                            {/* Measurement layer for selected other object */}
+                            <OtherObjectMeasurementLayer
+                                otherObjects={otherObjects}
+                                room={room}
+                                selectedOtherObjectId={selectedOtherObjectId}
                             />
 
                             {/* Blocked zones overlay */}

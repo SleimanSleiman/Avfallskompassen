@@ -4,7 +4,7 @@
  */
 import { useState } from "react";
 import type { OtherObjectInRoom, Room } from "../Types";
-import { clamp, isOverlapping, mmToPixels, SCALE } from "../Constants";
+import { clamp, isOverlapping, cmToPixels, SCALE } from "../Constants";
 
 export function useOtherObjects(
     room: Room,
@@ -73,8 +73,8 @@ export function useOtherObjects(
 
     /* ──────────────── Add Other Object ──────────────── */
     const handleAddOtherObject = (name: string, width: number, height: number) => {
-        const widthPx = mmToPixels(width);
-        const heightPx = mmToPixels(height);
+        const widthPx = cmToPixels(width);
+        const heightPx = cmToPixels(height);
 
         let { x, y } = calculateInitialPosition(room, widthPx, heightPx);
         const objectZones = buildOtherObjectZones(otherObjects);

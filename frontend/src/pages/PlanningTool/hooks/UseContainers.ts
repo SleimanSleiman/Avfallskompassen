@@ -86,6 +86,7 @@ export function useContainers(
     room: Room,
     setSelectedContainerId: (id: number | null) => void,
     setSelectedDoorId: (id: number | null) => void,
+    setSelectedOtherObjectId: (id: number | null) => void,
     doorZones: { x: number; y: number; width: number; height: number }[] = [],
     otherObjectZones: { x: number; y: number; width: number; height: number }[] = []
 ) {
@@ -184,6 +185,7 @@ export function useContainers(
     const handleSelectContainer = (id: number | null) => {
         setSelectedContainerId(id);
         setSelectedDoorId(null);
+        setSelectedOtherObjectId(null);
     };
 
     //Container rotation
