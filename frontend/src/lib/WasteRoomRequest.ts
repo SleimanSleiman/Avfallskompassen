@@ -9,6 +9,7 @@ export type RoomRequest = {
     length: number; 
     doors: DoorRequest[];
     containers: ContainerPositionRequest[];
+    otherObjects: OtherObjectRequest[];
     propertyId : number;
     wasteRoomId : number;
     thumbnailBase64?: string;
@@ -28,6 +29,16 @@ export type ContainerPositionRequest = {
     x: number;
     y: number;
     angle: number;
+}
+
+export type OtherObjectRequest = {
+    id: number;
+    name: string;
+    x: number;
+    y: number;
+    width: number;
+    depth: number;
+    rotation: number;
 }
 
 export async function createWasteRoom(roomRequest: RoomRequest): Promise<WasteRoom> {
@@ -67,6 +78,7 @@ export type AdminVersionRequest = {
     length: number;
     doors: DoorRequest[];
     containers: ContainerPositionRequest[];
+    otherObjects: OtherObjectRequest[];
     propertyId: number;
     versionName?: string;
     adminUsername?: string;

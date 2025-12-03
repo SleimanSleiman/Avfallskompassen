@@ -13,6 +13,7 @@ export type Room = {
     height: number;
     doors?: Door[];
     containers?: ContainerInRoom[];
+    otherObjects?: OtherObjectInRoom[];
 };
 
 export type Door = {

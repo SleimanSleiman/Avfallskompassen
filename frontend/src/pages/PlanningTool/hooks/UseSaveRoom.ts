@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { createWasteRoom, updateWasteRoom, type ContainerPositionRequest, type DoorRequest, type RoomRequest } from "../../../lib/WasteRoomRequest";
-import type { ContainerInRoom, Door, Room } from "../Types";
+import type { ContainerInRoom, Door, Room, OtherObjectInRoom } from "../Types";
 import { SCALE } from "../Constants";
 
 export function useSaveRoom() {
@@ -40,6 +40,7 @@ export function useWasteRoomRequestBuilder(
         room : Room,
         doors : Door[],
         containers : ContainerInRoom[],
+        otherObjects : OtherObjectInRoom[],
         propertyId : number,
         thumbnailBase64: string
     ) : RoomRequest => {
@@ -68,6 +69,15 @@ export function useWasteRoomRequestBuilder(
                 x: c.x,
                 y: c.y,
                 angle: c.rotation,
+            })),
+            otherObjects: otherObjects.map(o => ({
+                id: o.id,
+                name: o.name,
+                x: o.x,
+                y: o.y,
+                width: o.width,
+                depth: o.height,
+                rotation: o.rotation,
             })),
             propertyId,
             name : room.name,

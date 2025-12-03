@@ -137,7 +137,8 @@ export default function PlanningTool({ isAdminMode = false }: PlanningToolProps)
         setDoors(room.doors);
     }
         if (room.containers && room.containers.length > 0) saveContainers(room.containers);
-    }, [room.id, setDoors, saveContainers]);
+        if (room.otherObjects && room.otherObjects.length > 0) setOtherObjects(room.otherObjects);
+    }, [room.id, setDoors, saveContainers, setOtherObjects]);
 
     useEffect(() => {
         if (typeof window === 'undefined') {
@@ -163,6 +164,7 @@ export default function PlanningTool({ isAdminMode = false }: PlanningToolProps)
                 ...parsed,
                 containers: containersInRoom,
                 doors: doors,
+                otherObjects: otherObjects,
                 width: room.height * SCALE, // Convert back to meters
                 length: room.width * SCALE,  // Convert back to meters
             };
@@ -171,6 +173,7 @@ export default function PlanningTool({ isAdminMode = false }: PlanningToolProps)
                 roomId: room.id,
                 containerCount: containersInRoom.length,
                 doorCount: doors.length,
+                otherObjectsCount: otherObjects.length,
                 roomDimensions: { width: updated.width, length: updated.length },
                 containers: containersInRoom
             });
@@ -179,7 +182,7 @@ export default function PlanningTool({ isAdminMode = false }: PlanningToolProps)
         } catch (error) {
             console.error('Failed to sync state to localStorage', error);
         }
-    }, [containersInRoom, doors, room.width, room.height, room.id]);
+    }, [containersInRoom, doors, otherObjects, room.width, room.height, room.id]);
 
 
     /* ──────────────── Service Types (API data) ──────────────── */
@@ -241,7 +244,7 @@ export default function PlanningTool({ isAdminMode = false }: PlanningToolProps)
             return;
         }
 
-        const roomRequest = buildWasteRoomRequest(room, doors, containersInRoom, propertyId, thumbnailBase64);
+        const roomRequest = buildWasteRoomRequest(room, doors, containersInRoom, otherObjects, propertyId, thumbnailBase64);
 
         const savedRoom = await saveRoom(roomRequest);
         room.id = savedRoom?.wasteRoomId;

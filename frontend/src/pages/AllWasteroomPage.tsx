@@ -45,6 +45,7 @@ export default function AllaMiljoRumPage() {
                 },
             })),
             doors: room.doors ?? [],
+            otherObjects: room.otherObjects ?? [],
         };
 
         localStorage.setItem("enviormentRoomData", JSON.stringify(fullRoomData));
