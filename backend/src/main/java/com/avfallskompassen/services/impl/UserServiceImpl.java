@@ -131,4 +131,15 @@ public class UserServiceImpl implements UserService {
             userRepository.save(user);
         });
     }
+
+    /**
+     * Finds a user with their associated properties.
+     * 
+     * @param userId the ID of the user to find
+     * @return Optional containing the user with properties if found, empty otherwise
+     */
+    @Override
+    public Optional<User> findUserWithProperties(Integer userId) {
+        return userRepository.findById(userId);
+    }
 }

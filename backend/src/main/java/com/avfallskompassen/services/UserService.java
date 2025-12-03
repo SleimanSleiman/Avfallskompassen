@@ -86,4 +86,12 @@ public interface UserService {
      * @param username the username of the user to update
      */
     void markPlanningToolManualAsSeen(String username);
+
+    /**
+     * Finds a user with their associated properties.
+     * 
+     * @param userId the ID of the user to find
+     * @return Optional containing the user with properties if found, empty otherwise
+     */
+    Optional<User> findUserWithProperties(Integer userId);
 }

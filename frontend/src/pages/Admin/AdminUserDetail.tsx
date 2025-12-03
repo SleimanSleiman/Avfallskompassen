@@ -102,11 +102,12 @@ export default function AdminUserDetail({ user, onBack }: AdminUserDetailProps) 
                     `/api/admin/properties/${prop.id}/wasterooms/${encodeURIComponent(roomName)}/versions`
                   );
 
-                  console.log(`Fetched versions for room "${roomName}":`, allVersions);
+                  console.log(`Fetched versions for room "${roomName}" (propertyId: ${prop.id}):`, allVersions);
 
                   // Check if we got valid data
                   if (!allVersions || allVersions.length === 0) {
-                    console.warn(`No versions returned for room "${roomName}", using fallback`);
+                    console.warn(`No versions returned for room "${roomName}", using fallback from first room data`);
+                    console.log(`   First room data available:`, roomVersions[0]);
                     throw new Error('No versions found');
                   }
 
@@ -144,6 +145,7 @@ export default function AdminUserDetail({ user, onBack }: AdminUserDetailProps) 
                   plans.push(plan);
                 } catch (versionError) {
                   console.warn(`Failed to fetch versions for room "${roomName}":`, versionError);
+                  console.log(`   Falling back to creating plan from raw room data`);
                   // Fallback: create a plan with single version from the first room data
                   const firstRoom = roomVersions[0];
                   const planId = prop.id * 1000 + plans.length + 1;
@@ -170,6 +172,7 @@ export default function AdminUserDetail({ user, onBack }: AdminUserDetailProps) 
                     activeVersionNumber: firstRoom.versionNumber || 1,
                   };
                   plans.push(plan);
+                  console.log(` Fallback plan created for room "${roomName}"`);
                 }
               }
             } catch (e) {
@@ -622,11 +625,11 @@ export default function AdminUserDetail({ user, onBack }: AdminUserDetailProps) 
                                             Alla versioner
                                           </div>
                                           <div className="space-y-2">
-                                            {plan.versions.map((version) => {
+                                            {plan.versions.map((version, index) => {
                                               const isActive = version.versionNumber === plan.activeVersionNumber;
                                               return (
                                                 <div
-                                                  key={version.versionNumber}
+                                                  key={`${version.versionNumber}-${version.createdAt}-${index}`}
                                                   className={`flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 p-2.5 rounded-lg ${
                                                     isActive ? 'bg-nsr-teal/5 border border-nsr-teal/20' : 'bg-white border border-gray-200'
                                                   }`}

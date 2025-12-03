@@ -59,3 +59,23 @@ export type OtherObject = {
 export async function getWasteRoomsByPropertyId(propertyId : number): Promise<WasteRoom[]> {
     return get<WasteRoom[]>(`/api/properties/${propertyId}/wasterooms`);
 }
+
+/**
+ * Fetches waste rooms for a specific user (admin endpoint).
+ * This is used by admins to view a user's waste rooms directly from the database.
+ * 
+ * @param userId The ID of the user
+ * @returns Promise<WasteRoom[]> The waste rooms for the user's property
+ */
+export async function getWasteRoomsForUser(userId: number): Promise<WasteRoom[]> {
+    console.log(`[Frontend API] Fetching waste rooms for userId: ${userId} from /api/admin/users/${userId}/waste-rooms`);
+    try {
+        const rooms = await get<WasteRoom[]>(`/api/admin/users/${userId}/waste-rooms`);
+        console.log(`[Frontend API] Successfully fetched ${rooms.length} waste room(s) for user ${userId}`);
+        rooms.forEach((r, i) => console.log(`   ${i + 1}. Room: "${r.name}" (ID: ${r.wasteRoomId}, Size: ${r.width}m × ${r.length}m)`));
+        return rooms;
+    } catch (error) {
+        console.error(`[Frontend API] Error fetching waste rooms for user ${userId}:`, error);
+        throw error;
+    }
+}

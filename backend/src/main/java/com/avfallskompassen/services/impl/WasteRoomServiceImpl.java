@@ -114,7 +114,12 @@ public class WasteRoomServiceImpl implements WasteRoomService {
      */
     @Override
     public List<WasteRoomDTO> getWasteRoomsByPropertyId(Long propertyId) {
+        System.out.println("[WasteRoomService] Querying database for waste rooms with propertyId: " + propertyId);
+        
         List<WasteRoom> rooms = wasteRoomRepository.findByPropertyId(propertyId);
+        
+        System.out.println("[WasteRoomService] Database query returned " + rooms.size() + " waste room(s)");
+        rooms.forEach(r -> System.out.println("    └─ Waste Room: " + r.getName() + " (ID: " + r.getId() + ", PropertyID: " + r.getProperty().getId() + ")"));
 
         return rooms.stream()
                 .map(this::mapWasteRoomToDTO)
@@ -466,8 +471,24 @@ public class WasteRoomServiceImpl implements WasteRoomService {
      */
     @Override
     public List<WasteRoomDTO> getAllVersionsByPropertyAndName(Long propertyId, String roomName) {
+        System.out.println("[WasteRoomService] Fetching all versions for propertyId: " + propertyId + ", roomName: '" + roomName + "'");
+        
         List<WasteRoom> versions = wasteRoomRepository
                 .findByPropertyIdAndNameOrderByVersionNumberAsc(propertyId, roomName);
+        
+        System.out.println("[WasteRoomService] Found " + versions.size() + " version(s) for room '" + roomName + "'");
+        if (versions.isEmpty()) {
+            System.out.println("   ⚠️  WARNING: No versions found! This room might have no version data in the database.");
+            System.out.println("   Checking raw rooms with this name and property...");
+            // Debug: check if rooms exist with this name
+            List<WasteRoom> rawRooms = wasteRoomRepository.findByPropertyId(propertyId);
+            long matchingNames = rawRooms.stream().filter(r -> r.getName().equals(roomName)).count();
+            System.out.println("   Raw rooms with matching name: " + matchingNames);
+            rawRooms.stream()
+                .filter(r -> r.getName().equals(roomName))
+                .forEach(r -> System.out.println("      - Room: " + r.getName() + " (ID: " + r.getId() + ", VersionNum: " + r.getVersionNumber() + ", IsActive: " + r.getIsActive() + ")"));
+        }
+        versions.forEach(v -> System.out.println("   ✓ Version: " + v.getVersionNumber() + " (Name: " + v.getName() + ", IsActive: " + v.getIsActive() + ")"));
         
         return versions.stream()
                 .map(this::mapWasteRoomToDTO)
