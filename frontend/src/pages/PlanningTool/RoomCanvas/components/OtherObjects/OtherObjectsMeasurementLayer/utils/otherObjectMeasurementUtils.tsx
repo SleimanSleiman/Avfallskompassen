@@ -10,7 +10,7 @@ const offset = 10;
 const textColor = "green";
 const arrowSize = 8;
 
-//Helper: push arrow line + arrowhead
+// Helper: push arrow line + arrowhead
 function addArrow(lines: number[][], x1: number, y1: number, x2: number, y2: number) {
     lines.push([x1, y1, x2, y2]);
 
@@ -28,20 +28,34 @@ export function getLinesAndTexts(
     object: OtherObjectInRoom,
     room: { x: number; y: number; width: number; height: number }
 ) {
-    const { x, y, width, height } = object;
+    const rotation = (object.rotation ?? 0) % 360;
+
+    // Axis-aligned bounding box for 0/90/180/270
+    const w = rotation === 90 || rotation === 270 ? object.height : object.width;
+    const h = rotation === 90 || rotation === 270 ? object.width : object.height;
+
+    // Center of object
+    const cx = object.x + object.width / 2;
+    const cy = object.y + object.height / 2;
+
+    // Top-left of bounding box
+    const x0 = cx - w / 2;
+    const y0 = cy - h / 2;
+
     const lines: number[][] = [];
     const texts: JSX.Element[] = [];
 
-    // --- Horizontal measurement to nearest wall ---
-    const topDist = y - room.y;
-    const bottomDist = room.y + room.height - (y + height);
-    if (topDist < bottomDist) {
-        // Arrow to top wall
-        addArrow(lines, x + width / 2, y, x + width / 2, room.y);
+    // --- Horizontal distances: top or bottom ---
+    const topDist = y0 - room.y;
+    const bottomDist = room.y + room.height - (y0 + h);
+
+    if (topDist <= bottomDist) {
+        // Arrow UP
+        addArrow(lines, cx, y0, cx, room.y);
         texts.push(
             <Text
                 key={`top-${object.id}`}
-                x={x + width / 2}
+                x={cx}
                 y={room.y - offset - fontSize}
                 text={`${(topDist * SCALE).toFixed(2)} m`}
                 fontSize={fontSize}
@@ -52,12 +66,12 @@ export function getLinesAndTexts(
             />
         );
     } else {
-        // Arrow to bottom wall
-        addArrow(lines, x + width / 2, y + height, x + width / 2, room.y + room.height);
+        // Arrow DOWN
+        addArrow(lines, cx, y0 + h, cx, room.y + room.height);
         texts.push(
             <Text
                 key={`bottom-${object.id}`}
-                x={x + width / 2}
+                x={cx}
                 y={room.y + room.height + offset}
                 text={`${(bottomDist * SCALE).toFixed(2)} m`}
                 fontSize={fontSize}
@@ -69,17 +83,18 @@ export function getLinesAndTexts(
         );
     }
 
-    // --- Vertical measurement to nearest wall ---
-    const leftDist = x - room.x;
-    const rightDist = room.x + room.width - (x + width);
-    if (leftDist < rightDist) {
-        // Arrow to left wall
-        addArrow(lines, x, y + height / 2, room.x, y + height / 2);
+    // --- Vertical distances: left or right ---
+    const leftDist = x0 - room.x;
+    const rightDist = room.x + room.width - (x0 + w);
+
+    if (leftDist <= rightDist) {
+        // Arrow LEFT
+        addArrow(lines, x0, cy, room.x, cy);
         texts.push(
             <Text
                 key={`left-${object.id}`}
                 x={room.x - offset - fontSize}
-                y={y + height / 2}
+                y={cy}
                 text={`${(leftDist * SCALE).toFixed(2)} m`}
                 fontSize={fontSize}
                 fill={textColor}
@@ -89,13 +104,13 @@ export function getLinesAndTexts(
             />
         );
     } else {
-        // Arrow to right wall
-        addArrow(lines, x + width, y + height / 2, room.x + room.width, y + height / 2);
+        // Arrow RIGHT
+        addArrow(lines, x0 + w, cy, room.x + room.width, cy);
         texts.push(
             <Text
                 key={`right-${object.id}`}
                 x={room.x + room.width + offset + 20}
-                y={y + height / 2}
+                y={cy}
                 text={`${(rightDist * SCALE).toFixed(2)} m`}
                 fontSize={fontSize}
                 fill={textColor}

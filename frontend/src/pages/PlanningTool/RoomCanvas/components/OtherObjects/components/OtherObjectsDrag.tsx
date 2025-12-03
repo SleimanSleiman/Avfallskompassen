@@ -19,22 +19,21 @@ export default function OtherObjectDrag({
     setIsDraggingOtherObject,
     children
 }) {
-    /**
-     * Check if this other object is overlapping forbidden zones:
-     * - door zones
-     * - container zones
-     * - other object zones
-     */
-    const checkZones = (x, y, rotation) => {
-        const rot = rotation % 180;
+    // Tracks the last valid (non-overlapping) position for snap-back
+    const [lastValidPos, setLastValidPos] = useState({ x: object.x, y: object.y });
+    // Tracks if object is overlapping a forbidden zone
+    const [isOverZone, setIsOverZone] = useState(false);
 
-        //Adjust width/height if rotated
+    /**
+     * Check whether this object overlaps any forbidden zones
+     */
+    const checkZones = (x: number, y: number, rotation: number) => {
+        const rot = rotation % 180;
         const w = rot === 90 ? object.height : object.width;
         const h = rot === 90 ? object.width : object.height;
 
         const rect = { x, y, width: w, height: h };
 
-        //Gather all restricted zones
         const zones = [
             ...doorZones,
             ...containerZones,
@@ -43,11 +42,6 @@ export default function OtherObjectDrag({
 
         return zones.some(zone => isOverlapping(rect, zone));
     };
-
-    //Store the last valid (non-overlapping) position for snap-back functionality
-    const [lastValidPos, setLastValidPos] = useState({ x: object.x, y: object.y });
-    //Tracks whether the object is currently overlapping another object
-    const [isOverZone, setIsOverZone] = useState(false);
 
     return (
         <Group
@@ -59,19 +53,19 @@ export default function OtherObjectDrag({
             draggable
             onClick={() => handleSelectOtherObject(object.id)}
             onDragStart={() => {
-                handleSelectOtherObject(object.id);
                 setIsDraggingOtherObject(true);
+                handleSelectOtherObject(object.id);
             }}
             dragBoundFunc={(pos) => {
                 const rot = (object.rotation || 0) % 180;
                 const w = rot === 90 ? object.height : object.width;
                 const h = rot === 90 ? object.width : object.height;
 
-                //Clamp inside room
+                // Clamp to room boundaries using rotated size
                 let newX = clamp(pos.x, room.x + w / 2, room.x + room.width - w / 2);
                 let newY = clamp(pos.y, room.y + h / 2, room.y + room.height - h / 2);
 
-                //Check while dragging
+                // Update overlap status during drag
                 setIsOverZone(checkZones(newX - w / 2, newY - h / 2, object.rotation));
 
                 return { x: newX, y: newY };
@@ -81,7 +75,6 @@ export default function OtherObjectDrag({
                 const newY = e.target.y() - object.height / 2;
 
                 handleDragOtherObject(object.id, { x: newX, y: newY });
-
                 setIsOverZone(checkZones(newX, newY, object.rotation));
             }}
             onDragEnd={(e) => {
@@ -89,14 +82,11 @@ export default function OtherObjectDrag({
                 const newY = e.target.y() - object.height / 2;
 
                 if (checkZones(newX, newY, object.rotation)) {
-                    //Snap back to last legal position
-                    e.target.position({
-                        x: lastValidPos.x + object.width / 2,
-                        y: lastValidPos.y + object.height / 2
-                    });
+                    // Snap back to last valid position
+                    e.target.position({ x: lastValidPos.x + object.width / 2, y: lastValidPos.y + object.height / 2 });
                     handleDragOtherObject(object.id, lastValidPos);
                 } else {
-                    //Valid new location
+                    // Movement valid → update last valid position
                     const newPos = { x: newX, y: newY };
                     setLastValidPos(newPos);
                     handleDragOtherObject(object.id, newPos);
@@ -106,7 +96,7 @@ export default function OtherObjectDrag({
                 setIsDraggingOtherObject(false);
             }}
         >
-            {children({})}
+            {children({ isOverZone })}
         </Group>
     );
 }

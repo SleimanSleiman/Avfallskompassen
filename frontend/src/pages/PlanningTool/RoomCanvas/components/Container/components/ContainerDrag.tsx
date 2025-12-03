@@ -27,6 +27,7 @@ export default function ContainerDrag({
      * Check whether container is overlapping any forbidden zones:
      * - door zones
      * - other containers
+     * - other objects
      */
     const checkZones = (x, y, rotation) => {
         const rot = rotation % 180;
@@ -37,7 +38,7 @@ export default function ContainerDrag({
 
         const rect = { x, y, width: w, height: h };
 
-        //Collect all no-go zones (doors + container zones)
+        //Collect all no-go zones (doors + container zones + other object zones)
         const zones = [...doorZones, ...otherObjectZones, ...getContainerZones(container.id)];
 
         //True if ANY zone is overlapping the container

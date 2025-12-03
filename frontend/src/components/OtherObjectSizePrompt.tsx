@@ -28,18 +28,23 @@ export default function OtherObjectSizePrompt({
         const lengthNum = Number(length);
         const widthNum = Number(width);
 
+        if (name.trim() === "") {
+            setError("Ange ett namn för objektet.");
+            return;
+        }
+
         if (Number.isNaN(lengthNum) || Number.isNaN(widthNum)) {
-            setError("Ange giltiga numeriska värden för längd och bredd.");
+            setError("Ange giltiga numeriska värden för djup och bredd.");
             return;
         }
 
         if (!(lengthNum >= minValue) || !(widthNum >= minValue)) {
-            setError(`Objektets längd och bredd måste vara minst ${minValue} cm.`);
+            setError(`Objektets djup och bredd måste vara minst ${minValue} cm.`);
             return;
         }
 
         if (lengthNum > maxLength) {
-            setError(`Objektets längd får inte överstiga ${maxLength} cm.`);
+            setError(`Objektets djup får inte överstiga ${maxLength} cm.`);
             return;
         }
 
@@ -70,7 +75,7 @@ export default function OtherObjectSizePrompt({
                 />
                 <input
                     type="number"
-                    placeholder="Djup (cm)"
+                    placeholder="Bredd (cm)"
                     value={length}
                     onChange={(e) => {
                         setLength(e.target.value);
@@ -80,7 +85,7 @@ export default function OtherObjectSizePrompt({
                 />
                 <input
                     type="number"
-                    placeholder="Bredd (cm)"
+                    placeholder="Djup (cm)"
                     value={width}
                     onChange={(e) => {
                         setWidth(e.target.value);

@@ -155,6 +155,30 @@ export function useOtherObjects(
         setSelectedOtherObjectId(null);
     };
 
+    const isObjectOutsideRoom = (
+        obj: { x: number; y: number; width: number; height: number; rotation?: number },
+        room: { x: number; y: number; width: number; height: number }
+    ) => {
+        const rotation = (obj.rotation ?? 0) % 360;
+        const centerX = obj.x + obj.width / 2;
+        const centerY = obj.y + obj.height / 2;
+
+        // Axis-aligned bounding box after rotation
+        const aabbWidth = rotation === 90 || rotation === 270 ? obj.height : obj.width;
+        const aabbHeight = rotation === 90 || rotation === 270 ? obj.width : obj.height;
+
+        const aabbX = centerX - aabbWidth / 2;
+        const aabbY = centerY - aabbHeight / 2;
+
+        return (
+            aabbX < room.x ||
+            aabbY < room.y ||
+            aabbX + aabbWidth > room.x + room.width ||
+            aabbY + aabbHeight > room.y + room.height
+        );
+    };
+
+
     /* ──────────────── Return ──────────────── */
     return {
         otherObjects,
@@ -165,5 +189,6 @@ export function useOtherObjects(
         handleSelectOtherObject,
         handleRotateOtherObject,
         handleRemoveOtherObject,
+        isObjectOutsideRoom,
     }
 }

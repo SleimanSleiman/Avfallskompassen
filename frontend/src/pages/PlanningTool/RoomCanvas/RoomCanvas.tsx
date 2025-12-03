@@ -63,6 +63,7 @@ type RoomCanvasProps = {
     handleDragOtherObject: (id: number, pos: { x: number; y: number }) => void;
     handleSelectOtherObject: (id: number | null) => void;
     selectedOtherObjectId: number | null;
+    isObjectOutsideRoom: (rect: { x: number; y: number; width: number; height: number; rotation?: number }, room: Room) => boolean;
 
     /* ───────────── Drag & Drop Props ───────────── */
     stageWrapperRef: React.RefObject<HTMLDivElement | null>;
@@ -127,6 +128,7 @@ export default function RoomCanvas({
     getOtherObjectZones,
     handleSelectOtherObject,
     selectedOtherObjectId,
+    isObjectOutsideRoom,
 
     /* ───────────── Drag & Drop Props ───────────── */
     stageWrapperRef,
@@ -350,6 +352,7 @@ export default function RoomCanvas({
                                 getOtherObjectZones={getOtherObjectZones}
                                 selectedOtherObjectId={selectedOtherObjectId}
                                 setIsDraggingOtherObject={setIsDraggingOtherObject}
+                                isObjectOutsideRoom={isObjectOutsideRoom}
                             />
 
                             {/* Measurement layer for selected other object */}
