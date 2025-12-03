@@ -52,6 +52,9 @@ public class SecurityConfig {
             .authorizeHttpRequests(authz -> authz
                     // authentication endpoints must remain public
                     .requestMatchers("/api/auth/**", "/images/**").permitAll()
+                    // Allow authenticated access to "manual seen" endpoints
+                    .requestMatchers("/api/user/*/has-seen-manual").authenticated()
+                    .requestMatchers("/api/user/*/mark-manual-seen").authenticated()
                     // admin endpoints require ADMIN role
                     .requestMatchers("/api/admin/**").hasRole("ADMIN")
                     // other API endpoints require authentication

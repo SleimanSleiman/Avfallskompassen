@@ -28,6 +28,8 @@ public class User {
     
     @Column(nullable = false, length = 50)
     private String role = "USER";
+    @Column(name = "seen_planningtool_manual", nullable = false)
+    private boolean hasSeenPlanningToolManual = false;
 
     /**
      * Timestamp when the user was created. Set automatically on persist.
@@ -87,4 +89,8 @@ public class User {
 
     public Instant getCreatedAt() { return createdAt; }
     public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
+    public boolean getHasSeenPlanningToolManual() { return hasSeenPlanningToolManual; }
+    public void setHasSeenPlanningToolManual(boolean hasSeenPlanningToolManual) {
+        this.hasSeenPlanningToolManual = hasSeenPlanningToolManual;
+    }
 }
