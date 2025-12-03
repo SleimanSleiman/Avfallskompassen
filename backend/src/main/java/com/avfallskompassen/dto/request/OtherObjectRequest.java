@@ -10,13 +10,9 @@ public class OtherObjectRequest {
     private String name;
 
     @NotNull
-    @Min(30)
-    @Max(1000)
     private double width;
 
     @NotNull
-    @Min(30)
-    @Max(1000)
     private double depth;
 
     @NotNull

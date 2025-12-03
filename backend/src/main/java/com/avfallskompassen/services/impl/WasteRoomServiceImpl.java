@@ -244,6 +244,7 @@ public class WasteRoomServiceImpl implements WasteRoomService {
 
         for (OtherObjectRequest request : otherObjects) {
             OtherObject otherObject = new OtherObject();
+            otherObject.setName(request.getName());
             otherObject.setWidth(request.getWidth());
             otherObject.setDepth(request.getDepth());
             otherObject.setX(request.getX());

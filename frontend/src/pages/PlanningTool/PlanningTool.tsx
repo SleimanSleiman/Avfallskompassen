@@ -141,22 +141,20 @@ export default function PlanningTool({ isAdminMode = false }: PlanningToolProps)
         if (room.otherObjects && room.otherObjects.length > 0) setOtherObjects(room.otherObjects);
     }, [room.id, setDoors, saveContainers, setOtherObjects]);
 
+    /* ──────────────── Sync state to localStorage on changes ──────────────── */
     useEffect(() => {
         if (typeof window === 'undefined') {
-            console.log('PlanningTool - Skipping sync (no window)');
             return;
         }
 
         // Don't sync if we don't have a room ID (means we're still initializing)
         if (!room.id) {
-            console.log('PlanningTool - Skipping sync (no room.id)', { room });
             return;
         }
 
         try {
             const stored = localStorage.getItem('trashRoomData');
             if (!stored) {
-                console.log('PlanningTool - Skipping sync (no stored data)');
                 return;
             }
 
@@ -169,15 +167,6 @@ export default function PlanningTool({ isAdminMode = false }: PlanningToolProps)
                 width: room.height * SCALE, // Convert back to meters
                 length: room.width * SCALE,  // Convert back to meters
             };
-
-            console.log('PlanningTool - Syncing state to localStorage:', {
-                roomId: room.id,
-                containerCount: containersInRoom.length,
-                doorCount: doors.length,
-                otherObjectsCount: otherObjects.length,
-                roomDimensions: { width: updated.width, length: updated.length },
-                containers: containersInRoom
-            });
 
             localStorage.setItem('trashRoomData', JSON.stringify(updated));
         } catch (error) {

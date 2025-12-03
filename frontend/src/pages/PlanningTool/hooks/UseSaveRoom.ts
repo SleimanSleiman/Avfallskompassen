@@ -71,7 +71,6 @@ export function useWasteRoomRequestBuilder(
                 angle: c.rotation,
             })),
             otherObjects: otherObjects.map(o => ({
-                id: o.id,
                 name: o.name,
                 x: o.x,
                 y: o.y,

@@ -32,7 +32,6 @@ export type ContainerPositionRequest = {
 }
 
 export type OtherObjectRequest = {
-    id: number;
     name: string;
     x: number;
     y: number;

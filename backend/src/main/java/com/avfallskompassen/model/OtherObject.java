@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 
 @Entity
 @Table(
-        name = "otherObjects"
+        name = "other_objects"
 )
 public class OtherObject {
     @Id
