@@ -15,7 +15,8 @@ public class UserDTO {
     private String username;
     private String role;
     private Instant createdAt;
-    
+    private boolean hasSeenPlanningToolManual;
+
     /**
      * Default constructor for JPA/Jackson.
      */
@@ -32,6 +33,7 @@ public class UserDTO {
         this.username = user.getUsername();
         this.role = user.getRole();
         this.createdAt = user.getCreatedAt();
+        this.hasSeenPlanningToolManual = user.getHasSeenPlanningToolManual();
     }
     
     /**
@@ -75,5 +77,12 @@ public class UserDTO {
     
     public void setCreatedAt(Instant createdAt) {
         this.createdAt = createdAt;
+    }
+    public boolean isHasSeenPlanningToolManual() {
+        return hasSeenPlanningToolManual;
+    }
+
+    public void setHasSeenPlanningToolManual(boolean seen) {
+        this.hasSeenPlanningToolManual = seen;
     }
 }

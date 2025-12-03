@@ -22,6 +22,7 @@ export default function LoginPage() {
       const res = await login(username, password, rememberMe); 
       if (res.success) {
         setMsg(res.message || 'Inloggning lyckades');
+        
         // Navigate to dashboard after successful login
         setTimeout(() => {
           navigate('/dashboard');
