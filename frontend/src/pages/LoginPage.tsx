@@ -85,6 +85,7 @@ export default function LoginPage() {
                     </label>
                     <button 
                       type="button" 
+                      tabIndex={-1}
                       className="text-sm text-nsr-teal hover:underline" 
                       onClick={() => setShowPw(v => !v)}
                     >
