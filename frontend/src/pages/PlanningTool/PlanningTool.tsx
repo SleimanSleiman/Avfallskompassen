@@ -3,13 +3,17 @@
  * Manages state and logic for room layout, doors, containers, and service types.
  * Renders the RoomCanvas, Sidebar, and ActionPanel components.
  */
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { MapPin, Home, Users } from "lucide-react";
+import { useNavigate } from 'react-router-dom';
 
 //Lib
 import type { Property } from '../../lib/Property';
 import type { ContainerDTO } from '../../lib/Container';
 import { currentUser } from '../../lib/Auth';
+
+//Components
+import { useUnsavedChanges } from '../../context/UnsavedChangesContext';
 
 
 //Components
@@ -233,17 +237,69 @@ export default function PlanningTool({ isAdminMode = false }: PlanningToolProps)
     const { saveRoom } = useSaveRoom();
     const { buildWasteRoomRequest } = useWasteRoomRequestBuilder(isContainerInsideRoom);
 
-    const handleSaveRoom = async (thumbnailBase64: string | "null") => {
+    const { hasUnsavedChanges, setHasUnsavedChanges, isNavigatingRef } = useUnsavedChanges();
+    const initialStateRef = useRef<{ room: string; doors: string; containers: string } | null>(null);
+
+    const handleSaveRoom = async (thumbnailBase64: string | null) => {
         if (!propertyId) {
             console.error("No propertyId, cannot save room.");
             return;
         }
 
-        const roomRequest = buildWasteRoomRequest(room, doors, containersInRoom, otherObjects, propertyId, thumbnailBase64);
+        try {
+            const roomRequest = buildWasteRoomRequest(room, doors, containersInRoom, propertyId, thumbnailBase64 || "null");
 
-        const savedRoom = await saveRoom(roomRequest);
-        room.id = savedRoom?.wasteRoomId;
+            const savedRoom = await saveRoom(roomRequest);
+            room.id = savedRoom?.wasteRoomId;
+            setHasUnsavedChanges(false);
+            initialStateRef.current = {
+                room: JSON.stringify(room),
+                doors: JSON.stringify(doors),
+                containers: JSON.stringify(containersInRoom)
+            };
+        } catch (error) {
+            console.error('Error saving room:', error);
+        }
     };
+    useEffect(() => {
+        if (initialStateRef.current === null && room.id) {
+            console.log('Initializing initial state');
+            initialStateRef.current = {
+                room: JSON.stringify(room),
+                doors: JSON.stringify(doors),
+                containers: JSON.stringify(containersInRoom)
+            };
+        }
+    }, [room.id]);
+
+    // Track changes by comparing current state with initial state
+    useEffect(() => {
+        if (initialStateRef.current === null || isNavigatingRef.current) {
+            return;
+        }
+
+        const hasChanges = 
+            initialStateRef.current.room !== JSON.stringify(room) ||
+            initialStateRef.current.doors !== JSON.stringify(doors) ||
+            initialStateRef.current.containers !== JSON.stringify(containersInRoom);
+
+        console.log('Checking for changes', { hasChanges, hasSavedState: initialStateRef.current !== null });
+        setHasUnsavedChanges(hasChanges);
+    }, [room, doors, containersInRoom]);
+
+    // Warn user before closing/refreshing if there are unsaved changes
+    useEffect(() => {
+        const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+            if (hasUnsavedChanges) {
+                e.preventDefault();
+                e.returnValue = '';
+                return '';
+            }
+        };
+
+        window.addEventListener('beforeunload', handleBeforeUnload);
+        return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+    }, [hasUnsavedChanges]);
 
     const [shouldShowTour, setShouldShowTour] = useState(false);
 

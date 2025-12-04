@@ -1,13 +1,19 @@
-import { Link, NavLink, useLocation } from 'react-router-dom';
-import { useEffect, useState } from 'react';
+import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
+import { useEffect, useState, useRef } from 'react';
 import { currentUser, logout } from '../lib/Auth';
+import { useUnsavedChanges } from '../context/UnsavedChangesContext';
+import ConfirmModal from './ConfirmModal';
 
 export default function NavBar() {
   const [open, setOpen] = useState(false);
   const [user, setUser] = useState(currentUser());
   const isAdmin = String(user?.role || '').toUpperCase().includes('ADMIN');
   const location = useLocation();
+  const navigate = useNavigate();
   const hideMenu = ["/login", "/register"].includes(location.pathname);
+  
+  const { hasUnsavedChanges, setHasUnsavedChanges, setShowCloseWarning, showCloseWarning, isNavigatingRef } = useUnsavedChanges();
+  const pendingNavigationRef = useRef<(() => void) | null>(null);
 
   useEffect(() => {
     setUser(currentUser());
@@ -26,13 +32,58 @@ export default function NavBar() {
   }, []);
 
   function handleLogout() {
+    if (hasUnsavedChanges) {
+      pendingNavigationRef.current = () => {
+        logout();
+        setUser(null);
+        window.location.href = '/login';
+      };
+      setShowCloseWarning(true);
+      return;
+    }
+    
     logout();
     setUser(null);
     window.location.href = '/login';
   }
 
+  function handleNavigation(to: string) {
+    if (hasUnsavedChanges) {
+      pendingNavigationRef.current = () => {
+        navigate(to);
+      };
+      setShowCloseWarning(true);
+      return;
+    }
+    
+    navigate(to);
+  }
+
   return (
     <header className="w-full shadow-sm">
+      <ConfirmModal
+        open={showCloseWarning}
+        title="Osparade ändringar"
+        message="Du har gjort ändringar som inte är sparade. Är du säker på att du vill lämna utan att spara?"
+        confirmLabel="Lämna utan att spara"
+        cancelLabel="Avbryt"
+        onConfirm={() => {
+          setShowCloseWarning(false);
+          setHasUnsavedChanges(false);
+          isNavigatingRef.current = true;
+          if (pendingNavigationRef.current) {
+            const navFn = pendingNavigationRef.current;
+            pendingNavigationRef.current = null;
+            setTimeout(() => {
+              navFn();
+            }, 0);
+          }
+        }}
+        onCancel={() => {
+          setShowCloseWarning(false);
+          pendingNavigationRef.current = null;
+        }}
+      />
       <div className="bg-nsr-teal">
         <div className="mx-auto max-w-7xl px-4">
           <div className="flex h-14 items-center justify-between">
@@ -61,7 +112,12 @@ export default function NavBar() {
             <nav className="hidden md:flex items-center gap-6 text-white font-black text-lg">
               {isAdmin ? (
                 <>
-                  <NavLink to="/admin" className={({ isActive }) => `nav-link hover:text-white transition-colors ${isActive ? 'nav-link-active' : ''}`}>Admin</NavLink>
+                  <button 
+                    onClick={() => handleNavigation("/admin")}
+                    className={`nav-link hover:text-white transition-colors ${location.pathname === "/admin" ? 'nav-link-active' : ''}`}
+                  >
+                    Admin
+                  </button>
                   <div className="flex items-center gap-3">
                     {user && <span className="text-sm">Hej {user.username}!</span>}
                     <button
@@ -74,11 +130,36 @@ export default function NavBar() {
                 </>
               ) : (
                 <>
-                  <NavLink to="/dashboard" className={({ isActive }) => `nav-link hover:text-white transition-colors ${isActive ? 'nav-link-active' : ''}`}>Dashboard</NavLink>
-                  <NavLink to="/statistics" className={({ isActive }) => `nav-link hover:text-white transition-colors ${isActive ? 'nav-link-active' : ''}`}>Statistik</NavLink>
-                  <NavLink to="/properties" className={({ isActive }) => `nav-link hover:text-white transition-colors ${isActive ? 'nav-link-active' : ''}`}>Mina fastigheter</NavLink>
-                  <NavLink to="/planningTool" className={({ isActive }) => `nav-link hover:text-white transition-colors ${isActive ? 'nav-link-active' : ''}`}>Planeringsverktyg</NavLink>
-                  <NavLink to="/reports" className={({ isActive }) => `nav-link hover:text-white transition-colors ${isActive ? 'nav-link-active' : ''}`}>Rapporter</NavLink>
+                  <button 
+                    onClick={() => handleNavigation("/dashboard")}
+                    className={`nav-link hover:text-white transition-colors ${location.pathname === "/dashboard" ? 'nav-link-active' : ''}`}
+                  >
+                    Dashboard
+                  </button>
+                  <button 
+                    onClick={() => handleNavigation("/statistics")}
+                    className={`nav-link hover:text-white transition-colors ${location.pathname === "/statistics" ? 'nav-link-active' : ''}`}
+                  >
+                    Statistik
+                  </button>
+                  <button 
+                    onClick={() => handleNavigation("/properties")}
+                    className={`nav-link hover:text-white transition-colors ${location.pathname === "/properties" ? 'nav-link-active' : ''}`}
+                  >
+                    Mina fastigheter
+                  </button>
+                  <button 
+                    onClick={() => handleNavigation("/planningTool")}
+                    className={`nav-link hover:text-white transition-colors ${location.pathname === "/planningTool" ? 'nav-link-active' : ''}`}
+                  >
+                    Planeringsverktyg
+                  </button>
+                  <button 
+                    onClick={() => handleNavigation("/reports")}
+                    className={`nav-link hover:text-white transition-colors ${location.pathname === "/reports" ? 'nav-link-active' : ''}`}
+                  >
+                    Rapporter
+                  </button>
                   <div className="flex items-center gap-3">
                     {user && <span className="text-sm">Hej {user.username}!</span>}
                     {user ? (
@@ -110,18 +191,58 @@ export default function NavBar() {
           <nav className="mx-auto max-w-7xl px-4 py-3 flex flex-col gap-3 font-black">
             {isAdmin ? (
               <>
-                <NavLink to="/admin" className="text-nsr-ink">Admin</NavLink>
-                <button onClick={handleLogout} className="text-left text-nsr-ink">Logga ut</button>
+                <button 
+                  onClick={() => handleNavigation("/admin")}
+                  className="text-left text-nsr-ink"
+                >
+                  Admin
+                </button>
+                <button 
+                  onClick={handleLogout} 
+                  className="text-left text-nsr-ink"
+                >
+                  Logga ut
+                </button>
               </>
             ) : (
               <>
-                <NavLink to="/dashboard" className="text-nsr-ink">Dashboard</NavLink>
-                <NavLink to="/properties" className="text-nsr-ink">Mina fastigheter</NavLink>
-                <NavLink to="/statistics" className="text-nsr-ink">Statistik</NavLink>
-                <NavLink to="/planningTool" className="text-nsr-ink">Planeringsverktyg</NavLink>
-                <NavLink to="/reports" className="text-nsr-ink">Rapporter</NavLink>
+                <button 
+                  onClick={() => handleNavigation("/dashboard")}
+                  className="text-left text-nsr-ink"
+                >
+                  Dashboard
+                </button>
+                <button 
+                  onClick={() => handleNavigation("/properties")}
+                  className="text-left text-nsr-ink"
+                >
+                  Mina fastigheter
+                </button>
+                <button 
+                  onClick={() => handleNavigation("/statistics")}
+                  className="text-left text-nsr-ink"
+                >
+                  Statistik
+                </button>
+                <button 
+                  onClick={() => handleNavigation("/planningTool")}
+                  className="text-left text-nsr-ink"
+                >
+                  Planeringsverktyg
+                </button>
+                <button 
+                  onClick={() => handleNavigation("/reports")}
+                  className="text-left text-nsr-ink"
+                >
+                  Rapporter
+                </button>
                 {user ? (
-                  <button onClick={handleLogout} className="text-left text-nsr-ink">Logga ut</button>
+                  <button 
+                    onClick={handleLogout} 
+                    className="text-left text-nsr-ink"
+                  >
+                    Logga ut
+                  </button>
                 ) : (
                   <Link to="/login" className="text-left text-nsr-ink">Logga in</Link>
                 )}
