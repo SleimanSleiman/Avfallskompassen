@@ -78,7 +78,7 @@ export default function PlanningTool({ isAdminMode = false }: PlanningToolProps)
         handleRotateOtherObject,
         handleRemoveOtherObject,
         isObjectOutsideRoom,
-    } = useOtherObjects(room, setSelectedOtherObjectId, setSelectedContainerId, setSelectedDoorId, getDoorZones());
+    } = useOtherObjects(room, setSelectedOtherObjectId, setSelectedContainerId, setSelectedDoorId, getDoorZones(), () => getContainerZones());
 
     /* ──────────────── Container state & logic ──────────────── */
     const {

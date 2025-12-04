@@ -12,6 +12,7 @@ export function useOtherObjects(
     setSelectedContainerId: (id: number | null) => void,
     setSelectedDoorId: (id: number | null) => void,
     doorZones: { x: number; y: number; width: number; height: number }[] = [],
+    getContainerZones: () => { x: number; y: number; width: number; height: number }[] = () => []
 ) {
     /* ──────────────── Other Objects state ──────────────── */
     const [otherObjects, setOtherObjects] = useState<OtherObjectInRoom[]>([]);
@@ -63,12 +64,13 @@ export function useOtherObjects(
     function validateOtherObjectPlacement(
         newRect: { x: number; y: number; width: number; height: number },
         doorZones: { x: number; y: number; width: number; height: number }[],
-        objectZones: { x: number; y: number; width: number; height: number }[]
+        objectZones: { x: number; y: number; width: number; height: number }[],
+        containerZones: { x: number; y: number; width: number; height: number }[],
     ) {
         const overlapsDoor = doorZones.some(zone => isOverlapping(newRect, zone));
         const overlapsObject = objectZones.some(zone => isOverlapping(newRect, zone));
-
-        return !(overlapsDoor || overlapsObject);
+        const overlapsContainer = containerZones.some(zone => isOverlapping(newRect, zone));
+        return !(overlapsDoor || overlapsObject || overlapsContainer);
     }
 
     /* ──────────────── Add Other Object ──────────────── */
@@ -78,9 +80,10 @@ export function useOtherObjects(
 
         let { x, y } = calculateInitialPosition(room, widthPx, heightPx);
         const objectZones = buildOtherObjectZones(otherObjects);
+        const containerZones = getContainerZones();
         let newRect = { x, y, widthPx, heightPx };
 
-        let isValid = validateOtherObjectPlacement(newRect, doorZones, objectZones);
+        let isValid = validateOtherObjectPlacement(newRect, doorZones, objectZones, containerZones);
 
         if (!isValid) {
             const step = 20;
@@ -89,12 +92,12 @@ export function useOtherObjects(
             for (let tryY = room.y; tryY <= room.y + room.height - heightPx; tryY += step) {
                 for (let tryX = room.x; tryX <= room.x + room.width - widthPx; tryX += step) {
                     newRect = { x: tryX, y: tryY, widthPx, heightPx };
-                    if (validateOtherObjectPlacement(newRect, doorZones, objectZones)) {
-                        x = tryX;
-                        y = tryY;
-                        foundSpot = true;
-                        break;
-                    }
+                   if (validateOtherObjectPlacement(newRect, doorZones, objectZones, getContainerZones())) {
+                       x = tryX;
+                       y = tryY;
+                       foundSpot = true;
+                       break;
+                   }
                 }
                 if (foundSpot) break;
             }

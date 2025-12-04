@@ -56,7 +56,8 @@ export default function ContainerItem({
                                 x: container.x,
                                 y: container.y,
                                 width: container.width,
-                                height: container.height
+                                height: container.height,
+                                rotation: container.rotation ?? 0
                             },
                             room
                         )

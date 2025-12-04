@@ -224,7 +224,7 @@ export default function ActionPanel({
                             className="flex flex-col items-center justify-center text-gray-700 hover:text-blue-600 transition min-w-[64px] group"
                         >
                             <Info className="w-5 h-5" />
-                            <span className="text-sm font-medium max-h-0 overflow-hidden transition-all duration-300 group-hover:max-h-6">
+                            <span className="text-xs font-medium max-h-0 overflow-hidden transition-all duration-300 group-hover:max-h-20">
                                 Information
                             </span>
                         </button>
@@ -235,7 +235,7 @@ export default function ActionPanel({
                             className="flex flex-col items-center justify-center text-gray-700 hover:text-blue-600 transition min-w-[64px] group"
                     >
                         <RotateCcw className="w-5 h-5" />
-                        <span className="text-xs font-medium max-h-0 overflow-hidden transition-all duration-300 group-hover:max-h-6">
+                        <span className="text-xs font-medium max-h-0 overflow-hidden transition-all duration-300 group-hover:max-h-20">
                             {rotateText}
                         </span>
                     </button>
@@ -246,7 +246,7 @@ export default function ActionPanel({
                         className="flex flex-col items-center justify-center text-red-600 hover:text-red-700 transition min-w-[64px] group"
                     >
                         <Trash2 className="w-5 h-5" />
-                        <span className="text-xs font-medium max-h-0 overflow-hidden transition-all duration-300 group-hover:max-h-6">
+                        <span className="text-xs font-medium max-h-0 overflow-hidden transition-all duration-300 group-hover:max-h-20">
                             {removeText}
                         </span>
                     </button>

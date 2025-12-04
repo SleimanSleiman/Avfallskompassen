@@ -262,14 +262,27 @@ export function useContainers(
 
     //Checks if a container is inside the boundaries of a room
     const isContainerInsideRoom = (
-        c: { x: number; y: number; width: number; height: number },
+        c: { x: number; y: number; width: number; height: number; rotation?: number },
         room: Room
     ) => {
+        const rotation = (c.rotation ?? 0) % 360;
+
+        // Swap width/height if rotated 90 or 270 degrees
+        const aabbWidth = rotation === 90 || rotation === 270 ? c.height : c.width;
+        const aabbHeight = rotation === 90 || rotation === 270 ? c.width : c.height;
+
+        const centerX = c.x + c.width / 2;
+        const centerY = c.y + c.height / 2;
+
+        // Axis-aligned bounding box
+        const aabbX = centerX - aabbWidth / 2;
+        const aabbY = centerY - aabbHeight / 2;
+
         return (
-            c.x >= room.x &&
-            c.y >= room.y &&
-            c.x + c.width <= room.x + room.width &&
-            c.y + c.height <= room.y + room.height
+            aabbX >= room.x &&
+            aabbY >= room.y &&
+            aabbX + aabbWidth <= room.x + room.width &&
+            aabbY + aabbHeight <= room.y + room.height
         );
     };
 
