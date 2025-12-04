@@ -68,4 +68,22 @@ public interface UserService {
      * @return UserDTO of the updated user
      */
     UserDTO updateUserRole(Integer userId, String newRole);
+
+    /**
+     * Checks whether the specified user has already seen
+     * the interactive Planning Tool manual/tutorial.
+     *
+     * @param username the username of the user to check
+     * @return true if the user has seen the manual, false otherwise
+     */
+
+    boolean hasSeenPlanningToolManual(String username);
+    /**
+     * Marks that the specified user has seen the
+     * Planning Tool manual/tutorial by updating the
+     * corresponding field in the database.
+     *
+     * @param username the username of the user to update
+     */
+    void markPlanningToolManualAsSeen(String username);
 }
