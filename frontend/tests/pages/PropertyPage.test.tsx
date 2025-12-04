@@ -2,6 +2,7 @@ import { render, screen, fireEvent, waitFor, within } from "@testing-library/rea
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import PropertyPage from "../../src/pages/PropertyPage";
 import { BrowserRouter } from "react-router-dom";
+import { UnsavedChangesProvider } from "../../src/context/UnsavedChangesContext";
 
 import {
   getMyProperties,
@@ -33,9 +34,11 @@ vi.mock("../../src/lib/auth", () => ({
 
 function renderPage() {
   return render(
-    <BrowserRouter>
-      <PropertyPage />
-    </BrowserRouter>
+    <UnsavedChangesProvider>
+      <BrowserRouter>
+        <PropertyPage />
+      </BrowserRouter>
+    </UnsavedChangesProvider>
   );
 }
 

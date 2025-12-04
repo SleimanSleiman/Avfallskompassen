@@ -1,8 +1,23 @@
 import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import PlanningTool from "../../../src/pages/PlanningTool/PlanningTool";
+import { UnsavedChangesProvider } from "../../../src/context/UnsavedChangesContext";
 
 // ─────────────── Mock hooks ───────────────
+vi.mock("../../../src/context/UnsavedChangesContext", async () => {
+    const actual = await vi.importActual("../../../src/context/UnsavedChangesContext");
+    return {
+        ...actual,
+        useUnsavedChanges: () => ({
+            hasUnsavedChanges: false,
+            setHasUnsavedChanges: vi.fn(),
+            showCloseWarning: false,
+            setShowCloseWarning: vi.fn(),
+            isNavigatingRef: { current: false },
+        }),
+    };
+});
+
 vi.mock("../../../src/pages/PlanningTool/hooks/UseRoom", () => ({
     useRoom: () => ({
         room: { id: 1, x: 0, y: 0, width: 500, height: 400 },
@@ -133,7 +148,11 @@ describe("PlanningTool", () => {
 
     //Test rendering of main components
     it("renders RoomCanvas, WasteAnalysisPanels, and PropertyOverviewPanel", () => {
-        render(<PlanningTool />);
+        render(
+            <UnsavedChangesProvider>
+                <PlanningTool />
+            </UnsavedChangesProvider>
+        );
         expect(screen.getByTestId("mock-room-canvas")).toBeDefined();
         expect(screen.getByTestId("mock-waste-panels")).toBeDefined();
         expect(screen.getByTestId("mock-overview-panel")).toBeDefined();
@@ -141,7 +160,11 @@ describe("PlanningTool", () => {
 
     //Test that ActionPanel is not rendered initially
     it("does not render ActionPanel initially", () => {
-        render(<PlanningTool />);
+        render(
+            <UnsavedChangesProvider>
+                <PlanningTool />
+            </UnsavedChangesProvider>
+        );
         expect(screen.queryByTestId("mock-action-panel")).toBeNull();
     });
 });
