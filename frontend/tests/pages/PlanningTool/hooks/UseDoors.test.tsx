@@ -63,7 +63,7 @@ describe("useDoors hook", () => {
 
         expect(added).toBe(false);
         expect(result.current.doors.length).toBe(0);
-        expect(mockSetError).toHaveBeenCalledWith("Dörrar måste vara minst 1.2 meter breda");
+        expect(mockSetError).toHaveBeenCalledWith("Minst en dörr måste vara 1.2 meter bred.");
     });
 
     //Test adding a smaller door after a large door exists
@@ -107,7 +107,7 @@ describe("useDoors hook", () => {
 
         const stillExists = result.current.doors.some(d => d.id === largeDoor.id);
         expect(stillExists).toBe(true);
-        expect(mockSetError).toHaveBeenCalledWith("Det går inte att ta bort denna dörren. Ett rum måste ha minst en dörr");
+        expect(mockSetError).toHaveBeenCalledWith("Minst en dörr måste vara 1.2 meter bred.");
     });
 
     //Test removing a small door normally

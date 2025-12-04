@@ -38,7 +38,7 @@ export function useDoors(
         if (doors.length === 0 && width < 1.2) {
             setMsg("");
             setError("");
-            setTimeout(() => setError("Dörrar måste vara minst 1.2 meter breda"), 10);
+            setTimeout(() => setError("Minst en dörr måste vara 1.2 meter bred."), 10);
             return false;
         }
 
@@ -233,7 +233,7 @@ export function useDoors(
         if (doorToRemove.width >= 1.2 && minimumSizeDoors.length === 1) {
             setMsg("");
             setError("");
-            setTimeout(() => setError("Det går inte att ta bort denna dörren. Ett rum måste ha minst en dörr"), 10);
+            setTimeout(() => setError("Minst en dörr måste vara 1.2 meter bred."), 10);
             return;
         }
 
