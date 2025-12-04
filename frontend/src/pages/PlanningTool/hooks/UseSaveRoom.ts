@@ -6,7 +6,7 @@ import { SCALE } from "../Constants";
 export function useSaveRoom() {
     const [isSaving, setIsSaving] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    
+
     const saveRoom = async (roomRequest: RoomRequest) => {
         setIsSaving(true);
         setError(null);
@@ -54,7 +54,7 @@ export function useWasteRoomRequestBuilder(
             wasteRoomId : room.id,
             x: room.x,
             y: room.y,
-            width: room.width * SCALE, 
+            width: room.width * SCALE,
             length: room.height * SCALE,
             doors: doors.map(d => ({
                 x: d.x,
