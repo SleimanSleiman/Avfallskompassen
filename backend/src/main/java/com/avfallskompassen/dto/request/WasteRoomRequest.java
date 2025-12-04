@@ -27,7 +27,9 @@ public class WasteRoomRequest {
     @NotNull
     private double y;
 
+    @NotNull
     private List<DoorRequest> doors;
+
     private List<ContainerPositionRequest> containers;
 
     private String name;

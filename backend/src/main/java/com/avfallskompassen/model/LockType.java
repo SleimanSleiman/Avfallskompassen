@@ -23,6 +23,14 @@ public class LockType {
     @Column(nullable = false)
     private BigDecimal cost;
 
+    public LockType() {
+    }
+
+    public LockType(String name, BigDecimal cost) {
+        this.name = name;
+        this.cost = cost;
+    }
+
     public BigDecimal getCost() {
         return cost;
     }
