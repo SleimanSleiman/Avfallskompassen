@@ -13,7 +13,9 @@ public class LoginResponse {
     private String username;
     private String role;
     private String token;
-    
+    private boolean hasSeenPlanningToolManual;
+
+
     /**
      * Default constructor for JSON serialization.
      */
@@ -34,12 +36,13 @@ public class LoginResponse {
         this.role = role;
     }
     
-    public LoginResponse(boolean success, String message, String username, String role, String token) {
+    public LoginResponse(boolean success, String message, String username, String role, String token, boolean hasSeenPlanningToolManual) {
         this.success = success;
         this.message = message;
         this.username = username;
         this.role = role;
         this.token = token;
+        this.hasSeenPlanningToolManual = hasSeenPlanningToolManual;
     }
     // Getters and Setters
     public boolean isSuccess() { return success; }
@@ -56,4 +59,11 @@ public class LoginResponse {
 
     public String getToken() { return token; }
     public void setToken(String token) { this.token = token; }
+
+    public boolean getHasSeenPlanningToolManual() {
+        return hasSeenPlanningToolManual;
+    }
+    public void setHasSeenPlanningToolManual(boolean hasSeenPlanningToolManual) {
+        this.hasSeenPlanningToolManual = hasSeenPlanningToolManual;
+    }
 }

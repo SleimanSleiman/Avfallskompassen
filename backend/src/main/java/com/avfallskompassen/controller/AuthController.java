@@ -55,7 +55,8 @@ public class AuthController {
                         "Inloggning lyckades",
                         user.getUsername(),
                         user.getRole(),
-                        token
+                        token,
+                        user.getHasSeenPlanningToolManual()
                     );
                     return ResponseEntity.ok(response);
                 } else {
@@ -107,7 +108,8 @@ public class AuthController {
                 "Registrering lyckades! Du är nu inloggad.",
                 newUser.getUsername(),
                 newUser.getRole(),
-                token
+                token,
+                false
             );
             return ResponseEntity.ok(response);
             

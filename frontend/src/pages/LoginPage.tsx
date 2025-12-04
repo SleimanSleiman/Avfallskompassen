@@ -27,6 +27,7 @@ export default function LoginPage() {
         localStorage.removeItem('enviormentRoomData');
         localStorage.removeItem('selectedProperty');
         localStorage.removeItem('selectedPropertyId');
+        
         // Navigate to dashboard after successful login
         setTimeout(() => {
           navigate('/dashboard');

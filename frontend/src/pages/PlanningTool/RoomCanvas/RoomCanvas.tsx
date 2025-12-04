@@ -192,6 +192,7 @@ export default function RoomCanvas({
     return (
         <div
             ref={stageWrapperRef}
+            id="canvas-stage"
             className={isStageDropActive ? "stage-wrapper stage-wrapper-active" : "stage-wrapper"}
             onDrop={handleStageDrop}
             onDragOver={handleStageDragOver}
