@@ -268,6 +268,53 @@ export function useContainers(
         );
     };
 
+    //Move any containers that collided with a door zone
+    function pushContainersAwayFromDoors(
+        doorZones: { x: number; y: number; width: number; height: number }[]
+    ): boolean {
+
+        // Work on a mutable copy
+        const tempContainers = [...containersInRoom];
+
+        // For each container
+        for (let i = 0; i < tempContainers.length; i++) {
+            const c = tempContainers[i];
+            const cRect = { x: c.x, y: c.y, width: c.width, height: c.height };
+
+            const overlappingDoor = doorZones.some(dz => isOverlapping(cRect, dz));
+            if (!overlappingDoor) continue;
+
+            // Try to move it
+            const step = 10;
+
+            outer:
+            for (let dy = -200; dy <= 200; dy += step) {
+                for (let dx = -200; dx <= 200; dx += step) {
+
+                    const testX = clamp(c.x + dx, room.x, room.x + room.width - c.width);
+                    const testY = clamp(c.y + dy, room.y, room.y + room.height - c.height);
+
+                    const testRect = { x: testX, y: testY, width: c.width, height: c.height };
+
+                    //recalc zones from tempContainers
+                    const containerZones = buildContainerZones(
+                        tempContainers,
+                        c.id
+                    );
+
+                    if (validateContainerPlacement(testRect, doorZones, containerZones)) {
+                        // Commit move
+                        tempContainers[i] = { ...c, x: testX, y: testY };
+                        break outer;
+                    }
+                }
+            }
+        }
+
+        // Success → save new layout
+        saveContainers(tempContainers);
+    }
+
     /* ──────────────── Return ──────────────── */
     return {
         containersInRoom,
@@ -302,5 +349,6 @@ export function useContainers(
         undo,
         redo,
         isContainerInsideRoom,
+        pushContainersAwayFromDoors,
     };
 }

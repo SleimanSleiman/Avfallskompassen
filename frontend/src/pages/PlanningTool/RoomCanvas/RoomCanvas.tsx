@@ -43,6 +43,7 @@ type RoomCanvasProps = {
     handleDragDoor: (id: number, pos: { x: number; y: number; wall: Door["wall"]; rotation: number }) => void;
     handleAddDoor: (door: { width: number }) => boolean;
     doorZones: { x: number; y: number; width: number; height: number }[];
+    pushContainersFromDoor: () => void;
 
     /* ───────────── Container Props ───────────── */
     containers: ContainerInRoom[];
@@ -98,6 +99,7 @@ export default function RoomCanvas({
     handleDragDoor,
     handleAddDoor,
     doorZones,
+    pushContainersFromDoor,
 
     /* ───────────── Container Props ───────────── */
     containers,
@@ -138,6 +140,7 @@ export default function RoomCanvas({
     isAdminMode = false,
 }: RoomCanvasProps) {
     const [isDraggingContainer, setIsDraggingContainer] = useState(false);
+    const [iSDraggingDoor, setIsDraggingDoor] = useState(false);
     const [msg, setMsg] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
 
@@ -291,6 +294,8 @@ export default function RoomCanvas({
                                 room={room}
                                 handleDragDoor={handleDragDoor}
                                 handleSelectDoor={handleSelectDoor}
+                                pushContainersFromDoor={pushContainersFromDoor}
+                                setIsDraggingDoor={setIsDraggingDoor}
                             />
 
                             {/* Measurements between door and corners*/}
@@ -314,7 +319,7 @@ export default function RoomCanvas({
                             />
 
                             {/* Blocked zones overlay */}
-                            {(isDraggingContainer || draggedContainer) && <BlockedZones zones={zones} />}
+                            {(isDraggingContainer || draggedContainer || iSDraggingDoor) && <BlockedZones zones={zones} />}
                         </Layer>
                     </Stage>
                 </div>

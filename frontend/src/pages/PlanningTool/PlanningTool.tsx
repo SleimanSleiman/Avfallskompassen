@@ -63,7 +63,7 @@ export default function PlanningTool({ isAdminMode = false }: PlanningToolProps)
         handleSelectDoor,
         getDoorZones,
         doorOffsetRef,
-    } = useDoors(room, setSelectedDoorId, setSelectedContainerId);
+    } = useDoors(room, setSelectedDoorId, setSelectedContainerId, () => getContainerZones());
 
     /* ──────────────── Container state & logic ──────────────── */
     const {
@@ -95,6 +95,7 @@ export default function PlanningTool({ isAdminMode = false }: PlanningToolProps)
         redo,
         getContainerZones,
         isContainerInsideRoom,
+        pushContainersAwayFromDoors,
     } = useContainers(room, setSelectedContainerId, setSelectedDoorId, getDoorZones());
 
     /* ──────────────── Sync the doors and containers when changes are made to the room ──────────────── */
@@ -130,7 +131,7 @@ export default function PlanningTool({ isAdminMode = false }: PlanningToolProps)
         if (room.containers && room.containers.length > 0) saveContainers(room.containers);
     }, [room.id, setDoors, saveContainers]);
 
-   useEffect(() => {
+    useEffect(() => {
         if (typeof window === 'undefined') {
             console.log('PlanningTool - Skipping sync (no window)');
             return;
@@ -366,6 +367,7 @@ export default function PlanningTool({ isAdminMode = false }: PlanningToolProps)
                         handleSelectDoor={handleSelectDoor}
                         handleAddDoor={handleAddDoor}
                         doorZones={getDoorZones()}
+                        pushContainersFromDoor={() => pushContainersAwayFromDoors(getDoorZones())}
 
                         containers={containersInRoom}
                         selectedContainerId={selectedContainerId}

@@ -12,6 +12,8 @@ type DoorsLayerProps = {
     room: { x: number; y: number; width: number; height: number };
     handleDragDoor: (id: number, pos: { x: number; y: number; wall?: string; rotation?: number }) => void;
     handleSelectDoor: (id: number) => void;
+    setIsDraggingDoor?: (dragging: boolean) => void;
+    pushContainersFromDoor: () => void;
 };
 
 export default function DoorsLayer({
@@ -20,6 +22,8 @@ export default function DoorsLayer({
     room,
     handleDragDoor,
     handleSelectDoor,
+    setIsDraggingDoor,
+    pushContainersFromDoor,
 }: DoorsLayerProps) {
     return (
         <>
@@ -32,6 +36,8 @@ export default function DoorsLayer({
                     room={room}
                     handleDragDoor={handleDragDoor}
                     handleSelectDoor={handleSelectDoor}
+                    pushContainersFromDoor={pushContainersFromDoor}
+                    setIsDraggingDoor={setIsDraggingDoor}
                 />
             ))}
         </>
