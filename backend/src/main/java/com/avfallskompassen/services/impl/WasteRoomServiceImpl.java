@@ -3,6 +3,7 @@ package com.avfallskompassen.services.impl;
 import com.avfallskompassen.dto.*;
 import com.avfallskompassen.dto.request.ContainerPositionRequest;
 import com.avfallskompassen.dto.request.DoorRequest;
+import com.avfallskompassen.dto.request.OtherObjectRequest;
 import com.avfallskompassen.dto.request.WasteRoomRequest;
 import com.avfallskompassen.exception.ResourceNotFoundException;
 import com.avfallskompassen.model.*;
@@ -73,8 +74,10 @@ public class WasteRoomServiceImpl implements WasteRoomService {
 
         List<ContainerPosition> containerPositions = convertContainerRequest(request.getContainers(), wasteRoom);
         List<Door> doorPositions = convertDoorRequest(request.getDoors(), wasteRoom);
+        List<OtherObject> otherObjectPositions = convertOtherObjectRequest(request.getOtherObjects(), wasteRoom);
         wasteRoom.setContainers(containerPositions);
         wasteRoom.setDoors(doorPositions);
+        wasteRoom.setOtherObjects(otherObjectPositions);
 
         if (request.getName() != null) {
             wasteRoom.setName(request.getName());
@@ -148,6 +151,11 @@ public class WasteRoomServiceImpl implements WasteRoomService {
         wasteRoom.getDoors().clear();
         wasteRoom.getDoors().addAll(
                 convertDoorRequest(request.getDoors(), wasteRoom)
+        );
+
+        wasteRoom.getOtherObjects().clear();
+        wasteRoom.getOtherObjects().addAll(
+                convertOtherObjectRequest(request.getOtherObjects(), wasteRoom)
         );
 
         WasteRoom updated = wasteRoomRepository.save(wasteRoom);
@@ -227,6 +235,29 @@ public class WasteRoomServiceImpl implements WasteRoomService {
         return doorPositions;
     }
 
+    private List<OtherObject> convertOtherObjectRequest(List<OtherObjectRequest> otherObjects, WasteRoom wasteRoom) {
+        if (otherObjects == null || otherObjects.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        List<OtherObject> otherObjectPositions = new ArrayList<>();
+
+        for (OtherObjectRequest request : otherObjects) {
+            OtherObject otherObject = new OtherObject();
+            otherObject.setName(request.getName());
+            otherObject.setWidth(request.getWidth());
+            otherObject.setDepth(request.getDepth());
+            otherObject.setX(request.getX());
+            otherObject.setY(request.getY());
+            otherObject.setRotation(request.getRotation());
+            otherObject.setWasteRoom(wasteRoom);
+
+            otherObjectPositions.add(otherObject);
+        }
+
+        return otherObjectPositions;
+    }
+
     /**
      * Collects a property from the database and returns it.
      *
@@ -266,6 +297,10 @@ public class WasteRoomServiceImpl implements WasteRoomService {
                 ? entity.getDoors().stream().map(DoorDTO::fromEntity).toList()
                 : new ArrayList<>();
 
+        List<OtherObjectDTO> otherObjects = entity.getOtherObjects() != null
+                ? entity.getOtherObjects().stream().map(OtherObjectDTO::fromEntity).toList()
+                : new ArrayList<>();
+
         WasteRoomDTO dto = new WasteRoomDTO(
                 entity.getProperty().getId(),
                 entity.getLength(),
@@ -275,6 +310,9 @@ public class WasteRoomServiceImpl implements WasteRoomService {
                 containerService.getContainersByWasteRoomId(entity.getId()),
                 entity.getDoors() != null
                         ? entity.getDoors().stream().map(DoorDTO::fromEntity).toList()
+                        : new ArrayList<>(),
+                entity.getOtherObjects() != null
+                        ? entity.getOtherObjects().stream().map(OtherObjectDTO::fromEntity).toList()
                         : new ArrayList<>(),
                 entity.getId(),
                 entity.getName(),
@@ -389,6 +427,8 @@ public class WasteRoomServiceImpl implements WasteRoomService {
         
         List<ContainerPosition> containerPositions = convertContainerRequest(request.getContainers(), newVersion);
         List<Door> doorPositions = convertDoorRequest(request.getDoors(), newVersion);
+        List<OtherObject> otherObjectPositions = convertOtherObjectRequest(request.getOtherObjects(), newVersion);
+        newVersion.setOtherObjects(otherObjectPositions);
         newVersion.setContainers(containerPositions);
         newVersion.setDoors(doorPositions);
         

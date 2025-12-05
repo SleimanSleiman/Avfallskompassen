@@ -50,6 +50,7 @@ describe("RoomShape (Vitest)", () => {
 
     const handleSelectDoor = vi.fn();
     const handleSelectContainer = vi.fn();
+    const handleSelectOtherObject = vi.fn();
     const setSelectedContainerInfo = vi.fn();
     const onMove = vi.fn();
 
@@ -62,6 +63,7 @@ describe("RoomShape (Vitest)", () => {
             <RoomShape
                 room={room}
                 handleSelectDoor={handleSelectDoor}
+                handleSelectOtherObject={handleSelectOtherObject}
                 handleSelectContainer={handleSelectContainer}
                 setSelectedContainerInfo={setSelectedContainerInfo}
                 onMove={onMove}
@@ -79,6 +81,7 @@ describe("RoomShape (Vitest)", () => {
             <RoomShape
                 room={room}
                 handleSelectDoor={handleSelectDoor}
+                handleSelectOtherObject={handleSelectOtherObject}
                 handleSelectContainer={handleSelectContainer}
                 setSelectedContainerInfo={setSelectedContainerInfo}
                 onMove={onMove}
@@ -97,6 +100,7 @@ describe("RoomShape (Vitest)", () => {
             <RoomShape
                 room={room}
                 handleSelectDoor={handleSelectDoor}
+                handleSelectOtherObject={handleSelectOtherObject}
                 handleSelectContainer={handleSelectContainer}
                 setSelectedContainerInfo={setSelectedContainerInfo}
                 onMove={onMove}

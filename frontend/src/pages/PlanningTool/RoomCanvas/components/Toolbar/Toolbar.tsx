@@ -5,10 +5,11 @@
  */
 
 import { React, useState } from "react";
-import { Save, Ruler, DoorOpen, Undo, Redo, PillBottle, X } from "lucide-react";
+import { Save, Ruler, DoorOpen, Undo, Redo, PillBottle, X, SquarePlus } from "lucide-react";
 import { SCALE, STAGE_WIDTH, STAGE_HEIGHT, MARGIN, clamp, MIN_HEIGHT, MIN_WIDTH } from "../../../Constants"
 import RoomSizePrompt from "../../../../../components/RoomSizePrompt";
 import DoorWidthPrompt from "../../../../../components/DoorWidthPrompt";
+import OtherObjectSizePrompt from "../../../../../components/OtherObjectSizePrompt";
 import ContainerInfo from "./ContainerInfo"
 import './css/roomCanvasToolbar.css'
 
@@ -31,6 +32,7 @@ type ToolbarProps = {
     setSelectedContainerInfo: (container: ContainerDTO | null) => void;
     isAdminMode?: boolean;
     generateThumbnail: () => string | null;
+    handleAddOtherObject: (name: string, length: number, width: number) => boolean;
 };
 
 export default function Toolbar({
@@ -52,10 +54,12 @@ export default function Toolbar({
     setSelectedContainerInfo,
     isAdminMode = false,
     generateThumbnail,
+    handleAddOtherObject,
 }: ToolbarProps) {
 
     const [isRoomPromptOpen, setIsRoomPromptOpen] = useState(false);
     const [isDoorPromptOpen, setIsDoorPromptOpen] = useState(false);
+    const [isOtherObjectPromptOpen, setIsOtherObjectPromptOpen] = useState(false);
 
     const [containerInfoPos, setContainerInfoPos] = useState<{ left: number; top: number } | null>(null);
 
@@ -103,6 +107,12 @@ export default function Toolbar({
         if (success) setIsDoorPromptOpen(false);
     };
 
+    //Confirm other object addition
+    const handleAddOtherObjectWithPrompt = (name: string, length: number, width: number) => {
+        const success = handleAddOtherObject(name, length, width);
+        if (success) setIsOtherObjectPromptOpen(false);
+    };
+
     //Save room and display messages
     const handleSaveRoom = async () => {
         setMsg("");
@@ -140,7 +150,7 @@ export default function Toolbar({
             {/* Add door */}
             <button
                 onClick={() => {
-                    setIsDoorPromptOpen(true)
+                    setIsDoorPromptOpen(true);
                     handleSelectContainer(null);
                     handleSelectDoor(null);
                 }}
@@ -157,6 +167,19 @@ export default function Toolbar({
             >
                 <PillBottle className="toolbar-icon" />
                 <span className="toolbar-label">Lägg till sopkärl</span>
+            </button>
+
+            {/* Add other object */}
+            <button
+                onClick={() => {
+                    setIsOtherObjectPromptOpen(true);
+                    handleSelectContainer(null);
+                    handleSelectDoor(null);
+                }}
+                className="group toolbar-btn"
+            >
+                <SquarePlus className="toolbar-icon" />
+                <span className="toolbar-label">Lägg till övrigt föremål</span>
             </button>
 
             {/* Save design - Hidden in admin mode */}
@@ -208,6 +231,12 @@ export default function Toolbar({
                 <DoorWidthPrompt
                     onConfirm={handleAddDoorWithPrompt}
                     onCancel={() => setIsDoorPromptOpen(false)}
+                />
+            )}
+            {isOtherObjectPromptOpen && (
+                <OtherObjectSizePrompt
+                    onConfirm={(name, length, width) => handleAddOtherObjectWithPrompt(name, length, width)}
+                    onCancel={() => setIsOtherObjectPromptOpen(false)}
                 />
             )}
 

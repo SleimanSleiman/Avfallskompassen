@@ -25,10 +25,10 @@ describe("ContainersLayer component", () => {
     const room = { x: 0, y: 0, width: 500, height: 400 };
     const doorZones = [{ x: 0, y: 0, width: 50, height: 50 }];
     const containersInRoom = [
-    { id: 1, x: 10, y: 20, width: 50, height: 50 },
-    { id: 2, x: 100, y: 120, width: 60, height: 60 },
+        { id: 1, x: 10, y: 20, width: 50, height: 50 },
+        { id: 2, x: 100, y: 120, width: 60, height: 60 },
     ];
-
+    const otherObjectZones = [];
     const handleDragContainer = vi.fn();
     const handleSelectContainer = vi.fn();
     const getContainerZones = vi.fn(() => []);
@@ -44,6 +44,7 @@ describe("ContainersLayer component", () => {
                 handleSelectContainer={handleSelectContainer}
                 room={room}
                 doorZones={doorZones}
+                otherObjectZones={otherObjectZones}
                 getContainerZones={getContainerZones}
                 setIsDraggingContainer={setIsDraggingContainer}
                 isContainerInsideRoom={isContainerInsideRoom}
@@ -66,6 +67,7 @@ describe("ContainersLayer component", () => {
                 handleSelectContainer={handleSelectContainer}
                 room={room}
                 doorZones={doorZones}
+                otherObjectZones={otherObjectZones}
                 getContainerZones={getContainerZones}
                 setIsDraggingContainer={setIsDraggingContainer}
                 isContainerInsideRoom={isContainerInsideRoom}
@@ -88,6 +90,7 @@ describe("ContainersLayer component", () => {
                 handleSelectContainer={handleSelectContainer}
                 room={room}
                 doorZones={doorZones}
+                otherObjectZones={otherObjectZones}
                 getContainerZones={getContainerZones}
                 setIsDraggingContainer={setIsDraggingContainer}
                 isContainerInsideRoom={isContainerInsideRoom}
@@ -109,6 +112,7 @@ describe("ContainersLayer component", () => {
                 handleSelectContainer={handleSelectContainer}
                 room={room}
                 doorZones={doorZones}
+                otherObjectZones={otherObjectZones}
                 getContainerZones={getContainerZones}
                 setIsDraggingContainer={setIsDraggingContainer}
                 isContainerInsideRoom={isContainerInsideRoom}

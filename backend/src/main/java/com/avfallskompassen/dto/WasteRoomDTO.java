@@ -18,6 +18,7 @@ public class WasteRoomDTO {
     private double y;
     private List<ContainerPositionDTO> containers;
     private List<DoorDTO> doors;
+    private List<OtherObjectDTO> otherObjects;
     private Long wasteRoomId;
     private String name;
     private int versionNumber;
@@ -33,7 +34,7 @@ public class WasteRoomDTO {
     public WasteRoomDTO() {}
 
     public WasteRoomDTO(Long propertyId, double length, double width, double x, double y,
-                        List<ContainerPositionDTO> containers, List<DoorDTO> doors, Long wasteRoomId, String name,
+                        List<ContainerPositionDTO> containers, List<DoorDTO> doors, List<OtherObjectDTO> otherObjects, Long wasteRoomId, String name,
                         int versionNumber, String createdBy, String adminUsername, String versionName,
                         Boolean isActive, String createdAt, String updatedAt) {
         this.propertyId = propertyId;
@@ -43,6 +44,7 @@ public class WasteRoomDTO {
         this.y = y;
         this.containers = containers;
         this.doors = doors;
+        this.otherObjects = otherObjects;
         this.wasteRoomId = wasteRoomId;
         this.name = name;
         this.versionNumber = versionNumber;
@@ -103,6 +105,13 @@ public class WasteRoomDTO {
         this.doors = doors;
     }
 
+    public List<OtherObjectDTO> getOtherObjects() {
+        return otherObjects;
+    }
+    public void setOtherObjects(List<OtherObjectDTO> otherObjects) {
+        this.otherObjects = otherObjects;
+    }
+
     public Long getWasteRoomId() { return wasteRoomId; }
     public void setWasteRoomId(Long wasteRoomId) { this.wasteRoomId = wasteRoomId; }
 
@@ -154,6 +163,11 @@ public class WasteRoomDTO {
                 entity.getDoors() != null
                         ? entity.getDoors().stream()
                         .map(DoorDTO::fromEntity)
+                        .collect(Collectors.toList())
+                        : null,
+                entity.getOtherObjects() != null
+                        ? entity.getOtherObjects().stream()
+                        .map(OtherObjectDTO::fromEntity)
                         .collect(Collectors.toList())
                         : null,
                 entity.getId(),

@@ -1,110 +1,166 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, fireEvent } from "@testing-library/react";
-import React from "react";
-import RoomShape from "../../../../src/pages/PlanningTool/RoomCanvas/components/Room/RoomShape";
-import { SCALE, STAGE_WIDTH, STAGE_HEIGHT, MARGIN } from "../../../../src/pages/PlanningTool/Constants";
+import { renderHook, act } from "@testing-library/react";
+import { useContainers } from "../../../../src/pages/PlanningTool/hooks/UseContainers";
+import { fetchContainersByMunicipalityAndService } from "../../../../src/lib/Container";
+import { useLayoutHistory } from "../../../../src/pages/PlanningTool/hooks/UseLayoutHistory";
 
-const rectPropsStore: Record<string, any> = {};
+// ─────────────── Mock modules ───────────────
+vi.mock("../../../../src/lib/Container", () => ({
+    fetchContainersByMunicipalityAndService: vi.fn(),
+}));
 
-// ─────────────── Mock react-konva ───────────────
-vi.mock("react-konva", async () => {
-    const actual = await vi.importActual("react");
-    return {
-        ...actual,
-        Rect: (props: any) => {
-            rectPropsStore["rect"] = props;
-            return <div data-testid="rect" {...props} />;
-        },
-        Text: (props: any) => <div data-testid="text">{props.text}</div>,
-    };
-});
+vi.mock("../../../../src/pages/PlanningTool/hooks/UseLayoutHistory", () => ({
+    useLayoutHistory: vi.fn(() => {
+        const state: any[] = [];
+        const save = (newState: any[]) => {
+            state.splice(0, state.length, ...newState);
+        };
+        return {
+            state,
+            save,
+            undo: vi.fn(),
+            redo: vi.fn(),
+        };
+    }),
+}));
 
-// ─────────────── Default mocks ───────────────
-const defaultRoom = { x: 0, y: 0, width: 500, height: 400 };
-const defaultHandlers = {
-    handleSelectDoor: vi.fn(),
-    handleSelectContainer: vi.fn(),
-    setSelectedContainerInfo: vi.fn(),
-    onMove: vi.fn(),
-};
 
-// ─────────────── Helper function ───────────────
-const renderRoomShape = (overrideProps: Partial<React.ComponentProps<typeof RoomShape>> = {}) =>
-    render(
-        <RoomShape
-            room={defaultRoom}
-            handleSelectDoor={defaultHandlers.handleSelectDoor}
-            handleSelectContainer={defaultHandlers.handleSelectContainer}
-            setSelectedContainerInfo={defaultHandlers.setSelectedContainerInfo}
-            onMove={defaultHandlers.onMove}
-            {...overrideProps}
-        />
-    );
+// ─────────────── Test data ───────────────
+const room = { x: 0, y: 0, width: 500, height: 400 };
+const containerDTO = { id: 1, width: 1000, depth: 800, name: "Test Container" };
 
-describe("RoomShape", () => {
-    let handleSelectDoor: ReturnType<typeof vi.fn>;
-    let handleSelectContainer: ReturnType<typeof vi.fn>;
-    let setSelectedContainerInfo: ReturnType<typeof vi.fn>;
-    let onMove: ReturnType<typeof vi.fn>;
+describe("useContainers hook", () => {
+    let setSelectedContainerId: ReturnType<typeof vi.fn>;
+    let setSelectedDoorId: ReturnType<typeof vi.fn>;
+    let setSelectedOtherObjectId: ReturnType<typeof vi.fn>;
 
     beforeEach(() => {
-        handleSelectDoor = vi.fn();
-        handleSelectContainer = vi.fn();
-        setSelectedContainerInfo = vi.fn();
-        onMove = vi.fn();
+        setSelectedContainerId = vi.fn();
+        setSelectedDoorId = vi.fn();
+        setSelectedOtherObjectId = vi.fn();
         vi.clearAllMocks();
     });
 
-    it("renders the room rectangle and dimension texts", () => {
-        renderRoomShape();
+    it("should add a container in a valid position", () => {
+        const { result } = renderHook(() =>
+            useContainers(room, setSelectedContainerId, setSelectedDoorId, setSelectedOtherObjectId)
+        );
 
-        const rect = screen.getByTestId("rect");
-        expect(rect).toBeDefined();
-
-        const texts = screen.getAllByTestId("text");
-        expect(texts.length).toBe(2);
-        expect(texts[0].textContent).toBe((defaultRoom.width * SCALE).toFixed(2) + " m");
-        expect(texts[1].textContent).toBe((defaultRoom.height * SCALE).toFixed(2) + " m");
-    });
-
-    it("calls selection handlers when clicking on the room rectangle", () => {
-        renderRoomShape({
-            handleSelectDoor,
-            handleSelectContainer,
-            setSelectedContainerInfo,
+        act(() => {
+            result.current.handleAddContainer(containerDTO);
         });
 
-        const rect = screen.getByTestId("rect");
-        fireEvent.mouseDown(rect);
-
-        expect(handleSelectContainer).toHaveBeenCalledWith(null);
-        expect(handleSelectDoor).toHaveBeenCalledWith(null);
-        expect(setSelectedContainerInfo).toHaveBeenCalledWith(null);
+        expect(result.current.containersInRoom.length).toBe(1);
+        expect(setSelectedContainerId).toHaveBeenCalledWith(expect.any(Number));
     });
 
-    it("calls onMove with clamped coordinates on drag", () => {
-        renderRoomShape({ onMove });
+    it("should remove a container", () => {
+        const saveMock = vi.fn();
+        (useLayoutHistory as any).mockReturnValue({
+            state: [{ id: 123, container: containerDTO, x: 0, y: 0, width: 100, height: 80, rotation: 0 }],
+            save: saveMock,
+            undo: vi.fn(),
+            redo: vi.fn(),
+        });
 
-        const props = rectPropsStore["rect"];
-        expect(props).toBeDefined();
+        const { result } = renderHook(() =>
+            useContainers(room, setSelectedContainerId, setSelectedDoorId, setSelectedOtherObjectId)
+        );
 
-        const targetMock = {
-            _pos: { x: 600, y: 500 },
-            position: function (pos?: { x: number; y: number }) {
-                if (pos) this._pos = pos;
-                return this._pos;
-            },
+        act(() => {
+            result.current.handleRemoveContainer(123);
+        });
+
+        expect(saveMock).toHaveBeenCalledWith([]);
+        expect(setSelectedContainerId).toHaveBeenCalledWith(null);
+    });
+
+    it("should rotate a container", () => {
+        const saveMock = vi.fn();
+        (useLayoutHistory as any).mockReturnValue({
+            state: [{ id: 1, container: containerDTO, x: 0, y: 0, width: 100, height: 80, rotation: 0 }],
+            save: saveMock,
+            undo: vi.fn(),
+            redo: vi.fn(),
+        });
+
+        const { result } = renderHook(() =>
+            useContainers(room, setSelectedContainerId, setSelectedDoorId, setSelectedOtherObjectId)
+        );
+
+        act(() => {
+            result.current.handleRotateContainer(1);
+        });
+
+        expect(saveMock).toHaveBeenCalledWith([
+            expect.objectContaining({ rotation: 90 }),
+        ]);
+    });
+
+    it("should handle container selection", () => {
+        const { result } = renderHook(() =>
+            useContainers(room, setSelectedContainerId, setSelectedDoorId, setSelectedOtherObjectId)
+        );
+
+        act(() => {
+            result.current.handleSelectContainer(42);
+        });
+
+        expect(setSelectedContainerId).toHaveBeenCalledWith(42);
+        expect(setSelectedDoorId).toHaveBeenCalledWith(null);
+        expect(setSelectedOtherObjectId).toHaveBeenCalledWith(null);
+    });
+
+    it("should fetch available containers and set state", async () => {
+        (fetchContainersByMunicipalityAndService as any).mockResolvedValue([
+            { id: 10, width: 100, depth: 100, name: "Fetched Container" },
+        ]);
+
+        const { result } = renderHook(() =>
+            useContainers(room, setSelectedContainerId, setSelectedDoorId, setSelectedOtherObjectId)
+        );
+
+        await act(async () => {
+            await result.current.fetchAvailableContainers({ id: 1, name: "Service" });
+        });
+
+        expect(result.current.availableContainers.length).toBe(1);
+        expect(result.current.availableContainers[0].name).toBe("Fetched Container");
+        expect(result.current.isLoadingContainers).toBe(false);
+    });
+
+    it("should handle stage drop with valid data", () => {
+        const { result } = renderHook(() =>
+            useContainers(room, setSelectedContainerId, setSelectedDoorId, setSelectedOtherObjectId)
+        );
+
+        const stageRefMock = { querySelector: () => ({ getBoundingClientRect: () => ({ left: 0, top: 0, width: 500, height: 400 }) }) };
+        result.current.stageWrapperRef.current = stageRefMock as any;
+
+        const dataTransfer = {
+            getData: vi.fn(() => JSON.stringify(containerDTO)),
+            types: ["application/container"],
+            dropEffect: "",
         };
 
-        props.onDragMove({ target: targetMock });
+        const event = { preventDefault: vi.fn(), clientX: 100, clientY: 100, dataTransfer };
 
-        expect(onMove).toHaveBeenCalled();
-        const calledX = onMove.mock.calls[0][0];
-        const calledY = onMove.mock.calls[0][1];
+        act(() => {
+            result.current.handleStageDrop(event as any);
+        });
 
-        expect(calledX).toBeGreaterThanOrEqual(MARGIN);
-        expect(calledX).toBeLessThanOrEqual(STAGE_WIDTH - defaultRoom.width - MARGIN);
-        expect(calledY).toBeGreaterThanOrEqual(MARGIN);
-        expect(calledY).toBeLessThanOrEqual(STAGE_HEIGHT - defaultRoom.height - MARGIN);
+        expect(result.current.containersInRoom.length).toBe(1);
+    });
+
+    it("should correctly report if container is inside the room", () => {
+        const { result } = renderHook(() =>
+            useContainers(room, setSelectedContainerId, setSelectedDoorId, setSelectedOtherObjectId)
+        );
+
+        const inside = result.current.isContainerInsideRoom({ x: 10, y: 10, width: 50, height: 50 }, room);
+        const outside = result.current.isContainerInsideRoom({ x: -10, y: -10, width: 50, height: 50 }, room);
+
+        expect(inside).toBe(true);
+        expect(outside).toBe(false);
     });
 });
