@@ -1,0 +1,15 @@
+package com.avfallskompassen.model;
+
+public enum ActivityType {
+    LOGIN,
+    REGISTERED,
+    CREATED_PROPERTY,
+    CHANGED_PROPERTY,
+    DELETED_PROPERTY,
+    CREATED_WASTEROOM,
+    CREATED_VERSION,
+    SAVED_WASTEROOM,
+    UPDATED_WASTEROOM,
+    CHANGED_ROLE,
+    EXPORTED_CALCULATEDCOST_PDF,
+}
