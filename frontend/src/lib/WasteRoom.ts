@@ -13,6 +13,7 @@ export type WasteRoom = {
     y: number;
     containers?: ContainerPosition[];
     doors?: Door[];
+    otherObjects?: OtherObject[];
     createdAt: string;
     updatedAt?: string;
     property?: Property;
@@ -43,6 +44,16 @@ export type ContainerPosition = {
     angle : number;
     containerDTO : ContainerDTO;
     wasteRoomId : number;
+}
+
+export type OtherObject = {
+    id: number;
+    name: string;
+    x: number;
+    y: number;
+    width: number;
+    depth: number;
+    rotation: number;
 }
 
 export async function getWasteRoomsByPropertyId(propertyId : number): Promise<WasteRoom[]> {

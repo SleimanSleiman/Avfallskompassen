@@ -12,11 +12,6 @@ import type { ContainerDTO } from '../../lib/Container';
 import { currentUser } from '../../lib/Auth';
 
 
-import { useComparison } from './hooks/useComparison';
-import { useLayoutHistory } from './hooks/UseLayoutHistory';
-import { useSaveRoom, useWasteRoomRequestBuilder } from './hooks/UseSaveRoom';
-import { usePropertyHighlights } from './hooks/usePropertyHighlights';
-
 //Components
 import RoomCanvas from './RoomCanvas/RoomCanvas';
 import ActionPanel from './ActionPanel';
@@ -29,6 +24,12 @@ import { useRoom } from './hooks/UseRoom';
 import { useDoors } from './hooks/UseDoors';
 import { useContainers } from './hooks/UseContainers';
 import { useServiceTypes } from './hooks/UseServiceTypes';
+import { useOtherObjects } from './hooks/UseOtherObjects';
+import { useComparison } from './hooks/useComparison';
+import { useLayoutHistory } from './hooks/UseLayoutHistory';
+import { useSaveRoom, useWasteRoomRequestBuilder } from './hooks/UseSaveRoom';
+import { usePropertyHighlights } from './hooks/usePropertyHighlights';
+
 import { SCALE } from './Constants';
 
 import { driver } from "driver.js";
@@ -40,8 +41,10 @@ type PlanningToolProps = {
 
 export default function PlanningTool({ isAdminMode = false }: PlanningToolProps) {
 
-    const [selectedContainerId, setSelectedContainerId] = useState<number | null>(null);
-    const [selectedDoorId, setSelectedDoorId] = useState<number | null>(null);
+   // Selected IDs
+   const [selectedContainerId, setSelectedContainerId] = useState<number | null>(null);
+   const [selectedDoorId, setSelectedDoorId] = useState<number | null>(null);
+   const [selectedOtherObjectId, setSelectedOtherObjectId] = useState<number | null>(null);
 
     /* ──────────────── Room state & logic ──────────────── */
     const {
@@ -62,7 +65,20 @@ export default function PlanningTool({ isAdminMode = false }: PlanningToolProps)
         handleSelectDoor,
         getDoorZones,
         doorOffsetRef,
-    } = useDoors(room, setSelectedDoorId, setSelectedContainerId, () => getContainerZones());
+    } = useDoors(room, setSelectedDoorId, setSelectedContainerId, setSelectedOtherObjectId, () => getContainerZones());
+
+    /* ──────────────── Other Objects state & logic ──────────────── */
+    const {
+        otherObjects,
+        setOtherObjects,
+        handleAddOtherObject,
+        handleDragOtherObject,
+        getOtherObjectZones,
+        handleSelectOtherObject,
+        handleRotateOtherObject,
+        handleRemoveOtherObject,
+        isObjectOutsideRoom,
+    } = useOtherObjects(room, setSelectedOtherObjectId, setSelectedContainerId, setSelectedDoorId, getDoorZones(), () => getContainerZones());
 
     /* ──────────────── Container state & logic ──────────────── */
     const {
@@ -94,7 +110,7 @@ export default function PlanningTool({ isAdminMode = false }: PlanningToolProps)
         redo,
         getContainerZones,
         isContainerInsideRoom,
-    } = useContainers(room, setSelectedContainerId, setSelectedDoorId, getDoorZones());
+    } = useContainers(room, setSelectedContainerId, setSelectedDoorId, setSelectedOtherObjectId, getDoorZones(), getOtherObjectZones());
 
     /* ──────────────── Sync the doors and containers when changes are made to the room ──────────────── */
     useEffect(() => {
@@ -127,21 +143,26 @@ export default function PlanningTool({ isAdminMode = false }: PlanningToolProps)
         setDoors(room.doors);
     }
         if (room.containers && room.containers.length > 0) saveContainers(room.containers);
-    }, [room.id, setDoors, saveContainers]);
+        if (room.otherObjects && room.otherObjects.length > 0) setOtherObjects(room.otherObjects);
+    }, [room.id, setDoors, saveContainers, setOtherObjects]);
 
+    /* ──────────────── Sync state to localStorage on changes ──────────────── */
     useEffect(() => {
         if (typeof window === 'undefined') {
+            console.log('PlanningTool - Skipping sync (no window)');
             return;
         }
 
         // Don't sync if we don't have a room ID (means we're still initializing)
         if (!room.id) {
+            console.log('PlanningTool - Skipping sync (no room.id)', { room });
             return;
         }
 
         try {
             const stored = localStorage.getItem('trashRoomData');
             if (!stored) {
+                console.log('PlanningTool - Skipping sync (no stored data)');
                 return;
             }
 
@@ -150,17 +171,16 @@ export default function PlanningTool({ isAdminMode = false }: PlanningToolProps)
                 ...parsed,
                 containers: containersInRoom,
                 doors: doors,
+                otherObjects: otherObjects,
                 width: room.height * SCALE, // Convert back to meters
                 length: room.width * SCALE,  // Convert back to meters
             };
-
-
 
             localStorage.setItem('trashRoomData', JSON.stringify(updated));
         } catch (error) {
             console.error('Failed to sync state to localStorage', error);
         }
-    }, [containersInRoom, doors, room.width, room.height, room.id]);
+    }, [containersInRoom, doors, otherObjects, room.width, room.height, room.id]);
 
 
     /* ──────────────── Service Types (API data) ──────────────── */
@@ -222,7 +242,7 @@ export default function PlanningTool({ isAdminMode = false }: PlanningToolProps)
             return;
         }
 
-        const roomRequest = buildWasteRoomRequest(room, doors, containersInRoom, propertyId, thumbnailBase64);
+        const roomRequest = buildWasteRoomRequest(room, doors, containersInRoom, otherObjects, propertyId, thumbnailBase64);
 
         const savedRoom = await saveRoom(roomRequest);
         room.id = savedRoom?.wasteRoomId;
@@ -385,6 +405,15 @@ export default function PlanningTool({ isAdminMode = false }: PlanningToolProps)
                         onContainerPanelHeightChange={setContainerPanelHeight}
                         isContainerInsideRoom={isContainerInsideRoom}
 
+                        otherObjects={otherObjects}
+                        setOtherObjects={setOtherObjects}
+                        handleAddOtherObject={handleAddOtherObject}
+                        handleDragOtherObject={handleDragOtherObject}
+                        getOtherObjectZones={getOtherObjectZones}
+                        handleSelectOtherObject={handleSelectOtherObject}
+                        selectedOtherObjectId={selectedOtherObjectId}
+                        isObjectOutsideRoom={isObjectOutsideRoom}
+
                         undo={undo}
                         redo={redo}
                         saveRoom={handleSaveRoom}
@@ -392,18 +421,22 @@ export default function PlanningTool({ isAdminMode = false }: PlanningToolProps)
                     />
 
                     {/* ActionPanel for selected container or door */}
-                    {(selectedContainerId !== null || selectedDoorId !== null) && (
+                    {(selectedContainerId !== null || selectedDoorId !== null || selectedOtherObjectId != null) && (
                         <div
                             className="absolute z-50 left-0.5 top-0 flex w-full justify-center lg:justify-start">
                             <ActionPanel
                                 containers={containersInRoom}
                                 doors={doors}
+                                otherObjects={otherObjects}
                                 selectedContainerId={selectedContainerId}
                                 selectedDoorId={selectedDoorId}
+                                selectedOtherObjectId={selectedOtherObjectId}
                                 handleRemoveContainer={handleRemoveContainer}
                                 handleRemoveDoor={handleRemoveDoor}
+                                handleRemoveOtherObject={handleRemoveOtherObject}
                                 handleRotateDoor={handleRotateDoor}
                                 handleRotateContainer={handleRotateContainer}
+                                handleRotateOtherObject={handleRotateOtherObject}
                                 handleShowContainerInfo={handleShowContainerInfo}
                                 stageWrapperRef={stageWrapperRef}
                                 pos={actionPanelPos}

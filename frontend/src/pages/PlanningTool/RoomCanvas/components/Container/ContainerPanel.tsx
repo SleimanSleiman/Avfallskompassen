@@ -4,7 +4,7 @@
  * select sizes, drag containers onto the canvas, or add them directly.
  */
 
-import { useCallback, useEffect, forwardRef, type ForwardRef, Dispatch, type SetStateAction } from "react";
+import { useCallback, useEffect, forwardRef, type ForwardRef, Dispatch, type SetStateAction, useRef} from "react";
 import { Apple, Trash2, CupSoda, Package, Package2, GlassWater, BottleWine, InspectionPanel, X } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import type { ContainerDTO } from "../../../../../lib/Container";
@@ -138,6 +138,31 @@ const ContainerPanel = forwardRef(function ContainerPanel(
         }));
     };
 
+    const scrollRef = useRef<HTMLDivElement>(null);
+    useEffect(() => {
+        const el = scrollRef.current;
+        const arrow = document.getElementById("scrollArrow");
+
+        if (!(el instanceof HTMLElement) || !(arrow instanceof HTMLElement)) return;
+
+        function updateArrow() {
+            const isScrollable = el.scrollHeight > el.clientHeight;
+            const atBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - 5;
+
+            arrow.classList.toggle("visible", isScrollable && !atBottom);
+        }
+
+        updateArrow();
+        el.addEventListener("scroll", updateArrow);
+        window.addEventListener("resize", updateArrow);
+
+        return () => {
+            el.removeEventListener("scroll", updateArrow);
+            window.removeEventListener("resize", updateArrow);
+        };
+    }, [filteredContainers]);
+
+
     /* ──────────────── Render ──────────────── */
     return (
         <div ref={ref} className={`transition-panel ${isOpen ? "panel-open" : "panel-closed"}`}>
@@ -186,6 +211,9 @@ const ContainerPanel = forwardRef(function ContainerPanel(
                                 );
                                 })}
                             </div>
+                            <div className="scroll-arrow" id="scrollArrow">
+                                ▼
+                            </div>
                         </div>
                     )}
 
@@ -219,7 +247,13 @@ const ContainerPanel = forwardRef(function ContainerPanel(
                         )}
 
                         {/*Container list*/}
-                        <div className="container-list-scroll">
+                        <div className="container-list-scroll" ref={scrollRef}>
+                            <div className="scroll-arrow" id="scrollArrow">
+                                <svg viewBox="0 0 24 24">
+                                    <path d="M8 4l8 8-8 8" stroke="currentColor" strokeWidth="2" fill="none"/>
+                                </svg>
+                                
+                            </div>
                             <div className="container-grid">
                                 {filteredContainers.map(container => (
                                     <div key={container.id} className="container-card">

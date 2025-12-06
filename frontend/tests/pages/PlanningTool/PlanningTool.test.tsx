@@ -55,6 +55,20 @@ vi.mock("../../../src/pages/PlanningTool/hooks/UseContainers", () => ({
     }),
 }));
 
+vi.mock("../../../src/pages/PlanningTool/hooks/UseOtherObjects", () => ({
+    useOtherObjects: () => ({
+        otherObjects: [],
+        setOtherObjects: vi.fn(),
+        handleAddOtherObject: vi.fn(),
+        handleDragOtherObject: vi.fn(),
+        getOtherObjectZones: vi.fn().mockReturnValue([]),
+        handleSelectOtherObject: vi.fn(),
+        handleRotateOtherObject: vi.fn(),
+        handleRemoveOtherObject: vi.fn(),
+        isObjectOutsideRoom: vi.fn().mockReturnValue(false),
+    }),
+}));
+
 vi.mock("../../../src/pages/PlanningTool/hooks/UseServiceTypes", () => ({
     useServiceTypes: () => [
         { id: 1, name: "Avfall" },

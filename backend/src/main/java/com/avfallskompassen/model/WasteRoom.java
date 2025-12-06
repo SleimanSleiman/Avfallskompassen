@@ -40,6 +40,10 @@ public class WasteRoom {
     @BatchSize(size = 50)
     private List<Door> doors;
 
+    @OneToMany(mappedBy = "wasteRoom", cascade = CascadeType.ALL, orphanRemoval = true)
+    @BatchSize(size = 50)
+    private List<OtherObject> otherObjects;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
@@ -107,6 +111,13 @@ public class WasteRoom {
 
     public List<ContainerPosition> getContainers() { return containers; }
     public void setContainers(List<ContainerPosition> containers) { this.containers = containers; }
+
+    public List<OtherObject> getOtherObjects() {
+        return otherObjects;
+    }
+    public void setOtherObjects(List<OtherObject> otherObjects) {
+        this.otherObjects = otherObjects;
+    }
 
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }

@@ -10,6 +10,7 @@ export function useDoors(
     room: Room | null,
     setSelectedDoorId: (id: number | null) => void,
     setSelectedContainerId: (id: number | null) => void,
+    setSelectedOtherObjectId: (id: number | null) => void,
     getContainerZones: () => { x: number; y: number; width: number; height: number }[],
 ) {
 
@@ -31,13 +32,13 @@ export function useDoors(
 
     /* ──────────────── Add Door with Collision Check ──────────────── */
     const handleAddDoor = (doorData: { width: number; wall?: Door["wall"] }) => {
-        if (!room) return null;
+        if (!room) return false;
 
         const { width, wall = "bottom" } = doorData;
 
         if (doors.length === 0 && width < 1.2) {
             alert("Minst en dörr måste vara 1.2 meter bred.");
-            return null;
+            return false;
         }
 
         const doorSizePx = width / SCALE;
@@ -83,7 +84,7 @@ export function useDoors(
             // Check each possible position
             for (let pos of steps) {
                 const collision = doors.some(d => {
-                    if (d.wall !== w) return null;
+                    if (d.wall !== w) return false;
                     const dSize = d.width / SCALE;
                     if (w === "top" || w === "bottom") {
                         return !(pos.x + doorSizePx <= d.x || pos.x >= d.x + dSize);
@@ -106,7 +107,7 @@ export function useDoors(
 
         if (!placed) {
             alert("Det finns ingen plats för dörren på någon vägg.");
-            return null;
+            return false;
         }
 
         const id = Date.now();
@@ -123,17 +124,16 @@ export function useDoors(
 
         setDoors(prev => [...prev, newDoor]);
 
-        setSelectedDoorId(id);
-        return newDoor;
+        handleSelectDoor(id);
+        return true;
     };
-
 
     /* ──────────────── Drag Door ──────────────── */
     const handleDragDoor = (id: number, pos: { x: number; y: number }) => {
         const door = doors.find(d => d.id === id);
         if (!door) return;
 
-        setSelectedDoorId(id);
+        handleSelectDoor(id);
 
         const widthPx = door.width / SCALE;
 
@@ -313,7 +313,8 @@ export function useDoors(
     /* ──────────────── Select Door ──────────────── */
     const handleSelectDoor = (id: number | null) => {
         setSelectedDoorId(id);
-        setSelectedContainerId(null); // Clear container selection
+        setSelectedContainerId(null);
+        setSelectedOtherObjectId(null);
     };
 
     /* ──────────────── Door Zones & Collision ──────────────── */

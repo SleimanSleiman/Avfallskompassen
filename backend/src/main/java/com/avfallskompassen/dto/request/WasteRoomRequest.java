@@ -31,6 +31,7 @@ public class WasteRoomRequest {
     private List<DoorRequest> doors;
 
     private List<ContainerPositionRequest> containers;
+    private List<OtherObjectRequest> otherObjects;
 
     private String name;
 
@@ -43,13 +44,14 @@ public class WasteRoomRequest {
 
     public WasteRoomRequest(double length, double width, double x,
                             double y, List<DoorRequest> doors,
-                            List<ContainerPositionRequest> containers,
+                            List<ContainerPositionRequest> containers, List<OtherObjectRequest> otherObjects,
                             Long propertyId, String name) {
         this.length = length;
         this.width = width;
         this.x = x;
         this.y = y;
         this.doors = doors;
+        this.otherObjects = otherObjects;
         this.containers = containers;
         this.propertyId = propertyId;
         this.name = name;
@@ -104,6 +106,13 @@ public class WasteRoomRequest {
 
     public void setContainers(List<ContainerPositionRequest> containerPositionRequests) {
         this.containers = containerPositionRequests;
+    }
+
+    public List<OtherObjectRequest> getOtherObjects() {
+        return otherObjects;
+    }
+    public void setOtherObjects(List<OtherObjectRequest> otherObjectRequests) {
+        this.otherObjects = otherObjectRequests;
     }
 
     public Long getPropertyId() {
