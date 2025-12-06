@@ -64,6 +64,7 @@ type RoomCanvasProps = {
     handleSelectOtherObject: (id: number | null) => void;
     selectedOtherObjectId: number | null;
     isObjectOutsideRoom: (rect: { x: number; y: number; width: number; height: number; rotation?: number }, room: Room) => boolean;
+    moveAllObjects: (dx: number, dy: number) => void;
 
     /* ───────────── Drag & Drop Props ───────────── */
     stageWrapperRef: React.RefObject<HTMLDivElement | null>;
@@ -129,6 +130,7 @@ export default function RoomCanvas({
     handleSelectOtherObject,
     selectedOtherObjectId,
     isObjectOutsideRoom,
+    moveAllObjects,
 
     /* ───────────── Drag & Drop Props ───────────── */
     stageWrapperRef,
@@ -194,6 +196,7 @@ export default function RoomCanvas({
 
         setRoom({ ...room, x: newX, y: newY });
         moveAllContainers(dx, dy);
+        moveAllObjects(dx, dy);
     };
 
     const stageRef = useRef<any>(null);

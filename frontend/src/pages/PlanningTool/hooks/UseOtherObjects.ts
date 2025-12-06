@@ -181,6 +181,16 @@ export function useOtherObjects(
         );
     };
 
+    //Move all objects within the room when the room is moved
+    const moveAllObjects = (dx: number, dy: number) => {
+        const newState = otherObjects.map(o => ({
+            ...o,
+            x: o.x + dx,
+            y: o.y + dy,
+        }));
+
+        setOtherObjects(newState);
+    }
 
     /* ──────────────── Return ──────────────── */
     return {
@@ -193,5 +203,6 @@ export function useOtherObjects(
         handleRotateOtherObject,
         handleRemoveOtherObject,
         isObjectOutsideRoom,
+        moveAllObjects,
     }
 }
