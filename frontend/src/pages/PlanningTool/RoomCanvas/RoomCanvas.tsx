@@ -43,7 +43,6 @@ type RoomCanvasProps = {
     handleDragDoor: (id: number, pos: { x: number; y: number; wall: Door["wall"]; rotation: number }) => void;
     handleAddDoor: (door: { width: number }) => boolean;
     doorZones: { x: number; y: number; width: number; height: number }[];
-    pushContainersFromDoor: () => void;
 
     /* ───────────── Container Props ───────────── */
     containers: ContainerInRoom[];
@@ -99,7 +98,6 @@ export default function RoomCanvas({
     handleDragDoor,
     handleAddDoor,
     doorZones,
-    pushContainersFromDoor,
 
     /* ───────────── Container Props ───────────── */
     containers,
@@ -294,7 +292,6 @@ export default function RoomCanvas({
                                 room={room}
                                 handleDragDoor={handleDragDoor}
                                 handleSelectDoor={handleSelectDoor}
-                                pushContainersFromDoor={pushContainersFromDoor}
                                 setIsDraggingDoor={setIsDraggingDoor}
                             />
 

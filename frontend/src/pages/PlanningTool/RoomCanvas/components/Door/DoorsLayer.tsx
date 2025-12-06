@@ -23,7 +23,6 @@ export default function DoorsLayer({
     handleDragDoor,
     handleSelectDoor,
     setIsDraggingDoor,
-    pushContainersFromDoor,
 }: DoorsLayerProps) {
     return (
         <>
@@ -36,7 +35,6 @@ export default function DoorsLayer({
                     room={room}
                     handleDragDoor={handleDragDoor}
                     handleSelectDoor={handleSelectDoor}
-                    pushContainersFromDoor={pushContainersFromDoor}
                     setIsDraggingDoor={setIsDraggingDoor}
                 />
             ))}

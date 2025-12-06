@@ -16,7 +16,6 @@ export default function DoorDrag({
     handleDragDoor,
     handleSelectDoor,
     setIsDraggingDoor,
-    pushContainersFromDoor,
 }) {
     //Store the last valid (non-overlapping) position for snap-back functionality
     const [lastValidPos, setLastValidPos] = useState({ x: door.x, y: door.y });
@@ -64,8 +63,6 @@ export default function DoorDrag({
 
                 setIsOverZone(false);
                 setIsDraggingDoor(false)
-
-                if (pushContainersFromDoor) pushContainersFromDoor(door.id);
             }}
             onClick={(e) => {
                 e.cancelBubble = true;

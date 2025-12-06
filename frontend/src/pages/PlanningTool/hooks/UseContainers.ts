@@ -2,7 +2,7 @@
  * Custom hook for managing container placement in the canvas and fetching available container
  * types from the API.
  */
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import type { DragEvent as ReactDragEvent } from "react";
 import type { ContainerInRoom, Room } from "../Types";
 import type { ContainerDTO } from "../../../lib/Container";
@@ -268,52 +268,55 @@ export function useContainers(
         );
     };
 
-    //Move any containers that collided with a door zone
-    function pushContainersAwayFromDoors(
-        doorZones: { x: number; y: number; width: number; height: number }[]
-    ): boolean {
+    //When door zones change, push overlapping containers away from doors
+    useEffect(() => {
+        if (doorZones.length === 0) return;
 
-        // Work on a mutable copy
-        const tempContainers = [...containersInRoom];
+        const STEP = 10;
+        const MAX = 200;
 
-        // For each container
-        for (let i = 0; i < tempContainers.length; i++) {
-            const c = tempContainers[i];
+        //Generate offsets sorted by distance
+        const offsets: { dx: number; dy: number; dist: number }[] = [];
+        for (let dy = -MAX; dy <= MAX; dy += STEP) {
+            for (let dx = -MAX; dx <= MAX; dx += STEP) {
+                offsets.push({ dx, dy, dist: Math.abs(dx) + Math.abs(dy) });
+            }
+        }
+        offsets.sort((a, b) => a.dist - b.dist);
+
+        const temp = [...containersInRoom];
+        let changed = false;
+
+        //Try to move each overlapping container
+        for (let i = 0; i < temp.length; i++) {
+            const c = temp[i];
+
+            //Check if container overlaps any door zone
             const cRect = { x: c.x, y: c.y, width: c.width, height: c.height };
+            const overlapsDoor = doorZones.some(dz => isOverlapping(cRect, dz));
+            if (!overlapsDoor) continue;
 
-            const overlappingDoor = doorZones.some(dz => isOverlapping(cRect, dz));
-            if (!overlappingDoor) continue;
+            //Try offsets until a valid position is found
+            for (const { dx, dy } of offsets) {
+                const testX = clamp(c.x + dx, room.x, room.x + room.width - c.width);
+                const testY = clamp(c.y + dy, room.y, room.y + room.height - c.height);
+                const testRect = { x: testX, y: testY, width: c.width, height: c.height };
 
-            // Try to move it
-            const step = 10;
+                const containerZones = buildContainerZones(temp, c.id);
 
-            outer:
-            for (let dy = -200; dy <= 200; dy += step) {
-                for (let dx = -200; dx <= 200; dx += step) {
-
-                    const testX = clamp(c.x + dx, room.x, room.x + room.width - c.width);
-                    const testY = clamp(c.y + dy, room.y, room.y + room.height - c.height);
-
-                    const testRect = { x: testX, y: testY, width: c.width, height: c.height };
-
-                    //recalc zones from tempContainers
-                    const containerZones = buildContainerZones(
-                        tempContainers,
-                        c.id
-                    );
-
-                    if (validateContainerPlacement(testRect, doorZones, containerZones)) {
-                        // Commit move
-                        tempContainers[i] = { ...c, x: testX, y: testY };
-                        break outer;
-                    }
+                if (validateContainerPlacement(testRect, doorZones, containerZones)) {
+                    temp[i] = { ...c, x: testX, y: testY };
+                    changed = true;
+                    break;
                 }
             }
         }
 
-        // Success → save new layout
-        saveContainers(tempContainers);
-    }
+        //If any containers were moved, save the new state
+        if (changed) {
+            saveContainers(temp);
+        }
+    }, [doorZones]);
 
     /* ──────────────── Return ──────────────── */
     return {
@@ -349,6 +352,5 @@ export function useContainers(
         undo,
         redo,
         isContainerInsideRoom,
-        pushContainersAwayFromDoors,
     };
 }

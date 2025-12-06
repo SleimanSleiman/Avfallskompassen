@@ -40,6 +40,9 @@ type PlanningToolProps = {
 
 export default function PlanningTool({ isAdminMode = false }: PlanningToolProps) {
 
+    const [selectedContainerId, setSelectedContainerId] = useState<number | null>(null);
+    const [selectedDoorId, setSelectedDoorId] = useState<number | null>(null);
+
     /* ──────────────── Room state & logic ──────────────── */
     const {
         room,
@@ -48,11 +51,7 @@ export default function PlanningTool({ isAdminMode = false }: PlanningToolProps)
         setRoom
     } = useRoom();
 
-
     /* ──────────────── Door state & logic ──────────────── */
-    const [selectedContainerId, setSelectedContainerId] = useState<number | null>(null);
-    const [selectedDoorId, setSelectedDoorId] = useState<number | null>(null);
-
     const {
         doors,
         setDoors,
@@ -95,7 +94,6 @@ export default function PlanningTool({ isAdminMode = false }: PlanningToolProps)
         redo,
         getContainerZones,
         isContainerInsideRoom,
-        pushContainersAwayFromDoors,
     } = useContainers(room, setSelectedContainerId, setSelectedDoorId, getDoorZones());
 
     /* ──────────────── Sync the doors and containers when changes are made to the room ──────────────── */
@@ -133,20 +131,17 @@ export default function PlanningTool({ isAdminMode = false }: PlanningToolProps)
 
     useEffect(() => {
         if (typeof window === 'undefined') {
-            console.log('PlanningTool - Skipping sync (no window)');
             return;
         }
 
         // Don't sync if we don't have a room ID (means we're still initializing)
         if (!room.id) {
-            console.log('PlanningTool - Skipping sync (no room.id)', { room });
             return;
         }
 
         try {
             const stored = localStorage.getItem('trashRoomData');
             if (!stored) {
-                console.log('PlanningTool - Skipping sync (no stored data)');
                 return;
             }
 
@@ -159,13 +154,7 @@ export default function PlanningTool({ isAdminMode = false }: PlanningToolProps)
                 length: room.width * SCALE,  // Convert back to meters
             };
 
-            console.log('PlanningTool - Syncing state to localStorage:', {
-                roomId: room.id,
-                containerCount: containersInRoom.length,
-                doorCount: doors.length,
-                roomDimensions: { width: updated.width, length: updated.length },
-                containers: containersInRoom
-            });
+
 
             localStorage.setItem('trashRoomData', JSON.stringify(updated));
         } catch (error) {
@@ -367,7 +356,6 @@ export default function PlanningTool({ isAdminMode = false }: PlanningToolProps)
                         handleSelectDoor={handleSelectDoor}
                         handleAddDoor={handleAddDoor}
                         doorZones={getDoorZones()}
-                        pushContainersFromDoor={() => pushContainersAwayFromDoors(getDoorZones())}
 
                         containers={containersInRoom}
                         selectedContainerId={selectedContainerId}
