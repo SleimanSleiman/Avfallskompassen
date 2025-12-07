@@ -98,6 +98,7 @@ describe("ContainerDrag component", () => {
 
     it("updates lastValidPos if not over a zone on drag end", () => {
         (isOverlapping as any).mockReturnValue(false);
+
         render(
             <ContainerDrag
                 container={container}
@@ -125,8 +126,15 @@ describe("ContainerDrag component", () => {
         };
 
         capturedProps.onDragEnd({ target: mockTarget });
+
         expect(setLastValidPos).toHaveBeenCalledWith(newPos);
-        expect(handleDragContainer).toHaveBeenCalledWith(container.id, newPos);
+
+        expect(handleDragContainer).toHaveBeenCalledWith(container.id, {
+            x: newPos.x,
+            y: newPos.y,
+            rotation: 0,
+        });
+
         expect(setIsOverZone).toHaveBeenCalledWith(false);
         expect(setIsDraggingContainer).toHaveBeenCalledWith(false);
     });
