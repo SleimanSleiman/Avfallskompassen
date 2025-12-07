@@ -16,6 +16,7 @@ import com.avfallskompassen.model.PropertyType;
 import com.avfallskompassen.model.ServiceType;
 import com.avfallskompassen.repository.PropertyContainerRepository;
 import com.avfallskompassen.repository.PropertyRepository;
+import com.avfallskompassen.repository.WasteRoomRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,6 +26,7 @@ import org.mockito.MockitoAnnotations;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -50,6 +52,9 @@ class PropertyComparisonServiceTest {
 	@Mock
 	private PropertyContainerRepository propertyContainerRepository;
 
+	@Mock
+	private WasteRoomRepository wasteRoomRepository;
+
 	@InjectMocks
 	private PropertyComparisonService propertyComparisonService;
 
@@ -68,6 +73,8 @@ class PropertyComparisonServiceTest {
 	@BeforeEach
 	void setUp() {
 		MockitoAnnotations.openMocks(this);
+
+		when(wasteRoomRepository.findByPropertyId(any())).thenReturn(Collections.emptyList());
 
 		Municipality municipality = new Municipality();
 		municipality.setId(10L);

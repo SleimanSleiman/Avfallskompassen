@@ -83,6 +83,8 @@ public class WasteRoomServiceImpl implements WasteRoomService {
             wasteRoom.setName(request.getName());
         }
 
+        wasteRoom.setAverageCollectionFrequency(calculateAverageCollectionFrequency(containerPositions));
+
         WasteRoom savedRoom = wasteRoomRepository.save(wasteRoom);
         saveThumbnail(request.getThumbnailBase64(), savedRoom.getId(), savedRoom);
         savedRoom = wasteRoomRepository.save(savedRoom);
@@ -157,6 +159,8 @@ public class WasteRoomServiceImpl implements WasteRoomService {
         wasteRoom.getOtherObjects().addAll(
                 convertOtherObjectRequest(request.getOtherObjects(), wasteRoom)
         );
+
+        wasteRoom.setAverageCollectionFrequency(calculateAverageCollectionFrequency(wasteRoom.getContainers()));
 
         WasteRoom updated = wasteRoomRepository.save(wasteRoom);
 
@@ -322,7 +326,8 @@ public class WasteRoomServiceImpl implements WasteRoomService {
                 entity.getVersionName(),
                 entity.getIsActive(),
                 entity.getCreatedAt() != null ? entity.getCreatedAt().toString() : null,
-                entity.getUpdatedAt() != null ? entity.getUpdatedAt().toString() : null
+                entity.getUpdatedAt() != null ? entity.getUpdatedAt().toString() : null,
+                entity.getAverageCollectionFrequency()
         );
 
         dto.setThumbnailUrl(entity.getThumbnailUrl());
@@ -472,5 +477,15 @@ public class WasteRoomServiceImpl implements WasteRoomService {
         return versions.stream()
                 .map(this::mapWasteRoomToDTO)
                 .toList();
+    }
+
+    private Double calculateAverageCollectionFrequency(List<ContainerPosition> containers) {
+        if (containers == null || containers.isEmpty()) {
+            return 0.0;
+        }
+        double totalFrequency = containers.stream()
+                .mapToDouble(c -> c.getContainerPlan().getEmptyingFrequencyPerYear())
+                .sum();
+        return totalFrequency / containers.size();
     }
 }

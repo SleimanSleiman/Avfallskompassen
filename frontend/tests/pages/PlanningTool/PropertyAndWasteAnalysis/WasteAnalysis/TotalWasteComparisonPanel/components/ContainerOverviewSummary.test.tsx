@@ -20,6 +20,8 @@ describe("ContainerOverviewSummary", () => {
                 containerCount={4}
                 typeMapSize={3}
                 averageFrequencyAll={12.5}
+                comparisonAverageFrequency={10.0}
+                frequencyDifference={25}
                 dominantCostRow={{
                     displayName: "Restavfall",
                     costPercentage: 0.45,
@@ -31,11 +33,52 @@ describe("ContainerOverviewSummary", () => {
         expect(screen.getByTestId("summary-value")).toHaveTextContent("4 kärl");
         expect(screen.getByText("Fraktioner")).toBeDefined();
         expect(screen.getByText("3")).toBeDefined();
-        expect(screen.getByText(/12/)).toBeDefined();
+        expect(screen.getByText(/12,5/)).toBeDefined(); 
         expect(screen.getByText(/Restavfall/)).toBeDefined();
         expect(screen.getByText(/\(0,5%\)/)).toBeDefined();
     });
 
+    it("displays frequency difference with correct color when provided (positive/red)", () => {
+        render(
+            <ContainerOverviewSummary
+                designHasContainers={true}
+                containerCount={4}
+                typeMapSize={3}
+                averageFrequencyAll={12.5}
+                comparisonAverageFrequency={10.0}
+                frequencyDifference={25}
+                dominantCostRow={{
+                    displayName: "Restavfall",
+                    costPercentage: 0.45,
+                } as any}
+            />
+        );
+
+        const diffElement = screen.getByText("+25%");
+        expect(diffElement).toBeDefined();
+        expect(diffElement).toHaveClass("text-red-500");
+    });
+
+    it("displays frequency difference with correct color when provided (negative/green)", () => {
+        render(
+            <ContainerOverviewSummary
+                designHasContainers={true}
+                containerCount={4}
+                typeMapSize={3}
+                averageFrequencyAll={8.0}
+                comparisonAverageFrequency={10.0}
+                frequencyDifference={-20}
+                dominantCostRow={{
+                    displayName: "Restavfall",
+                    costPercentage: 0.45,
+                } as any}
+            />
+        );
+
+        const diffElement = screen.getByText(/[-−]20%/);
+        expect(diffElement).toBeDefined();
+        expect(diffElement).toHaveClass("text-green-500");
+    });
 
     it("hides frequency section when averageFrequencyAll is null", () => {
         render(
