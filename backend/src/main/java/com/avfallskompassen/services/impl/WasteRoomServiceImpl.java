@@ -483,9 +483,14 @@ public class WasteRoomServiceImpl implements WasteRoomService {
         if (containers == null || containers.isEmpty()) {
             return 0.0;
         }
+        // Only consider containers that have a non-null ContainerPlan to avoid NPEs in tests
         double totalFrequency = containers.stream()
+                .filter(c -> c.getContainerPlan() != null)
                 .mapToDouble(c -> c.getContainerPlan().getEmptyingFrequencyPerYear())
                 .sum();
-        return totalFrequency / containers.size();
+
+        long validCount = containers.stream().filter(c -> c.getContainerPlan() != null).count();
+        if (validCount == 0) return 0.0;
+        return totalFrequency / (double) validCount;
     }
 }
