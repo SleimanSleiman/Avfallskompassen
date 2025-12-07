@@ -3,147 +3,125 @@
  * Wraps drag logic, boundary clamping, zone overlap detection,
  * and restoring to last valid position if container is dropped illegally.
  */
-
 import { Group } from "react-konva";
-import { clamp, isOverlapping } from "../../../../Constants"
+import { clamp, isOverlapping } from "../../../../Constants";
 import { autoRotateContainer } from "../components/AutoRotateContainer";
 
 export default function ContainerDrag({
-    container,
-    selected,
-    room,
-    doorZones,
-    getContainerZones,
-    setIsDraggingContainer,
-    handleDragContainer,
-    handleSelectContainer,
-    lastValidPos,
-    setLastValidPos,
-    isOverZone,
-    setIsOverZone,
-    children,
+  container,
+  selected,
+  room,
+  doorZones,
+  getContainerZones,
+  setIsDraggingContainer,
+  handleDragContainer,
+  handleSelectContainer,
+  lastValidPos,
+  setLastValidPos,
+  isOverZone,
+  setIsOverZone,
+  children,
 }) {
-    /**
-     * Check whether container is overlapping any forbidden zones:
-     * - door zones
-     * - other containers
-     */
-    const checkZones = (x, y, rotation) => {
-        const rot = rotation % 180;
+  /**
+   * Check whether container is overlapping any forbidden zones:
+   * - door zones
+   * - other containers
+   */
+  const checkZones = (x, y, rotation) => {
+    const rot = rotation % 180;
 
-        //Adjust width/height based on rotation
-        const w = rot === 90 ? container.height : container.width;
-        const h = rot === 90 ? container.width : container.height;
+    // Adjust width/height based on rotation
+    const w = rot === 90 ? container.height : container.width;
+    const h = rot === 90 ? container.width : container.height;
 
-        const rect = { x, y, width: w, height: h };
+    const rect = { x, y, width: w, height: h };
 
-        //Collect all no-go zones (doors + container zones)
-        const zones = [...doorZones, ...getContainerZones(container.id)];
+    // Collect all no-go zones (doors + container zones)
+    const zones = [...doorZones, ...getContainerZones(container.id)];
 
-        //True if ANY zone is overlapping the container
-        return zones.some(zone => isOverlapping(rect, zone));
-    };
+    // True if ANY zone is overlapping the container
+    return zones.some((zone) => isOverlapping(rect, zone));
+  };
 
-    return (
-        <Group
-            //Position group anchor at the center of the container
-            x={container.x + container.width / 2}
-            y={container.y + container.height / 2}
-            offsetX={container.width / 2}
-            offsetY={container.height / 2}
-            rotation={container.rotation}
-            draggable
-            onClick={() => handleSelectContainer(container.id)}
-            onDragStart={() => {
-                handleSelectContainer(container.id);
-                setIsDraggingContainer(true);
-            }}
-            dragBoundFunc={(pos) => {
-                //Calculate rotated width & height
-                const rot = (container.rotation || 0) % 180;
-                const w = rot === 90 ? container.height : container.width;
-                const h = rot === 90 ? container.width : container.height;
+  return (
+    <Group
+      // Position group anchor at the center of the container
+      x={container.x + container.width / 2}
+      y={container.y + container.height / 2}
+      offsetX={container.width / 2}
+      offsetY={container.height / 2}
+      rotation={container.rotation}
+      draggable
+      onClick={() => handleSelectContainer(container.id)}
+      onDragStart={() => {
+        handleSelectContainer(container.id);
+        setIsDraggingContainer(true);
+      }}
+      dragBoundFunc={(pos) => {
+        // DO NOT use rotated size here
+        const w = container.width;
+        const h = container.height;
 
-                //Clamp container movement inside room
-                let newX = clamp(pos.x, room.x + w / 2, room.x + room.width - w / 2);
-                let newY = clamp(pos.y, room.y + h / 2, room.y + room.height - h / 2);
+        let newX = clamp(pos.x, room.x + w / 2, room.x + room.width - w / 2);
+        let newY = clamp(pos.y, room.y + h / 2, room.y + room.height - h / 2);
 
-                //Check if overlapping restricted zone during drag
-                setIsOverZone(checkZones(newX - w / 2, newY - h / 2, container.rotation));
-                return { x: newX, y: newY };
-            }}
-            onDragEnd={(e) => {
-                const oldWidth = container.width;
-                const oldHeight = container.height;
+        setIsOverZone(checkZones(newX - w / 2, newY - h / 2, container.rotation));
 
-                let newX = e.target.x() - oldWidth / 2;
-                let newY = e.target.y() - oldHeight / 2;
+        return { x: newX, y: newY };
+      }}
+      onDragEnd={(e) => {
+        const oldWidth = container.width;
+        const oldHeight = container.height;
 
-                //Determine new rotation
-                const autoRotation = autoRotateContainer(
-                    { x: newX, y: newY, width: oldWidth, height: oldHeight },
-                    room.x,
-                    room.y,
-                    room.width,
-                    room.height
-                );
+        let newX = e.target.x() - oldWidth / 2;
+        let newY = e.target.y() - oldHeight / 2;
 
-                let finalRotation = autoRotation ?? container.rotation;
+        // Determine new rotation
+        const autoRotation = autoRotateContainer(
+          { x: newX, y: newY, width: oldWidth, height: oldHeight },
+          room.x,
+          room.y,
+          room.width,
+          room.height
+        );
 
-                //Compute rotated size
-                const rot = finalRotation % 180;
-                const rotatedWidth = rot === 90 ? oldHeight : oldWidth;
-                const rotatedHeight = rot === 90 ? oldWidth : oldHeight;
+        let finalRotation = autoRotation ?? container.rotation;
 
-                //Snap to walls using rotated dimensions
-                const rLeft   = newX - room.x;
-                const rRight  = (room.x + room.width)  - (newX + rotatedWidth);
-                const rTop    = newY - room.y;
-                const rBottom = (room.y + room.height) - (newY + rotatedHeight);
+        // Compute rotated size
+        const rot = finalRotation % 180;
+        const rotatedWidth = rot === 90 ? oldHeight : oldWidth;
+        const rotatedHeight = rot === 90 ? oldWidth : oldHeight;
 
-                if (rLeft < 60) {
-                    newX = room.x;
-                }
-                if (rRight < 60) {
-                    newX = room.x + room.width - rotatedWidth;
-                }
-                if (rTop < 60) {
-                    newY = room.y;
-                }
-                if (rBottom < 60) {
-                    newY = room.y + room.height - rotatedHeight;
-                }
+        // Collision check
+        if (checkZones(newX, newY, finalRotation)) {
+          // Restore to last valid position
+          e.target.position({
+            x: lastValidPos.x + rotatedWidth / 2,
+            y: lastValidPos.y + rotatedHeight / 2,
+          });
 
-                //Collision check
-                if (checkZones(newX, newY, finalRotation)) {
-                    e.target.position({
-                        x: lastValidPos.x + rotatedWidth / 2,
-                        y: lastValidPos.y + rotatedHeight / 2,
-                    });
-                    handleDragContainer(container.id, {
-                        ...lastValidPos,
-                        rotation: finalRotation
-                    });
-                } else {
-                    const newPos = { x: newX, y: newY };
-                    setLastValidPos(newPos);
-                    handleDragContainer(container.id, {
-                        ...newPos,
-                        rotation: finalRotation
-                    });
+          handleDragContainer(container.id, {
+            ...lastValidPos,
+            rotation: finalRotation,
+          });
+        } else {
+          // Accept new position
+          const newPos = { x: newX, y: newY };
 
-                    e.target.position({
-                        x: newX + rotatedWidth / 2,
-                        y: newY + rotatedHeight / 2,
-                    });
-                }
+          setLastValidPos(newPos);
+          handleDragContainer(container.id, { ...newPos, rotation: finalRotation });
 
-                setIsOverZone(false);
-                setIsDraggingContainer(false);
-            }}
+          e.target.position({
+            x: newX + rotatedWidth / 2,
+            y: newY + rotatedHeight / 2,
+          });
+        }
 
-        >
-            {children({})}
-        </Group>
-    );
+        setIsOverZone(false);
+        setIsDraggingContainer(false);
+      }}
+    >
+      {children({})}
+    </Group>
+  );
 }
