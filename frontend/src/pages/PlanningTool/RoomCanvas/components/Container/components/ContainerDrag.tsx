@@ -44,17 +44,13 @@ export default function ContainerDrag({
         return zones.some(zone => isOverlapping(rect, zone));
     };
 
-    const rot = container.rotation % 180;
-    const rotatedWidth = rot === 90 ? container.height : container.width;
-    const rotatedHeight = rot === 90 ? container.width : container.height;
-
     return (
         <Group
             //Position group anchor at the center of the container
-            x={container.x + rotatedWidth / 2}
-            y={container.y + rotatedHeight / 2}
-            offsetX={rotatedWidth / 2}
-            offsetY={rotatedHeight / 2}
+            x={container.x + container.width / 2}
+            y={container.y + container.height / 2}
+            offsetX={container.width / 2}
+            offsetY={container.height / 2}
             rotation={container.rotation}
             draggable
             onClick={() => handleSelectContainer(container.id)}
@@ -63,64 +59,74 @@ export default function ContainerDrag({
                 setIsDraggingContainer(true);
             }}
             dragBoundFunc={(pos) => {
-                const rot = container.rotation % 180;
+                //Calculate rotated width & height
+                const rot = (container.rotation || 0) % 180;
                 const w = rot === 90 ? container.height : container.width;
                 const h = rot === 90 ? container.width : container.height;
 
-                // Convert center position -> top-left
-                let tlX = pos.x - w / 2;
-                let tlY = pos.y - h / 2;
+                //Clamp container movement inside room
+                let newX = clamp(pos.x, room.x + w / 2, room.x + room.width - w / 2);
+                let newY = clamp(pos.y, room.y + h / 2, room.y + room.height - h / 2);
 
-                // Clamp top-left, NOT the center!
-                tlX = clamp(tlX, room.x, room.x + room.width - w);
-                tlY = clamp(tlY, room.y, room.y + room.height - h);
-
-                // Convert back to center
-                const cx = tlX + w / 2;
-                const cy = tlY + h / 2;
-
-                setIsOverZone(checkZones(tlX, tlY, container.rotation));
-
-                return { x: cx, y: cy };
+                //Check if overlapping restricted zone during drag
+                setIsOverZone(checkZones(newX - w / 2, newY - h / 2, container.rotation));
+                return { x: newX, y: newY };
             }}
             onDragEnd={(e) => {
                 const oldWidth = container.width;
                 const oldHeight = container.height;
 
-                // Compute rotation FIRST (because it determines size)
+                let newX = e.target.x() - oldWidth / 2;
+                let newY = e.target.y() - oldHeight / 2;
+
+                //Determine new rotation
                 const autoRotation = autoRotateContainer(
-                    { x: container.x, y: container.y, width: oldWidth, height: oldHeight },
-                    room.x, room.y, room.width, room.height
+                    { x: newX, y: newY, width: oldWidth, height: oldHeight },
+                    room.x,
+                    room.y,
+                    room.width,
+                    room.height
                 );
 
-                const finalRotation = autoRotation ?? container.rotation;
+                let finalRotation = autoRotation ?? container.rotation;
 
-                // Compute rotated size BEFORE computing newX/newY
+                //Compute rotated size
                 const rot = finalRotation % 180;
                 const rotatedWidth = rot === 90 ? oldHeight : oldWidth;
                 const rotatedHeight = rot === 90 ? oldWidth : oldHeight;
 
-                // Correct top-left calculation
-                const newX = e.target.x() - rotatedWidth / 2;
-                const newY = e.target.y() - rotatedHeight / 2;
+                //Snap to walls using rotated dimensions
+                const rLeft   = newX - room.x;
+                const rRight  = (room.x + room.width)  - (newX + rotatedWidth);
+                const rTop    = newY - room.y;
+                const rBottom = (room.y + room.height) - (newY + rotatedHeight);
+
+                if (rLeft < 60) {
+                    newX = room.x;
+                }
+                if (rRight < 60) {
+                    newX = room.x + room.width - rotatedWidth;
+                }
+                if (rTop < 60) {
+                    newY = room.y;
+                }
+                if (rBottom < 60) {
+                    newY = room.y + room.height - rotatedHeight;
+                }
 
                 //Collision check
                 if (checkZones(newX, newY, finalRotation)) {
-                    // Restore to last valid position
                     e.target.position({
                         x: lastValidPos.x + rotatedWidth / 2,
                         y: lastValidPos.y + rotatedHeight / 2,
                     });
-
                     handleDragContainer(container.id, {
                         ...lastValidPos,
                         rotation: finalRotation
                     });
-
                 } else {
                     const newPos = { x: newX, y: newY };
                     setLastValidPos(newPos);
-
                     handleDragContainer(container.id, {
                         ...newPos,
                         rotation: finalRotation
