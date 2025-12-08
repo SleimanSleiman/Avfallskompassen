@@ -72,6 +72,9 @@ public class WasteRoom {
     @Column(name = "thumbnail")
     private String thumbnailUrl;
 
+    @Column(name = "average_collection_frequency")
+    private Double averageCollectionFrequency;
+
     @PrePersist
     public void onCreate() {
         createdAt = LocalDateTime.now();
@@ -98,6 +101,9 @@ public class WasteRoom {
     public void setY(double y) { this.y = y; }
 
     public LocalDateTime getCreatedAt() { return createdAt; }
+
+    public Double getAverageCollectionFrequency() { return averageCollectionFrequency; }
+    public void setAverageCollectionFrequency(Double averageCollectionFrequency) { this.averageCollectionFrequency = averageCollectionFrequency; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
 
     public LocalDateTime getUpdatedAt() { return updatedAt; }
