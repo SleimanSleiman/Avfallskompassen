@@ -53,6 +53,8 @@ export default function TotalWasteComparisonPanel({
                 containerCount={designStats.containerCount}
                 typeMapSize={designStats.typeMap.size}
                 averageFrequencyAll={containerData.averageFrequencyAll}
+                comparisonAverageFrequency={containerData.comparisonAverageFrequency}
+                frequencyDifference={containerData.frequencyDifference}
                 dominantCostRow={costData.dominantCostRow}
             />
 

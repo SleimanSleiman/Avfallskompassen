@@ -50,6 +50,7 @@ describe("ContainerItem component", () => {
         selected: false,
         room,
         doorZones: [],
+        otherObjectZones: [],
         getContainerZones: vi.fn(),
         handleDragContainer: vi.fn(),
         handleSelectContainer: vi.fn(),

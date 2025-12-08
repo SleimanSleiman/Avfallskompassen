@@ -8,6 +8,8 @@ import ConfirmModal from '../components/ConfirmModal';
 import { deleteWasteRoom } from '../lib/WasteRoomRequest';
 import Message from '../components/ShowStatus';
 import LoadingBar from '../components/LoadingBar';
+import PlanVersionDropdown from '../components/PlanVersionDropdown';
+import type { WasteRoom } from '../lib/WasteRoom';
 
 export default function PropertyPage() {
     const [properties, setProperties] = useState<Property[]>([]);
@@ -218,6 +220,46 @@ export default function PropertyPage() {
     function createWasteRoom(p: Property) {
         setSelectedProperty(p);
         setIsCreateRoomOpen(true);
+    }
+
+    function openRoomVersion(propertyData: Property, room: WasteRoom) {
+        if (!propertyData?.id || !room) return;
+
+        const normalizedContainers = (room.containers ?? []).map((c: any, index: number) => {
+            const fallbackContainer = {
+                id: c?.id ?? index + 1,
+                name: c?.containerDTO?.name ?? 'Behållare',
+                size: c?.containerDTO?.size ?? 0,
+                width: c?.containerDTO?.width ?? 1,
+                depth: c?.containerDTO?.depth ?? 1,
+                height: c?.containerDTO?.height ?? 1,
+                imageFrontViewUrl: c?.containerDTO?.imageFrontViewUrl ?? '',
+                imageTopViewUrl: c?.containerDTO?.imageTopViewUrl ?? '/images/containers/defaultTopView.png',
+                emptyingFrequencyPerYear: c?.containerDTO?.emptyingFrequencyPerYear ?? 0,
+                cost: c?.containerDTO?.cost ?? 0,
+            };
+
+            return {
+                ...c,
+                containerDTO: c?.containerDTO ?? fallbackContainer,
+            };
+        });
+
+        const normalizedRoom = {
+            ...room,
+            propertyId: propertyData.id,
+            property: room.property ?? propertyData,
+            wasteRoomId: room.wasteRoomId ?? room.id,
+            containers: normalizedContainers,
+            doors: room.doors ?? [],
+        };
+
+        localStorage.setItem('enviormentRoomData', JSON.stringify(normalizedRoom));
+        localStorage.setItem('selectedPropertyId', String(propertyData.id));
+        localStorage.setItem('selectedProperty', JSON.stringify({ propertyId: propertyData.id }));
+        localStorage.setItem('selectedPropertyAddress', propertyData.address);
+
+        window.location.href = '/planningTool';
     }
 
     function handleInputChange(field: keyof PropertyRequest, value: string | number) {
@@ -504,6 +546,13 @@ async function onDeleteWasteRoom(propertyId: number, wasteRoomId: number) {
                   </div>
                 </div>
                 <div className="mt-4 flex flex-wrap gap-2">
+                  <div className="flex-shrink-0 basis-full sm:basis-auto">
+                    <PlanVersionDropdown
+                      rooms={property.wasteRooms}
+                      propertyAddress={property.address}
+                      onOpenVersion={(room) => openRoomVersion(property, room)}
+                    />
+                  </div>
                     <button
                         className="btn-secondary-sm"
                         onClick={() => {

@@ -5,6 +5,7 @@
 import SummaryStat from "../../components/SummaryStat";
 import { formatNumber, formatPercentage } from "../../../utils/utils";
 import type { CombinedRow } from "../../../utils/types";
+import Tooltip from "../../../../../../components/Tooltip";
 import '../../css/wasteComparison.css'
 
 type ContainerOverviewSummaryProps = {
@@ -12,6 +13,8 @@ type ContainerOverviewSummaryProps = {
     containerCount: number;
     typeMapSize: number;
     averageFrequencyAll: number | null;
+    comparisonAverageFrequency?: number | null;
+    frequencyDifference?: number | null;
     dominantCostRow: CombinedRow | null;
 };
 
@@ -20,6 +23,8 @@ export default function ContainerOverviewSummary({
     containerCount,
     typeMapSize,
     averageFrequencyAll,
+    comparisonAverageFrequency,
+    frequencyDifference,
     dominantCostRow,
 }: ContainerOverviewSummaryProps) {
     //Determine description content based on whether containers exist
@@ -32,8 +37,22 @@ export default function ContainerOverviewSummary({
             {averageFrequencyAll != null && (
                 //Show average emptying frequency if available
                 <div className="summary-row">
-                    <span>Genomsnittlig tömning</span>
-                    <span className="summary-row-label">{formatNumber(averageFrequencyAll, { maximumFractionDigits: 1 })} ggr/år</span>
+                    <Tooltip content="Genomsnittligt antal tömningar per år för alla kärl i miljörummet.">
+                        <span className="cursor-help border-b border-dotted border-gray-400">Genomsnittlig tömning</span>
+                    </Tooltip>
+                    <span className="summary-row-label">
+                        {formatNumber(averageFrequencyAll, { maximumFractionDigits: 1 })} ggr/år
+                        {comparisonAverageFrequency != null && (
+                            <span className="text-xs text-gray-500 ml-1">
+                                (snitt: {formatNumber(comparisonAverageFrequency, { maximumFractionDigits: 1 })}
+                                {frequencyDifference != null && (
+                                    <span className={frequencyDifference > 0 ? "text-red-500 ml-1" : "text-green-500 ml-1"}>
+                                        {frequencyDifference > 0 ? "+" : ""}{formatNumber(frequencyDifference, { maximumFractionDigits: 0 })}%
+                                    </span>
+                                )})
+                            </span>
+                        )}
+                    </span>
                 </div>
             )}
             {dominantCostRow && dominantCostRow.costPercentage != null && (

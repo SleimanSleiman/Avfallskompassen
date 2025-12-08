@@ -13,6 +13,7 @@ export type Room = {
     height: number;
     doors?: Door[];
     containers?: ContainerInRoom[];
+    otherObjects?: OtherObjectInRoom[];
 };
 
 export type Door = {
@@ -28,6 +29,16 @@ export type Door = {
 export type ContainerInRoom = {
     id: number;
     container: ContainerDTO;
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+    rotation: number;
+};
+
+export type OtherObjectInRoom = {
+    id: number;
+    name: string;
     x: number;
     y: number;
     width: number;

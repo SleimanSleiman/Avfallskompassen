@@ -46,7 +46,7 @@ class WasteRoomServiceImplTest {
 
     @Test
     void saveWasteRoom_ValidRequest_ReturnsDTO() {
-        WasteRoomRequest request = new WasteRoomRequest(10, 5, 12, 2, List.of(), List.of(), 1L, "Name");
+        WasteRoomRequest request = new WasteRoomRequest(10, 5, 12, 2, List.of(), List.of(), List.of(), 1L, "Name");
 
         Property property = new Property();
         property.setId(1L);
@@ -59,6 +59,7 @@ class WasteRoomServiceImplTest {
         savedWasteRoom.setY(2);
         savedWasteRoom.setContainers(List.of());
         savedWasteRoom.setDoors(List.of());
+        savedWasteRoom.setOtherObjects(List.of());
 
         when(propertyRepository.findById(1L)).thenReturn(Optional.of(property));
         when(wasteRoomRepository.save(any(WasteRoom.class))).thenReturn(savedWasteRoom);
@@ -73,13 +74,14 @@ class WasteRoomServiceImplTest {
         assertEquals(2, result.getY());
         assertEquals(List.of(), result.getContainers());
         assertEquals(List.of(), result.getDoors());
+        assertEquals(List.of(), result.getOtherObjects());
 
         verify(wasteRoomRepository, times(2)).save(any(WasteRoom.class));
     }
 
     @Test
     void saveWasteRoom_ValidRequest_NullLists() {
-        WasteRoomRequest request = new WasteRoomRequest(10, 5, 12, 2, null, null, 1L, "Name");
+        WasteRoomRequest request = new WasteRoomRequest(10, 5, 12, 2, null, null, null, 1L, "Name");
 
         Property property = new Property();
         property.setId(1L);
@@ -92,6 +94,7 @@ class WasteRoomServiceImplTest {
         savedWasteRoom.setY(2);
         savedWasteRoom.setContainers(null);
         savedWasteRoom.setDoors(null);
+        savedWasteRoom.setOtherObjects(null);
 
         when(propertyRepository.findById(1L)).thenReturn(Optional.of(property));
         when(wasteRoomRepository.save(any(WasteRoom.class))).thenReturn(savedWasteRoom);
@@ -106,13 +109,14 @@ class WasteRoomServiceImplTest {
         assertEquals(2, result.getY());
         assertNull(result.getContainers());
         assertNull(result.getDoors());
+        assertNull(result.getOtherObjects());
 
         verify(wasteRoomRepository, times(2)).save(any(WasteRoom.class));
     }
 
     @Test
     void saveWasteRoom_InvalidRequest_WrongPropertyId() {
-        WasteRoomRequest request = new WasteRoomRequest(10, 5, 12, 2, null, null, 10203L, "Name");
+        WasteRoomRequest request = new WasteRoomRequest(10, 5, 12, 2, null, null, null, 10203L, "Name");
 
         when(propertyRepository.findById(10203L)).thenReturn(Optional.empty());
 
@@ -137,6 +141,7 @@ class WasteRoomServiceImplTest {
         savedWasteRoom.setY(2);
         savedWasteRoom.setContainers(List.of());
         savedWasteRoom.setDoors(List.of());
+        savedWasteRoom.setOtherObjects(List.of());
 
         when(wasteRoomRepository.findById(1L)).thenReturn(Optional.of(savedWasteRoom));
 
@@ -150,6 +155,7 @@ class WasteRoomServiceImplTest {
         assertEquals(2, result.getY());
         assertEquals(List.of(), result.getContainers());
         assertEquals(List.of(), result.getDoors());
+        assertEquals(List.of(), result.getOtherObjects());
 
         verify(wasteRoomRepository, times(1)).findById(1L);
     }
@@ -181,6 +187,7 @@ class WasteRoomServiceImplTest {
         savedWasteRoom1.setY(2);
         savedWasteRoom1.setContainers(List.of());
         savedWasteRoom1.setDoors(List.of());
+        savedWasteRoom1.setOtherObjects(List.of());
 
         WasteRoom savedWasteRoom2 = new WasteRoom();
         savedWasteRoom2.setProperty(property);
@@ -190,6 +197,7 @@ class WasteRoomServiceImplTest {
         savedWasteRoom2.setY(2);
         savedWasteRoom2.setContainers(List.of());
         savedWasteRoom2.setDoors(List.of());
+        savedWasteRoom2.setOtherObjects(List.of());
 
         List<WasteRoom> wasteRooms = List.of(savedWasteRoom1, savedWasteRoom2);
 
@@ -220,7 +228,7 @@ class WasteRoomServiceImplTest {
     @Test
     void updateWasteRoom_ValidRequest_ReturnUpdatedDTO() {
         Long wasteRoomId = 1L;
-        WasteRoomRequest request = new WasteRoomRequest(12.5, 8.0, 1.0, 2.0, List.of(), List.of(),1L, "Name");
+        WasteRoomRequest request = new WasteRoomRequest(12.5, 8.0, 1.0, 2.0, List.of(), List.of(), List.of(), 1L, "Name");
 
         Property property = new Property();
         property.setId(1L);
@@ -234,6 +242,7 @@ class WasteRoomServiceImplTest {
         existingRoom.setY(0);
         existingRoom.setContainers(new ArrayList<>());
         existingRoom.setDoors(new ArrayList<>());
+        existingRoom.setOtherObjects(new ArrayList<>());
 
         WasteRoom updatedRoom = new WasteRoom();
         updatedRoom.setId(wasteRoomId);
@@ -244,6 +253,7 @@ class WasteRoomServiceImplTest {
         updatedRoom.setY(request.getY());
         updatedRoom.setContainers(List.of());
         updatedRoom.setDoors(List.of());
+        updatedRoom.setOtherObjects(List.of());
 
         when(wasteRoomRepository.findById(wasteRoomId)).thenReturn(Optional.of(existingRoom));
         when(propertyRepository.findById(request.getPropertyId())).thenReturn(Optional.of(property));
@@ -265,7 +275,7 @@ class WasteRoomServiceImplTest {
         Long wasteRoomId = 1L;
 
         List<ContainerPositionRequest> newContainers = List.of(new ContainerPositionRequest(1L, 5, 5, 0));
-        WasteRoomRequest request = new WasteRoomRequest(12.5, 8.0, 1.0, 2.0, List.of(), newContainers, 1L, "Name");
+        WasteRoomRequest request = new WasteRoomRequest(12.5, 8.0, 1.0, 2.0, List.of(), newContainers, List.of(), 1L, "Name");
 
         Property property = new Property();
         property.setId(1L);
@@ -279,6 +289,7 @@ class WasteRoomServiceImplTest {
         existingRoom.setY(0);
         existingRoom.setContainers(new ArrayList<>(List.of(new ContainerPosition(), new ContainerPosition(), new ContainerPosition())));
         existingRoom.setDoors(new ArrayList<>());
+        existingRoom.setOtherObjects(new ArrayList<>());
 
         ContainerType containerType = new ContainerType();
         containerType.setId(1L);
@@ -292,6 +303,7 @@ class WasteRoomServiceImplTest {
         updatedRoom.setY(request.getY());
         updatedRoom.setContainers(new ArrayList<>(List.of(new ContainerPosition())));
         updatedRoom.setDoors(new ArrayList<>());
+        updatedRoom.setOtherObjects(new ArrayList<>());
 
         when(wasteRoomRepository.findById(wasteRoomId)).thenReturn(Optional.of(existingRoom));
         when(propertyRepository.findById(request.getPropertyId())).thenReturn(Optional.of(property));
@@ -306,6 +318,7 @@ class WasteRoomServiceImplTest {
         assertEquals(2.0, result.getY());
         assertEquals(1, result.getContainers().size());
         assertEquals(0, result.getDoors().size());
+        assertEquals(0, result.getOtherObjects().size());
 
         verify(wasteRoomRepository, times(2)).save(any(WasteRoom.class));
     }
@@ -314,7 +327,7 @@ class WasteRoomServiceImplTest {
     void updateWasteRoom_InvalidRequest_WrongWasteRoomID() {
         Long wrongWasteRoomId = 99L;
 
-        WasteRoomRequest request = new WasteRoomRequest(12.5, 8.0, 1.0, 2.0, List.of(), List.of(), 1L,  "Name");
+        WasteRoomRequest request = new WasteRoomRequest(12.5, 8.0, 1.0, 2.0, List.of(), List.of(), List.of(), 1L,  "Name");
 
         when(wasteRoomRepository.findById(wrongWasteRoomId)).thenReturn(Optional.empty());
 

@@ -71,12 +71,14 @@ function buildContainerZones(
 function validateContainerPlacement(
     newRect: { x: number; y: number; width: number; height: number },
     doorZones: { x: number; y: number; width: number; height: number }[],
-    containerZones: { x: number; y: number; width: number; height: number }[]
+    containerZones: { x: number; y: number; width: number; height: number }[],
+    otherObjectZones: { x: number; y: number; width: number; height: number }[],
 ) {
     const overlapsDoor = doorZones.some(zone => isOverlapping(newRect, zone));
     const overlapsContainer = containerZones.some(zone => isOverlapping(newRect, zone));
+    const overlapsOtherObject = otherObjectZones.some(zone => isOverlapping(newRect, zone));
 
-    return !(overlapsDoor || overlapsContainer);
+    return !(overlapsDoor || overlapsContainer || overlapsOtherObject);
 }
 
 /* ──────────────── Main Hook ──────────────── */
@@ -84,7 +86,9 @@ export function useContainers(
     room: Room,
     setSelectedContainerId: (id: number | null) => void,
     setSelectedDoorId: (id: number | null) => void,
-    doorZones: { x: number; y: number; width: number; height: number }[] = []
+    setSelectedOtherObjectId: (id: number | null) => void,
+    doorZones: { x: number; y: number; width: number; height: number }[] = [],
+    otherObjectZones: { x: number; y: number; width: number; height: number }[] = []
 ) {
 
     /* ──────────────── Containers State ──────────────── */
@@ -104,7 +108,7 @@ export function useContainers(
         const newRect = createContainerRect(container, x, y);
 
         const containerZones = buildContainerZones(containersInRoom);
-        const isValid = validateContainerPlacement(newRect, doorZones, containerZones);
+        const isValid = validateContainerPlacement(newRect, doorZones, containerZones, otherObjectZones);
 
        //If initial position is invalid, try to find a valid spot
         if (!isValid && !position) {
@@ -117,7 +121,7 @@ export function useContainers(
             for (let tryY = room.y; tryY < room.y + room.height - heightPx; tryY += step) {
                 for (let tryX = room.x; tryX < room.x + room.width - widthPx; tryX += step) {
                     const testRect = { x: tryX, y: tryY, width: widthPx, height: heightPx };
-                    if (validateContainerPlacement(testRect, doorZones, containerZones)) {
+                    if (validateContainerPlacement(testRect, doorZones, containerZones, otherObjectZones)) {
                         x = tryX;
                         y = tryY;
                         foundSpot = true;
@@ -181,6 +185,7 @@ export function useContainers(
     const handleSelectContainer = (id: number | null) => {
         setSelectedContainerId(id);
         setSelectedDoorId(null);
+        setSelectedOtherObjectId(null);
     };
 
     //Container rotation
@@ -257,14 +262,27 @@ export function useContainers(
 
     //Checks if a container is inside the boundaries of a room
     const isContainerInsideRoom = (
-        c: { x: number; y: number; width: number; height: number },
+        c: { x: number; y: number; width: number; height: number; rotation?: number },
         room: Room
     ) => {
+        const rotation = (c.rotation ?? 0) % 360;
+
+        // Swap width/height if rotated 90 or 270 degrees
+        const aabbWidth = rotation === 90 || rotation === 270 ? c.height : c.width;
+        const aabbHeight = rotation === 90 || rotation === 270 ? c.width : c.height;
+
+        const centerX = c.x + c.width / 2;
+        const centerY = c.y + c.height / 2;
+
+        // Axis-aligned bounding box
+        const aabbX = centerX - aabbWidth / 2;
+        const aabbY = centerY - aabbHeight / 2;
+
         return (
-            c.x >= room.x &&
-            c.y >= room.y &&
-            c.x + c.width <= room.x + room.width &&
-            c.y + c.height <= room.y + room.height
+            aabbX >= room.x &&
+            aabbY >= room.y &&
+            aabbX + aabbWidth <= room.x + room.width &&
+            aabbY + aabbHeight <= room.y + room.height
         );
     };
 

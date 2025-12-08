@@ -152,6 +152,7 @@ export default function AdminPlanningEditor({
         y: roomY,
         doors,
         containers,
+        otherObjects: [],
         propertyId: property.id,
         versionName: versionName || undefined,
         adminUsername,

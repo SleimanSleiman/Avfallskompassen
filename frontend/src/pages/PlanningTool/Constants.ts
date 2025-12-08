@@ -11,6 +11,11 @@ export const mmToPixels = (mm?: number): number => {
     return mmToMeter / SCALE;
 };
 
+export const cmToPixels = (cm?: number): number => {
+    const cmToMeter = cm / 100;
+    return cmToMeter / SCALE;
+};
+
 //Check if two objects are overlapping
 export const isOverlapping = (
     a: { x: number; y: number; width: number; height: number },

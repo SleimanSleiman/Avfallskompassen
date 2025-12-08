@@ -7,8 +7,10 @@ import com.avfallskompassen.dto.PropertyComparisonDTO;
 import com.avfallskompassen.dto.WasteAmountComparisonDTO;
 import com.avfallskompassen.model.Property;
 import com.avfallskompassen.model.PropertyContainer;
+import com.avfallskompassen.model.WasteRoom;
 import com.avfallskompassen.repository.PropertyContainerRepository;
 import com.avfallskompassen.repository.PropertyRepository;
+import com.avfallskompassen.repository.WasteRoomRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -39,14 +41,17 @@ public class PropertyComparisonService implements IPropertyComparisonService {
     private final PropertyRepository propertyRepository;
     private final PropertyCostService propertyCostService;
     private final PropertyContainerRepository propertyContainerRepository;
+    private final WasteRoomRepository wasteRoomRepository;
 
     @Autowired
     public PropertyComparisonService(PropertyRepository propertyRepository,
                                          PropertyCostService propertyCostService,
-                                         PropertyContainerRepository propertyContainerRepository) {
+                                         PropertyContainerRepository propertyContainerRepository,
+                                         WasteRoomRepository wasteRoomRepository) {
         this.propertyRepository = propertyRepository;
         this.propertyCostService = propertyCostService;
         this.propertyContainerRepository = propertyContainerRepository;
+        this.wasteRoomRepository = wasteRoomRepository;
     }
 
     @Override
@@ -179,7 +184,7 @@ public class PropertyComparisonService implements IPropertyComparisonService {
         int propertyVolume = calculateTotalContainerVolume(containersByProperty.get(property.getId()));
 
         if (similarProperties.isEmpty()) {
-            return new ContainerSizeComparisonDTO(propertyVolume, (double) propertyVolume, "lika stora", 0);
+            return new ContainerSizeComparisonDTO(propertyVolume, (double) propertyVolume, "lika stora", 0, 0.0);
         }
 
         List<Integer> volumes = similarProperties.stream()
@@ -187,6 +192,14 @@ public class PropertyComparisonService implements IPropertyComparisonService {
             .collect(Collectors.toList());
 
         double averageVolume = volumes.stream().mapToInt(Integer::intValue).average().orElse(0.0);
+
+        // Calculate average collection frequency for comparison group
+        List<Double> frequencies = similarProperties.stream()
+            .map(similar -> getAverageFrequencyForProperty(similar.getId()))
+            .filter(freq -> freq > 0)
+            .collect(Collectors.toList());
+        
+        double averageFrequency = frequencies.stream().mapToDouble(Double::doubleValue).average().orElse(0.0);
 
         double tolerance = 0.1;
         String comparison;
@@ -202,8 +215,18 @@ public class PropertyComparisonService implements IPropertyComparisonService {
             propertyVolume,
             roundDouble(averageVolume),
             comparison,
-            volumes.size()
+            volumes.size(),
+            roundDouble(averageFrequency)
         );
+    }
+
+    private double getAverageFrequencyForProperty(Long propertyId) {
+        List<WasteRoom> rooms = wasteRoomRepository.findByPropertyId(propertyId);
+        return rooms.stream()
+            .filter(r -> Boolean.TRUE.equals(r.getIsActive()) && r.getAverageCollectionFrequency() != null)
+            .mapToDouble(WasteRoom::getAverageCollectionFrequency)
+            .average()
+            .orElse(0.0);
     }
 
     private int calculateTotalContainerVolume(List<PropertyContainer> containers) {
