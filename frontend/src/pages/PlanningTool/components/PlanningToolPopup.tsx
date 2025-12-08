@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { Property } from '../../../lib/Property';
 import type { WasteRoom } from '../../../lib/WasteRoom';
 import { getMyPropertiesWithWasteRooms } from '../../../lib/Property';
-import { MapPin, Home, Users } from 'lucide-react';
+import { MapPin, Home, Users, ChevronDown, Plus, LayoutGrid } from 'lucide-react';
 import type { ContainerInRoom } from '../Types';
 import { mmToPixels, SCALE } from '../Constants';
 
@@ -46,6 +46,7 @@ export default function PlanningToolPopup({
   const [propertySearch, setPropertySearch] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [expandedPropertyId, setExpandedPropertyId] = useState<number | null>(null);
 
   const fetchProperties = useCallback(async () => {
     setLoading(true);
@@ -75,13 +76,6 @@ export default function PlanningToolPopup({
       return address.includes(query) || municipality.includes(query);
     });
   }, [propertyOptions, propertySearch]);
-
-  const selectWasteRoomCandidate = useCallback((property: Property) => {
-    const rooms = property.wasteRooms ?? [];
-    if (!rooms.length) return null;
-    const active = rooms.find((room) => room.isActive);
-    return active ?? rooms[rooms.length - 1];
-  }, []);
 
   const buildFallbackContainerDTO = useCallback(
     (container: WasteRoomContainer | undefined, index: number) => {
@@ -140,22 +134,22 @@ export default function PlanningToolPopup({
     [buildFallbackContainerDTO]
   );
 
-  const prepareRoomState = useCallback(
-    (property: Property): PreparedRoomState => {
-      const existingRoom = selectWasteRoomCandidate(property);
-      const containersForStorage =
-        normalizeContainersForStorage(existingRoom?.containers);
+  const prepareRoomStateForWasteRoom = useCallback(
+    (property: Property, wasteRoom: WasteRoom | null): PreparedRoomState => {
+      const containersForStorage = wasteRoom
+        ? normalizeContainersForStorage(wasteRoom.containers)
+        : [];
 
-      const storagePayload = existingRoom
+      const storagePayload = wasteRoom
         ? {
-            ...existingRoom,
+            ...wasteRoom,
             property,
             propertyId: property.id,
-            width: existingRoom.width ?? defaultRoomState.widthMeters,
-            length: existingRoom.length ?? defaultRoomState.heightMeters,
-            doors: existingRoom.doors ?? [],
+            width: wasteRoom.width ?? defaultRoomState.widthMeters,
+            length: wasteRoom.length ?? defaultRoomState.heightMeters,
+            doors: wasteRoom.doors ?? [],
             containers: containersForStorage,
-            name: existingRoom.name ?? '',
+            name: wasteRoom.name ?? '',
           }
         : {
             property,
@@ -167,18 +161,16 @@ export default function PlanningToolPopup({
             name: '',
           };
 
-      const roomState = existingRoom
+      const roomState = wasteRoom
         ? {
-            id: existingRoom.wasteRoomId ?? existingRoom.id ?? undefined,
-            name: existingRoom.name ?? '',
-            x: existingRoom.x ?? defaultRoomState.x,
-            y: existingRoom.y ?? defaultRoomState.y,
-            width:
-              (existingRoom.width ?? defaultRoomState.widthMeters) / SCALE,
-            height:
-              (existingRoom.length ?? defaultRoomState.heightMeters) / SCALE,
-            doors: existingRoom.doors ?? [],
-            containers: convertContainersToRoomState(existingRoom.containers),
+            id: wasteRoom.wasteRoomId ?? wasteRoom.id ?? undefined,
+            name: wasteRoom.name ?? '',
+            x: wasteRoom.x ?? defaultRoomState.x,
+            y: wasteRoom.y ?? defaultRoomState.y,
+            width: (wasteRoom.width ?? defaultRoomState.widthMeters) / SCALE,
+            height: (wasteRoom.length ?? defaultRoomState.heightMeters) / SCALE,
+            doors: wasteRoom.doors ?? [],
+            containers: convertContainersToRoomState(wasteRoom.containers),
           }
         : {
             id: undefined,
@@ -198,31 +190,38 @@ export default function PlanningToolPopup({
         roomState,
       };
     },
-    [
-      convertContainersToRoomState,
-      defaultRoomState,
-      normalizeContainersForStorage,
-      selectWasteRoomCandidate,
-    ]
+    [convertContainersToRoomState, defaultRoomState, normalizeContainersForStorage]
   );
 
-  const handleSelectProperty = useCallback(
-    (property: Property) => {
+  const handleSelectWasteRoom = useCallback(
+    (property: Property, wasteRoom: WasteRoom) => {
       if (!property?.id) return;
-      const prepared = prepareRoomState(property);
+      const prepared = prepareRoomStateForWasteRoom(property, wasteRoom);
       onSelect(prepared);
     },
-    [onSelect, prepareRoomState]
+    [onSelect, prepareRoomStateForWasteRoom]
   );
+
+  const handleCreateNewRoom = useCallback(
+    (property: Property) => {
+      if (!property?.id) return;
+      const prepared = prepareRoomStateForWasteRoom(property, null);
+      onSelect(prepared);
+    },
+    [onSelect, prepareRoomStateForWasteRoom]
+  );
+
+  const togglePropertyExpansion = useCallback((propertyId: number) => {
+    setExpandedPropertyId((prev) => (prev === propertyId ? null : propertyId));
+  }, []);
 
   return (
     <div className="fixed inset-0 z-[999] flex items-center justify-center bg-black/45 px-4 py-6">
       <div className="w-full max-w-3xl rounded-2xl border border-gray-200 bg-white p-6 shadow-2xl">
         <div className="flex flex-col gap-1">
-          <h2 className="text-2xl font-bold text-nsr-ink">Välj fastighet</h2>
+          <h2 className="text-2xl font-bold text-nsr-ink">Välj fastighet och miljörum</h2>
           <p className="text-sm text-gray-600">
-            För att starta planeringen behöver du välja vilken fastighet
-            miljörummet hör till.
+            Välj en fastighet för att se tillgängliga miljörum eller skapa ett nytt.
           </p>
         </div>
 
@@ -279,37 +278,144 @@ export default function PlanningToolPopup({
             </div>
           ) : (
             <div className="space-y-3">
-              {filteredProperties.map((property) => (
-                <button
-                  key={property.id}
-                  type="button"
-                  onClick={() => handleSelectProperty(property)}
-                  className="w-full rounded-2xl border border-gray-200 bg-white p-4 text-left shadow-sm transition hover:border-nsr-teal/60 hover:bg-nsr-teal/5 focus:outline-none focus:ring-2 focus:ring-nsr-teal"
-                >
-                  <div className="flex items-center justify-between gap-3">
-                    <div className="text-base font-semibold text-nsr-ink">
-                      {property.address}
-                    </div>
-                    <span className="text-sm font-medium text-gray-500">
-                      {property.municipalityName ?? '—'}
-                    </span>
+              {filteredProperties.map((property) => {
+                const wasteRooms = property.wasteRooms ?? [];
+                const isExpanded = expandedPropertyId === property.id;
+                const hasWasteRooms = wasteRooms.length > 0;
+
+                return (
+                  <div
+                    key={property.id}
+                    className="rounded-2xl border border-gray-200 bg-white shadow-sm overflow-hidden"
+                  >
+                    {/* Property Header */}
+                    <button
+                      type="button"
+                      onClick={() => togglePropertyExpansion(property.id)}
+                      className="w-full p-4 text-left transition hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-nsr-teal"
+                    >
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2">
+                            <span className="text-base font-semibold text-nsr-ink truncate">
+                              {property.address}
+                            </span>
+                            {hasWasteRooms && (
+                              <span className="inline-flex items-center gap-1 rounded-full bg-nsr-teal/10 px-2 py-0.5 text-xs font-medium text-nsr-teal">
+                                <LayoutGrid className="h-3 w-3" />
+                                {wasteRooms.length}
+                              </span>
+                            )}
+                          </div>
+                          <span className="text-sm text-gray-500">
+                            {property.municipalityName ?? '—'}
+                          </span>
+                        </div>
+                        <ChevronDown
+                          className={`h-5 w-5 text-gray-400 transition-transform ${
+                            isExpanded ? 'rotate-180' : ''
+                          }`}
+                        />
+                      </div>
+                      <div className="mt-2 flex flex-wrap items-center gap-4 text-sm text-gray-600">
+                        <span className="inline-flex items-center gap-1">
+                          <Home className="h-4 w-4 text-nsr-teal" />
+                          {property.numberOfApartments ?? '—'} lägenheter
+                        </span>
+                        <span className="inline-flex items-center gap-1">
+                          <MapPin className="h-4 w-4 text-nsr-teal" />
+                          {property.accessPathLength ?? '—'} m dragväg
+                        </span>
+                        <span className="inline-flex items-center gap-1">
+                          <Users className="h-4 w-4 text-nsr-teal" />
+                          {property.lockName ?? 'Ingen låstyp'}
+                        </span>
+                      </div>
+                    </button>
+
+                    {/* Expanded Content - Waste Rooms */}
+                    {isExpanded && (
+                      <div className="border-t border-gray-200 bg-gray-50/50 p-4">
+                        <div className="mb-3">
+                          <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                            Välj miljörum
+                          </h4>
+                        </div>
+
+                        <div className="space-y-2">
+                          {/* Existing Waste Rooms */}
+                          {wasteRooms.map((room) => (
+                            <button
+                              key={room.wasteRoomId ?? room.id}
+                              type="button"
+                              onClick={() => handleSelectWasteRoom(property, room)}
+                              className="w-full flex items-center gap-3 p-3 rounded-xl border border-gray-200 bg-white text-left transition hover:border-nsr-teal/60 hover:bg-nsr-teal/5 focus:outline-none focus:ring-2 focus:ring-nsr-teal"
+                            >
+                              <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-nsr-teal/10 flex items-center justify-center">
+                                <LayoutGrid className="h-5 w-5 text-nsr-teal" />
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2">
+                                  <span className="font-medium text-nsr-ink truncate">
+                                    {room.name && room.name.trim() !== ''
+                                      ? room.name
+                                      : `Miljörum ${room.wasteRoomId ?? room.id}`}
+                                  </span>
+                                  {room.isActive && (
+                                    <span className="inline-flex items-center rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700">
+                                      Aktiv
+                                    </span>
+                                  )}
+                                </div>
+                                <p className="text-sm text-gray-500">
+                                  {room.width ?? '—'}m × {room.length ?? '—'}m
+                                  {room.containers && room.containers.length > 0 && (
+                                    <span className="ml-2">
+                                      • {room.containers.length} behållare
+                                    </span>
+                                  )}
+                                </p>
+                              </div>
+                              <svg
+                                className="h-5 w-5 text-gray-400"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth="2"
+                                  d="M9 5l7 7-7 7"
+                                />
+                              </svg>
+                            </button>
+                          ))}
+
+                          {/* Create New Room Button */}
+                          <button
+                            type="button"
+                            onClick={() => handleCreateNewRoom(property)}
+                            className="w-full flex items-center gap-3 p-3 rounded-xl border border-dashed border-nsr-teal/40 bg-nsr-teal/5 text-left transition hover:border-nsr-teal hover:bg-nsr-teal/10 focus:outline-none focus:ring-2 focus:ring-nsr-teal"
+                          >
+                            <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-nsr-teal/20 flex items-center justify-center">
+                              <Plus className="h-5 w-5 text-nsr-teal" />
+                            </div>
+                            <div className="flex-1">
+                              <span className="font-medium text-nsr-teal">
+                                Skapa nytt miljörum
+                              </span>
+                              <p className="text-sm text-nsr-teal/70">
+                                Börja med ett tomt miljörum
+                              </p>
+                            </div>
+                          </button>
+                        </div>
+                      </div>
+                    )}
                   </div>
-                  <div className="mt-2 flex flex-wrap items-center gap-4 text-sm text-gray-600">
-                    <span className="inline-flex items-center gap-1">
-                      <Home className="h-4 w-4 text-nsr-teal" />
-                      {property.numberOfApartments ?? '—'} lägenheter
-                    </span>
-                    <span className="inline-flex items-center gap-1">
-                      <MapPin className="h-4 w-4 text-nsr-teal" />
-                      {property.accessPathLength ?? '—'} m dragväg
-                    </span>
-                    <span className="inline-flex items-center gap-1">
-                      <Users className="h-4 w-4 text-nsr-teal" />
-                      {property.lockName ?? 'Ingen låstyp'}
-                    </span>
-                  </div>
-                </button>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>
