@@ -58,6 +58,7 @@ type RoomCanvasProps = {
 
     /* ───────────── Other Objects Props ───────────── */
     otherObjects: OtherObjectInRoom[];
+    setOtherObjects: (objects: OtherObjectInRoom[]) => void;
     handleAddOtherObject: (name: string, width: number, height: number) => void;
     getOtherObjectZones: (excludeId?: number) => { x: number; y: number; width: number; height: number }[];
     handleDragOtherObject: (id: number, pos: { x: number; y: number }) => void;

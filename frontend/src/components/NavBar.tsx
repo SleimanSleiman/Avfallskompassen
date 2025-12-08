@@ -31,6 +31,14 @@ export default function NavBar() {
     window.location.href = '/login';
   }
 
+  function resetPlanningToolState() {
+    if (typeof window === 'undefined') return;
+    localStorage.removeItem('enviormentRoomData');
+    localStorage.removeItem('trashRoomData');
+    localStorage.removeItem('selectedProperty');
+    localStorage.removeItem('selectedPropertyId');
+  }
+
   return (
     <header className="w-full shadow-sm">
       <div className="bg-nsr-teal">
@@ -77,7 +85,13 @@ export default function NavBar() {
                   <NavLink to="/dashboard" className={({ isActive }) => `nav-link hover:text-white transition-colors ${isActive ? 'nav-link-active' : ''}`}>Dashboard</NavLink>
                   <NavLink to="/statistics" className={({ isActive }) => `nav-link hover:text-white transition-colors ${isActive ? 'nav-link-active' : ''}`}>Statistik</NavLink>
                   <NavLink to="/properties" className={({ isActive }) => `nav-link hover:text-white transition-colors ${isActive ? 'nav-link-active' : ''}`}>Mina fastigheter</NavLink>
-                  <NavLink to="/planningTool" className={({ isActive }) => `nav-link hover:text-white transition-colors ${isActive ? 'nav-link-active' : ''}`}>Planeringsverktyg</NavLink>
+                  <NavLink
+                    to="/planningTool"
+                    onClick={resetPlanningToolState}
+                    className={({ isActive }) => `nav-link hover:text-white transition-colors ${isActive ? 'nav-link-active' : ''}`}
+                  >
+                    Planeringsverktyg
+                  </NavLink>
                   <NavLink to="/reports" className={({ isActive }) => `nav-link hover:text-white transition-colors ${isActive ? 'nav-link-active' : ''}`}>Rapporter</NavLink>
                   <div className="flex items-center gap-3">
                     {user && <span className="text-sm">Hej {user.username}!</span>}
@@ -118,7 +132,7 @@ export default function NavBar() {
                 <NavLink to="/dashboard" className="text-nsr-ink">Dashboard</NavLink>
                 <NavLink to="/properties" className="text-nsr-ink">Mina fastigheter</NavLink>
                 <NavLink to="/statistics" className="text-nsr-ink">Statistik</NavLink>
-                <NavLink to="/planningTool" className="text-nsr-ink">Planeringsverktyg</NavLink>
+                <NavLink to="/planningTool" onClick={resetPlanningToolState} className="text-nsr-ink">Planeringsverktyg</NavLink>
                 <NavLink to="/reports" className="text-nsr-ink">Rapporter</NavLink>
                 {user ? (
                   <button onClick={handleLogout} className="text-left text-nsr-ink">Logga ut</button>

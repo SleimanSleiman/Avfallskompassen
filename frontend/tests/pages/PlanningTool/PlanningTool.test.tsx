@@ -1,6 +1,11 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen } from "@testing-library/react";
 import PlanningTool from "../../../src/pages/PlanningTool/PlanningTool";
+
+// ─────────────── Mock react-router-dom ───────────────
+vi.mock("react-router-dom", () => ({
+    useNavigate: () => vi.fn(),
+}));
 
 // ─────────────── Mock hooks ───────────────
 vi.mock("../../../src/pages/PlanningTool/hooks/UseRoom", () => ({
@@ -20,18 +25,21 @@ vi.mock("../../../src/pages/PlanningTool/hooks/UseRoom", () => ({
 vi.mock("../../../src/pages/PlanningTool/hooks/UseDoors", () => ({
     useDoors: () => ({
         doors: [],
+        setDoors: vi.fn(),
         handleAddDoor: vi.fn(),
         handleDragDoor: vi.fn(),
         handleRotateDoor: vi.fn(),
         handleRemoveDoor: vi.fn(),
         handleSelectDoor: vi.fn(),
         getDoorZones: () => [],
+        doorOffsetRef: { current: {} },
     }),
 }));
 
 vi.mock("../../../src/pages/PlanningTool/hooks/UseContainers", () => ({
     useContainers: () => ({
         containersInRoom: [],
+        saveContainers: vi.fn(),
         draggedContainer: null,
         setDraggedContainer: vi.fn(),
         availableContainers: [],
@@ -42,6 +50,7 @@ vi.mock("../../../src/pages/PlanningTool/hooks/UseContainers", () => ({
         handleAddContainer: vi.fn(),
         handleRemoveContainer: vi.fn(),
         handleDragContainer: vi.fn(),
+        moveAllContainers: vi.fn(),
         handleSelectContainer: vi.fn(),
         fetchAvailableContainers: vi.fn(),
         handleStageDrop: vi.fn(),
@@ -51,7 +60,10 @@ vi.mock("../../../src/pages/PlanningTool/hooks/UseContainers", () => ({
         selectedContainerInfo: null,
         setSelectedContainerInfo: vi.fn(),
         handleShowContainerInfo: vi.fn(),
+        undo: vi.fn(),
+        redo: vi.fn(),
         getContainerZones: vi.fn(),
+        isContainerInsideRoom: vi.fn(() => true),
     }),
 }));
 
@@ -80,6 +92,14 @@ vi.mock("../../../src/pages/PlanningTool/hooks/usePropertyHighlights", () => ({
     usePropertyHighlights: () => [],
 }));
 
+vi.mock("../../../src/pages/PlanningTool/hooks/useComparison", () => ({
+    useComparison: () => ({ data: null, loading: false, error: null }),
+}));
+
+vi.mock("../../../src/pages/PlanningTool/hooks/UseLayoutHistory", () => ({
+    useLayoutHistory: () => ({ undo: vi.fn(), redo: vi.fn() }),
+}));
+
 vi.mock("../../../src/pages/PlanningTool/hooks/UseSaveRoom", () => ({
     useSaveRoom: () => ({ saveRoom: vi.fn(), isSaving: false, error: null }),
     useWasteRoomRequestBuilder: () => ({ buildWasteRoomRequest: vi.fn() }),
@@ -103,6 +123,10 @@ vi.mock("../../../src/pages/PlanningTool/PropertyAndWasteAnalysis/WasteAnalysis/
 
 vi.mock("../../../src/pages/PlanningTool/PropertyAndWasteAnalysis/PropertyOverview/PropertyOverviewPanel", () => ({
     default: () => <div data-testid="mock-overview-panel">PropertyOverviewPanel</div>,
+}));
+
+vi.mock("../../../src/pages/PlanningTool/components/PlanningToolPopup", () => ({
+    default: () => null,
 }));
 
 describe("PlanningTool", () => {
