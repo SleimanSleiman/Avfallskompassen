@@ -35,6 +35,7 @@ export function useSaveRoom() {
 
 export function useWasteRoomRequestBuilder(
     isContainerInsideRoom: (rect: { x: number; y: number; width: number; height: number },room: Room) => boolean,
+    isObjectInsideRoom: (rect: { x: number; y: number; width: number; height: number },room: Room) => boolean,
 ) {
     const buildWasteRoomRequest = (
         room : Room,
@@ -47,6 +48,12 @@ export function useWasteRoomRequestBuilder(
         const validContainers = containers.filter(c =>
             isContainerInsideRoom(
                 { x: c.x, y: c.y, width: c.width, height: c.height },
+                room
+            )
+        );
+        const validObjects = otherObjects.filter(o =>
+            isObjectInsideRoom(
+                { x: o.x, y: o.y, width: o.width, height: o.height },
                 room
             )
         );
@@ -70,7 +77,7 @@ export function useWasteRoomRequestBuilder(
                 y: c.y,
                 angle: c.rotation,
             })),
-            otherObjects: otherObjects.map(o => ({
+            otherObjects: validObjects.map(o => ({
                 name: o.name,
                 x: o.x,
                 y: o.y,

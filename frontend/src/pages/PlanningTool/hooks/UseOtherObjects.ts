@@ -158,7 +158,7 @@ export function useOtherObjects(
         setSelectedOtherObjectId(null);
     };
 
-    const isObjectOutsideRoom = (
+    const isObjectInsideRoom = (
         obj: { x: number; y: number; width: number; height: number; rotation?: number },
         room: { x: number; y: number; width: number; height: number }
     ) => {
@@ -174,10 +174,10 @@ export function useOtherObjects(
         const aabbY = centerY - aabbHeight / 2;
 
         return (
-            aabbX < room.x ||
-            aabbY < room.y ||
-            aabbX + aabbWidth > room.x + room.width ||
-            aabbY + aabbHeight > room.y + room.height
+            aabbX >= room.x &&
+            aabbY >= room.y &&
+            aabbX + aabbWidth <= room.x + room.width &&
+            aabbY + aabbHeight <= room.y + room.height
         );
     };
 
@@ -202,7 +202,7 @@ export function useOtherObjects(
         handleSelectOtherObject,
         handleRotateOtherObject,
         handleRemoveOtherObject,
-        isObjectOutsideRoom,
+        isObjectInsideRoom,
         moveAllObjects,
     }
 }
