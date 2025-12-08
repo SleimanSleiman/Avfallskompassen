@@ -96,7 +96,7 @@ public class PropertyServiceImpl implements PropertyService {
             property.setMunicipality(municipality);
 
             Property savedProperty = propertyRepository.save(property);
-            activityService.saveActivity(user, ActivityType.CREATED_PROPERTY, "Skapade en fastighet");
+            activityService.saveActivity(user, ActivityType.CREATED_PROPERTY, "Skapade en fastighet med addressen " + property.getAddress());
 
             return savedProperty;
         } catch (DataIntegrityViolationException e) {
@@ -271,7 +271,13 @@ public class PropertyServiceImpl implements PropertyService {
         }
 
         try {
-            return propertyRepository.save(property);
+            Property updatedProperty = propertyRepository.save(property);
+            Optional<User> userOptional = userService.findByUsername(username);
+            if (userOptional.isPresent()) {
+                User user = userOptional.get();
+                activityService.saveActivity(user, ActivityType.CHANGED_PROPERTY, "Du ändrade fastigheten med addresesen " + property.getAddress());
+            }
+            return updatedProperty;
         } catch (DataIntegrityViolationException e) {
             throw new RuntimeException("Failed to update property: " + e.getMessage());
         }

@@ -1,10 +1,14 @@
 package com.avfallskompassen.services.impl;
 
+import com.avfallskompassen.dto.ActivityDTO;
 import com.avfallskompassen.model.Activity;
 import com.avfallskompassen.model.ActivityType;
 import com.avfallskompassen.model.User;
 import com.avfallskompassen.repository.ActivityRepository;
 import com.avfallskompassen.services.ActivityService;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -18,13 +22,18 @@ public class ActivityServiceImpl implements ActivityService {
     }
 
     @Override
-    public List<Activity> getLatestUserActivities(User user) {
-        return List.of();
+    public List<ActivityDTO> getLimitedUserActivities(User user, int limit) {
+        Pageable pageable = PageRequest.of(0, limit, Sort.by(Sort.Direction.DESC, "timestamp"));
+        List<Activity> usersActivities = activityRepository.findByUser(user, pageable);
+
+        return ActivityDTO.fromEntity(usersActivities);
     }
 
     @Override
-    public List<Activity> getUserActivities(User user) {
-        return List.of();
+    public List<ActivityDTO> getUserActivities(User user) {
+        List<Activity> usersActivities = activityRepository.findByUserOrderByTimestampDesc(user);
+
+        return ActivityDTO.fromEntity(usersActivities);
     }
 
     @Override

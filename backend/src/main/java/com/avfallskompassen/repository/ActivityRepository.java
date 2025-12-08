@@ -2,6 +2,7 @@ package com.avfallskompassen.repository;
 
 import com.avfallskompassen.model.Activity;
 import com.avfallskompassen.model.User;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -11,5 +12,5 @@ import java.util.List;
 public interface ActivityRepository extends JpaRepository<Activity, Long> {
     List<Activity> findByUserOrderByTimestampDesc(User user);
 
-    List<Activity> findTop20ByUserOrderByTimestampDesc(User user);
+    List<Activity> findByUser(User user, Pageable pageable);
 }
