@@ -1,13 +1,26 @@
 package com.avfallskompassen.dto.request;
 
-/** 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
+
+/**
  * This class encapsulates the user credentials required for authentication
  * operations, providing a structured way to receive login data from clients.
  * 
  * @author Akmal Safi
  */
 public class LoginRequest {
+    @NotBlank(message = "Username may not be empty")
+    @Size(min = 3, max = 50, message = "Username must be 3–50 characters")
+    @Pattern(
+            regexp = "^[A-Za-z0-9._-]+$",
+            message = "Username contains invalid characters"
+    )
     private String username;
+
+    @NotBlank(message = "Password may not be empty")
+    @Size(min = 6, max = 255, message = "Password must be at least 6 characters")
     private String password;
     
     /**
