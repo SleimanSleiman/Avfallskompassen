@@ -4,14 +4,13 @@ on:
   push:
     branches:
       - main
-      - testing/NSR144-sätt_upp_backend_och_automatisk_testning
   pull_request:
 
 jobs:
   test-backend:
     name: Backend Tests
     runs-on: windows-latest
-    timeout-minutes: 5
+    timeout-minutes: 8
 
     defaults:
       run:

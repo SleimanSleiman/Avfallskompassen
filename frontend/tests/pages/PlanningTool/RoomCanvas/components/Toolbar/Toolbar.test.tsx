@@ -3,13 +3,18 @@ import { render, fireEvent } from "@testing-library/react";
 import Toolbar from "../../../../../../src/pages/PlanningTool/RoomCanvas/components/Toolbar/Toolbar";
 
 // Mocks for prompt components
-vi.mock("../../../../../components/RoomSizePrompt", () => ({
+vi.mock("../../../../../../src/components/RoomSizePrompt", () => ({
     default: () => <div data-testid="room-size-prompt" />,
 }));
 
-vi.mock("../../../../../components/DoorWidthPrompt", () => ({
+vi.mock("../../../../../../src/components/DoorWidthPrompt", () => ({
     default: () => <div data-testid="door-width-prompt" />,
 }));
+
+vi.mock("../../../../../../src/components/OtherObjectSizePrompt", () => ({
+    default: () => <div data-testid="other-object-size-prompt" />,
+}));
+
 
 vi.mock("./ContainerInfo", () => ({
     default: ({ onClose }: any) => (
@@ -32,6 +37,9 @@ describe("Toolbar component", () => {
     const undo = vi.fn();
     const redo = vi.fn();
     const setSelectedContainerInfo = vi.fn();
+    const generateThumbnail = vi.fn().mockReturnValue("thumbdata");
+    const handleAddOtherObject = vi.fn().mockReturnValue(true);
+
 
     const room = { id: 1, x: 0, y: 0, width: 100, height: 100 };
 
@@ -54,6 +62,8 @@ describe("Toolbar component", () => {
                 redo={redo}
                 selectedContainerInfo={null}
                 setSelectedContainerInfo={setSelectedContainerInfo}
+                generateThumbnail={generateThumbnail}
+                handleAddOtherObject={handleAddOtherObject}
             />
         );
 
@@ -63,10 +73,11 @@ describe("Toolbar component", () => {
         expect(getByText("Spara design")).toBeTruthy();
         expect(getByText("Ångra")).toBeTruthy();
         expect(getByText("Gör om")).toBeTruthy();
+        expect(getByText("Lägg till övrigt föremål")).toBeTruthy();
     });
 
-    it("calls handlers when buttons are clicked", () => {
-        const { getByText } = render(
+    it("calls handlers when buttons are clicked", async () => {
+        const { getByText, getByRole, findByTestId } = render(
             <Toolbar
                 roomName="Room A"
                 isContainerPanelOpen={false}
@@ -84,6 +95,8 @@ describe("Toolbar component", () => {
                 redo={redo}
                 selectedContainerInfo={null}
                 setSelectedContainerInfo={setSelectedContainerInfo}
+                generateThumbnail={generateThumbnail}
+                handleAddOtherObject={handleAddOtherObject}
             />
         );
 
@@ -98,6 +111,10 @@ describe("Toolbar component", () => {
 
         fireEvent.click(getByText("Gör om"));
         expect(redo).toHaveBeenCalled();
+
+        fireEvent.click(getByRole("button", { name: "Lägg till övrigt föremål" }));
+        const prompt = await findByTestId("other-object-size-prompt");
+        expect(prompt).toBeTruthy();
     });
 
     it("renders selected container info and can close it", () => {
@@ -119,6 +136,8 @@ describe("Toolbar component", () => {
                 redo={redo}
                 selectedContainerInfo={{ id: 1 }}
                 setSelectedContainerInfo={setSelectedContainerInfo}
+                generateThumbnail={generateThumbnail}
+                handleAddOtherObject={handleAddOtherObject}
             />
         );
 

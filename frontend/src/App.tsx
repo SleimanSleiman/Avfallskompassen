@@ -12,6 +12,9 @@ import { currentUser } from './lib/Auth';
 import PlanningTool from './pages/PlanningTool/PlanningTool';
 import AdminPage from './pages/AdminPage';
 import AllWasteroomPage from "./pages/AllWasteroomPage";
+import { useEffect } from "react";
+import { useLocation } from "react-router-dom";
+import { startInactivityTimer, stopInactivityTimer } from "./lib/InactivityTimer";
 
 function Dashboard() {
   const user = currentUser();
@@ -137,6 +140,18 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
+    const location = useLocation();
+
+    useEffect(() => {
+      const isInPlanningTool = location.pathname.startsWith("/planningTool");
+
+      if (isInPlanningTool) {
+        stopInactivityTimer();
+      } else {
+        startInactivityTimer();
+      }
+    }, [location.pathname]);
+    
   return (
     <div className="min-h-screen flex flex-col">
       <NavBar />

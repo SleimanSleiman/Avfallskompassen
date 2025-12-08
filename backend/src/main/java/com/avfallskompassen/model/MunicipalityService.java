@@ -23,6 +23,15 @@ public class MunicipalityService {
     @ManyToOne
     private ServiceType serviceType;
 
+    public MunicipalityService(Municipality municipality, ServiceType serviceType) {
+        this.municipality = municipality;
+        this.serviceType = serviceType;
+    }
+
+    public MunicipalityService() {
+
+    }
+
     public long getId() {
         return id;
     }

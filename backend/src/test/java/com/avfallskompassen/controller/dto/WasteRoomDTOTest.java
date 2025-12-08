@@ -1,5 +1,6 @@
-package com.avfallskompassen.dto;
+package com.avfallskompassen.controller.dto;
 
+import com.avfallskompassen.dto.WasteRoomDTO;
 import com.avfallskompassen.model.ContainerPosition;
 import com.avfallskompassen.model.Door;
 import com.avfallskompassen.model.Property;

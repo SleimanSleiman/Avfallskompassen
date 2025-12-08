@@ -1,95 +1,137 @@
 import { renderHook } from "@testing-library/react";
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, afterEach, beforeEach } from "vitest";
 import useContainerZones from "../../../../../src/pages/PlanningTool/RoomCanvas/hooks/useContainerZones";
 
 describe("useContainerZones hook", () => {
+    let getContainerZonesMock: ReturnType<typeof vi.fn>;
+    let getOtherObjectZonesMock: ReturnType<typeof vi.fn>;
     const doorZonesMock = [{ id: "door1" }, { id: "door2" }];
-    const getContainerZonesMock = vi.fn();
+
+    beforeEach(() => {
+        getContainerZonesMock = vi.fn();
+        getOtherObjectZonesMock = vi.fn();
+    });
 
     afterEach(() => {
         vi.clearAllMocks();
     });
 
-    it("returns only doorZones when not dragging any container", () => {
+    it("returns doorZones + all container and other object zones when not dragging anything", () => {
+        const containerZones = [{ id: "c1" }];
+        const otherObjectZones = [{ id: "o1" }];
+        getContainerZonesMock.mockReturnValue(containerZones);
+        getOtherObjectZonesMock.mockReturnValue(otherObjectZones);
+
         const { result } = renderHook(() =>
             useContainerZones({
                 isDraggingContainer: false,
+                isDraggingOtherObject: false,
                 selectedContainerId: null,
+                selectedOtherObjectId: null,
                 draggedContainer: null,
                 getContainerZones: getContainerZonesMock,
+                getOtherObjectZones: getOtherObjectZonesMock,
                 doorZones: doorZonesMock,
             })
         );
 
-        expect(result.current).toEqual(doorZonesMock);
-        expect(getContainerZonesMock).not.toHaveBeenCalled();
+        expect(result.current).toEqual([...doorZonesMock, ...otherObjectZones, ...containerZones]);
+        expect(getContainerZonesMock).toHaveBeenCalled();
+        expect(getOtherObjectZonesMock).toHaveBeenCalled();
     });
 
-    it("returns doorZones + zones for selected container when dragging existing container", () => {
-        const containerZones = [{ id: "container1" }];
+    it("removes the zone of the selected container when dragging an existing container", () => {
+        const containerZones = [{ id: "c1" }];
+        const otherObjectZones = [{ id: "o1" }];
         getContainerZonesMock.mockReturnValue(containerZones);
+        getOtherObjectZonesMock.mockReturnValue(otherObjectZones);
 
         const { result } = renderHook(() =>
             useContainerZones({
                 isDraggingContainer: true,
+                isDraggingOtherObject: false,
                 selectedContainerId: 1,
+                selectedOtherObjectId: null,
                 draggedContainer: null,
                 getContainerZones: getContainerZonesMock,
+                getOtherObjectZones: getOtherObjectZonesMock,
                 doorZones: doorZonesMock,
             })
         );
 
-        expect(result.current).toEqual([...doorZonesMock, ...containerZones]);
         expect(getContainerZonesMock).toHaveBeenCalledWith(1);
+        expect(result.current).toEqual([...doorZonesMock, ...otherObjectZones, ...containerZones]);
     });
 
-    it("returns doorZones + zones for dragged container when dragging new container", () => {
-        const draggedZones = [{ id: "dragged" }];
-        getContainerZonesMock.mockReturnValue(draggedZones);
+    it("returns all zones except the dragged container when dragging a new container", () => {
+        const containerZones = [{ id: "c1" }];
+        const otherObjectZones = [{ id: "o1" }];
+        getContainerZonesMock.mockReturnValue(containerZones);
+        getOtherObjectZonesMock.mockReturnValue(otherObjectZones);
 
         const { result } = renderHook(() =>
             useContainerZones({
                 isDraggingContainer: true,
+                isDraggingOtherObject: false,
                 selectedContainerId: null,
-                draggedContainer: { id: "newContainer" },
+                selectedOtherObjectId: null,
+                draggedContainer: { id: "new" },
                 getContainerZones: getContainerZonesMock,
+                getOtherObjectZones: getOtherObjectZonesMock,
                 doorZones: doorZonesMock,
             })
         );
 
-        expect(result.current).toEqual([...doorZonesMock, ...draggedZones]);
         expect(getContainerZonesMock).toHaveBeenCalledWith();
+        expect(result.current).toEqual([...doorZonesMock, ...otherObjectZones, ...containerZones]);
     });
 
-    it("returns only doorZones if draggedContainer is null and not dragging existing container", () => {
+    it("removes the zone of the selected other object when dragging it", () => {
+        const containerZones = [{ id: "c1" }];
+        const otherObjectZones = [{ id: "o1" }];
+        getContainerZonesMock.mockReturnValue(containerZones);
+        getOtherObjectZonesMock.mockReturnValue(otherObjectZones);
+
         const { result } = renderHook(() =>
             useContainerZones({
-                isDraggingContainer: true,
+                isDraggingContainer: false,
+                isDraggingOtherObject: true,
                 selectedContainerId: null,
+                selectedOtherObjectId: 42,
                 draggedContainer: null,
                 getContainerZones: getContainerZonesMock,
+                getOtherObjectZones: getOtherObjectZonesMock,
                 doorZones: doorZonesMock,
             })
         );
 
-        expect(result.current).toEqual(doorZonesMock);
-        expect(getContainerZonesMock).not.toHaveBeenCalled();
+        expect(getOtherObjectZonesMock).toHaveBeenCalledWith(42);
+        expect(result.current).toEqual([...doorZonesMock, ...otherObjectZones, ...containerZones]);
     });
 
     it("filters out falsy values from combined zones", () => {
-        const containerZones = [{ id: "container1" }, null, undefined];
+        const containerZones = [{ id: "c1" }, null, undefined];
+        const otherObjectZones = [null, { id: "o1" }];
         getContainerZonesMock.mockReturnValue(containerZones);
+        getOtherObjectZonesMock.mockReturnValue(otherObjectZones);
 
         const { result } = renderHook(() =>
             useContainerZones({
-                isDraggingContainer: true,
-                selectedContainerId: 1,
+                isDraggingContainer: false,
+                isDraggingOtherObject: false,
+                selectedContainerId: null,
+                selectedOtherObjectId: null,
                 draggedContainer: null,
                 getContainerZones: getContainerZonesMock,
+                getOtherObjectZones: getOtherObjectZonesMock,
                 doorZones: [...doorZonesMock, null],
             })
         );
 
-        expect(result.current).toEqual([...doorZonesMock, { id: "container1" }]);
+        expect(result.current).toEqual([
+            ...doorZonesMock,
+            { id: "o1" },
+            { id: "c1" },
+        ]);
     });
 });

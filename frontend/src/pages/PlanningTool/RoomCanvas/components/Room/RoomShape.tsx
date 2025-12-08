@@ -11,6 +11,7 @@ type RoomShapeProps = {
     room: Room;
     handleSelectDoor: (id: number) => void;
     handleSelectContainer: (id: number) => void;
+    handleSelectOtherObject: (id: number) => void;
     setSelectedContainerInfo: (v: ContainerDTO | null) => void;
     onMove: (x: number, y: number) => void;
 };
@@ -19,6 +20,7 @@ export default function RoomShape({
     room,
     handleSelectDoor,
     handleSelectContainer,
+    handleSelectOtherObject,
     setSelectedContainerInfo,
     onMove,
 }: RoomShapeProps) {
@@ -71,6 +73,7 @@ export default function RoomShape({
                 onMouseDown={(e) => {
                     handleSelectContainer(null);
                     handleSelectDoor(null);
+                    handleSelectOtherObject(null);
                     setSelectedContainerInfo(null);
                     e.cancelBubble = true;
                 }}

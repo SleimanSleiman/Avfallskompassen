@@ -1,4 +1,4 @@
-package com.avfallskompassen.dto;
+package com.avfallskompassen.controller.dto;
 
 import com.avfallskompassen.dto.request.PropertyRequest;
 import org.junit.jupiter.api.Test;

@@ -14,6 +14,7 @@ type ContainersLayerProps = {
     handleSelectContainer: (id: number) => void;
     room: Room;
     doorZones: { x: number; y: number; width: number; height: number }[];
+    otherObjectZones: { x: number; y: number; width: number; height: number }[];
     getContainerZones: (excludeId?: number) => { x: number; y: number; width: number; height: number }[];
     setIsDraggingContainer: (dragging: boolean) => void;
     isContainerInsideRoom: (
@@ -29,6 +30,7 @@ export default function ContainersLayer({
     handleSelectContainer,
     room,
     doorZones,
+    otherObjectZones,
     getContainerZones,
     setIsDraggingContainer,
     isContainerInsideRoom,
@@ -42,6 +44,7 @@ export default function ContainersLayer({
                     selected={container.id === selectedContainerId}
                     room={room}
                     doorZones={doorZones}
+                    otherObjectZones={otherObjectZones}
                     getContainerZones={getContainerZones}
                     handleDragContainer={handleDragContainer}
                     handleSelectContainer={handleSelectContainer}
