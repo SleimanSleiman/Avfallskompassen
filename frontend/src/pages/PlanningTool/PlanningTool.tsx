@@ -211,7 +211,7 @@ export default function PlanningTool({ isAdminMode = false }: PlanningToolProps)
         if (!hasCheckedStoredProperty) return;
 
         // Check if we have a property object OR a valid propertyId from navigation
-        // (e.g., when coming from AllWasteroomPage via "Redigera" button)
+        // (ex., when coming from AllWasteroomPage via "Redigera" button)
         const storedPropertyId = typeof window !== 'undefined' ? localStorage.getItem('selectedPropertyId') : null;
         const hasValidPropertyId = storedPropertyId && storedPropertyId !== 'null' && storedPropertyId !== 'undefined';
 
