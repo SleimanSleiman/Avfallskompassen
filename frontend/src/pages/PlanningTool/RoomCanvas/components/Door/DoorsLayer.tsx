@@ -10,10 +10,10 @@ type DoorsLayerProps = {
     doors: Door[];
     selectedDoorId: number | null;
     room: { x: number; y: number; width: number; height: number };
-    handleDragDoor: (id: number, pos: { x: number; y: number; wall?: string; rotation?: number }) => void;
+    handleDragDoor: (id: number, pos: { x: number; y: number; wall: Door["wall"]; rotation: number }) => void;
     handleSelectDoor: (id: number) => void;
     setIsDraggingDoor?: (dragging: boolean) => void;
-    pushContainersFromDoor: () => void;
+    getOtherObjectZones: (excludeId?: number) => { x: number; y: number; width: number; height: number }[];
 };
 
 export default function DoorsLayer({
@@ -23,6 +23,7 @@ export default function DoorsLayer({
     handleDragDoor,
     handleSelectDoor,
     setIsDraggingDoor,
+    getOtherObjectZones,
 }: DoorsLayerProps) {
     return (
         <>
@@ -36,6 +37,7 @@ export default function DoorsLayer({
                     handleDragDoor={handleDragDoor}
                     handleSelectDoor={handleSelectDoor}
                     setIsDraggingDoor={setIsDraggingDoor}
+                    getOtherObjectZones={getOtherObjectZones}
                 />
             ))}
         </>

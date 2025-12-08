@@ -11,7 +11,6 @@ export function useDoors(
     setSelectedDoorId: (id: number | null) => void,
     setSelectedContainerId: (id: number | null) => void,
     setSelectedOtherObjectId: (id: number | null) => void,
-    getContainerZones: () => { x: number; y: number; width: number; height: number }[],
 ) {
 
     /* ──────────────── Door state ──────────────── */
@@ -55,8 +54,6 @@ export function useDoors(
         let newX = 0;
         let newY = 0;
         let newWall: Door["wall"] = wall;
-
-        const containers = getContainerZones();
 
         for (let w of walls) {
             // Define start position and step along the wall

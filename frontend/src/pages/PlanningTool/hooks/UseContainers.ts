@@ -70,9 +70,9 @@ function buildContainerZones(
 
 function validateContainerPlacement(
     newRect: { x: number; y: number; width: number; height: number },
-    doorZones: { x: number; y: number; width: number; height: number }[],
-    containerZones: { x: number; y: number; width: number; height: number }[],
-    otherObjectZones: { x: number; y: number; width: number; height: number }[],
+    doorZones: { x: number; y: number; width: number; height: number }[] = [],
+    containerZones: { x: number; y: number; width: number; height: number }[] = [],
+    otherObjectZones: { x: number; y: number; width: number; height: number }[] = [],
 ) {
     const overlapsDoor = doorZones.some(zone => isOverlapping(newRect, zone));
     const overlapsContainer = containerZones.some(zone => isOverlapping(newRect, zone));

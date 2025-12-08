@@ -6,7 +6,7 @@ import { useState } from "react";
 import { Group } from "react-konva";
 import { clamp, isOverlapping} from "../../../../Constants";
 import DoorVisual from "./DoorVisual";
-import { computeDragBound, getDoorRect } from "../utils/DoorDragUtils";
+import { computeDragBound, getDoorRect, getDoorZone } from "../utils/DoorDragUtils";
 
 export default function DoorDrag({
     door,
@@ -16,6 +16,7 @@ export default function DoorDrag({
     handleDragDoor,
     handleSelectDoor,
     setIsDraggingDoor,
+    getOtherObjectZones,
 }) {
     //Store the last valid (non-overlapping) position for snap-back functionality
     const [lastValidPos, setLastValidPos] = useState({ x: door.x, y: door.y });
@@ -24,6 +25,19 @@ export default function DoorDrag({
 
     //Keeps dragging inside room bounds
     const dragBoundFunc = (pos) => computeDragBound(door, room, pos);
+
+    const checkOverlapping = (pos: { x: number; y: number }) => {
+        const overlappingDoor = doors
+            .filter(d => d.id !== door.id)
+            .some(d => isOverlapping(getDoorRect(door, pos.x, pos.y), getDoorRect(d, d.x, d.y)));
+
+        const objectZones = getOtherObjectZones?.() || [];
+        const overlappingObject = objectZones.some(zone =>
+            isOverlapping(getDoorZone(door, pos.x, pos.y), zone)
+        );
+
+        return overlappingDoor || overlappingObject;
+    };
 
     return (
         <Group
@@ -38,19 +52,12 @@ export default function DoorDrag({
                 handleDragDoor(door.id, pos);
 
                 //Check if overlapping any other door
-                const overlapping = doors
-                    .filter(d => d.id !== door.id)
-                    .some(d => isOverlapping(getDoorRect(door, pos.x, pos.y), getDoorRect(d, d.x, d.y)));
-
-                //Update overlapping state to change door color
-                setIsOverZone(overlapping);
+                setIsOverZone(checkOverlapping(pos));
             }}
             onDragEnd={(e) => {
                 const pos = e.target.position();
                 //Check if overlapping any other door
-                const overlapping = doors
-                    .filter(d => d.id !== door.id)
-                    .some(d => isOverlapping(getDoorRect(door, pos.x, pos.y), getDoorRect(d, d.x, d.y)));
+                const overlapping = checkOverlapping(pos);
 
                 //If overlapping, snap back to last valid position
                 if (overlapping) {

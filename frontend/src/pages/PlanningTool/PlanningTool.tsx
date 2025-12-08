@@ -65,7 +65,7 @@ export default function PlanningTool({ isAdminMode = false }: PlanningToolProps)
         handleSelectDoor,
         getDoorZones,
         doorOffsetRef,
-    } = useDoors(room, setSelectedDoorId, setSelectedContainerId, setSelectedOtherObjectId, () => getContainerZones());
+    } = useDoors(room, setSelectedDoorId, setSelectedContainerId, setSelectedOtherObjectId);
 
     /* ──────────────── Other Objects state & logic ──────────────── */
     const {

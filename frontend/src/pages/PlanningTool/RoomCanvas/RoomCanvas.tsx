@@ -321,6 +321,7 @@ export default function RoomCanvas({
                                 handleDragDoor={handleDragDoor}
                                 handleSelectDoor={handleSelectDoor}
                                 setIsDraggingDoor={setIsDraggingDoor}
+                                getOtherObjectZones={getOtherObjectZones}
                             />
 
                             {/* Measurements between door and corners*/}
