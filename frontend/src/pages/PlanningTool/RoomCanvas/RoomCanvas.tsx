@@ -214,7 +214,7 @@ export default function RoomCanvas({
     };
 
     const closePanels = () => {
-        setSelectedContainerInfo = null;
+        setSelectedContainerInfo(null);
         handleSelectOtherObject (null);
         handleSelectContainer (null);
         handleSelectDoor (null);

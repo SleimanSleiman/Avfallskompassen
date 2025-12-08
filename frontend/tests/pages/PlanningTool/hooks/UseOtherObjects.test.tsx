@@ -122,13 +122,13 @@ describe("useOtherObjects hook", () => {
         const obj = result.current.otherObjects[0];
 
         // inside room
-        expect(result.current.isObjectOutsideRoom(obj, room)).toBe(false);
+        expect(result.current.isObjectInsideRoom(obj, room)).toBe(true);
 
         // move outside room
         act(() => {
             result.current.handleDragOtherObject(obj.id, { x: 1000, y: 1000 });
         });
 
-        expect(result.current.isObjectOutsideRoom(result.current.otherObjects[0], room)).toBe(true);
+        expect(result.current.isObjectInsideRoom(result.current.otherObjects[0], room)).toBe(false);
     });
 });
