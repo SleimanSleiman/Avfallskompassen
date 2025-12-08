@@ -3,7 +3,7 @@ import type { Property } from '../../../lib/Property';
 import type { WasteRoom } from '../../../lib/WasteRoom';
 import { getMyPropertiesWithWasteRooms } from '../../../lib/Property';
 import { MapPin, Home, Users, ChevronDown, Plus, LayoutGrid } from 'lucide-react';
-import type { ContainerInRoom } from '../Types';
+import type { ContainerInRoom, Door } from '../Types';
 import { mmToPixels, SCALE } from '../Constants';
 
 type WasteRoomContainer = NonNullable<WasteRoom['containers']>[number];
@@ -134,6 +134,24 @@ export default function PlanningToolPopup({
     [buildFallbackContainerDTO]
   );
 
+  // Transform raw door data to proper Door format (matching useRoom hook logic)
+  const convertDoorsToRoomState = useCallback(
+    (doors?: WasteRoom['doors']): Door[] => {
+      if (!doors || !Array.isArray(doors)) return [];
+      return doors.map((d: any, i: number) => ({
+        id: d?.id ?? Date.now() + i,
+        x: d?.x ?? 0,
+        y: d?.y ?? 0,
+        width: d?.width ?? 1.2,
+        wall: (d?.wall as Door['wall']) ?? 'bottom',
+        rotation: d?.rotation ?? d?.angle ?? 0,
+        // Match useRoom.ts default - existing saved doors default to 'inward' if not specified
+        swingDirection: (d?.swingDirection as Door['swingDirection']) ?? 'inward',
+      }));
+    },
+    []
+  );
+
   const prepareRoomStateForWasteRoom = useCallback(
     (property: Property, wasteRoom: WasteRoom | null): PreparedRoomState => {
       const containersForStorage = wasteRoom
@@ -169,7 +187,7 @@ export default function PlanningToolPopup({
             y: wasteRoom.y ?? defaultRoomState.y,
             width: (wasteRoom.width ?? defaultRoomState.widthMeters) / SCALE,
             height: (wasteRoom.length ?? defaultRoomState.heightMeters) / SCALE,
-            doors: wasteRoom.doors ?? [],
+            doors: convertDoorsToRoomState(wasteRoom.doors),
             containers: convertContainersToRoomState(wasteRoom.containers),
           }
         : {
@@ -190,7 +208,7 @@ export default function PlanningToolPopup({
         roomState,
       };
     },
-    [convertContainersToRoomState, defaultRoomState, normalizeContainersForStorage]
+    [convertContainersToRoomState, convertDoorsToRoomState, defaultRoomState, normalizeContainersForStorage]
   );
 
   const handleSelectWasteRoom = useCallback(

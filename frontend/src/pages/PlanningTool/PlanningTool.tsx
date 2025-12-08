@@ -232,7 +232,9 @@ export default function PlanningTool({ isAdminMode = false }: PlanningToolProps)
         }
 
         try {
-            const stored = localStorage.getItem('trashRoomData');
+            // Check both storage keys (matching UseRoom.ts pattern)
+            // enviormentRoomData is set by popup selection, trashRoomData is legacy
+            const stored = localStorage.getItem('enviormentRoomData') ?? localStorage.getItem('trashRoomData');
             if (!stored) {
                 setSelectedProperty(null);
                 return;

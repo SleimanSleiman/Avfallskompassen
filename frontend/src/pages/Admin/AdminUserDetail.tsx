@@ -292,7 +292,7 @@ export default function AdminUserDetail({ user, onBack }: AdminUserDetailProps) 
 
             roomsByName.forEach((roomVersions, roomName) => {
               if (roomVersions.length > 0) {
-                const planId = prop.id * 1000 + roomsByName.size;
+                const planId = prop.id * 1000 + plans.length + 1;
                 const versions: PlanVersion[] = roomVersions.map((v: any) => ({
                   versionNumber: v.versionNumber || 1,
                   roomWidth: v.width || v.roomWidth || 0,
