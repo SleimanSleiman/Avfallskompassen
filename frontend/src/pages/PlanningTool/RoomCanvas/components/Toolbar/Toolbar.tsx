@@ -188,25 +188,6 @@ export default function Toolbar({
         setPendingSaveThumbnail(null);
     };
 
-    //Handle forced save despite outside objects
-    const handleConfirmForcedSave = async () => {
-        setShowOutsideWarning(false);
-
-        if (!saveRoom) return;
-
-        try {
-            await saveRoom(pendingSaveThumbnail);
-            setTimeout(() => setMsg("Rummet har sparats"), 10);
-        } catch (err) {
-            setTimeout(() => setError("Rummet gick inte att spara. Vänligen försök igen senare"), 10);
-        }
-    };
-
-    //Cancel forced save
-    const handleCancelForcedSave = () => {
-        setShowOutsideWarning(false);
-        setPendingSaveThumbnail(null);
-    };
 
     return (
         <div id="toolbar-panel" className="toolbar-panel">
