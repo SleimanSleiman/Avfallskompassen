@@ -158,7 +158,7 @@ export function useOtherObjects(
         setSelectedOtherObjectId(null);
     };
 
-    const isObjectOutsideRoom = (
+    const isObjectInsideRoom = (
         obj: { x: number; y: number; width: number; height: number; rotation?: number },
         room: { x: number; y: number; width: number; height: number }
     ) => {
@@ -174,13 +174,23 @@ export function useOtherObjects(
         const aabbY = centerY - aabbHeight / 2;
 
         return (
-            aabbX < room.x ||
-            aabbY < room.y ||
-            aabbX + aabbWidth > room.x + room.width ||
-            aabbY + aabbHeight > room.y + room.height
+            aabbX >= room.x &&
+            aabbY >= room.y &&
+            aabbX + aabbWidth <= room.x + room.width &&
+            aabbY + aabbHeight <= room.y + room.height
         );
     };
 
+    //Move all objects within the room when the room is moved
+    const moveAllObjects = (dx: number, dy: number) => {
+        const newState = otherObjects.map(o => ({
+            ...o,
+            x: o.x + dx,
+            y: o.y + dy,
+        }));
+
+        setOtherObjects(newState);
+    }
 
     /* ──────────────── Return ──────────────── */
     return {
@@ -192,6 +202,7 @@ export function useOtherObjects(
         handleSelectOtherObject,
         handleRotateOtherObject,
         handleRemoveOtherObject,
-        isObjectOutsideRoom,
+        isObjectInsideRoom,
+        moveAllObjects,
     }
 }

@@ -95,7 +95,8 @@ export default function PlanningTool({ isAdminMode = false }: PlanningToolProps)
         handleSelectOtherObject,
         handleRotateOtherObject,
         handleRemoveOtherObject,
-        isObjectOutsideRoom,
+        isObjectInsideRoom,
+        moveAllObjects,
     } = useOtherObjects(room, setSelectedOtherObjectId, setSelectedContainerId, setSelectedDoorId, getDoorZones(), () => getContainerZones());
 
     /* ──────────────── Container state & logic ──────────────── */
@@ -297,7 +298,7 @@ export default function PlanningTool({ isAdminMode = false }: PlanningToolProps)
     const propertyHighlights = usePropertyHighlights(comparisonData, comparisonLoading, selectedProperty);
 
     const { saveRoom } = useSaveRoom();
-    const { buildWasteRoomRequest } = useWasteRoomRequestBuilder(isContainerInsideRoom);
+    const { buildWasteRoomRequest } = useWasteRoomRequestBuilder(isContainerInsideRoom, isObjectInsideRoom);
 
     const handleSaveRoom = async (thumbnailBase64: string | null) => {
         if (!propertyId) {
@@ -477,7 +478,8 @@ export default function PlanningTool({ isAdminMode = false }: PlanningToolProps)
                         getOtherObjectZones={getOtherObjectZones}
                         handleSelectOtherObject={handleSelectOtherObject}
                         selectedOtherObjectId={selectedOtherObjectId}
-                        isObjectOutsideRoom={isObjectOutsideRoom}
+                        isObjectInsideRoom={isObjectInsideRoom}
+                        moveAllObjects={moveAllObjects}
 
                         undo={undo}
                         redo={redo}

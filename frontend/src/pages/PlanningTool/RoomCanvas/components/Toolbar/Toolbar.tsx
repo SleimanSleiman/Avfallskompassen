@@ -11,6 +11,7 @@ import RoomSizePrompt from "../../../../../components/RoomSizePrompt";
 import DoorWidthPrompt from "../../../../../components/DoorWidthPrompt";
 import OtherObjectSizePrompt from "../../../../../components/OtherObjectSizePrompt";
 import ContainerInfo from "./ContainerInfo"
+import ConfirmModal from "../../../../../components/ConfirmModal";
 import './css/roomCanvasToolbar.css'
 
 type ToolbarProps = {
@@ -33,6 +34,11 @@ type ToolbarProps = {
     isAdminMode?: boolean;
     generateThumbnail: () => string | null;
     handleAddOtherObject: (name: string, length: number, width: number) => boolean;
+    isContainerInsideRoom: (rect: { x: number; y: number; width: number; height: number }, room: Room) => boolean;
+    isObjectInsideRoom: (rect: { x: number; y: number; width: number; height: number }, room: Room) => boolean;
+    containers: ContainerDTO[];
+    otherObjects: OtherObjectDTO[];
+    closePanels: () => void;
 };
 
 export default function Toolbar({
@@ -55,13 +61,19 @@ export default function Toolbar({
     isAdminMode = false,
     generateThumbnail,
     handleAddOtherObject,
+    isContainerInsideRoom,
+    isObjectInsideRoom,
+    containers,
+    otherObjects,
+    closePanels,
 }: ToolbarProps) {
 
     const [isRoomPromptOpen, setIsRoomPromptOpen] = useState(false);
     const [isDoorPromptOpen, setIsDoorPromptOpen] = useState(false);
     const [isOtherObjectPromptOpen, setIsOtherObjectPromptOpen] = useState(false);
-
     const [containerInfoPos, setContainerInfoPos] = useState<{ left: number; top: number } | null>(null);
+    const [showOutsideWarning, setShowOutsideWarning] = useState(false);
+    const [pendingSaveThumbnail, setPendingSaveThumbnail] = useState<string | null>(null);
 
     //Safe wrappers for optional undo/redo
     const safeUndo = useCallback(() => {
@@ -122,14 +134,46 @@ export default function Toolbar({
             setTimeout(() => setError("Det måste finnas en dörr innan du sparar rummet"), 10);
             return;
         }
-        try {
-            const thumbnail = generateThumbnail();
-            await saveRoom(thumbnail);
 
+        //Check for containers or objects outside room boundaries
+        const anyContainerOutside = (containers ?? []).some(c => !isContainerInsideRoom(c, room));
+        const anyObjectOutside = (otherObjects ?? []).some(o => !isObjectInsideRoom(o, room));
+
+        const thumbnail = generateThumbnail();
+        setPendingSaveThumbnail(thumbnail);
+
+        if (anyContainerOutside || anyObjectOutside) {
+            closePanels();
+            setShowOutsideWarning(true);
+            return;
+        }
+
+        try {
+            await saveRoom(thumbnail);
             setTimeout(() => setMsg("Rummet har sparats"), 10);
         } catch (err) {
             setTimeout(() => setError("Rummet gick inte att spara. Vänligen försök senare igen"), 10);
         }
+    };
+
+    //Handle forced save despite outside objects
+    const handleConfirmForcedSave = async () => {
+        setShowOutsideWarning(false);
+
+        if (!saveRoom) return;
+
+        try {
+            await saveRoom(pendingSaveThumbnail);
+            setTimeout(() => setMsg("Rummet har sparats"), 10);
+        } catch (err) {
+            setTimeout(() => setError("Rummet gick inte att spara. Vänligen försök igen senare"), 10);
+        }
+    };
+
+    //Cancel forced save
+    const handleCancelForcedSave = () => {
+        setShowOutsideWarning(false);
+        setPendingSaveThumbnail(null);
     };
 
     return (
@@ -247,6 +291,27 @@ export default function Toolbar({
                     onClose={() => setSelectedContainerInfo(null)}
                     pos={containerInfoPos}
                     setPos={setContainerInfoPos}
+                />
+            )}
+
+            {/* Warning modal for outside objects */}
+            {showOutsideWarning && (
+                <ConfirmModal
+                    open={showOutsideWarning}
+                    title="Objekt utanför rummet"
+                    message={
+                        <div>
+                            Det finns sopkärl och/eller föremål som ligger utanför rummets gränser.
+                            <br />
+                            Dessa kommer <strong>inte</strong> att sparas.
+                            <br /><br />
+                            Vill du fortsätta ändå?
+                        </div>
+                    }
+                    confirmLabel="Spara ändå"
+                    cancelLabel="Avbryt"
+                    onConfirm={handleConfirmForcedSave}
+                    onCancel={handleCancelForcedSave}
                 />
             )}
         </div>

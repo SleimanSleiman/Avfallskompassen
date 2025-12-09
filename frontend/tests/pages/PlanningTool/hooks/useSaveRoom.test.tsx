@@ -104,8 +104,9 @@ describe("useSaveRoom", () => {
 describe("useWasteRoomRequestBuilder", () => {
     it("builds correct request and filters containers outside room", () => {
         const isContainerInsideRoom = vi.fn((rect, room) => rect.x !== 999);
+        const isObjectInsideRoom = vi.fn((rect, room) => rect.x !== 999);
 
-        const { buildWasteRoomRequest } = useWasteRoomRequestBuilder(isContainerInsideRoom);
+        const { buildWasteRoomRequest } = useWasteRoomRequestBuilder(isContainerInsideRoom, isObjectInsideRoom);
 
         const room = { id: 10, x: 5, y: 6, width: 4, height: 3, name: "Room A" };
         const doors = [{ x: 1, y: 2, width: 90, rotation: 45, wall: "north", swingDirection: "in" }];
@@ -134,5 +135,6 @@ describe("useWasteRoomRequestBuilder", () => {
         });
 
         expect(isContainerInsideRoom).toHaveBeenCalledTimes(2);
+        expect(isObjectInsideRoom).toHaveBeenCalledTimes(1);
     });
 });
