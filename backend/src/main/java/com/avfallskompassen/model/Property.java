@@ -93,6 +93,8 @@ public class Property {
         this.createdBy = createdBy;
     }
 
+
+
     public Municipality getMunicipality() {
         return municipality;
     }

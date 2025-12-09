@@ -19,7 +19,7 @@ export default function PropertyOverviewPanel({
 }: Props) {
     return (
         <>
-            <div className="overview-wrapper">
+            <div id="property-panel" className="overview-wrapper">
                 <div className="overview-grid">
                     {propertyHighlights.map(({ key, Icon, title, value, tone, helper }) => (
                         <div key={key} className="overview-card">
@@ -38,7 +38,7 @@ export default function PropertyOverviewPanel({
                 </div>
             </div>
 
-            <div className="overview-summary-wrapper">
+            <div id="comparison-panel"className="overview-summary-wrapper">
                 <WasteTypeSummaryPanel
                     comparisonData={comparisonData}
                     comparisonLoading={comparisonLoading}

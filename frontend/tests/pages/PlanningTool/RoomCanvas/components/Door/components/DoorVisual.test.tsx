@@ -61,6 +61,15 @@ describe("DoorVisual component", () => {
         expect(line.dataset.stroke).toBe("orange");
     });
 
+    it("applies red stroke color when overlapping (isOverZone=true)", () => {
+        render(<DoorVisual door={doorBase} selected={false} isOverZone={true} />);
+        const arc = screen.getByTestId("arc");
+        const line = screen.getByTestId("line");
+
+        expect(arc.dataset.stroke).toBe("red");
+        expect(line.dataset.stroke).toBe("red");
+    });
+
     it("applies correct rotation, scaleX, and radius/points", () => {
         const door = { ...doorBase, swingDirection: "inward" };
         render(<DoorVisual door={door} selected={false} />);

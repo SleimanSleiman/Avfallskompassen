@@ -13,6 +13,7 @@ const mockRoom = {
 describe("useDoors hook", () => {
     const mockSetSelectedDoorId = vi.fn();
     const mockSetSelectedContainerId = vi.fn();
+    const mockSetSelectedOtherObjectId = vi.fn();
 
     //Mock global alert
     beforeAll(() => {
@@ -31,7 +32,7 @@ describe("useDoors hook", () => {
     //Test adding a new door
     it("adds a new door to the room", () => {
 
-        const { result } = renderHook(() => useDoors(mockRoom, mockSetSelectedDoorId, mockSetSelectedContainerId));
+        const { result } = renderHook(() => useDoors(mockRoom, mockSetSelectedDoorId, mockSetSelectedContainerId, mockSetSelectedOtherObjectId));
 
         let added: boolean;
         act(() => {
@@ -47,7 +48,7 @@ describe("useDoors hook", () => {
 
     //Test adding a door with width less than 1.2m when it's the first door
     it("does not add a door if first door is smaller than 1.2m", () => {
-        const { result } = renderHook(() => useDoors(mockRoom, mockSetSelectedDoorId, mockSetSelectedContainerId))
+        const { result } = renderHook(() => useDoors(mockRoom, mockSetSelectedDoorId, mockSetSelectedContainerId, mockSetSelectedOtherObjectId))
 
         let added: boolean;
         act(() => {
@@ -61,7 +62,7 @@ describe("useDoors hook", () => {
 
     //Test adding a smaller door after a large door exists
     it("allows adding smaller doors after a large door exists", () => {
-        const { result } = renderHook(() => useDoors(mockRoom, mockSetSelectedDoorId, mockSetSelectedContainerId))
+        const { result } = renderHook(() => useDoors(mockRoom, mockSetSelectedDoorId, mockSetSelectedContainerId, mockSetSelectedOtherObjectId))
 
         act(() => {
             result.current.handleAddDoor({ width: 1.2 });
@@ -78,7 +79,7 @@ describe("useDoors hook", () => {
 
     //Test removing a door >=1.2m when it's the only large door
     it("prevents removing the last large door (≥1.2m)", () => {
-        const { result } = renderHook(() => useDoors(mockRoom, mockSetSelectedDoorId, mockSetSelectedContainerId))
+        const { result } = renderHook(() => useDoors(mockRoom, mockSetSelectedDoorId, mockSetSelectedContainerId, mockSetSelectedOtherObjectId))
 
         act(() => {
             result.current.handleAddDoor({ width: 1.2 });
@@ -101,7 +102,7 @@ describe("useDoors hook", () => {
 
     //Test removing a small door normally
     it("removes a small door normally", async () => {
-        const { result } = renderHook(() => useDoors(mockRoom, mockSetSelectedDoorId, mockSetSelectedContainerId))
+        const { result } = renderHook(() => useDoors(mockRoom, mockSetSelectedDoorId, mockSetSelectedContainerId, mockSetSelectedOtherObjectId))
 
         act(() => {
             result.current.handleAddDoor({ width: 1.2 });
@@ -123,7 +124,7 @@ describe("useDoors hook", () => {
 
     //Test selecting a door
     it("selects a door by id", () => {
-        const { result } = renderHook(() => useDoors(mockRoom, mockSetSelectedDoorId, mockSetSelectedContainerId))
+        const { result } = renderHook(() => useDoors(mockRoom, mockSetSelectedDoorId, mockSetSelectedContainerId, mockSetSelectedOtherObjectId));
 
         act(() => {
             result.current.handleAddDoor({ width: 1.2 });
@@ -141,7 +142,7 @@ describe("useDoors hook", () => {
     //Test rotating a door
     it("updates door rotation and swing direction", () => {
         const { result } = renderHook(() =>
-            useDoors(mockRoom, mockSetSelectedDoorId, mockSetSelectedContainerId)
+            useDoors(mockRoom, mockSetSelectedDoorId, mockSetSelectedContainerId, mockSetSelectedOtherObjectId)
         );
 
         act(() => {
@@ -165,7 +166,7 @@ describe("useDoors hook", () => {
 
     //Test dragging door to another wall
     it("moves door to another wall when dragged across room boundary", () => {
-        const { result } = renderHook(() => useDoors(mockRoom, mockSetSelectedDoorId, mockSetSelectedContainerId))
+        const { result } = renderHook(() => useDoors(mockRoom, mockSetSelectedDoorId, mockSetSelectedContainerId, mockSetSelectedOtherObjectId));
 
         act(() => {
             result.current.handleAddDoor({ width: 1.2 });
@@ -187,7 +188,7 @@ describe("useDoors hook", () => {
     //Test rotation update when dragging inward-swing door to new wall
     it("updates rotation correctly when dragging inward-swing door to new wall", () => {
         const { result } = renderHook(() =>
-            useDoors(mockRoom, mockSetSelectedDoorId, mockSetSelectedContainerId)
+            useDoors(mockRoom, mockSetSelectedDoorId, mockSetSelectedContainerId, mockSetSelectedOtherObjectId)
         );
 
         act(() => {
@@ -211,7 +212,7 @@ describe("useDoors hook", () => {
 
     //Test door position updates when room changes
     it("updates door position when room size changes", () => {
-        const { result, rerender } = renderHook(({ room }) => useDoors(room, mockSetSelectedDoorId, mockSetSelectedContainerId), {
+        const { result, rerender } = renderHook(({ room }) => useDoors(room, mockSetSelectedDoorId, mockSetSelectedContainerId, mockSetSelectedOtherObjectId), {
             initialProps: { room: mockRoom },
         });
 
@@ -231,7 +232,7 @@ describe("useDoors hook", () => {
 
     //Test door zone generation
     it("generates door zones correctly", () => {
-        const { result } = renderHook(() => useDoors(mockRoom, mockSetSelectedDoorId, mockSetSelectedContainerId));
+        const { result } = renderHook(() => useDoors(mockRoom, mockSetSelectedDoorId, mockSetSelectedContainerId, mockSetSelectedOtherObjectId));
         act(() => result.current.handleAddDoor({ width: 1.2 }));
 
         const zones = result.current.getDoorZones();

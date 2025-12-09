@@ -63,7 +63,16 @@ describe("RoomCanvas component", () => {
         setSelectedContainerInfo: vi.fn(),
         selectedContainerInfo: null,
         draggedContainer: null,
-        getContainerZones: vi.fn(),
+        getContainerZones: vi.fn().mockReturnValue([]),
+
+        otherObjects: [],
+        setOtherObjects: vi.fn(),
+        handleAddOtherObject: vi.fn(),
+        handleDragOtherObject: vi.fn(),
+        getOtherObjectZones: vi.fn().mockReturnValue([]),
+        handleSelectOtherObject: vi.fn(),
+        selectedOtherObjectId: null,
+        isObjectOutsideRoom: vi.fn().mockReturnValue(false),
 
         stageWrapperRef: React.createRef<HTMLDivElement>(),
         handleStageDrop: vi.fn(),

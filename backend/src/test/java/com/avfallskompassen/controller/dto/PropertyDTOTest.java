@@ -1,5 +1,6 @@
-package com.avfallskompassen.dto;
+package com.avfallskompassen.controller.dto;
 
+import com.avfallskompassen.dto.PropertyDTO;
 import com.avfallskompassen.model.LockType;
 import com.avfallskompassen.model.Municipality;
 import com.avfallskompassen.model.Property;

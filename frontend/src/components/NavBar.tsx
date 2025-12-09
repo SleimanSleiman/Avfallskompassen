@@ -1,4 +1,4 @@
-import { Link, NavLink } from 'react-router-dom';
+import { Link, NavLink, useLocation } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { currentUser, logout } from '../lib/Auth';
 
@@ -6,6 +6,8 @@ export default function NavBar() {
   const [open, setOpen] = useState(false);
   const [user, setUser] = useState(currentUser());
   const isAdmin = String(user?.role || '').toUpperCase().includes('ADMIN');
+  const location = useLocation();
+  const hideMenu = ["/login", "/register"].includes(location.pathname);
 
   useEffect(() => {
     setUser(currentUser());
@@ -29,6 +31,14 @@ export default function NavBar() {
     window.location.href = '/login';
   }
 
+  function resetPlanningToolState() {
+    if (typeof window === 'undefined') return;
+    localStorage.removeItem('enviormentRoomData');
+    localStorage.removeItem('trashRoomData');
+    localStorage.removeItem('selectedProperty');
+    localStorage.removeItem('selectedPropertyId');
+  }
+
   return (
     <header className="w-full shadow-sm">
       <div className="bg-nsr-teal">
@@ -47,12 +57,15 @@ export default function NavBar() {
               />
             </Link>
 
+            {!hideMenu && (
             <button className="md:hidden text-white" onClick={() => setOpen(v => !v)} aria-label="Toggle navigation">
               <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" stroke="currentColor">
                 <path strokeWidth="2" strokeLinecap="round" d="M4 6h16M4 12h16M4 18h16" />
               </svg>
             </button>
+            )}
 
+            {!hideMenu && (
             <nav className="hidden md:flex items-center gap-6 text-white font-black text-lg">
               {isAdmin ? (
                 <>
@@ -72,7 +85,13 @@ export default function NavBar() {
                   <NavLink to="/dashboard" className={({ isActive }) => `nav-link hover:text-white transition-colors ${isActive ? 'nav-link-active' : ''}`}>Dashboard</NavLink>
                   <NavLink to="/statistics" className={({ isActive }) => `nav-link hover:text-white transition-colors ${isActive ? 'nav-link-active' : ''}`}>Statistik</NavLink>
                   <NavLink to="/properties" className={({ isActive }) => `nav-link hover:text-white transition-colors ${isActive ? 'nav-link-active' : ''}`}>Mina fastigheter</NavLink>
-                  <NavLink to="/planningTool" className={({ isActive }) => `nav-link hover:text-white transition-colors ${isActive ? 'nav-link-active' : ''}`}>Planeringsverktyg</NavLink>
+                  <NavLink
+                    to="/planningTool"
+                    onClick={resetPlanningToolState}
+                    className={({ isActive }) => `nav-link hover:text-white transition-colors ${isActive ? 'nav-link-active' : ''}`}
+                  >
+                    Planeringsverktyg
+                  </NavLink>
                   <NavLink to="/reports" className={({ isActive }) => `nav-link hover:text-white transition-colors ${isActive ? 'nav-link-active' : ''}`}>Rapporter</NavLink>
                   <div className="flex items-center gap-3">
                     {user && <span className="text-sm">Hej {user.username}!</span>}
@@ -95,11 +114,12 @@ export default function NavBar() {
                 </>
               )}
             </nav>
+            )}
           </div>
         </div>
       </div>
       <div className="h-3 w-full bg-nsr-tealDark" />
-      {open && (
+      {open && !hideMenu && (
         <div className="md:hidden bg-white border-b">
           <nav className="mx-auto max-w-7xl px-4 py-3 flex flex-col gap-3 font-black">
             {isAdmin ? (
@@ -112,7 +132,7 @@ export default function NavBar() {
                 <NavLink to="/dashboard" className="text-nsr-ink">Dashboard</NavLink>
                 <NavLink to="/properties" className="text-nsr-ink">Mina fastigheter</NavLink>
                 <NavLink to="/statistics" className="text-nsr-ink">Statistik</NavLink>
-                <NavLink to="/planningTool" className="text-nsr-ink">Planeringsverktyg</NavLink>
+                <NavLink to="/planningTool" onClick={resetPlanningToolState} className="text-nsr-ink">Planeringsverktyg</NavLink>
                 <NavLink to="/reports" className="text-nsr-ink">Rapporter</NavLink>
                 {user ? (
                   <button onClick={handleLogout} className="text-left text-nsr-ink">Logga ut</button>

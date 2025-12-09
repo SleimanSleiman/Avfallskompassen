@@ -21,7 +21,7 @@ public class RoomPdf {
     private WasteRoom wasteRoom;
 
     @Lob
-    @Column(name = "pdf_data", nullable = false)
+    @Column(name = "pdf_data", nullable = false, columnDefinition = "BLOB")
     private byte[] pdfData;
 
     @Column(name = "file_size")

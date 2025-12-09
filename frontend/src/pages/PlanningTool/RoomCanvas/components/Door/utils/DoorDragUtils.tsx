@@ -3,7 +3,7 @@
  * Computes constrained drag bounds for doors inside a room.
  */
 
-import { clamp } from "../../../../Constants";
+import { clamp, SCALE } from "../../../../Constants";
 
 //Compute the nearest allowed position for a door within room bounds
 export function computeDragBound(door, room, pos: { x: number; y: number }) {
@@ -60,3 +60,11 @@ export function computeDragBound(door, room, pos: { x: number; y: number }) {
 
     return { x: newX, y: newY };
 }
+
+//Get the rectangle representing the door's area to check for collisions
+export function getDoorRect (door, x, y) {
+   const w = door.wall === "top" || door.wall === "bottom" ? door.width / SCALE : 10;
+   const h = door.wall === "left" || door.wall === "right" ? door.width / SCALE : 10;
+
+   return { x, y, width: w, height: h };
+};

@@ -27,6 +27,7 @@ export default function DoorsLayer({
                 <DoorDrag
                     key={door.id}
                     door={door}
+                    doors={doors}
                     selected={selectedDoorId === door.id}
                     room={room}
                     handleDragDoor={handleDragDoor}

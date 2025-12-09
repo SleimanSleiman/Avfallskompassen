@@ -2,8 +2,10 @@ import { useState, useMemo, useEffect } from 'react';
 import type { AdminUser } from '../AdminPage';
 import AdminPlanningEditor from './AdminPlanningEditor';
 import LoadingBar from '../../components/LoadingBar';
-import { get } from '../../lib/api';
+import { get, deleteRequest } from '../../lib/api';
 import { getUsersPropertiesWithWasteRooms } from '../../lib/Property';
+import { currentUser } from '../../lib/Auth';
+import ConfirmModal from '../../components/ConfirmModal';
 
 // Data types
 export type AdminProperty = {
@@ -57,6 +59,7 @@ export default function AdminUserDetail({ user, onBack }: AdminUserDetailProps) 
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [expandedProperties, setExpandedProperties] = useState<Set<number>>(new Set());
+  const [deleteConfirm, setDeleteConfirm] = useState<{ planId: number; versionNumber: number; wasteRoomId: number } | null>(null);
 
   useEffect(() => {
     let mounted = true;
@@ -245,6 +248,94 @@ export default function AdminUserDetail({ user, onBack }: AdminUserDetailProps) 
         ? { ...prev, activeVersionNumber: versionNumber }
         : prev
     );
+  };
+
+  const handleDeleteVersion = async (planId: number, versionNumber: number, wasteRoomId: number) => {
+    if (!wasteRoomId) {
+      console.error('Cannot delete version: no wasteRoomId');
+      return;
+    }
+
+    try {
+      await deleteRequest(`/api/wasterooms/${wasteRoomId}`);
+      
+      // Reload room plans after deletion
+      setLoading(true);
+      const allProps = await get<any[]>('/api/properties');
+      const userProps = allProps.filter((p) => p.createdByUsername === user.username);
+
+      const mappedProps: AdminProperty[] = userProps.map((p) => ({
+        id: Number(p.id),
+        userId: user.id,
+        address: p.address || '',
+        numberOfApartments: p.numberOfApartments || 0,
+        municipalityName: p.municipalityName || p.municipality || '',
+        lockName: (p.lockTypeDto && p.lockTypeDto.name) || p.lockName || '',
+        accessPathLength: p.accessPathLength || 0,
+        createdAt: p.createdAt || new Date().toISOString(),
+      }));
+
+      const plans: RoomPlan[] = [];
+      await Promise.all(
+        mappedProps.map(async (prop) => {
+          try {
+            const rooms = await get<any[]>(`/api/properties/${prop.id}/wasterooms`);
+            // Group rooms by name
+            const roomsByName = new Map<string, any[]>();
+            (rooms || []).forEach((r: any) => {
+              const roomName = r.name || 'Miljörum 1';
+              if (!roomsByName.has(roomName)) {
+                roomsByName.set(roomName, []);
+              }
+              roomsByName.get(roomName)!.push(r);
+            });
+
+            roomsByName.forEach((roomVersions, roomName) => {
+              if (roomVersions.length > 0) {
+                const planId = prop.id * 1000 + plans.length + 1;
+                const versions: PlanVersion[] = roomVersions.map((v: any) => ({
+                  versionNumber: v.versionNumber || 1,
+                  roomWidth: v.width || v.roomWidth || 0,
+                  roomHeight: v.length || v.roomHeight || 0,
+                  x: v.x ?? 150,
+                  y: v.y ?? 150,
+                  doors: v.doors || [],
+                  containers: v.containers || [],
+                  createdBy: (v.createdBy || 'user') as 'user' | 'admin',
+                  adminUsername: v.adminUsername,
+                  createdAt: v.createdAt || new Date().toISOString(),
+                  versionName: v.versionName,
+                  wasteRoomId: v.wasteRoomId || v.id,
+                }));
+
+                const activeVersion = versions.find(v => v.versionNumber === (roomVersions[0].activeVersionNumber || 1)) || versions[0];
+                const plan: RoomPlan = {
+                  id: planId,
+                  propertyId: prop.id,
+                  userId: user.id,
+                  name: roomName,
+                  versions,
+                  createdAt: prop.createdAt,
+                  updatedAt: new Date().toISOString(),
+                  activeVersionNumber: activeVersion.versionNumber,
+                };
+                plans.push(plan);
+              }
+            });
+          } catch (e) {
+            console.warn('Failed to fetch wasterooms for property', prop.id, e);
+          }
+        })
+      );
+
+      setRoomPlans(plans);
+      setDeleteConfirm(null);
+    } catch (error) {
+      console.error('Failed to delete version', error);
+      alert('Kunde inte ta bort versionen. Försök igen.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleSavePlanVersion = async (planId: number, planData: any, adminUsername: string) => {
@@ -676,6 +767,28 @@ export default function AdminUserDetail({ user, onBack }: AdminUserDetailProps) 
                                                         {new Date(version.createdAt).toLocaleDateString('sv-SE')}
                                                       </span>
                                                     </div>
+                                                    {currentUser()?.role === 'ADMIN' && version.wasteRoomId && !isActive && (
+                                                      <button
+                                                        onClick={() => setDeleteConfirm({ planId: plan.id, versionNumber: version.versionNumber, wasteRoomId: version.wasteRoomId! })}
+                                                        className="flex-shrink-0 p-1.5 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors"
+                                                        title="Ta bort version"
+                                                      >
+                                                        <svg
+                                                          className="w-4 h-4"
+                                                          fill="none"
+                                                          stroke="currentColor"
+                                                          viewBox="0 0 24 24"
+                                                          xmlns="http://www.w3.org/2000/svg"
+                                                        >
+                                                          <path
+                                                            strokeLinecap="round"
+                                                            strokeLinejoin="round"
+                                                            strokeWidth={2}
+                                                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                                                          />
+                                                        </svg>
+                                                      </button>
+                                                    )}
                                                   </div>
                                                 </div>
                                               );
@@ -705,6 +818,19 @@ export default function AdminUserDetail({ user, onBack }: AdminUserDetailProps) 
           </div>
         )}
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {deleteConfirm && (
+        <ConfirmModal
+          open={true}
+          onCancel={() => setDeleteConfirm(null)}
+          onConfirm={() => handleDeleteVersion(deleteConfirm.planId, deleteConfirm.versionNumber, deleteConfirm.wasteRoomId)}
+          title="Ta bort version"
+          message={`Är du säker på att du vill ta bort Version ${deleteConfirm.versionNumber}? Denna åtgärd kan inte ångras.`}
+          confirmLabel="Ta bort"
+          cancelLabel="Avbryt"
+        />
+      )}
     </main>
   );
 }

@@ -14,6 +14,7 @@ export interface ContainerSizeComparison {
   averageVolume: number;
   comparison: string;
   comparisonGroupSize: number;
+  averageCollectionFrequency: number;
 }
 
 export interface WasteAmountComparison {

@@ -116,4 +116,19 @@ public class UserServiceImpl implements UserService {
         User savedUser = userRepository.save(user);
         return new UserDTO(savedUser);
     }
+
+    @Override
+    public boolean hasSeenPlanningToolManual(String username) {
+        return userRepository.findByUsername(username)
+                .map(User::getHasSeenPlanningToolManual)
+                .orElse(false);
+    }
+
+    @Override
+    public void markPlanningToolManualAsSeen(String username) {
+        userRepository.findByUsername(username).ifPresent(user -> {
+            user.setHasSeenPlanningToolManual(true);
+            userRepository.save(user);
+        });
+    }
 }

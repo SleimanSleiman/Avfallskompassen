@@ -17,6 +17,14 @@ public class Municipality {
     @Column //Lägg till att den inte ska vara nullable.
     private String name;
 
+    public Municipality(String name) {
+        this.name = name;
+    }
+
+    public Municipality() {
+
+    }
+
     public long getId() {
         return Id;
     }

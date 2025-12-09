@@ -77,10 +77,10 @@ describe("ContainerPanel component", () => {
 
     it("renders filtered containers for selected service type", () => {
         render(<ContainerPanel {...defaultProps} selectedType="Mat" />);
-
-        expect(screen.getByText("Container 1")).toBeInTheDocument();
-        expect(screen.queryByText("Container 2")).not.toBeInTheDocument();
+        expect(screen.getByAltText("Container 1")).toBeInTheDocument();
+        expect(screen.queryByAltText("Container 2")).not.toBeInTheDocument();
     });
+
 
     it("calls handleAddContainer when 'Lägg till' clicked", () => {
         render(<ContainerPanel {...defaultProps} selectedType="Mat" />);

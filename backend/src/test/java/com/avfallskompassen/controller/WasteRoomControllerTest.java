@@ -2,6 +2,7 @@ package com.avfallskompassen.controller;
 
 import com.avfallskompassen.dto.ContainerPositionDTO;
 import com.avfallskompassen.dto.DoorDTO;
+import com.avfallskompassen.dto.OtherObjectDTO;
 import com.avfallskompassen.dto.WasteRoomDTO;
 import com.avfallskompassen.dto.WasteRoomImgDTO;
 import com.avfallskompassen.dto.request.WasteRoomRequest;
@@ -55,7 +56,11 @@ class WasteRoomControllerTest {
                 new DoorDTO(1L, 0.5, 0.5, 0, 1.0, 0.1, 5L,"top","outward")
         );
 
-        WasteRoomDTO dto = new WasteRoomDTO(2L,10,10,10,10,containers,doors, 5L, "Name", 1, "user", null, null, true, null, null);
+        List<OtherObjectDTO> otherObjects = List.of(
+                new OtherObjectDTO(1L, "Skåp", 3, 3, 30, 30, 90, 5L)
+        );
+
+        WasteRoomDTO dto = new WasteRoomDTO(2L,10,10,10,10,containers,doors,otherObjects, 5L, "Name", 1, "user", null, null, true, null, null, null);
 
         when(wasteRoomService.saveWasteRoom(any(WasteRoomRequest.class))).thenReturn(dto);
 
@@ -73,6 +78,9 @@ class WasteRoomControllerTest {
                       ],
                       "doors": [
                         { "width": 1.0, "x": 0.5, "y": 0.5, "angle": 0.0, "wall": "top", "swingDirection": "outward" }
+                      ],
+                        "otherObjects": [
+                        { "name": "Skåp", "x": 3.0, "y": 3.0, "length": 30.0, "width": 30.0, "angle": 90.0 }
                       ]
                     }
                 """))
@@ -80,7 +88,8 @@ class WasteRoomControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.propertyId").value(2))
                 .andExpect(jsonPath("$.containers[0].id").value(1))
-                .andExpect(jsonPath("$.doors[0].id").value(1));;
+                .andExpect(jsonPath("$.doors[0].id").value(1))
+                .andExpect(jsonPath("$.otherObjects[0].name").value("Skåp"));
     }
 
     @Test
@@ -93,7 +102,8 @@ class WasteRoomControllerTest {
             "x": 1.0,
             "y": 2.0,
             "containers": [],
-            "doors": []
+            "doors": [],
+            "otherObjects": []
         }
         """;
         mockMvc.perform(post("/api/wasterooms")
@@ -112,7 +122,8 @@ class WasteRoomControllerTest {
             "x": 1.0,
             "y": 2.0,
             "containers": [],
-            "doors": []
+            "doors": [],
+            "otherObjects": []
         }
         """;
         mockMvc.perform(post("/api/wasterooms")
@@ -131,7 +142,8 @@ class WasteRoomControllerTest {
             "x": 1.0,
             "y": 2.0,
             "containers": [],
-            "doors": []
+            "doors": [],
+            "otherObjects": []
         }
         """;
         mockMvc.perform(post("/api/wasterooms")
@@ -151,7 +163,11 @@ class WasteRoomControllerTest {
                 new DoorDTO(1L, 0.5, 0.5, 0, 1.0, 0.1, 5L,"top","outward")
         );
 
-        WasteRoomDTO dto = new WasteRoomDTO(2L, 10, 10, 10, 10, containers, doors, 5L, "Name", 1, "user", null, null, true, null, null);
+        List<OtherObjectDTO> otherObjects = List.of(
+                new OtherObjectDTO(1L, "Skåp", 3, 3, 30, 30, 90, 5L)
+        );
+
+        WasteRoomDTO dto = new WasteRoomDTO(2L, 10, 10, 10, 10, containers, doors, otherObjects, 5L, "Name", 1, "user", null, null, true, null, null, null);
 
         when(wasteRoomService.updateWasteRoom(any(Long.class), any(WasteRoomRequest.class))).thenReturn(dto);
 
@@ -169,13 +185,17 @@ class WasteRoomControllerTest {
                       ],
                       "doors": [
                         { "width": 1.0, "x": 0.5, "y": 0.5, "angle": 0.0, "wall": "top", "swingDirection": "outward" }
+                      ],
+                        "otherObjects": [
+                        { "name": "Skåp", "x": 3.0, "y": 3.0, "length": 30.0, "width": 30.0, "angle": 90.0 }
                       ]
                     }
                     """))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.propertyId").value(2))
                 .andExpect(jsonPath("$.containers[0].id").value(1))
-                .andExpect(jsonPath("$.doors[0].id").value(1));
+                .andExpect(jsonPath("$.doors[0].id").value(1))
+                .andExpect(jsonPath("$.otherObjects[0].name").value("Skåp"));
     }
 
     @Test
@@ -237,7 +257,7 @@ class WasteRoomControllerTest {
 
     @Test
     void getWasteRoomById_ReturnsOK() throws Exception {
-        WasteRoomDTO dto = new WasteRoomDTO(1L, 10, 10, 0, 0, List.of(), List.of(), 1L, "Name", 1, "user", null, null, true, null, null);
+        WasteRoomDTO dto = new WasteRoomDTO(1L, 10, 10, 0, 0, List.of(), List.of(), List.of(), 1L, "Name", 1, "user", null, null, true, null, null, null);
 
         when(wasteRoomService.getWasteRoomById(1L)).thenReturn(dto);
 
@@ -259,8 +279,8 @@ class WasteRoomControllerTest {
     @Test
     void getWasteRoomsByPropertyId_ReturnsOK() throws Exception {
         List<WasteRoomDTO> rooms = List.of(
-                new WasteRoomDTO(1L, 10, 10, 0, 0, List.of(), List.of(),3L, "Name", 1, "user", null, null, true, null, null),
-                new WasteRoomDTO(1L, 12, 8, 5, 5, List.of(), List.of(),2L, "Name", 1, "user", null, null, true, null, null)
+                new WasteRoomDTO(1L, 10, 10, 0, 0, List.of(), List.of(), List.of(),3L, "Name", 1, "user", null, null, true, null, null, null),
+                new WasteRoomDTO(1L, 12, 8, 5, 5, List.of(), List.of(), List.of(), 2L, "Name", 1, "user", null, null, true, null, null, null)
         );
 
         when(wasteRoomService.getWasteRoomsByPropertyId(1L)).thenReturn(rooms);

@@ -45,7 +45,7 @@ export default function WasteAnalysisPanels({
     });
 
     return (
-        <div className="analysis-root">
+        <div id="analys-panel" className="analysis-root">
 
             <div className="analysis-header">
                 <div className="analysis-header-left">

@@ -12,6 +12,7 @@
     "test:watch": "vitest watch"
   },
   "dependencies": {
+    "driver.js": "^1.4.0",
     "framer-motion": "^12.23.22",
     "konva": "^10.0.12",
     "lucide-react": "^0.552.0",

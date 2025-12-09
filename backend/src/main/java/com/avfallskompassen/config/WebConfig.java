@@ -12,6 +12,7 @@ public class WebConfig implements WebMvcConfigurer {
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         registry.addResourceHandler("/images/wasterooms/**")
                 .addResourceLocations("file:uploads/wasterooms/");
+
     }
 
     @Override //TODO: Denna måste ändras om man ska göra den deployable.

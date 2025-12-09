@@ -24,7 +24,15 @@ export default function AllaMiljoRumPage() {
 
             try {
                 const data = await getWasteRoomsByPropertyId(Number(propertyId));
-                setRooms(data);
+                console.log(data);
+
+                const sorted = data.sort(
+                    (a, b) =>
+                        new Date(b.updatedAt ?? 0).getTime() -
+                        new Date(a.updatedAt ?? 0).getTime()
+                );
+
+                setRooms(sorted);
             } finally {
                 setLoading(false);
             }
@@ -45,6 +53,7 @@ export default function AllaMiljoRumPage() {
                 },
             })),
             doors: room.doors ?? [],
+            otherObjects: room.otherObjects ?? [],
         };
 
         localStorage.setItem("enviormentRoomData", JSON.stringify(fullRoomData));
@@ -151,9 +160,9 @@ export default function AllaMiljoRumPage() {
                         {filteredRooms.map((room, i) => (
                             
                             <div key={room.id} className="rounded-xl border bg-white p-5 shadow-soft flex flex-col">
-                                {console.log("Thumbnail URL new →", room.thumbnailUrl)}
                                 <img
-                                    src={`http://localhost:8081${room.thumbnailUrl}`}
+                                    //src={`http://localhost:8081${room.thumbnailUrl}`}
+                                    src={room.thumbnailUrl || greybox}
                                     alt="Miljörum bild"
                                     className="w-full h-40 object-cover rounded-lg mb-3"
                                 />
