@@ -11,15 +11,17 @@ public class ContainerSizeComparisonDTO {
     private Double averageVolume;             // Average volume in comparison group
     private String comparison;                 // "mindre", "större", "lika stora"
     private Integer comparisonGroupSize;       // Number of similar properties
-    
+    private Double averageCollectionFrequency; // Average collection frequency in comparison group
+
     public ContainerSizeComparisonDTO() {}
     
     public ContainerSizeComparisonDTO(Integer propertyTotalVolume, Double averageVolume, 
-                                     String comparison, Integer comparisonGroupSize) {
+                                     String comparison, Integer comparisonGroupSize, Double averageCollectionFrequency) {
         this.propertyTotalVolume = propertyTotalVolume;
         this.averageVolume = averageVolume;
         this.comparison = comparison;
         this.comparisonGroupSize = comparisonGroupSize;
+        this.averageCollectionFrequency = averageCollectionFrequency;
     }
     
     // Getters and Setters
@@ -50,8 +52,16 @@ public class ContainerSizeComparisonDTO {
     public Integer getComparisonGroupSize() {
         return comparisonGroupSize;
     }
-    
+
     public void setComparisonGroupSize(Integer comparisonGroupSize) {
         this.comparisonGroupSize = comparisonGroupSize;
+    }
+
+    public Double getAverageCollectionFrequency() {
+        return averageCollectionFrequency;
+    }
+
+    public void setAverageCollectionFrequency(Double averageCollectionFrequency) {
+        this.averageCollectionFrequency = averageCollectionFrequency;
     }
 }

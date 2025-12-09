@@ -41,7 +41,7 @@ describe("OtherObjectsLayer", () => {
     });
 
     it("renders all objects as Rects", () => {
-        const isObjectOutsideRoom = vi.fn(() => false);
+        const isObjectInsideRoom = vi.fn(() => false);
 
         const { getAllByTestId } = render(
             <OtherObjectsLayer
@@ -54,7 +54,7 @@ describe("OtherObjectsLayer", () => {
                 selectedOtherObjectId={null}
                 handleDragOtherObject={handleDragOtherObject}
                 setIsDraggingOtherObject={setIsDraggingOtherObject}
-                isObjectOutsideRoom={isObjectOutsideRoom}
+                isObjectInsideRoom={isObjectInsideRoom}
             />
         );
 
@@ -63,7 +63,7 @@ describe("OtherObjectsLayer", () => {
     });
 
     it("applies correct fill and stroke for selected object", () => {
-        const isObjectOutsideRoom = vi.fn(() => false);
+        const isObjectInsideRoom = vi.fn(() => false);
 
         const { getAllByTestId } = render(
             <OtherObjectsLayer
@@ -76,7 +76,7 @@ describe("OtherObjectsLayer", () => {
                 selectedOtherObjectId={2}
                 handleDragOtherObject={handleDragOtherObject}
                 setIsDraggingOtherObject={setIsDraggingOtherObject}
-                isObjectOutsideRoom={isObjectOutsideRoom}
+                isObjectInsideRoom={isObjectInsideRoom}
             />
         );
 

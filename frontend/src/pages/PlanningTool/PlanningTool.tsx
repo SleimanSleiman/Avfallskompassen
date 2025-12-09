@@ -3,8 +3,8 @@
  * Manages state and logic for room layout, doors, containers, and service types.
  * Renders the RoomCanvas, Sidebar, and ActionPanel components.
  */
-import { useState, useEffect } from 'react';
-import { MapPin, Home, Users } from "lucide-react";
+import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 //Lib
 import type { Property } from '../../lib/Property';
@@ -30,7 +30,11 @@ import { useLayoutHistory } from './hooks/UseLayoutHistory';
 import { useSaveRoom, useWasteRoomRequestBuilder } from './hooks/UseSaveRoom';
 import { usePropertyHighlights } from './hooks/usePropertyHighlights';
 
-import { SCALE } from './Constants';
+import { SCALE, ROOM_HORIZONTAL_OFFSET, ROOM_VERTICAL_OFFSET, STAGE_HEIGHT, STAGE_WIDTH } from './Constants';
+import PlanningToolPopup from './components/PlanningToolPopup';
+import type { PreparedRoomState } from './components/PlanningToolPopup';
+
+const DEFAULT_ROOM_METERS = 5;
 
 import { driver } from "driver.js";
 import "driver.js/dist/driver.css";
@@ -40,6 +44,20 @@ type PlanningToolProps = {
 };
 
 export default function PlanningTool({ isAdminMode = false }: PlanningToolProps) {
+    const navigate = useNavigate();
+
+    const defaultRoomState = useMemo(() => {
+        const widthPx = DEFAULT_ROOM_METERS / SCALE;
+        const heightPx = DEFAULT_ROOM_METERS / SCALE;
+        return {
+            widthMeters: DEFAULT_ROOM_METERS,
+            heightMeters: DEFAULT_ROOM_METERS,
+            widthPx,
+            heightPx,
+            x: (STAGE_WIDTH - widthPx) / 2 + ROOM_HORIZONTAL_OFFSET,
+            y: (STAGE_HEIGHT - heightPx) / 2 + ROOM_VERTICAL_OFFSET,
+        };
+    }, []);
 
    // Selected IDs
    const [selectedContainerId, setSelectedContainerId] = useState<number | null>(null);
@@ -77,7 +95,8 @@ export default function PlanningTool({ isAdminMode = false }: PlanningToolProps)
         handleSelectOtherObject,
         handleRotateOtherObject,
         handleRemoveOtherObject,
-        isObjectOutsideRoom,
+        isObjectInsideRoom,
+        moveAllObjects,
     } = useOtherObjects(room, setSelectedOtherObjectId, setSelectedContainerId, setSelectedDoorId, getDoorZones(), () => getContainerZones());
 
     /* ──────────────── Container state & logic ──────────────── */
@@ -188,15 +207,45 @@ export default function PlanningTool({ isAdminMode = false }: PlanningToolProps)
 
 
     const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
+    const [hasCheckedStoredProperty, setHasCheckedStoredProperty] = useState(false);
+    const [showPropertyPicker, setShowPropertyPicker] = useState(false);
+    const clearPlanningStorage = useCallback(() => {
+        if (typeof window === 'undefined') return;
+        localStorage.removeItem('enviormentRoomData');
+        localStorage.removeItem('trashRoomData');
+        localStorage.removeItem('selectedProperty');
+        localStorage.removeItem('selectedPropertyId');
+    }, []);
+
+    useEffect(() => {
+        if (isAdminMode) return;
+        if (!hasCheckedStoredProperty) return;
+
+        // Check if we have a property object OR a valid propertyId from navigation
+        // (ex., when coming from AllWasteroomPage via "Redigera" button)
+        const storedPropertyId = typeof window !== 'undefined' ? localStorage.getItem('selectedPropertyId') : null;
+        const hasValidPropertyId = storedPropertyId && storedPropertyId !== 'null' && storedPropertyId !== 'undefined';
+
+        if (selectedProperty || hasValidPropertyId) {
+            setShowPropertyPicker(false);
+            return;
+        }
+
+        clearPlanningStorage();
+        setShowPropertyPicker(true);
+    }, [isAdminMode, selectedProperty, hasCheckedStoredProperty, clearPlanningStorage]);
     const [containerPanelHeight, setContainerPanelHeight] = useState(0);
 
     useEffect(() => {
         if (typeof window === 'undefined') {
+            setHasCheckedStoredProperty(true);
             return;
         }
 
         try {
-            const stored = localStorage.getItem('trashRoomData');
+            // Check both storage keys (matching UseRoom.ts pattern)
+            // enviormentRoomData is set by popup selection, trashRoomData is legacy
+            const stored = localStorage.getItem('enviormentRoomData') ?? localStorage.getItem('trashRoomData');
             if (!stored) {
                 setSelectedProperty(null);
                 return;
@@ -211,6 +260,8 @@ export default function PlanningTool({ isAdminMode = false }: PlanningToolProps)
         } catch (error) {
             console.error('Failed to parse stored property data', error);
             setSelectedProperty(null);
+        } finally {
+            setHasCheckedStoredProperty(true);
         }
     }, []);
 
@@ -230,19 +281,36 @@ export default function PlanningTool({ isAdminMode = false }: PlanningToolProps)
     const _savedPropertyId = typeof window !== 'undefined' ? localStorage.getItem('selectedPropertyId') : null;
     const propertyId = _savedProperty ? JSON.parse(_savedProperty).propertyId : (_savedPropertyId ? Number(_savedPropertyId) : null);
 
+    const handlePopupSelection = useCallback((prepared: PreparedRoomState) => {
+        const { property, propertyId: preparedId, storagePayload, roomState } = prepared;
+        localStorage.setItem('enviormentRoomData', JSON.stringify(storagePayload));
+        localStorage.removeItem('trashRoomData');
+        localStorage.setItem('selectedPropertyId', String(preparedId));
+        localStorage.setItem('selectedProperty', JSON.stringify({ propertyId: preparedId }));
+        setSelectedProperty(property);
+        setRoom(roomState);
+        setShowPropertyPicker(false);
+    }, [setRoom]);
+
+    const goToProperties = useCallback(() => {
+        setShowPropertyPicker(false);
+        navigate('/properties');
+    }, [navigate]);
+
     const { data: comparisonData, loading: comparisonLoading, error: comparisonError } = useComparison(propertyId);
     const propertyHighlights = usePropertyHighlights(comparisonData, comparisonLoading, selectedProperty);
 
     const { saveRoom } = useSaveRoom();
-    const { buildWasteRoomRequest } = useWasteRoomRequestBuilder(isContainerInsideRoom);
+    const { buildWasteRoomRequest } = useWasteRoomRequestBuilder(isContainerInsideRoom, isObjectInsideRoom);
 
-    const handleSaveRoom = async (thumbnailBase64: string | "null") => {
+    const handleSaveRoom = async (thumbnailBase64: string | null) => {
         if (!propertyId) {
             console.error("No propertyId, cannot save room.");
             return;
         }
 
-        const roomRequest = buildWasteRoomRequest(room, doors, containersInRoom, otherObjects, propertyId, thumbnailBase64);
+        const thumbnail = thumbnailBase64 || "";
+        const roomRequest = buildWasteRoomRequest(room, doors, containersInRoom, otherObjects, propertyId, thumbnail);
 
         const savedRoom = await saveRoom(roomRequest);
         room.id = savedRoom?.wasteRoomId;
@@ -351,6 +419,7 @@ export default function PlanningTool({ isAdminMode = false }: PlanningToolProps)
 
     /* ──────────────── Render ──────────────── */
     return (
+        <>
         <div className="flex h-full w-full flex-col gap-4 p-3 sm:p-5">
 
             <button
@@ -412,7 +481,8 @@ export default function PlanningTool({ isAdminMode = false }: PlanningToolProps)
                         getOtherObjectZones={getOtherObjectZones}
                         handleSelectOtherObject={handleSelectOtherObject}
                         selectedOtherObjectId={selectedOtherObjectId}
-                        isObjectOutsideRoom={isObjectOutsideRoom}
+                        isObjectInsideRoom={isObjectInsideRoom}
+                        moveAllObjects={moveAllObjects}
 
                         undo={undo}
                         redo={redo}
@@ -466,5 +536,14 @@ export default function PlanningTool({ isAdminMode = false }: PlanningToolProps)
                 </div>
             </div>
         </div>
+
+        {!isAdminMode && showPropertyPicker && (
+            <PlanningToolPopup
+                defaultRoomState={defaultRoomState}
+                onSelect={handlePopupSelection}
+                onManageProperties={goToProperties}
+            />
+        )}
+        </>
     );
 }

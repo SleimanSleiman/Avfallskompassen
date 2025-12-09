@@ -29,6 +29,7 @@ public class WasteRoomDTO {
     private String createdAt;
     private String updatedAt;
     private String thumbnailUrl;
+    private Double averageCollectionFrequency;
 
     // Constructors
     public WasteRoomDTO() {}
@@ -36,7 +37,7 @@ public class WasteRoomDTO {
     public WasteRoomDTO(Long propertyId, double length, double width, double x, double y,
                         List<ContainerPositionDTO> containers, List<DoorDTO> doors, List<OtherObjectDTO> otherObjects, Long wasteRoomId, String name,
                         int versionNumber, String createdBy, String adminUsername, String versionName,
-                        Boolean isActive, String createdAt, String updatedAt) {
+                        Boolean isActive, String createdAt, String updatedAt, Double averageCollectionFrequency) {
         this.propertyId = propertyId;
         this.length = length;
         this.width = width;
@@ -54,6 +55,7 @@ public class WasteRoomDTO {
         this.isActive = isActive;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
+        this.averageCollectionFrequency = averageCollectionFrequency;
     }
 
     public Long getPropertyId() {
@@ -143,6 +145,9 @@ public class WasteRoomDTO {
     public String getUpdatedAt() { return updatedAt; }
     public void setUpdatedAt(String updatedAt) { this.updatedAt = updatedAt; }
 
+    public Double getAverageCollectionFrequency() { return averageCollectionFrequency; }
+    public void setAverageCollectionFrequency(Double averageCollectionFrequency) { this.averageCollectionFrequency = averageCollectionFrequency; }
+
     /**
      * Method for converting an entity object to a DTO object
      * @param entity The entity object to be converted
@@ -178,7 +183,8 @@ public class WasteRoomDTO {
                 entity.getVersionName(),
                 entity.getIsActive(),
                 entity.getCreatedAt() != null ? entity.getCreatedAt().toString() : null,
-                entity.getUpdatedAt() != null ? entity.getUpdatedAt().toString() : null
+                entity.getUpdatedAt() != null ? entity.getUpdatedAt().toString() : null,
+                entity.getAverageCollectionFrequency()
         );
         dto.setThumbnailUrl(entity.getThumbnailUrl());
         return dto;

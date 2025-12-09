@@ -86,6 +86,14 @@ export function useContainerComparison({
             ? totalFrequencyAll / designStats.containerCount
             : null;
 
+    //Average frequency across comparison group
+    const comparisonAverageFrequency = containerComparison?.averageCollectionFrequency ?? null;
+
+    const frequencyDifference = calculatePercentageDifference(
+        averageFrequencyAll,
+        comparisonAverageFrequency
+    );
+
     return {
         propertyVolumeValue,
         containerAverageVolume,
@@ -96,5 +104,7 @@ export function useContainerComparison({
         containerTone,
         totalVolumeLabel,
         averageFrequencyAll,
+        comparisonAverageFrequency,
+        frequencyDifference,
     };
 }

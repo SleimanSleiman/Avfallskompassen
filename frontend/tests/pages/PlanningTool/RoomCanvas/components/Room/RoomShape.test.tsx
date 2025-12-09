@@ -48,24 +48,29 @@ describe("RoomShape (Vitest)", () => {
         height: 150,
     };
 
-    const handleSelectDoor = vi.fn();
     const handleSelectContainer = vi.fn();
+    const handleSelectDoor = vi.fn();
     const handleSelectOtherObject = vi.fn();
     const setSelectedContainerInfo = vi.fn();
+
+    const closePanels = () => {
+        handleSelectContainer(null);
+        handleSelectDoor(null);
+        handleSelectOtherObject(null);
+        setSelectedContainerInfo(null);
+    };
+
     const onMove = vi.fn();
 
     beforeEach(() => {
-    vi.clearAllMocks();
+        vi.clearAllMocks();
     });
 
     it("renders rectangle and dimension text", () => {
         const { getByTestId } = render(
             <RoomShape
                 room={room}
-                handleSelectDoor={handleSelectDoor}
-                handleSelectOtherObject={handleSelectOtherObject}
-                handleSelectContainer={handleSelectContainer}
-                setSelectedContainerInfo={setSelectedContainerInfo}
+                closePanels={closePanels}
                 onMove={onMove}
             />
         );
@@ -80,10 +85,7 @@ describe("RoomShape (Vitest)", () => {
         const { getByTestId } = render(
             <RoomShape
                 room={room}
-                handleSelectDoor={handleSelectDoor}
-                handleSelectOtherObject={handleSelectOtherObject}
-                handleSelectContainer={handleSelectContainer}
-                setSelectedContainerInfo={setSelectedContainerInfo}
+                closePanels={closePanels}
                 onMove={onMove}
             />
         );
@@ -92,6 +94,7 @@ describe("RoomShape (Vitest)", () => {
 
         expect(handleSelectContainer).toHaveBeenCalledWith(null);
         expect(handleSelectDoor).toHaveBeenCalledWith(null);
+        expect(handleSelectOtherObject).toHaveBeenCalledWith(null);
         expect(setSelectedContainerInfo).toHaveBeenCalledWith(null);
     });
 
@@ -99,10 +102,7 @@ describe("RoomShape (Vitest)", () => {
         const { getByTestId } = render(
             <RoomShape
                 room={room}
-                handleSelectDoor={handleSelectDoor}
-                handleSelectOtherObject={handleSelectOtherObject}
-                handleSelectContainer={handleSelectContainer}
-                setSelectedContainerInfo={setSelectedContainerInfo}
+                closePanels={closePanels}
                 onMove={onMove}
             />
         );

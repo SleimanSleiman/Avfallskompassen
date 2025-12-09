@@ -17,7 +17,7 @@ type OtherObjectsLayerProps = {
     selectedOtherObjectId: number | null;
     handleDragOtherObject: (id: number, pos: { x: number; y: number }) => void;
     setIsDraggingOtherObject: (val: boolean) => void;
-    isObjectOutsideRoom: (rect: { x: number; y: number; width: number; height: number; rotation?: number },room: Room) => boolean;
+    isObjectInsideRoom: (rect: { x: number; y: number; width: number; height: number; rotation?: number },room: Room) => boolean;
 };
 
 export default function OtherObjectsLayer({
@@ -30,7 +30,7 @@ export default function OtherObjectsLayer({
     selectedOtherObjectId,
     handleDragOtherObject,
     setIsDraggingOtherObject,
-    isObjectOutsideRoom,
+    isObjectInsideRoom,
 }: OtherObjectsLayerProps) {
 
     return (
@@ -38,7 +38,7 @@ export default function OtherObjectsLayer({
             {otherObjectsInRoom.map((obj) => {
                 const isSelected = obj.id === selectedOtherObjectId;
 
-                const isOutsideRoom = isObjectOutsideRoom(
+                const isOutsideRoom = !isObjectInsideRoom(
                    { x: obj.x, y: obj.y, width: obj.width, height: obj.height, rotation: obj.rotation },
                    room
                 );
