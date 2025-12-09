@@ -4,14 +4,17 @@
  * saving the design, and performing undo/redo actions.
  */
 
-import { React, useState, useCallback } from "react";
-import { Save, Ruler, DoorOpen, Undo, Redo, PillBottle, X, SquarePlus, ArrowLeft } from "lucide-react";
+import { useState, useCallback } from "react";
+import { Save, Ruler, DoorOpen, Undo, Redo, PillBottle, SquarePlus, ArrowLeft } from "lucide-react";
 import { SCALE, STAGE_WIDTH, STAGE_HEIGHT, MARGIN, clamp, MIN_HEIGHT, MIN_WIDTH } from "../../../Constants"
 import RoomSizePrompt from "../../../../../components/RoomSizePrompt";
 import DoorWidthPrompt from "../../../../../components/DoorWidthPrompt";
 import OtherObjectSizePrompt from "../../../../../components/OtherObjectSizePrompt";
 import ContainerInfo from "./ContainerInfo"
 import ConfirmModal from "../../../../../components/ConfirmModal";
+import type { Room } from "../../../Types";
+import type { ContainerDTO } from "../../../../../lib/Container";
+import type { OtherObjectInRoom, ContainerInRoom } from "../../../Types";
 import './css/roomCanvasToolbar.css'
 
 type ToolbarProps = {
@@ -36,8 +39,8 @@ type ToolbarProps = {
     handleAddOtherObject: (name: string, length: number, width: number) => boolean;
     isContainerInsideRoom: (rect: { x: number; y: number; width: number; height: number }, room: Room) => boolean;
     isObjectInsideRoom: (rect: { x: number; y: number; width: number; height: number }, room: Room) => boolean;
-    containers: ContainerDTO[];
-    otherObjects: OtherObjectDTO[];
+    containers: ContainerInRoom[];
+    otherObjects: OtherObjectInRoom[];
     closePanels: () => void;
     hasUnsavedChanges?: () => boolean;
     onClose?: () => void;
