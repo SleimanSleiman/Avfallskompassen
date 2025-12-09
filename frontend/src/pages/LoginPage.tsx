@@ -24,11 +24,8 @@ export default function LoginPage() {
       if (res.success) {
         startInactivityTimer();
         setMsg(res.message || 'Inloggning lyckades');
-        
-        // Navigate to dashboard after successful login
-        setTimeout(() => {
+
           navigate('/dashboard');
-        }, 1500);
       } else {
         setError(res.message || 'Inloggningen misslyckades');
       }
