@@ -83,6 +83,7 @@ export default function PlanningTool({ isAdminMode = false }: PlanningToolProps)
         handleSelectDoor,
         getDoorZones,
         doorOffsetRef,
+        restoreDoorState,
     } = useDoors(room, setSelectedDoorId, setSelectedContainerId, setSelectedOtherObjectId);
 
     /* ──────────────── Other Objects state & logic ──────────────── */
@@ -445,6 +446,7 @@ export default function PlanningTool({ isAdminMode = false }: PlanningToolProps)
                         handleSelectDoor={handleSelectDoor}
                         handleAddDoor={handleAddDoor}
                         doorZones={getDoorZones()}
+                        restoreDoorState={restoreDoorState}
 
                         containers={containersInRoom}
                         selectedContainerId={selectedContainerId}

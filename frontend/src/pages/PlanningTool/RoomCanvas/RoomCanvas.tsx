@@ -41,9 +41,10 @@ type RoomCanvasProps = {
     doors: Door[];
     selectedDoorId: number | null;
     handleSelectDoor: (id: number | null) => void;
-    handleDragDoor: (id: number, pos: { x: number; y: number; wall: Door["wall"]; rotation: number }) => void;
+    handleDragDoor: (id: number, pos: { x: number; y: number }) => void;
     handleAddDoor: (door: { width: number }) => boolean;
     doorZones: { x: number; y: number; width: number; height: number }[];
+    restoreDoorState: (id: number, state: { x: number; y: number; wall: Door["wall"]; rotation: number; swingDirection: Door["swingDirection"];}) => void;
 
     /* ───────────── Container Props ───────────── */
     containers: ContainerInRoom[];
@@ -110,6 +111,7 @@ export default function RoomCanvas({
     handleDragDoor,
     handleAddDoor,
     doorZones,
+    restoreDoorState,
 
     /* ───────────── Container Props ───────────── */
     containers,
@@ -332,6 +334,7 @@ export default function RoomCanvas({
                                 handleSelectDoor={handleSelectDoor}
                                 setIsDraggingDoor={setIsDraggingDoor}
                                 getOtherObjectZones={getOtherObjectZones}
+                                restoreDoorState={restoreDoorState}
                             />
 
                             {/* Measurements between door and corners*/}

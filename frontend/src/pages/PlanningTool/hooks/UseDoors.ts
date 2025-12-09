@@ -328,6 +328,23 @@ export function useDoors(
         });
     };
 
+    const restoreDoorState = (id, state) => {
+        setDoors(prev =>
+            prev.map(d =>
+                d.id !== id
+                    ? d
+                    : {
+                        ...d,
+                        x: state.x,
+                        y: state.y,
+                        wall: state.wall,
+                        rotation: state.rotation,
+                        swingDirection: state.swingDirection
+                    }
+            )
+        );
+    };
+
     /* ──────────────── Return ──────────────── */
     return {
         doors,
@@ -340,6 +357,7 @@ export function useDoors(
         handleSelectDoor,
         getDoorZones,
         doorOffsetRef,
+        restoreDoorState,
     };
 }
 
