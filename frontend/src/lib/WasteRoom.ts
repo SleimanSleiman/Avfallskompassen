@@ -59,3 +59,7 @@ export type OtherObject = {
 export async function getWasteRoomsByPropertyId(propertyId : number): Promise<WasteRoom[]> {
     return get<WasteRoom[]>(`/api/properties/${propertyId}/wasterooms`);
 }
+
+export async function getWasteRoomById(wasteRoomId: number): Promise<WasteRoom> {
+    return get<WasteRoom>(`/api/wasterooms/${wasteRoomId}`);
+}
