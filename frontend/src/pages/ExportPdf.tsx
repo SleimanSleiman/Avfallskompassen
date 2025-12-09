@@ -51,7 +51,7 @@ const MARGINS = {
     standard: [0, 0, 0, 15] as [number, number, number, number],
 } as const;
 
-const TABLE_COLUMN_WIDTHS = ["*", "auto", "auto", "auto", "auto", "auto", "auto", "auto", "auto"] as const;
+const TABLE_COLUMN_WIDTHS = [85, 50, 30, 55, 55, 40, 45, 55, 55] as const;
 
 async function fetchImageAsBase64(url: string): Promise<string> {
     const res = await fetch(url, { credentials: "include" });
@@ -107,6 +107,7 @@ function createTableHeaderCell(text: string, alignment: 'left' | 'right' | 'cent
         color: COLORS.text.white,
         fontSize: FONT_SIZES.normal,
         alignment,
+        noWrap: false,
     };
 }
 
@@ -122,6 +123,7 @@ function createTableCell(
         fillColor,
         fontSize: FONT_SIZES.small,
         color: COLORS.text.secondary,
+        noWrap: false,
         ...options
     };
 }
@@ -208,13 +210,13 @@ function createFieldValue(value: string, fontSize = FONT_SIZES.medium) {
 function createTableHeaderRow() {
     return [
         createTableHeaderCell("Fraktion"),
-        createTableHeaderCell("Volym (liter)", "right"),
-        createTableHeaderCell("Antal kärl", "right"),
-        createTableHeaderCell("Hämtfrekvens", "right"),
+        createTableHeaderCell("Volym (L)", "right"),
+        createTableHeaderCell("Antal", "right"),
+        createTableHeaderCell("Hämtfrekv.", "right"),
         createTableHeaderCell("Årsvolym", "right"),
-        createTableHeaderCell("Procent", "right"),
-        createTableHeaderCell("L/lgh/vecka", "right"),
-        createTableHeaderCell("Kostnad (kr)", "right"),
+        createTableHeaderCell("%", "right"),
+        createTableHeaderCell("L/lgh/v", "right"),
+        createTableHeaderCell("Kostnad", "right"),
         createTableHeaderCell("Fördelning", "right")
     ];
 }
@@ -235,7 +237,8 @@ function createSummaryRow(summary: any, index: number, totalAnnualVolume: number
             color: indicatorColor,
             bold: true,
             fillColor: rowColor,
-            fontSize: FONT_SIZES.normal
+            fontSize: FONT_SIZES.normal,
+            noWrap: false
         },
         createTableCell(formatNumber(Number(summary.totalVolume)), "right", rowColor, { bold: true }),
         createTableCell(formatNumber(Number(summary.totalQuantity)), "right", rowColor, { bold: true }),
@@ -266,7 +269,8 @@ function createContainerRow(container: any, rowColor: string, collectionFee: num
             fontSize: FONT_SIZES.small,
             margin: [8, 0, 0, 0],
             fillColor: rowColor,
-            color: COLORS.text.secondary
+            color: COLORS.text.secondary,
+            noWrap: false
         },
         createTableCell(formatNumber(size), "right", rowColor),
         createTableCell(formatNumber(qty), "right", rowColor),
@@ -334,12 +338,12 @@ function buildSummaryTable(containerSummaries: any[], collectionFee: number) {
             vLineWidth: () => 0,
             hLineColor: (i: number) =>
                 (i === 0 || i === 1) ? COLORS.primary : COLORS.border.light,
-            paddingLeft: () => 10,
-            paddingRight: () => 10,
+            paddingLeft: () => 7,
+            paddingRight: () => 5,
             paddingTop: () => 6,
             paddingBottom: () => 6
         },
-        margin: MARGINS.section
+        margin: [-30, 15, 0, 20]
     };
 }
 
