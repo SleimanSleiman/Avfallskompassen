@@ -332,6 +332,7 @@ export default function RoomCanvas({
                                 room={room}
                                 handleDragDoor={handleDragDoor}
                                 handleSelectDoor={handleSelectDoor}
+                                isDraggingDoor={isDraggingDoor}
                                 setIsDraggingDoor={setIsDraggingDoor}
                                 getOtherObjectZones={getOtherObjectZones}
                                 restoreDoorState={restoreDoorState}

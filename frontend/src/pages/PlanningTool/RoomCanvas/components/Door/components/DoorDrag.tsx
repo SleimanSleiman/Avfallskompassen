@@ -15,6 +15,7 @@ export default function DoorDrag({
     doors,
     handleDragDoor,
     handleSelectDoor,
+    isDraggingDoor,
     setIsDraggingDoor,
     getOtherObjectZones,
     restoreDoorState,
@@ -47,6 +48,18 @@ export default function DoorDrag({
 
         return overlappingDoor || overlappingObject;
     };
+
+    useEffect(() => {
+        if (!isDraggingDoor) {
+            setLastValidState({
+                x: door.x,
+                y: door.y,
+                wall: door.wall,
+                rotation: door.rotation,
+                swingDirection: door.swingDirection,
+            });
+        }
+    }, [door.x, door.y, door.wall, door.rotation, door.swingDirection, isDraggingDoor]);
 
     return (
         <Group
