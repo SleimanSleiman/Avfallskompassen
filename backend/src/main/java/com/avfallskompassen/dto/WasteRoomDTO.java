@@ -18,6 +18,7 @@ public class WasteRoomDTO {
     private double y;
     private List<ContainerPositionDTO> containers;
     private List<DoorDTO> doors;
+    private List<OtherObjectDTO> otherObjects;
     private Long wasteRoomId;
     private String name;
     private int versionNumber;
@@ -28,14 +29,15 @@ public class WasteRoomDTO {
     private String createdAt;
     private String updatedAt;
     private String thumbnailUrl;
+    private Double averageCollectionFrequency;
 
     // Constructors
     public WasteRoomDTO() {}
 
     public WasteRoomDTO(Long propertyId, double length, double width, double x, double y,
-                        List<ContainerPositionDTO> containers, List<DoorDTO> doors, Long wasteRoomId, String name,
+                        List<ContainerPositionDTO> containers, List<DoorDTO> doors, List<OtherObjectDTO> otherObjects, Long wasteRoomId, String name,
                         int versionNumber, String createdBy, String adminUsername, String versionName,
-                        Boolean isActive, String createdAt, String updatedAt) {
+                        Boolean isActive, String createdAt, String updatedAt, Double averageCollectionFrequency) {
         this.propertyId = propertyId;
         this.length = length;
         this.width = width;
@@ -43,6 +45,7 @@ public class WasteRoomDTO {
         this.y = y;
         this.containers = containers;
         this.doors = doors;
+        this.otherObjects = otherObjects;
         this.wasteRoomId = wasteRoomId;
         this.name = name;
         this.versionNumber = versionNumber;
@@ -52,6 +55,7 @@ public class WasteRoomDTO {
         this.isActive = isActive;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
+        this.averageCollectionFrequency = averageCollectionFrequency;
     }
 
     public Long getPropertyId() {
@@ -103,6 +107,13 @@ public class WasteRoomDTO {
         this.doors = doors;
     }
 
+    public List<OtherObjectDTO> getOtherObjects() {
+        return otherObjects;
+    }
+    public void setOtherObjects(List<OtherObjectDTO> otherObjects) {
+        this.otherObjects = otherObjects;
+    }
+
     public Long getWasteRoomId() { return wasteRoomId; }
     public void setWasteRoomId(Long wasteRoomId) { this.wasteRoomId = wasteRoomId; }
 
@@ -134,6 +145,9 @@ public class WasteRoomDTO {
     public String getUpdatedAt() { return updatedAt; }
     public void setUpdatedAt(String updatedAt) { this.updatedAt = updatedAt; }
 
+    public Double getAverageCollectionFrequency() { return averageCollectionFrequency; }
+    public void setAverageCollectionFrequency(Double averageCollectionFrequency) { this.averageCollectionFrequency = averageCollectionFrequency; }
+
     /**
      * Method for converting an entity object to a DTO object
      * @param entity The entity object to be converted
@@ -156,6 +170,11 @@ public class WasteRoomDTO {
                         .map(DoorDTO::fromEntity)
                         .collect(Collectors.toList())
                         : null,
+                entity.getOtherObjects() != null
+                        ? entity.getOtherObjects().stream()
+                        .map(OtherObjectDTO::fromEntity)
+                        .collect(Collectors.toList())
+                        : null,
                 entity.getId(),
                 entity.getName(),
                 entity.getVersionNumber(),
@@ -164,7 +183,8 @@ public class WasteRoomDTO {
                 entity.getVersionName(),
                 entity.getIsActive(),
                 entity.getCreatedAt() != null ? entity.getCreatedAt().toString() : null,
-                entity.getUpdatedAt() != null ? entity.getUpdatedAt().toString() : null
+                entity.getUpdatedAt() != null ? entity.getUpdatedAt().toString() : null,
+                entity.getAverageCollectionFrequency()
         );
         dto.setThumbnailUrl(entity.getThumbnailUrl());
         return dto;

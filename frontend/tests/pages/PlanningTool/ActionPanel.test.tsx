@@ -3,71 +3,52 @@ import React from "react";
 import ActionPanel from "../../../src/pages/PlanningTool/ActionPanel";
 import { vi, describe, it, beforeEach, expect } from "vitest";
 
-// ─────────────── Mock components ───────────────
+// ─────────────── Mock Tooltip ───────────────
 vi.mock("../../../src/pages/PlanningTool/components/InfoTooltip", () => ({
     default: ({ text }: { text: string }) => <div data-testid="mock-tooltip">{text}</div>,
 }));
 
-// ─────────────── Default mocks ───────────────
+// ─────────────── Mocks ───────────────
 const mockContainer = {
     id: 1,
-    container: {
-        id: 1,
-        name: "240 L",
-        size: 240,
-        width: 600,
-        depth: 800,
-        height: 1100,
-        imageFrontViewUrl: "/front.png",
-        imageTopViewUrl: "/top.png",
-        emptyingFrequencyPerYear: 0,
-        cost: 0,
-    },
-    x: 0,
-    y: 0,
-    width: 100,
-    height: 100,
-    rotation: 0,
+    container: { id: 1, name: "240 L", size: 240, width: 600, depth: 800, height: 1100, imageFrontViewUrl: "", imageTopViewUrl: "", emptyingFrequencyPerYear: 0, cost: 0 },
+    x: 0, y: 0, width: 100, height: 100, rotation: 0,
 };
 
-const mockDoor = {
-    id: 2,
-    width: 0.9,
-    x: 0,
-    y: 0,
-    rotation: 0,
-    wall: "bottom" as const,
-    swingDirection: "inward" as const,
-};
+const mockDoor = { id: 2, width: 0.9, x: 0, y: 0, rotation: 0, wall: "bottom" as const, swingDirection: "inward" as const };
+
+const mockOtherObject = { id: 3, name: "Object A", x: 0, y: 0, width: 50, height: 50, rotation: 0 };
 
 const mockHandlers = {
     handleRemoveContainer: vi.fn(),
     handleRemoveDoor: vi.fn(),
+    handleRemoveOtherObject: vi.fn(),
     handleRotateDoor: vi.fn(),
     handleRotateContainer: vi.fn(),
+    handleRotateOtherObject: vi.fn(),
     handleShowContainerInfo: vi.fn(),
 };
 
-// ─────────────── Helper function ───────────────
+// ─────────────── Helper ───────────────
 const renderActionPanel = (overrideProps: Partial<React.ComponentProps<typeof ActionPanel>> = {}) =>
-    render(
-        <ActionPanel
-            containers={[mockContainer]}
-            doors={[mockDoor]}
-            selectedContainerId={null}
-            selectedDoorId={null}
-            pos={{ left: 0, top: 0 }}
-            setPos={vi.fn()}
-            stageWrapperRef={{ current: { getBoundingClientRect: () => ({ width: 800, height: 600 }) } }}
-            {...mockHandlers}
-            {...overrideProps}
-        />
-    );
+render(
+    <ActionPanel
+        containers={[mockContainer]}
+        doors={[mockDoor]}
+        otherObjects={[mockOtherObject]}
+        selectedContainerId={null}
+        selectedDoorId={null}
+        selectedOtherObjectId={null}
+        pos={{ left: 0, top: 0 }}
+        setPos={vi.fn()}
+        stageWrapperRef={{ current: { getBoundingClientRect: () => ({ width: 800, height: 600 }) } }}
+        {...mockHandlers}
+        {...overrideProps}
+    />
+);
 
 describe("ActionPanel", () => {
-    beforeEach(() => {
-        vi.clearAllMocks();
-    });
+    beforeEach(() => vi.clearAllMocks());
 
     it("renders correctly for a selected container", () => {
         renderActionPanel({ selectedContainerId: mockContainer.id });
@@ -86,10 +67,9 @@ describe("ActionPanel", () => {
     });
 
     it("renders correctly for a selected door", () => {
-        renderActionPanel({ selectedDoorId: mockDoor.id, selectedContainerId: null });
+        renderActionPanel({ selectedDoorId: mockDoor.id });
 
         expect(screen.getByText(`Dörr ${mockDoor.width * 100}cm`)).toBeDefined();
-
         fireEvent.click(screen.getByText("Rotera dörr"));
         expect(mockHandlers.handleRotateDoor).toHaveBeenCalledWith(mockDoor.id);
 
@@ -99,8 +79,21 @@ describe("ActionPanel", () => {
         expect(screen.queryByText("Information")).toBeNull();
     });
 
+    it("renders correctly for a selected other object", () => {
+        renderActionPanel({ selectedOtherObjectId: mockOtherObject.id });
+
+        expect(screen.getByText(mockOtherObject.name)).toBeDefined();
+        fireEvent.click(screen.getByText("Rotera objekt"));
+        expect(mockHandlers.handleRotateOtherObject).toHaveBeenCalledWith(mockOtherObject.id);
+
+        fireEvent.click(screen.getByText("Ta bort objekt"));
+        expect(mockHandlers.handleRemoveOtherObject).toHaveBeenCalledWith(mockOtherObject.id);
+
+        expect(screen.queryByText("Information")).toBeNull();
+    });
+
     it("does not render if nothing is selected", () => {
-        const { container } = renderActionPanel({ selectedContainerId: null, selectedDoorId: null });
+        const { container } = renderActionPanel();
         expect(container.firstChild).toBeNull();
     });
 

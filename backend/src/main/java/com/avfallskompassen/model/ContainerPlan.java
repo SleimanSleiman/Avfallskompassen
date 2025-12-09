@@ -34,6 +34,18 @@ public class ContainerPlan {
     @Column(name = "image_top_view_url")
     private String imageTopViewUrl;
 
+    public ContainerPlan(MunicipalityService municipalityService, ContainerType containerType, int emptyingFrequencyPerYear, BigDecimal cost, String imageTopViewUrl) {
+        this.municipalityService = municipalityService;
+        this.containerType = containerType;
+        this.emptyingFrequencyPerYear = emptyingFrequencyPerYear;
+        this.cost = cost;
+        this.imageTopViewUrl = imageTopViewUrl;
+    }
+
+    public ContainerPlan() {
+
+    }
+
     public long getId() {
         return id;
     }

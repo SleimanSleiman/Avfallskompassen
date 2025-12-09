@@ -1,4 +1,6 @@
-import { post } from './api';
+import { post } from "./Api";
+import { stopInactivityTimer } from "./InactivityTimer";
+
 
 export type LoginResponse = {
   success: boolean;
@@ -41,6 +43,9 @@ export function currentUser() {
 export function logout() {
     localStorage.removeItem('auth_user');
     sessionStorage.removeItem('auth_user'); // Clear from both storages
+
+    stopInactivityTimer();
+
     // Dispatch event to notify components of auth change
     window.dispatchEvent(new Event('auth-change'));
 }

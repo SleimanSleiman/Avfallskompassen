@@ -40,6 +40,10 @@ public class WasteRoom {
     @BatchSize(size = 50)
     private List<Door> doors;
 
+    @OneToMany(mappedBy = "wasteRoom", cascade = CascadeType.ALL, orphanRemoval = true)
+    @BatchSize(size = 50)
+    private List<OtherObject> otherObjects;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
@@ -68,6 +72,9 @@ public class WasteRoom {
     @Column(name = "thumbnail")
     private String thumbnailUrl;
 
+    @Column(name = "average_collection_frequency")
+    private Double averageCollectionFrequency;
+
     @PrePersist
     public void onCreate() {
         createdAt = LocalDateTime.now();
@@ -94,6 +101,9 @@ public class WasteRoom {
     public void setY(double y) { this.y = y; }
 
     public LocalDateTime getCreatedAt() { return createdAt; }
+
+    public Double getAverageCollectionFrequency() { return averageCollectionFrequency; }
+    public void setAverageCollectionFrequency(Double averageCollectionFrequency) { this.averageCollectionFrequency = averageCollectionFrequency; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
 
     public LocalDateTime getUpdatedAt() { return updatedAt; }
@@ -107,6 +117,13 @@ public class WasteRoom {
 
     public List<ContainerPosition> getContainers() { return containers; }
     public void setContainers(List<ContainerPosition> containers) { this.containers = containers; }
+
+    public List<OtherObject> getOtherObjects() {
+        return otherObjects;
+    }
+    public void setOtherObjects(List<OtherObject> otherObjects) {
+        this.otherObjects = otherObjects;
+    }
 
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }

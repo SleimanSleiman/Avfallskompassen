@@ -1,0 +1,46 @@
+/* Overlay container */
+.prompt-overlay {
+  @apply fixed inset-0 flex items-center justify-center bg-black/50 z-50;
+}
+
+/* Modal box */
+.prompt-box {
+  @apply bg-white rounded-2xl border shadow-soft p-6 w-80;
+}
+
+/* Headings */
+.prompt-heading {
+  @apply text-lg font-black mb-4;
+}
+
+/* Input fields */
+.prompt-input {
+  @apply w-full border border-gray-300 rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-nsr-teal focus:border-nsr-teal;
+}
+
+/* Error messages */
+.prompt-error {
+  @apply mt-3 p-3 rounded-xl bg-red-50 border border-red-200;
+}
+
+.prompt-error-text {
+  @apply text-sm text-red-700 font-medium;
+}
+
+/* Buttons */
+.prompt-button {
+  @apply inline-flex items-center justify-center rounded-xl px-4 py-2 font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2;
+}
+
+.prompt-button-cancel {
+  @apply bg-red-500 text-white hover:bg-red-600 focus:ring-red-500;
+}
+
+.prompt-button-confirm {
+  @apply bg-nsr-accent text-[#121212] hover:bg-nsr-accent/90 focus:ring-nsr-accent;
+}
+
+/* Container for buttons */
+.prompt-buttons {
+  @apply flex justify-end gap-3 mt-6;
+}

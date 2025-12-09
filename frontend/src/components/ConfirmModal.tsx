@@ -34,7 +34,7 @@ export default function ConfirmModal({
             {title}
           </h3>
           <div className="mt-2 text-sm text-gray-700">{message}</div>
-          <div className="mt-4 flex justify-end gap-2">
+          <div className="mt-4 flex justify-center gap-2">
             <button className="btn-secondary" onClick={onCancel} disabled={loading}>
               {cancelLabel}
             </button>

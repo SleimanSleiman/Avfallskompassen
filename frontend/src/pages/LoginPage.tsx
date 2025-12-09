@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { login } from '../lib/Auth';
+import { startInactivityTimer } from "../lib/InactivityTimer";
 
 export default function LoginPage() {
   const [username, setUsername] = useState('');
@@ -22,6 +23,7 @@ export default function LoginPage() {
       const trimmedUsername = username.replace(/\s+$/, '');
       const res = await login(trimmedUsername, password, rememberMe); 
       if (res.success) {
+        startInactivityTimer();
         setMsg(res.message || 'Inloggning lyckades');
         localStorage.removeItem("trashRoomData");
         localStorage.removeItem('enviormentRoomData');

@@ -5,11 +5,13 @@
  */
 
 import { React, useState, useCallback } from "react";
-import { Save, Ruler, DoorOpen, Undo, Redo, PillBottle, X } from "lucide-react";
+import { Save, Ruler, DoorOpen, Undo, Redo, PillBottle, X, SquarePlus } from "lucide-react";
 import { SCALE, STAGE_WIDTH, STAGE_HEIGHT, MARGIN, clamp, MIN_HEIGHT, MIN_WIDTH } from "../../../Constants"
 import RoomSizePrompt from "../../../../../components/RoomSizePrompt";
 import DoorWidthPrompt from "../../../../../components/DoorWidthPrompt";
+import OtherObjectSizePrompt from "../../../../../components/OtherObjectSizePrompt";
 import ContainerInfo from "./ContainerInfo"
+import ConfirmModal from "../../../../../components/ConfirmModal";
 import './css/roomCanvasToolbar.css'
 import LoadingBar from "../../../../../components/LoadingBar";
 
@@ -33,6 +35,12 @@ type ToolbarProps = {
     setSelectedContainerInfo: (container: ContainerDTO | null) => void;
     isAdminMode?: boolean;
     generateThumbnail: () => string | null;
+    handleAddOtherObject: (name: string, length: number, width: number) => boolean;
+    isContainerInsideRoom: (rect: { x: number; y: number; width: number; height: number }, room: Room) => boolean;
+    isObjectInsideRoom: (rect: { x: number; y: number; width: number; height: number }, room: Room) => boolean;
+    containers: ContainerDTO[];
+    otherObjects: OtherObjectDTO[];
+    closePanels: () => void;
 };
 
 export default function Toolbar({
@@ -55,11 +63,20 @@ export default function Toolbar({
     setSelectedContainerInfo,
     isAdminMode = false,
     generateThumbnail,
+    handleAddOtherObject,
+    isContainerInsideRoom,
+    isObjectInsideRoom,
+    containers,
+    otherObjects,
+    closePanels,
 }: ToolbarProps) {
 
     const [isRoomPromptOpen, setIsRoomPromptOpen] = useState(false);
     const [isDoorPromptOpen, setIsDoorPromptOpen] = useState(false);
+    const [isOtherObjectPromptOpen, setIsOtherObjectPromptOpen] = useState(false);
     const [containerInfoPos, setContainerInfoPos] = useState<{ left: number; top: number } | null>(null);
+    const [showOutsideWarning, setShowOutsideWarning] = useState(false);
+    const [pendingSaveThumbnail, setPendingSaveThumbnail] = useState<string | null>(null);
 
     //Safe wrappers for optional undo/redo
     const safeUndo = useCallback(() => {
@@ -105,6 +122,12 @@ export default function Toolbar({
         if (success) setIsDoorPromptOpen(false);
     };
 
+    //Confirm other object addition
+    const handleAddOtherObjectWithPrompt = (name: string, length: number, width: number) => {
+        const success = handleAddOtherObject(name, length, width);
+        if (success) setIsOtherObjectPromptOpen(false);
+    };
+
     //Save room and display messages
     const handleSaveRoom = async () => {
         setMsg("");
@@ -119,16 +142,70 @@ export default function Toolbar({
             setIsSaving(false);
             return;
         }
-        try {
-            const thumbnail = generateThumbnail();
-            await saveRoom(thumbnail);
 
+        //Check for containers or objects outside room boundaries
+        const anyContainerOutside = (containers ?? []).some(c => !isContainerInsideRoom(c, room));
+        const anyObjectOutside = (otherObjects ?? []).some(o => !isObjectInsideRoom(o, room));
+
+        const thumbnail = generateThumbnail();
+        setPendingSaveThumbnail(thumbnail);
+
+        if (anyContainerOutside || anyObjectOutside) {
+            closePanels();
+            setShowOutsideWarning(true);
+            return;
+        }
+
+        try {
+            await saveRoom(thumbnail);
             setTimeout(() => setMsg("Rummet har sparats"), 10);
         } catch (err) {
             setTimeout(() => setError("Rummet gick inte att spara. Vänligen försök senare igen"), 10);
         } finally {
             setIsSaving(false);
         }
+    };
+
+    //Handle forced save despite outside objects
+    const handleConfirmForcedSave = async () => {
+        setShowOutsideWarning(false);
+
+        if (!saveRoom) return;
+
+        try {
+            await saveRoom(pendingSaveThumbnail);
+            setTimeout(() => setMsg("Rummet har sparats"), 10);
+        } catch (err) {
+            setTimeout(() => setError("Rummet gick inte att spara. Vänligen försök igen senare"), 10);
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
+    //Cancel forced save
+    const handleCancelForcedSave = () => {
+        setShowOutsideWarning(false);
+        setPendingSaveThumbnail(null);
+    };
+
+    //Handle forced save despite outside objects
+    const handleConfirmForcedSave = async () => {
+        setShowOutsideWarning(false);
+
+        if (!saveRoom) return;
+
+        try {
+            await saveRoom(pendingSaveThumbnail);
+            setTimeout(() => setMsg("Rummet har sparats"), 10);
+        } catch (err) {
+            setTimeout(() => setError("Rummet gick inte att spara. Vänligen försök igen senare"), 10);
+        }
+    };
+
+    //Cancel forced save
+    const handleCancelForcedSave = () => {
+        setShowOutsideWarning(false);
+        setPendingSaveThumbnail(null);
     };
 
     return (
@@ -149,7 +226,7 @@ export default function Toolbar({
             {/* Add door */}
             <button
                 onClick={() => {
-                    setIsDoorPromptOpen(true)
+                    setIsDoorPromptOpen(true);
                     handleSelectContainer(null);
                     handleSelectDoor(null);
                 }}
@@ -166,6 +243,19 @@ export default function Toolbar({
             >
                 <PillBottle className="toolbar-icon" />
                 <span className="toolbar-label">Lägg till sopkärl</span>
+            </button>
+
+            {/* Add other object */}
+            <button
+                onClick={() => {
+                    setIsOtherObjectPromptOpen(true);
+                    handleSelectContainer(null);
+                    handleSelectDoor(null);
+                }}
+                className="group toolbar-btn"
+            >
+                <SquarePlus className="toolbar-icon" />
+                <span className="toolbar-label">Lägg till övrigt föremål</span>
             </button>
 
             {/* Save design - Hidden in admin mode */}
@@ -219,6 +309,12 @@ export default function Toolbar({
                     onCancel={() => setIsDoorPromptOpen(false)}
                 />
             )}
+            {isOtherObjectPromptOpen && (
+                <OtherObjectSizePrompt
+                    onConfirm={(name, length, width) => handleAddOtherObjectWithPrompt(name, length, width)}
+                    onCancel={() => setIsOtherObjectPromptOpen(false)}
+                />
+            )}
 
             {/* Selected container information */}
             {selectedContainerInfo && (
@@ -227,6 +323,27 @@ export default function Toolbar({
                     onClose={() => setSelectedContainerInfo(null)}
                     pos={containerInfoPos}
                     setPos={setContainerInfoPos}
+                />
+            )}
+
+            {/* Warning modal for outside objects */}
+            {showOutsideWarning && (
+                <ConfirmModal
+                    open={showOutsideWarning}
+                    title="Objekt utanför rummet"
+                    message={
+                        <div>
+                            Det finns sopkärl och/eller föremål som ligger utanför rummets gränser.
+                            <br />
+                            Dessa kommer <strong>inte</strong> att sparas.
+                            <br /><br />
+                            Vill du fortsätta ändå?
+                        </div>
+                    }
+                    confirmLabel="Spara ändå"
+                    cancelLabel="Avbryt"
+                    onConfirm={handleConfirmForcedSave}
+                    onCancel={handleCancelForcedSave}
                 />
             )}
         </div>

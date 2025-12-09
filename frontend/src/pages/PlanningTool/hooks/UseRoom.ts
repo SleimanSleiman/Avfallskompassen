@@ -1,7 +1,7 @@
 
 import { useState } from "react";
 import { SCALE, STAGE_WIDTH, STAGE_HEIGHT, MIN_WIDTH, MIN_HEIGHT, MARGIN, clamp, mmToPixels, ROOM_VERTICAL_OFFSET, ROOM_HORIZONTAL_OFFSET } from "../Constants";
-import type { Room, ContainerInRoom, Door } from "../Types";
+import type { Room, ContainerInRoom, Door, OtherObjectInRoom } from "../Types";
 
 export function useRoom() {
   const initialRoom = (() => {
@@ -24,6 +24,7 @@ export function useRoom() {
         height: defaultHeightMeters / SCALE,
         doors: [] as Door[],
         containers: [] as ContainerInRoom[],
+        otherObjects: [] as OtherObjectInRoom[],
         propertyId: undefined,
         name: "",
       } as Room;
@@ -77,6 +78,18 @@ export function useRoom() {
           }))
         : [];
 
+      const otherObjects: OtherObjectInRoom[] = Array.isArray(parsed?.otherObjects)
+        ? parsed.otherObjects.map((o: any, i: number) => ({
+            id: o?.id ?? Date.now() + i,
+            name: o?.name ?? "Object",
+            x: o?.x ?? 0,
+            y: o?.y ?? 0,
+            width: o?.width ?? 50,
+            height: o?.depth ?? 50,
+            rotation: o?.rotation ?? 0,
+          }))
+        : [];
+
       return {
         id: parsed?.id ?? parsed?.wasteRoomId ?? undefined,
         x,
@@ -85,6 +98,7 @@ export function useRoom() {
         height: heightMeters / SCALE,
         doors,
         containers,
+        otherObjects,
         propertyId: parsed?.property?.id ?? undefined,
         name: parsed?.name ?? "",
       } as Room;
@@ -98,6 +112,7 @@ export function useRoom() {
         height: defaultHeightMeters / SCALE,
         doors: [] as Door[],
         containers: [] as ContainerInRoom[],
+        otherObjects: [] as OtherObjectInRoom[],
         propertyId: undefined,
         name: "",
       } as Room;

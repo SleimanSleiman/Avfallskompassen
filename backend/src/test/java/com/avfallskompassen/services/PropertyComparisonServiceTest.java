@@ -15,6 +15,7 @@ import com.avfallskompassen.model.PropertyContainer;
 import com.avfallskompassen.model.PropertyType;
 import com.avfallskompassen.model.ServiceType;
 import com.avfallskompassen.repository.PropertyContainerRepository;
+import com.avfallskompassen.repository.WasteRoomRepository;
 import com.avfallskompassen.repository.PropertyRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
@@ -49,6 +50,9 @@ class PropertyComparisonServiceTest {
 
 	@Mock
 	private PropertyContainerRepository propertyContainerRepository;
+
+	@Mock
+	private WasteRoomRepository wasteRoomRepository;
 
 	@InjectMocks
 	private PropertyComparisonService propertyComparisonService;
