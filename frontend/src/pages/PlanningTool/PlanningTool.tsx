@@ -11,6 +11,8 @@ import type { Property } from '../../lib/Property';
 import type { ContainerDTO } from '../../lib/Container';
 import { currentUser } from '../../lib/Auth';
 
+//Context
+import { useUnsavedChanges } from '../../context/UnsavedChangesContext';
 
 
 //Components
@@ -47,6 +49,7 @@ type PlanningToolProps = {
 
 export default function PlanningTool({ isAdminMode = false }: PlanningToolProps) {
     const navigate = useNavigate();
+    const { setHasUnsavedChanges } = useUnsavedChanges();
 
     const defaultRoomState = useMemo(() => {
         const widthPx = DEFAULT_ROOM_METERS / SCALE;
@@ -307,6 +310,8 @@ export default function PlanningTool({ isAdminMode = false }: PlanningToolProps)
     const { saveRoom } = useSaveRoom();
     const { buildWasteRoomRequest } = useWasteRoomRequestBuilder(isContainerInsideRoom, isObjectInsideRoom);
 
+    const [savedRoomState, setSavedRoomState] = useState<{ room: any; doors: any; containers: any; otherObjects: any } | null>(null);
+
     const handleSaveRoom = async (thumbnailBase64: string | null) => {
         if (!propertyId) {
             console.error("No propertyId, cannot save room.");
@@ -318,7 +323,48 @@ export default function PlanningTool({ isAdminMode = false }: PlanningToolProps)
 
         const savedRoom = await saveRoom(roomRequest);
         room.id = savedRoom?.wasteRoomId;
+        
+        // Update saved state after successful save
+        setSavedRoomState({
+            room: JSON.parse(JSON.stringify(room)),
+            doors: JSON.parse(JSON.stringify(doors)),
+            containers: JSON.parse(JSON.stringify(containersInRoom)),
+            otherObjects: JSON.parse(JSON.stringify(otherObjects)),
+        });
     };
+
+    // Track unsaved changes
+    const hasUnsavedChanges = useCallback(() => {
+        if (!savedRoomState) {
+            // If we haven't saved before, check if anything was changed
+            return room.id !== undefined || doors.length > 0 || containersInRoom.length > 0 || otherObjects.length > 0;
+        }
+        
+        // Compare current state with saved state
+        const roomChanged = JSON.stringify(room) !== JSON.stringify(savedRoomState.room);
+        const doorsChanged = JSON.stringify(doors) !== JSON.stringify(savedRoomState.doors);
+        const containersChanged = JSON.stringify(containersInRoom) !== JSON.stringify(savedRoomState.containers);
+        const objectsChanged = JSON.stringify(otherObjects) !== JSON.stringify(savedRoomState.otherObjects);
+        
+        return roomChanged || doorsChanged || containersChanged || objectsChanged;
+    }, [room, doors, containersInRoom, otherObjects, savedRoomState]);
+
+    // Update context when unsaved changes status changes
+    useEffect(() => {
+        setHasUnsavedChanges(hasUnsavedChanges());
+    }, [hasUnsavedChanges, setHasUnsavedChanges]);
+
+    // Handle close without saving
+    const handleCloseRoom = useCallback(() => {
+        clearPlanningStorage();
+        setHasUnsavedChanges(false);
+        const propertyId = typeof window !== 'undefined' ? localStorage.getItem('selectedPropertyId') : null;
+        if (propertyId) {
+            navigate(`/properties/${propertyId}/rooms`);
+        } else {
+            navigate('/properties');
+        }
+    }, [navigate, clearPlanningStorage, setHasUnsavedChanges]);
 
     const [shouldShowTour, setShouldShowTour] = useState(false);
 
@@ -498,6 +544,8 @@ export default function PlanningTool({ isAdminMode = false }: PlanningToolProps)
                         redo={redo}
                         saveRoom={handleSaveRoom}
                         isAdminMode={isAdminMode}
+                        hasUnsavedChanges={hasUnsavedChanges}
+                        onClose={handleCloseRoom}
                     />
 
                     {/* ActionPanel for selected container or door */}
