@@ -94,7 +94,6 @@ export default function NavBar() {
                   </NavLink>
                   <NavLink to="/reports" className={({ isActive }) => `nav-link hover:text-white transition-colors ${isActive ? 'nav-link-active' : ''}`}>Rapporter</NavLink>
                   <div className="flex items-center gap-3">
-                    {user && <span className="text-sm">Hej {user.username}!</span>}
                     {user ? (
                       <button
                         onClick={handleLogout}
