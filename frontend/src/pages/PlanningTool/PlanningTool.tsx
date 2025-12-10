@@ -142,8 +142,7 @@ export default function PlanningTool({ isAdminMode = false }: PlanningToolProps)
     } = useContainers(room, setSelectedContainerId, setSelectedDoorId, setSelectedOtherObjectId, getDoorZones(), getOtherObjectZones(),setError,setMsg);
 
     // Track the saved state for comparison
-    const [savedRoomState, setSavedRoomState] = useState<{ room: any; doors: any; containers: any; otherObjects: any } | null>(null);
-    const [hasInitializedFromStorage, setHasInitializedFromStorage] = useState(false);
+    // ...existing code...
 
     // Track the saved state for comparison
     const [savedRoomState, setSavedRoomState] = useState<{ room: any; doors: any; containers: any; otherObjects: any } | null>(null);
