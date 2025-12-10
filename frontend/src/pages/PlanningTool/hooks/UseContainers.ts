@@ -265,24 +265,21 @@ export function useContainers(
         c: { x: number; y: number; width: number; height: number; rotation?: number },
         room: Room
     ) => {
-        const rotation = (c.rotation ?? 0) % 360;
+        const rotation = (c.rotation ?? 0) % 180;
 
-        // Swap width/height if rotated 90 or 270 degrees
-        const aabbWidth = rotation === 90 || rotation === 270 ? c.height : c.width;
-        const aabbHeight = rotation === 90 || rotation === 270 ? c.width : c.height;
+        // Correct rotated axis-aligned bounding box
+        const w = rotation === 90 ? c.height : c.width;
+        const h = rotation === 90 ? c.width : c.height;
 
-        const centerX = c.x + c.width / 2;
-        const centerY = c.y + c.height / 2;
-
-        // Axis-aligned bounding box
-        const aabbX = centerX - aabbWidth / 2;
-        const aabbY = centerY - aabbHeight / 2;
+        // AABB uses TOP-LEFT correctly
+        const aabbX = c.x;
+        const aabbY = c.y;
 
         return (
             aabbX >= room.x &&
             aabbY >= room.y &&
-            aabbX + aabbWidth <= room.x + room.width &&
-            aabbY + aabbHeight <= room.y + room.height
+            aabbX + w <= room.x + room.width &&
+            aabbY + h <= room.y + room.height
         );
     };
 
