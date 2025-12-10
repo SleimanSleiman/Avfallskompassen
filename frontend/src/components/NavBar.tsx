@@ -172,7 +172,6 @@ export default function NavBar() {
                     Rapporter
                   </button>
                   <div className="flex items-center gap-3">
-                    {user && <span className="text-sm">Hej {user.username}!</span>}
                     {user ? (
                       <button
                         onClick={handleLogout}
