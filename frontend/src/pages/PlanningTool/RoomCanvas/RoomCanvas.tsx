@@ -27,6 +27,7 @@ import type { Room, ContainerInRoom, Door, OtherObjectInRoom } from "../Types";
 import type { ContainerDTO } from "../../../lib/Container";
 import Message from "../../../components/ShowStatus";
 import './css/roomCanvasStage.css'
+import LoadingBar from "../../../components/LoadingBar";
 
 /* ─────────────── RoomCanvas Props ──────────────── */
 type RoomCanvasProps = {
@@ -164,6 +165,8 @@ export default function RoomCanvas({
     const [isDraggingOtherObject, setIsDraggingOtherObject] = useState(false);
     const [msg, setMsg] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
+    const [isSaving, setIsSaving] = useState(false);
+    
 
     //Handle container panel state and ref
     const {
@@ -234,6 +237,7 @@ export default function RoomCanvas({
 
             {/* Feedback messages */}
             <div className="stage-content-wrapper">
+                {isSaving && <LoadingBar message="Sparar rummet…"/>}
                 {msg && <Message message={msg} type="success" />}
                 {error && <Message message={error} type="error" />}
             </div>
@@ -279,6 +283,7 @@ export default function RoomCanvas({
                         doorsLength={doors.length}
                         setMsg={setMsg}
                         setError={setError}
+                        setIsSaving={setIsSaving}
                         undo={undo}
                         redo={redo}
                         selectedContainerInfo={selectedContainerInfo}

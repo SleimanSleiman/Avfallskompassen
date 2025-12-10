@@ -12,12 +12,14 @@ import type { ContainerDTO } from '../../lib/Container';
 import { currentUser } from '../../lib/Auth';
 
 
+
 //Components
 import RoomCanvas from './RoomCanvas/RoomCanvas';
 import ActionPanel from './ActionPanel';
 import PropertyOverviewPanel from './PropertyAndWasteAnalysis/PropertyOverview/PropertyOverviewPanel';
 import WasteAnalysisPanels from './PropertyAndWasteAnalysis/WasteAnalysis/WasteAnalysisPanels'
 import { Tooltip } from "../../components/Tooltip";
+import Message from '../../components/ShowStatus';
 
 //Hooks
 import { useRoom } from './hooks/UseRoom';
@@ -67,7 +69,12 @@ export default function PlanningTool({ isAdminMode = false }: PlanningToolProps)
         setRoom
     } = useRoom();
 
-    // Selected IDs
+    /* ──────────────── Messages ──────────────── */
+    const [msg, setMsg] = useState<string | null>(null);
+    const [error, setError] = useState<string | null>(null);
+
+
+    /* ──────────────── Door state & logic ──────────────── */
     const [selectedContainerId, setSelectedContainerId] = useState<number | null>(null);
     const [selectedDoorId, setSelectedDoorId] = useState<number | null>(null);
     const [selectedOtherObjectId, setSelectedOtherObjectId] = useState<number | null>(null);
@@ -83,7 +90,7 @@ export default function PlanningTool({ isAdminMode = false }: PlanningToolProps)
         handleSelectDoor,
         getDoorZones,
         doorOffsetRef,
-    } = useDoors(room, setSelectedDoorId, setSelectedContainerId, setSelectedOtherObjectId);
+    } = useDoors(room, setSelectedDoorId, setSelectedContainerId,setSelectedOtherObjectId, setError, setMsg);
 
     /* ──────────────── Other Objects state & logic ──────────────── */
     const {
@@ -129,7 +136,7 @@ export default function PlanningTool({ isAdminMode = false }: PlanningToolProps)
         redo,
         getContainerZones,
         isContainerInsideRoom,
-    } = useContainers(room, setSelectedContainerId, setSelectedDoorId, setSelectedOtherObjectId, getDoorZones(), getOtherObjectZones());
+    } = useContainers(room, setSelectedContainerId, setSelectedDoorId, setSelectedOtherObjectId, getDoorZones(), getOtherObjectZones(),setError,setMsg);
 
     /* ──────────────── Sync the doors and containers when changes are made to the room ──────────────── */
     useEffect(() => {
@@ -418,6 +425,12 @@ export default function PlanningTool({ isAdminMode = false }: PlanningToolProps)
     return (
         <>
         <div className="flex h-full w-full flex-col gap-4 p-3 sm:p-5">
+
+            {/* Feedback messages */}
+            <div className="stage-content-wrapper">
+                {msg && <Message message={msg} type="success" />}
+                {error && <Message message={error} type="error" />}
+            </div>
 
             <button
                 onClick={startTour}

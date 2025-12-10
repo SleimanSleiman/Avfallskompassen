@@ -88,7 +88,9 @@ export function useContainers(
     setSelectedDoorId: (id: number | null) => void,
     setSelectedOtherObjectId: (id: number | null) => void,
     doorZones: { x: number; y: number; width: number; height: number }[] = [],
-    otherObjectZones: { x: number; y: number; width: number; height: number }[] = []
+    otherObjectZones: { x: number; y: number; width: number; height: number }[] = [],
+    setError,
+    setMsg
 ) {
 
     /* ──────────────── Containers State ──────────────── */
@@ -133,7 +135,9 @@ export function useContainers(
 
             //If no valid spot found, alert user and exit
             if (!foundSpot) {
-                alert("Det finns ingen ledig plats för att lägga till detta kärl i rummet.");
+                setMsg("");
+                setError("");
+                setTimeout(() => setError("Det finns ingen ledig plats för att lägga till detta kärl i rummet"), 10);
                 return;
             }
         } else if (!isValid) {
