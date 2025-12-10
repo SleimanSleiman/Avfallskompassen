@@ -18,6 +18,7 @@ import ActionPanel from './ActionPanel';
 import PropertyOverviewPanel from './PropertyAndWasteAnalysis/PropertyOverview/PropertyOverviewPanel';
 import WasteAnalysisPanels from './PropertyAndWasteAnalysis/WasteAnalysis/WasteAnalysisPanels'
 import { Tooltip } from "../../components/Tooltip";
+import Message from '../../components/ShowStatus';
 
 //Hooks
 import { useRoom } from './hooks/UseRoom';
@@ -59,6 +60,10 @@ export default function PlanningTool({ isAdminMode = false }: PlanningToolProps)
         };
     }, []);
 
+    /* ──────────────── Messages ──────────────── */
+    const [msg, setMsg] = useState<string | null>(null);
+    const [error, setError] = useState<string | null>(null);
+
    // Selected IDs
    const [selectedContainerId, setSelectedContainerId] = useState<number | null>(null);
    const [selectedDoorId, setSelectedDoorId] = useState<number | null>(null);
@@ -84,7 +89,7 @@ export default function PlanningTool({ isAdminMode = false }: PlanningToolProps)
         getDoorZones,
         doorOffsetRef,
         restoreDoorState,
-    } = useDoors(room, setSelectedDoorId, setSelectedContainerId, setSelectedOtherObjectId);
+    } = useDoors(room, setSelectedDoorId, setSelectedContainerId,setSelectedOtherObjectId, setError, setMsg);
 
     /* ──────────────── Other Objects state & logic ──────────────── */
     const {
@@ -130,7 +135,7 @@ export default function PlanningTool({ isAdminMode = false }: PlanningToolProps)
         redo,
         getContainerZones,
         isContainerInsideRoom,
-    } = useContainers(room, setSelectedContainerId, setSelectedDoorId, setSelectedOtherObjectId, getDoorZones(), getOtherObjectZones());
+    } = useContainers(room, setSelectedContainerId, setSelectedDoorId, setSelectedOtherObjectId, getDoorZones(), getOtherObjectZones(),setError,setMsg);
 
     /* ──────────────── Sync the doors and containers when changes are made to the room ──────────────── */
     useEffect(() => {
@@ -169,20 +174,17 @@ export default function PlanningTool({ isAdminMode = false }: PlanningToolProps)
     /* ──────────────── Sync state to localStorage on changes ──────────────── */
     useEffect(() => {
         if (typeof window === 'undefined') {
-            console.log('PlanningTool - Skipping sync (no window)');
             return;
         }
 
         // Don't sync if we don't have a room ID (means we're still initializing)
         if (!room.id) {
-            console.log('PlanningTool - Skipping sync (no room.id)', { room });
             return;
         }
 
         try {
             const stored = localStorage.getItem('trashRoomData');
             if (!stored) {
-                console.log('PlanningTool - Skipping sync (no stored data)');
                 return;
             }
 
@@ -422,6 +424,12 @@ export default function PlanningTool({ isAdminMode = false }: PlanningToolProps)
     return (
         <>
         <div className="flex h-full w-full flex-col gap-4 p-3 sm:p-5">
+
+            {/* Feedback messages */}
+            <div className="stage-content-wrapper">
+                {msg && <Message message={msg} type="success" />}
+                {error && <Message message={error} type="error" />}
+            </div>
 
             <button
                 onClick={startTour}

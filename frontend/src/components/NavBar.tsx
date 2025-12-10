@@ -26,6 +26,10 @@ export default function NavBar() {
   }, []);
 
   function handleLogout() {
+    localStorage.removeItem("trashRoomData");
+    localStorage.removeItem('enviormentRoomData');
+    localStorage.removeItem('selectedProperty');
+    localStorage.removeItem('selectedPropertyId');
     logout();
     setUser(null);
     window.location.href = '/login';

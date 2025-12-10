@@ -39,6 +39,7 @@ export default function ConfirmModal({
               {cancelLabel}
             </button>
             <button
+              data-testid="confirm-delete"
               onClick={onConfirm}
               disabled={loading}
               className="inline-flex items-center justify-center rounded-xl2 px-5 py-3 font-medium border border-red-200 text-red-700 bg-red-50 hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-600 disabled:opacity-60 disabled:cursor-not-allowed"

@@ -6,6 +6,7 @@ import AdminSaveVersionModal from './AdminSaveVersionModal';
 import { currentUser } from '../../lib/Auth';
 import { createAdminVersion } from '../../lib/WasteRoomRequest';
 import type { DoorRequest, ContainerPositionRequest } from '../../lib/WasteRoomRequest';
+import Message from '../../components/ShowStatus';
 
 type AdminPlanningEditorProps = {
   plan: RoomPlan;
@@ -49,6 +50,10 @@ export default function AdminPlanningEditor({
   const [versionName, setVersionName] = useState('');
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [versionToReplace, setVersionToReplace] = useState<number | null>(null);
+    
+  /* ──────────────── Messages ──────────────── */
+  const [msg, setMsg] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   // Prepare the plan data
   const planData = useMemo(() => {
@@ -90,6 +95,10 @@ export default function AdminPlanningEditor({
           x: currentPlanData.x,
           y: currentPlanData.y
       });
+
+            setMsg("")
+      setError("");
+      setTimeout(() => setMsg("Version sparad"), 10);
       
       const selectedVersionNumber = plan.selectedVersion ?? plan.activeVersionNumber ?? plan.versions[plan.versions.length - 1].versionNumber;
       const selectedVersion = plan.versions.find((v) => v.versionNumber === selectedVersionNumber) || plan.versions[plan.versions.length - 1];
@@ -160,19 +169,25 @@ export default function AdminPlanningEditor({
       };
 
         if (requestPayload.length > 9) {
-            alert("Room height cannot exceed 9 meters.");
+            setMsg("")
+            setError("");
+            setTimeout(() => setError("Rummets höjd får inte överstiga 9 meter"), 10);
             setSaving(false);
             return;
         }
 
         if (requestPayload.width > 12) {
-            alert("Room width cannot exceed 12 meters.");
+            setMsg("")
+            setError("");
+            setTimeout(() => setError("Rummets längd får inte överstiga 12 meter"), 10);
             setSaving(false);
             return;
         }
 
         if (requestPayload.length < 2.5 || requestPayload.width < 2.5) {
-            alert("Room dimensions must be at least 2.5 meters.");
+            setMsg("")
+            setError("");
+            setTimeout(() => setError("Rummets bredd alternativt längd får inte vara under 2.5 meter"), 10);
             setSaving(false);
             return;
         }
@@ -213,10 +228,14 @@ export default function AdminPlanningEditor({
       setHasUnsavedChanges(false);
 
       // Show success message
-      alert('Version sparad!');
+      setMsg("")
+      setError("");
+      setTimeout(() => setMsg("Version sparad"), 10);
     } catch (error) {
       console.error('Error saving plan:', error);
-      alert('Fel vid sparande av version. Se konsolen för detaljer.');
+        setMsg("")
+        setError("");
+        setTimeout(() => setError("Fel vid sparande av version. Se konsolen för detaljer"), 10);
     } finally {
       setSaving(false);
     }
@@ -224,6 +243,11 @@ export default function AdminPlanningEditor({
 
   return (
     <div className="flex min-h-screen flex-col bg-gray-50 overflow-x-hidden">
+        {/* Feedback messages */}
+        <div className="stage-content-wrapper">
+          {msg && <Message message={msg} type="success" />}
+          {error && <Message message={error} type="error" />}
+        </div>
       {/* Admin overlay header */}
       <div className="border-b border-gray-200 bg-white/95 px-4 py-4 shadow-sm backdrop-blur lg:sticky lg:top-0 lg:z-50">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
