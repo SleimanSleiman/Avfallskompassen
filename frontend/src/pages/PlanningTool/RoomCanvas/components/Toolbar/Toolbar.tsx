@@ -196,6 +196,23 @@ export default function Toolbar({
         setPendingSaveThumbnail(null);
     };
 
+    //Handle close button
+    const handleCloseClick = useCallback(() => {
+        if (hasUnsavedChanges()) {
+            setShowCloseConfirm(true);
+        } else if (onClose) {
+            onClose();
+        }
+    }, [hasUnsavedChanges, onClose]);
+
+    //Handle close without saving
+    const handleCloseWithoutSaving = useCallback(() => {
+        setShowCloseConfirm(false);
+        if (onClose) {
+            onClose();
+        }
+    }, [onClose]);
+
     return (
         <div id="toolbar-panel" className="toolbar-panel">
             {/* Close button */}

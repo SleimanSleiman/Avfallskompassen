@@ -145,6 +145,10 @@ export default function PlanningTool({ isAdminMode = false }: PlanningToolProps)
     const [savedRoomState, setSavedRoomState] = useState<{ room: any; doors: any; containers: any; otherObjects: any } | null>(null);
     const [hasInitializedFromStorage, setHasInitializedFromStorage] = useState(false);
 
+    // Track the saved state for comparison
+    const [savedRoomState, setSavedRoomState] = useState<{ room: any; doors: any; containers: any; otherObjects: any } | null>(null);
+    const [hasInitializedFromStorage, setHasInitializedFromStorage] = useState(false);
+
     /* ──────────────── Sync the doors and containers when changes are made to the room ──────────────── */
     useEffect(() => {
         // Only sync once on initial load from storage

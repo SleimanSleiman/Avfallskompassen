@@ -59,6 +59,8 @@ export default function AdminPlanningEditor({
   const [versionName, setVersionName] = useState('');
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [versionToReplace, setVersionToReplace] = useState<number | null>(null);
+  const [planData, setPlanData] = useState<any>(null);
+  const [isLoadingRoom, setIsLoadingRoom] = useState(true);
 
   // Fetch the actual waste room data from the database
   useEffect(() => {
