@@ -141,7 +141,7 @@ public class ContainerDTO {
                 type != null ? type.getWidth() : 0,
                 type != null ? type.getDepth() : 0,
                 type != null ? type.getHeight() : 0,
-                type != null ? type.getImageFrontViewUrl() : null,
+                plan.getImageFrontViewUrl(),
                 plan.getImageTopViewUrl(), 
                 plan.getEmptyingFrequencyPerYear(),
                 plan.getCost()
