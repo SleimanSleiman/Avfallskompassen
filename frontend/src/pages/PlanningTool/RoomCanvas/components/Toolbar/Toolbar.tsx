@@ -5,7 +5,8 @@
  */
 
 import { React, useState, useCallback } from "react";
-import { Save, Ruler, DoorOpen, Undo, Redo, PillBottle, X, SquarePlus } from "lucide-react";
+import { Save, Ruler, DoorOpen, Undo, Redo, X, SquarePlus } from "lucide-react";
+import { LiaDumpsterSolid } from "react-icons/lia";
 import { SCALE, STAGE_WIDTH, STAGE_HEIGHT, MARGIN, clamp, MIN_HEIGHT, MIN_WIDTH } from "../../../Constants"
 import RoomSizePrompt from "../../../../../components/RoomSizePrompt";
 import DoorWidthPrompt from "../../../../../components/DoorWidthPrompt";
@@ -222,7 +223,7 @@ export default function Toolbar({
                 onClick={toggleContainerPanel}
                 className={`group toolbar-btn ${isContainerPanelOpen ? "toolbar-btn-active" : ""}`}
             >
-                <PillBottle className="toolbar-icon" />
+                <LiaDumpsterSolid className="toolbar-icon toolbar-icon-dumpster" />
                 <span className="toolbar-label">Lägg till sopkärl</span>
             </button>
 
