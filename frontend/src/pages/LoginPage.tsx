@@ -20,11 +20,18 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      const res = await login(username, password, rememberMe); 
+      const trimmedUsername = username.replace(/\s+$/, '');
+      const res = await login(trimmedUsername, password, rememberMe); 
       if (res.success) {
         startInactivityTimer();
         setMsg(res.message || 'Inloggning lyckades');
-
+        localStorage.removeItem("trashRoomData");
+        localStorage.removeItem('enviormentRoomData');
+        localStorage.removeItem('selectedProperty');
+        localStorage.removeItem('selectedPropertyId');
+        
+        // Navigate to dashboard after successful login
+        setTimeout(() => {
           navigate('/dashboard');
       } else {
         setError(res.message || 'Inloggningen misslyckades');

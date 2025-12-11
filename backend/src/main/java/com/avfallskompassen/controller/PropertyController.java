@@ -93,6 +93,23 @@ public class PropertyController {
     }
 
     /**
+     * Fetches the lockType currently used by the selected property.
+     * @param propertyId
+     * @return LockType
+     */
+    @GetMapping("/my-lock-type/{propertyId}")
+    public ResponseEntity<LockTypeDto> getLockType(
+            @PathVariable("propertyId") Long propertyId) {
+        LockTypeDto lockTypeDto = lockTypeService.getPropertyLockTypeById(propertyId);
+
+        if (lockTypeDto == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Lock type not found");
+        }
+
+        return ResponseEntity.ok(lockTypeDto);
+    }
+
+    /**
      * Collects basic info about all users in the system, such as username, number of properties and waste rooms, etc.
      * @return A list of DTO:s containing information about users
      */

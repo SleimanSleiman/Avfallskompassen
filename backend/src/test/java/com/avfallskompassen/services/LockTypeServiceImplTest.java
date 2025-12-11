@@ -84,4 +84,40 @@ class LockTypeServiceImplTest {
 
         verify(lockTypeRepository, times(1)).findAll();
     }
+
+    @Test
+    void testGetPropertyLockTypeById_found() {
+        Long propertyId = 10L;
+
+        LockType lockType = new LockType();
+        lockType.setId(5L);
+        lockType.setName("Fysisk nyckel");
+
+        when(lockTypeRepository.findLockTypeByPropertyId(propertyId))
+                .thenReturn(Optional.of(lockType));
+
+        LockTypeDto result = lockTypeService.getPropertyLockTypeById(propertyId);
+
+        assertNotNull(result);
+        assertEquals(5L, result.getId());
+        assertEquals("Fysisk nyckel", result.getName());
+
+        verify(lockTypeRepository, times(1)).findLockTypeByPropertyId(propertyId);
+    }
+
+    @Test
+    void testGetPropertyLockTypeById_notFound() {
+        Long propertyId = 99L;
+
+        when(lockTypeRepository.findLockTypeByPropertyId(propertyId))
+                .thenReturn(Optional.empty());
+
+        RuntimeException ex = assertThrows(
+                RuntimeException.class,
+                () -> lockTypeService.getPropertyLockTypeById(propertyId)
+        );
+
+        assertEquals("No Locktype found for this property", ex.getMessage());
+        verify(lockTypeRepository, times(1)).findLockTypeByPropertyId(propertyId);
+    }
 }

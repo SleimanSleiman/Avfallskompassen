@@ -11,6 +11,8 @@ export function useDoors(
     setSelectedDoorId: (id: number | null) => void,
     setSelectedContainerId: (id: number | null) => void,
     setSelectedOtherObjectId: (id: number | null) => void,
+    setError,
+    setMsg
 ) {
 
     /* ──────────────── Door state ──────────────── */
@@ -35,7 +37,9 @@ export function useDoors(
         const { width, wall = "bottom" } = doorData;
 
         if (doors.length === 0 && width < 1.2) {
-            alert("Minst en dörr måste vara 1.2 meter bred.");
+            setMsg("");
+            setError("");
+            setTimeout(() => setError("Minst en dörr måste vara 1.2 meter bred."), 10);
             return false;
         }
 
@@ -228,7 +232,9 @@ export function useDoors(
         const minimumSizeDoors = doors.filter(d => d.width >= 1.2);
 
         if (doorToRemove.width >= 1.2 && minimumSizeDoors.length === 1) {
-            alert("Minst en dörr måste vara 1.2 meter bred.");
+            setMsg("");
+            setError("");
+            setTimeout(() => setError("Minst en dörr måste vara 1.2 meter bred."), 10);
             return;
         }
 

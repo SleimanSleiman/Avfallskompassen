@@ -59,3 +59,15 @@ export const TREND_BADGE_SIZE_STYLES: Record<TrendBadgeSize, { wrapper: string; 
     default: { wrapper: "trend-badge-default-wrapper", icon: "trend-badge-default-icon" },
     compact: { wrapper: "trend-badge-compact-wrapper", icon: "trend-badge-compact-icon" },
 };
+
+//Benchmark title styles per waste type
+export const BENCHMARK_TITLE_STYLES: Record<string, string> = {
+    restavfall: "text-[#2b2b2c]",
+    matavfall: "text-[#4fa255]",
+    pappersforpackningar: "text-[#907142]",
+    plastforpackningar: "text-[#763471]",
+    metallforpackningar: "text-[#606161]",
+    ofargatglas: "text-[#664941]",
+    fargatglas: "text-[#55ab8e]",
+    tidningar: "text-[#377fba]",
+};
