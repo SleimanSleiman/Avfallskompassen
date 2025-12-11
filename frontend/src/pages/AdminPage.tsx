@@ -69,7 +69,7 @@ export default function AdminPage() {
         setPropertiesCount(numOfProperties);
 
         const mapped: AdminUser[] = userStats.map((user) => ({
-          id: user.id ?? undefined,
+          id: user.userId ?? user.id ?? 0,
           username: user.username ?? "",
           createdAt: user.createdAt || null,
           propertiesCount: user.propertiesCount ?? 0,

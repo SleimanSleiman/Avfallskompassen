@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen } from "@testing-library/react";
 import PlanningTool from "../../../src/pages/PlanningTool/PlanningTool";
+import { UnsavedChangesProvider } from "../../../src/context/UnsavedChangesContext";
 
 // ─────────────── Mock react-router-dom ───────────────
 vi.mock("react-router-dom", () => ({
@@ -157,7 +158,11 @@ describe("PlanningTool", () => {
 
     //Test rendering of main components
     it("renders RoomCanvas, WasteAnalysisPanels, and PropertyOverviewPanel", () => {
-        render(<PlanningTool />);
+        render(
+            <UnsavedChangesProvider>
+                <PlanningTool />
+            </UnsavedChangesProvider>
+        );
         expect(screen.getByTestId("mock-room-canvas")).toBeDefined();
         expect(screen.getByTestId("mock-waste-panels")).toBeDefined();
         expect(screen.getByTestId("mock-overview-panel")).toBeDefined();
@@ -165,7 +170,11 @@ describe("PlanningTool", () => {
 
     //Test that ActionPanel is not rendered initially
     it("does not render ActionPanel initially", () => {
-        render(<PlanningTool />);
+        render(
+            <UnsavedChangesProvider>
+                <PlanningTool />
+            </UnsavedChangesProvider>
+        );
         expect(screen.queryByTestId("mock-action-panel")).toBeNull();
     });
 });

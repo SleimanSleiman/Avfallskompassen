@@ -93,8 +93,10 @@ type RoomCanvasProps = {
     /* ───────────── Misc / Utilities ───────────── */
     undo?: () => void;
     redo?: () => void;
-    saveRoom?: (thumbnailBase64: string | null) => void;
+    saveRoom?: (thumbnailBase64: string | null) => Promise<void>;
     isAdminMode?: boolean;
+    hasUnsavedChanges?: () => boolean;
+    onClose?: () => void;
 };
 
 export default function RoomCanvas({
@@ -162,6 +164,8 @@ export default function RoomCanvas({
     redo,
     saveRoom,
     isAdminMode = false,
+    hasUnsavedChanges = () => false,
+    onClose,
 }: RoomCanvasProps) {
     const [isDraggingContainer, setIsDraggingContainer] = useState(false);
     const [isDraggingOtherObject, setIsDraggingOtherObject] = useState(false);
@@ -299,6 +303,8 @@ export default function RoomCanvas({
                         containers={containers}
                         otherObjects={otherObjects}
                         closePanels={closePanels}
+                        hasUnsavedChanges={hasUnsavedChanges}
+                        onClose={onClose}
                     />
 
                     {/* Konva Stage */}
