@@ -31,7 +31,6 @@ export default function LoginPage() {
         localStorage.removeItem('selectedPropertyId');
         
         // Navigate to dashboard after successful login
-        setTimeout(() => {
           navigate('/dashboard');
       } else {
         setError(res.message || 'Inloggningen misslyckades');
