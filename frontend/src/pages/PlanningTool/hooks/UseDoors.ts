@@ -121,7 +121,21 @@ export function useDoors(
                 rotation: getOutwardRotation(newWall),
                 swingDirection: "outward"
         };
-        doorOffsetRef.current[id] = 0.5;
+
+        //Calculate offset along the wall (0 = start, 1 = end)
+        let offset = 0.5;
+        switch (newWall) {
+            case "bottom":
+            case "top":
+                offset = (newX - leftX) / room.width;
+                break;
+            case "left":
+            case "right":
+                offset = (newY - topY) / room.height;
+                break;
+        }
+
+        doorOffsetRef.current[id] = offset;
 
         setDoors(prev => [...prev, newDoor]);
 
