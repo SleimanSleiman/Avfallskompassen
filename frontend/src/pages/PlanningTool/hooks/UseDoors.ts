@@ -64,20 +64,32 @@ export function useDoors(
             let steps: { x: number; y: number }[] = [];
             const margin = 0.01;
             switch (w) {
-                case "bottom":
-                case "top": {
+                case "bottom": {
                     const startX = leftX + margin * room.width;
                     const endX = rightX - margin * room.width - doorSizePx;
                     const step = doorSizePx + 0.05;
-                    for (let x = startX; x <= endX; x += step) steps.push({ x, y: w === "bottom" ? bottomY : topY });
+                    for (let x = startX; x <= endX; x += step) steps.push({ x, y: bottomY });
                     break;
                 }
-                case "left":
-                case "right": {
+                case "top": {
+                    const startX = leftX + margin * room.width + doorSizePx; // shift start to account for rotation
+                    const endX = rightX - margin * room.width;
+                    const step = doorSizePx + 0.05;
+                    for (let x = startX; x <= endX; x += step) steps.push({ x, y: topY });
+                    break;
+                }
+                case "left": {
                     const startY = topY + margin * room.height;
                     const endY = bottomY - margin * room.height - doorSizePx;
                     const step = doorSizePx + 0.05;
-                    for (let y = startY; y <= endY; y += step) steps.push({ x: w === "left" ? leftX : rightX, y });
+                    for (let y = startY; y <= endY; y += step) steps.push({ x: leftX, y });
+                    break;
+                }
+                case "right": {
+                    const startY = topY + margin * room.height + doorSizePx; // shift start to account for rotation
+                    const endY = bottomY - margin * room.height;
+                    const step = doorSizePx + 0.05;
+                    for (let y = startY; y <= endY; y += step) steps.push({ x: rightX, y });
                     break;
                 }
             }
