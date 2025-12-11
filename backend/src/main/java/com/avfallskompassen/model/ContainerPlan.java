@@ -34,12 +34,16 @@ public class ContainerPlan {
     @Column(name = "image_top_view_url")
     private String imageTopViewUrl;
 
-    public ContainerPlan(MunicipalityService municipalityService, ContainerType containerType, int emptyingFrequencyPerYear, BigDecimal cost, String imageTopViewUrl) {
+    @Column(name = "image_front_view_url")
+    private String imageFrontViewUrl;
+
+    public ContainerPlan(MunicipalityService municipalityService, ContainerType containerType, int emptyingFrequencyPerYear, BigDecimal cost, String imageTopViewUrl, String imageFrontViewUrl) {
         this.municipalityService = municipalityService;
         this.containerType = containerType;
         this.emptyingFrequencyPerYear = emptyingFrequencyPerYear;
         this.cost = cost;
         this.imageTopViewUrl = imageTopViewUrl;
+        this.imageFrontViewUrl = imageFrontViewUrl;
     }
 
     public ContainerPlan() {
@@ -92,5 +96,13 @@ public class ContainerPlan {
 
     public void setImageTopViewUrl(String imageTopViewUrl) {
         this.imageTopViewUrl = imageTopViewUrl;
+    }
+
+    public String getImageFrontViewUrl() {
+        return imageFrontViewUrl;
+    }
+
+    public void setImageFrontViewUrl(String imageFrontViewUrl) {
+        this.imageFrontViewUrl = imageFrontViewUrl;
     }
 }
