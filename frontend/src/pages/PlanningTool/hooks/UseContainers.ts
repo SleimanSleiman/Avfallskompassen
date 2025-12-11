@@ -90,7 +90,8 @@ export function useContainers(
     doorZones: { x: number; y: number; width: number; height: number }[] = [],
     otherObjectZones: { x: number; y: number; width: number; height: number }[] = [],
     setError,
-    setMsg
+    setMsg,
+    isDoorDragging?: boolean,
 ) {
 
     /* ──────────────── Containers State ──────────────── */
@@ -292,6 +293,7 @@ export function useContainers(
 
     //When door zones change, push overlapping containers away from doors
     useEffect(() => {
+        if (!isDoorDragging) return;
         if (doorZones.length === 0) return;
 
         const STEP = 10;

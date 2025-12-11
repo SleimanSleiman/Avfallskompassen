@@ -92,6 +92,8 @@ export default function PlanningTool({ isAdminMode = false }: PlanningToolProps)
         getDoorZones,
         doorOffsetRef,
         restoreDoorState,
+        isDoorDragging,
+        setIsDoorDragging,
     } = useDoors(room, setSelectedDoorId, setSelectedContainerId,setSelectedOtherObjectId, setError, setMsg);
 
     /* ──────────────── Other Objects state & logic ──────────────── */
@@ -138,7 +140,7 @@ export default function PlanningTool({ isAdminMode = false }: PlanningToolProps)
         redo,
         getContainerZones,
         isContainerInsideRoom,
-    } = useContainers(room, setSelectedContainerId, setSelectedDoorId, setSelectedOtherObjectId, getDoorZones(), getOtherObjectZones(),setError,setMsg);
+    } = useContainers(room, setSelectedContainerId, setSelectedDoorId, setSelectedOtherObjectId, getDoorZones(), getOtherObjectZones(),setError,setMsg, isDoorDragging);
 
     // Track the saved state for comparison
     // ...existing code...
@@ -544,6 +546,8 @@ export default function PlanningTool({ isAdminMode = false }: PlanningToolProps)
                         handleAddDoor={handleAddDoor}
                         doorZones={getDoorZones()}
                         restoreDoorState={restoreDoorState}
+                        isDraggingDoor={isDoorDragging}
+                        setIsDraggingDoor={setIsDoorDragging}
 
                         containers={containersInRoom}
                         selectedContainerId={selectedContainerId}

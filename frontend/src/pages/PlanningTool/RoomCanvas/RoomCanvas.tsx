@@ -46,6 +46,8 @@ type RoomCanvasProps = {
     handleAddDoor: (door: { width: number }) => boolean;
     doorZones: { x: number; y: number; width: number; height: number }[];
     restoreDoorState: (id: number, state: { x: number; y: number; wall: Door["wall"]; rotation: number; swingDirection: Door["swingDirection"];}) => void;
+    isDraggingDoor?: boolean;
+    setIsDraggingDoor?: Dispatch<SetStateAction<boolean>>;
 
     /* ───────────── Container Props ───────────── */
     containers: ContainerInRoom[];
@@ -115,6 +117,8 @@ export default function RoomCanvas({
     handleAddDoor,
     doorZones,
     restoreDoorState,
+    isDraggingDoor,
+    setIsDraggingDoor,
 
     /* ───────────── Container Props ───────────── */
     containers,
@@ -169,7 +173,6 @@ export default function RoomCanvas({
 }: RoomCanvasProps) {
     const [isDraggingContainer, setIsDraggingContainer] = useState(false);
     const [isDraggingOtherObject, setIsDraggingOtherObject] = useState(false);
-    const [isDraggingDoor, setIsDraggingDoor] = useState(false);
     const [msg, setMsg] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [isSaving, setIsSaving] = useState(false);

@@ -21,6 +21,9 @@ export function useDoors(
     //Stores relative position (offset) of each door along the wall
     const doorOffsetRef = useRef<Record<number, number>>({});
 
+    //Dragging state
+    const [isDoorDragging, setIsDoorDragging] = useState(false);
+
     //Returns the default outward rotation based on wall direction
     const getOutwardRotation = (wall: Door["wall"]) => {
         switch (wall) {
@@ -390,6 +393,8 @@ export function useDoors(
         getDoorZones,
         doorOffsetRef,
         restoreDoorState,
+        isDoorDragging,
+        setIsDoorDragging
     };
 }
 
