@@ -130,7 +130,11 @@ describe("ContainerDrag component", () => {
 
         capturedProps.onDragEnd({ target: mockTarget });
         expect(setLastValidPos).toHaveBeenCalledWith(newPos);
-        expect(handleDragContainer).toHaveBeenCalledWith(container.id, newPos);
+        expect(handleDragContainer).toHaveBeenCalledWith(container.id, {
+            x: newPos.x,
+            y: newPos.y,
+            rotation: container.rotation,
+        });
         expect(setIsOverZone).toHaveBeenCalledWith(false);
         expect(setIsDraggingContainer).toHaveBeenCalledWith(false);
     });
