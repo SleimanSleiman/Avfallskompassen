@@ -1,5 +1,9 @@
 package com.avfallskompassen.model;
 
+/**
+ * Enum with the different types of {@link Activity} done by users that are to be saved
+ * @author Anton Persson
+ */
 public enum ActivityType {
     LOGIN,
     REGISTERED,

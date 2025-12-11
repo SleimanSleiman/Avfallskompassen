@@ -6,6 +6,10 @@ import com.avfallskompassen.model.User;
 
 import java.util.List;
 
+/**
+ * Interface for activity services
+ * @author Anton Persson
+ */
 public interface ActivityService {
     List<ActivityDTO> getLimitedUserActivities(User user, int limit);
 

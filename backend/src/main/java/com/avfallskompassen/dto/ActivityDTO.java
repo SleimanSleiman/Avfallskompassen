@@ -6,6 +6,10 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
+/**
+ * DTO for {@link Activity}
+ * @author Anton Persson
+ */
 public class ActivityDTO {
     private String details;
     private String timeStamp;
@@ -39,7 +43,7 @@ public class ActivityDTO {
         for (Activity activity : entities) {
             ActivityDTO dto = new ActivityDTO();
             dto.setDetails(activity.getDetails());
-            dto.setTimeStamp(activity.getTimestamp().toString());
+            dto.setTimeStamp(activity.getTimestamp() != null ? activity.getTimestamp().toString() : null);
             activityDTOList.add(dto);
         }
         return activityDTOList;

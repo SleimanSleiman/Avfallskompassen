@@ -5,6 +5,10 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 
+/**
+ * Entity class for users activities
+ * @author Anton Persson
+ */
 @Entity
 @Table(name = "activities")
 public class Activity {

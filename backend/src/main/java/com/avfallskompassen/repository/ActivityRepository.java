@@ -8,6 +8,10 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
+/**
+ * Repository for handling {@link Activity} entities
+ * @author Anton Persson
+ */
 @Repository
 public interface ActivityRepository extends JpaRepository<Activity, Long> {
     List<Activity> findByUserOrderByTimestampDesc(User user);
