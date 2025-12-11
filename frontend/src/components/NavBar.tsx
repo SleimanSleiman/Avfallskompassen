@@ -9,12 +9,15 @@ export default function NavBar() {
   const [user, setUser] = useState(currentUser());
   const isAdmin = String(user?.role || '').toUpperCase().includes('ADMIN');
   const location = useLocation();
+  // Hide nav entirely on auth pages
   const hideMenu = ["/login", "/register"].includes(location.pathname);
   const { hasUnsavedChanges, setHasUnsavedChanges } = useUnsavedChanges();
   const [pendingLogout, setPendingLogout] = useState(false);
+  // Store target path while waiting for unsaved-changes confirmation
   const [pendingNavigation, setPendingNavigation] = useState<string | null>(null);
 
   useEffect(() => {
+    // Keep user state in sync with storage/auth changes across tabs
     setUser(currentUser());
 
     const handleStorageChange = () => {
@@ -31,6 +34,7 @@ export default function NavBar() {
   }, []);
 
   function handleLogout() {
+    // Clear persisted planning selections even if logout gets cancelled
     localStorage.removeItem("trashRoomData");
     localStorage.removeItem('enviormentRoomData');
     localStorage.removeItem('selectedProperty');
@@ -46,6 +50,7 @@ export default function NavBar() {
   }
 
   function handleConfirmLogout() {
+    // Proceed with logout after user confirms discarding unsaved changes
     setPendingLogout(false);
     logout();
     setUser(null);
@@ -58,6 +63,7 @@ export default function NavBar() {
   }
 
   function handleNavigation(path: string) {
+    // Prompt before leaving planning tool with unsaved changes
     if (hasUnsavedChanges && location.pathname.includes('/planningTool')) {
       setPendingNavigation(path);
     } else {
@@ -78,6 +84,7 @@ export default function NavBar() {
 
   function resetPlanningToolState() {
     if (typeof window === 'undefined') return;
+    // Clear cached planning tool data to avoid stale selections
     localStorage.removeItem('enviormentRoomData');
     localStorage.removeItem('trashRoomData');
     localStorage.removeItem('selectedProperty');
