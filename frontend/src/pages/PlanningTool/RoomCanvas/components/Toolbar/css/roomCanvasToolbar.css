@@ -18,6 +18,11 @@
     @apply w-5 h-5 flex-shrink-0;
 }
 
+/* Dumpster icon */
+.toolbar-icon-dumpster {
+    transform: scale(1.3);
+}
+
 /* Label that expands on hover */
 .toolbar-label {
     @apply ml-2 text-sm font-medium opacity-0 w-0 group-hover:opacity-100 group-hover:w-auto

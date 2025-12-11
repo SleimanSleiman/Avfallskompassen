@@ -5,8 +5,13 @@
  */
 
 import { useCallback, useEffect, forwardRef, type ForwardRef, Dispatch, type SetStateAction, useRef} from "react";
-import { Apple, Trash2, CupSoda, Package, Package2, GlassWater, BottleWine, InspectionPanel, X } from "lucide-react";
-import type { LucideIcon } from "lucide-react";
+import { Package, Package2, X } from "lucide-react";
+import { IoNewspaperOutline } from "react-icons/io5";
+import { FaWineBottle, FaAppleAlt, FaNewspaper } from "react-icons/fa";
+import { PiBeerBottleBold } from "react-icons/pi";
+import { GiOpenedFoodCan, GiSwapBag } from "react-icons/gi";
+import { BsFillBoxSeamFill } from "react-icons/bs";
+import { FaJugDetergent } from "react-icons/fa6";
 import type { ContainerDTO } from "../../../../../lib/Container";
 import { DRAG_DATA_FORMAT } from "../../../Constants";
 import LoadingBar from "../../../../../components/LoadingBar";
@@ -32,21 +37,21 @@ type ContainerPanelProps = {
 //Maps service type names to icons based on keyword matching
 type ServiceTypeIconRule = {
     keywords: string[];
-    Icon: LucideIcon;
+    Icon: IconType;
 };
 
 const SERVICE_TYPE_ICON_RULES: ServiceTypeIconRule[] = [
-    { keywords: ["mat"], Icon: Apple },
-    { keywords: ["rest"], Icon: Trash2 },
-    { keywords: ["plast"], Icon: CupSoda },
-    { keywords: ["papper", "tidning"], Icon: Package },
-    { keywords: ["ofärgat"], Icon: GlassWater },
-    { keywords: ["färgat"], Icon: BottleWine },
-    { keywords: ["glas"], Icon: GlassWater },
-    { keywords: ["metall"], Icon: InspectionPanel }
+    { keywords: ["mat"], Icon: FaAppleAlt },
+    { keywords: ["rest"], Icon: GiSwapBag },
+    { keywords: ["plast"], Icon: FaJugDetergent },
+    { keywords: ["papper"], Icon: BsFillBoxSeamFill },
+    { keywords:  ["tidning"], Icon: FaNewspaper },
+    { keywords: ["ofärgat"], Icon: PiBeerBottleBold },
+    { keywords: ["färgat"], Icon: FaWineBottle },
+    { keywords: ["metall"], Icon: GiOpenedFoodCan }
 ];
 
-const getServiceTypeIcon = (name: string): LucideIcon => {
+const getServiceTypeIcon = (name: string): IconType => {
     //Find matching icon rule
     const normalized = name.toLowerCase();
     const match = SERVICE_TYPE_ICON_RULES.find(rule =>
