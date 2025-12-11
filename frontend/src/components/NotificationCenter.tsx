@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { getMyProperties } from '../lib/property';
-import type { Property } from '../lib/property';
+import { getMyProperties } from '../lib/Property';
+import type { Property } from '../lib/Property';
 import LoadingBar from './LoadingBar';
 
 // Determine notification threshold in seconds.

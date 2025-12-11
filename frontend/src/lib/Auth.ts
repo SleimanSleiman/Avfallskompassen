@@ -1,4 +1,4 @@
-import { post } from './api';
+import { post } from "./Api";
 import { stopInactivityTimer } from "./InactivityTimer";
 
 

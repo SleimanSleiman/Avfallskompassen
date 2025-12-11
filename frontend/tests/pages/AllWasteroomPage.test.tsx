@@ -132,13 +132,14 @@ describe("AllaMiljoRumPage (Vitest)", () => {
 
         (deleteWasteRoom as any).mockResolvedValue(undefined);
 
-        vi.spyOn(window, "confirm").mockReturnValue(true);
-
         renderWithRoute();
 
         await screen.findByText("DeleteMe");
 
-        fireEvent.click(screen.getByText("Ta bort"));
+        fireEvent.click(screen.getAllByText("Ta bort")[0]);
+
+        const confirmButton = await screen.findByTestId("confirm-delete");
+        fireEvent.click(confirmButton);
 
         await waitFor(() =>
             expect(deleteWasteRoom).toHaveBeenCalledWith(1)

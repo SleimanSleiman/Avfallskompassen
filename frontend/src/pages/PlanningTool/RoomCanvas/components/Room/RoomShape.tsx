@@ -9,19 +9,13 @@ import { SCALE, STAGE_WIDTH, STAGE_HEIGHT, MARGIN, clamp } from "../../../Consta
 
 type RoomShapeProps = {
     room: Room;
-    handleSelectDoor: (id: number) => void;
-    handleSelectContainer: (id: number) => void;
-    handleSelectOtherObject: (id: number) => void;
-    setSelectedContainerInfo: (v: ContainerDTO | null) => void;
+    closePanels: () => void;
     onMove: (x: number, y: number) => void;
 };
 
 export default function RoomShape({
     room,
-    handleSelectDoor,
-    handleSelectContainer,
-    handleSelectOtherObject,
-    setSelectedContainerInfo,
+    closePanels,
     onMove,
 }: RoomShapeProps) {
     //Convert dimensions to meters for display
@@ -71,10 +65,7 @@ export default function RoomShape({
                 }}
                 //Deselect when clicking empty room
                 onMouseDown={(e) => {
-                    handleSelectContainer(null);
-                    handleSelectDoor(null);
-                    handleSelectOtherObject(null);
-                    setSelectedContainerInfo(null);
+                    closePanels();
                     e.cancelBubble = true;
                 }}
             />

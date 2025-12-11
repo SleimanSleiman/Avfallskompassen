@@ -15,6 +15,7 @@ import AllWasteroomPage from "./pages/AllWasteroomPage";
 import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { startInactivityTimer, stopInactivityTimer } from "./lib/InactivityTimer";
+import { UnsavedChangesProvider } from './context/UnsavedChangesContext';
 import { ActivityList } from './components/ActivityList';
 import { getUsersLatestActivities } from './lib/Activity';
 import type { Activity } from './lib/Activity';
@@ -157,67 +158,69 @@ export default function App() {
     }, [location.pathname]);
     
   return (
-    <div className="min-h-screen flex flex-col">
-      <NavBar />
-      <div className="flex-1">
-        <Routes>
-          <Route
-            path="/"
+    <UnsavedChangesProvider>
+      <div className="min-h-screen flex flex-col">
+        <NavBar />
+        <div className="flex-1">
+          <Routes>
+            <Route
+              path="/"
+              element={
+                currentUser() ? <Navigate to="/dashboard" replace /> : <Navigate to="/login" replace />
+              }
+            />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/register" element={<RegisterPage />} />
+            <Route path="/dashboard" element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            } />
+            <Route path="/properties" element={
+              <ProtectedRoute>
+                <PropertyPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/planningTool" element={
+              <ProtectedRoute>
+                <PlanningTool />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin" element={
+              <ProtectedRoute>
+                <AdminPage />
+              </ProtectedRoute>
+            } />
+              <Route path="/statistics" element={
+                  <ProtectedRoute>
+                      <StatisticsOverviewPage/>
+                  </ProtectedRoute>
+               }/>
+            <Route path="/statistics/:propertyId" element={
+              <ProtectedRoute>
+                <StatisticsPage />
+              </ProtectedRoute>
+            } />
+            <Route
+            path="/allWasteroom/:propertyId"
             element={
-              currentUser() ? <Navigate to="/dashboard" replace /> : <Navigate to="/login" replace />
+              <ProtectedRoute>
+                <AllWasteroomPage />
+              </ProtectedRoute>
             }
           />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/register" element={<RegisterPage />} />
-          <Route path="/dashboard" element={
-            <ProtectedRoute>
-              <Dashboard />
-            </ProtectedRoute>
-          } />
-          <Route path="/properties" element={
-            <ProtectedRoute>
-              <PropertyPage />
-            </ProtectedRoute>
-          } />
-          <Route path="/planningTool" element={
-            <ProtectedRoute>
-              <PlanningTool />
-            </ProtectedRoute>
-          } />
-          <Route path="/admin" element={
-            <ProtectedRoute>
-              <AdminPage />
-            </ProtectedRoute>
-          } />
-            <Route path="/statistics" element={
-                <ProtectedRoute>
-                    <StatisticsOverviewPage/>
-                </ProtectedRoute>
-             }/>
-          <Route path="/statistics/:propertyId" element={
-            <ProtectedRoute>
-              <StatisticsPage />
-            </ProtectedRoute>
-          } />
           <Route
-          path="/allWasteroom/:propertyId"
-          element={
-            <ProtectedRoute>
-              <AllWasteroomPage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/reports"
-          element={
-            <ProtectedRoute>
-              <ReportsPage />
-            </ProtectedRoute>
-          }
-        />
-        </Routes>
+            path="/reports"
+            element={
+              <ProtectedRoute>
+                <ReportsPage />
+              </ProtectedRoute>
+            }
+          />
+          </Routes>
+        </div>
+        <Footer />
       </div>
-      <Footer />
-    </div>
+    </UnsavedChangesProvider>
   );
 }

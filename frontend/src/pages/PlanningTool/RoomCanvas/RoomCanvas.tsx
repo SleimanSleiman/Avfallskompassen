@@ -27,6 +27,7 @@ import type { Room, ContainerInRoom, Door, OtherObjectInRoom } from "../Types";
 import type { ContainerDTO } from "../../../lib/Container";
 import Message from "../../../components/ShowStatus";
 import './css/roomCanvasStage.css'
+import LoadingBar from "../../../components/LoadingBar";
 
 /* ─────────────── RoomCanvas Props ──────────────── */
 type RoomCanvasProps = {
@@ -58,12 +59,14 @@ type RoomCanvasProps = {
 
     /* ───────────── Other Objects Props ───────────── */
     otherObjects: OtherObjectInRoom[];
+    setOtherObjects: (objects: OtherObjectInRoom[]) => void;
     handleAddOtherObject: (name: string, width: number, height: number) => void;
     getOtherObjectZones: (excludeId?: number) => { x: number; y: number; width: number; height: number }[];
     handleDragOtherObject: (id: number, pos: { x: number; y: number }) => void;
     handleSelectOtherObject: (id: number | null) => void;
     selectedOtherObjectId: number | null;
-    isObjectOutsideRoom: (rect: { x: number; y: number; width: number; height: number; rotation?: number }, room: Room) => boolean;
+    isObjectInsideRoom: (rect: { x: number; y: number; width: number; height: number; rotation?: number }, room: Room) => boolean;
+    moveAllObjects: (dx: number, dy: number) => void;
 
     /* ───────────── Drag & Drop Props ───────────── */
     stageWrapperRef: React.RefObject<HTMLDivElement | null>;
@@ -89,8 +92,10 @@ type RoomCanvasProps = {
     /* ───────────── Misc / Utilities ───────────── */
     undo?: () => void;
     redo?: () => void;
-    saveRoom?: (thumbnailBase64: string | null) => void;
+    saveRoom?: (thumbnailBase64: string | null) => Promise<void>;
     isAdminMode?: boolean;
+    hasUnsavedChanges?: () => boolean;
+    onClose?: () => void;
 };
 
 export default function RoomCanvas({
@@ -128,7 +133,8 @@ export default function RoomCanvas({
     getOtherObjectZones,
     handleSelectOtherObject,
     selectedOtherObjectId,
-    isObjectOutsideRoom,
+    isObjectInsideRoom,
+    moveAllObjects,
 
     /* ───────────── Drag & Drop Props ───────────── */
     stageWrapperRef,
@@ -156,11 +162,15 @@ export default function RoomCanvas({
     redo,
     saveRoom,
     isAdminMode = false,
+    hasUnsavedChanges = () => false,
+    onClose,
 }: RoomCanvasProps) {
     const [isDraggingContainer, setIsDraggingContainer] = useState(false);
     const [isDraggingOtherObject, setIsDraggingOtherObject] = useState(false);
     const [msg, setMsg] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
+    const [isSaving, setIsSaving] = useState(false);
+    
 
     //Handle container panel state and ref
     const {
@@ -194,6 +204,7 @@ export default function RoomCanvas({
 
         setRoom({ ...room, x: newX, y: newY });
         moveAllContainers(dx, dy);
+        moveAllObjects(dx, dy);
     };
 
     const stageRef = useRef<any>(null);
@@ -210,6 +221,13 @@ export default function RoomCanvas({
         return uri;
     };
 
+    const closePanels = () => {
+        setSelectedContainerInfo(null);
+        handleSelectOtherObject (null);
+        handleSelectContainer (null);
+        handleSelectDoor (null);
+    }
+
     /* ──────────────── Render ──────────────── */
     return (
         <div
@@ -223,6 +241,7 @@ export default function RoomCanvas({
 
             {/* Feedback messages */}
             <div className="stage-content-wrapper">
+                {isSaving && <LoadingBar message="Sparar rummet…"/>}
                 {msg && <Message message={msg} type="success" />}
                 {error && <Message message={error} type="error" />}
             </div>
@@ -268,6 +287,7 @@ export default function RoomCanvas({
                         doorsLength={doors.length}
                         setMsg={setMsg}
                         setError={setError}
+                        setIsSaving={setIsSaving}
                         undo={undo}
                         redo={redo}
                         selectedContainerInfo={selectedContainerInfo}
@@ -275,6 +295,13 @@ export default function RoomCanvas({
                         isAdminMode={isAdminMode}
                         generateThumbnail={generateThumbnail}
                         handleAddOtherObject={handleAddOtherObject}
+                        isContainerInsideRoom={isContainerInsideRoom}
+                        isObjectInsideRoom={isObjectInsideRoom}
+                        containers={containers}
+                        otherObjects={otherObjects}
+                        closePanels={closePanels}
+                        hasUnsavedChanges={hasUnsavedChanges}
+                        onClose={onClose}
                     />
 
                     {/* Konva Stage */}
@@ -285,10 +312,7 @@ export default function RoomCanvas({
                         onMouseDown={(e) => {
                             //Deselect when clicking on empty area
                             if (e.target === e.target.getStage()) {
-                                handleSelectContainer(null);
-                                handleSelectDoor(null);
-                                handleSelectOtherObject(null);
-                                setSelectedContainerInfo(null);
+                                closePanels();
                             }
                         }}
                         className="page-grid-bg"
@@ -298,10 +322,7 @@ export default function RoomCanvas({
                             {/* Room rectangle */}
                             <RoomShape
                                 room={room}
-                                handleSelectContainer={handleSelectContainer}
-                                handleSelectDoor={handleSelectDoor}
-                                handleSelectOtherObject={handleSelectOtherObject}
-                                setSelectedContainerInfo={setSelectedContainerInfo}
+                                closePanels={closePanels}
                                 onMove={handleMoveRoom}
                             />
 
@@ -353,7 +374,7 @@ export default function RoomCanvas({
                                 getOtherObjectZones={getOtherObjectZones}
                                 selectedOtherObjectId={selectedOtherObjectId}
                                 setIsDraggingOtherObject={setIsDraggingOtherObject}
-                                isObjectOutsideRoom={isObjectOutsideRoom}
+                                isObjectInsideRoom={isObjectInsideRoom}
                             />
 
                             {/* Measurement layer for selected other object */}
