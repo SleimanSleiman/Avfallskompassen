@@ -40,6 +40,17 @@ public class LockTypeServiceImpl implements LockTypeService {
     }
 
     /**
+     * Fetches the lockType associated with a certain propertyId
+     * @param propertyId
+     * @return LockTypeDto
+     */
+    public LockTypeDto getPropertyLockTypeById(Long propertyId) {
+        LockType lockType = lockTypeRepository.findLockTypeByPropertyId(propertyId)
+                .orElseThrow(() -> new RuntimeException("No Locktype found for this property"));
+        return new LockTypeDto(lockType);
+    }
+
+    /**
      * Fetches all lock types.
      * @author Christian Storck
      * @return A list of {@link LockType} entity.

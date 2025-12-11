@@ -391,4 +391,37 @@ public class PropertyControllerTest {
         assertEquals(mockList, response.getBody());
 
     }
+
+    @Test
+    void getMyLockType_success_returnsOK() {
+        Long propertyId = sampleProperty().getId();
+        LockTypeDto dto = sampleLockDto();
+
+        when(lockTypeService.getPropertyLockTypeById(propertyId)).thenReturn(dto);
+
+        ResponseEntity<LockTypeDto> response = controller.getLockType(propertyId);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals(dto.getId(), response.getBody().getId());
+        assertEquals(dto.getName(), response.getBody().getName());
+        verify(lockTypeService).getPropertyLockTypeById(propertyId);
+    }
+
+    @Test
+    void getMyLockType_notFound_throws404() {
+        Long propertyId = sampleProperty().getId();
+
+        when(lockTypeService.getPropertyLockTypeById(propertyId)).thenReturn(null);
+
+        ResponseStatusException ex = assertThrows(
+                ResponseStatusException.class,
+                () -> controller.getLockType(propertyId)
+        );
+
+        assertEquals(HttpStatus.NOT_FOUND, ex.getStatusCode());
+        assertEquals("Lock type not found", ex.getReason());
+
+        verify(lockTypeService).getPropertyLockTypeById(propertyId);
+    }
 }

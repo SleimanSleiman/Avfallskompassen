@@ -19,6 +19,12 @@ export type SimplePropertyDTO = {
     municipalityName: string;
 };
 
+export type LockTypeDTO = {
+    id: number;
+    name: string;
+    cost: number;
+}
+
 export type PropertyContainerDTO = {
     fractionType: string;
     containerName: string;
@@ -53,6 +59,12 @@ export async function getCollectionFee(propertyId: number): Promise<CollectionFe
 
 export async function getPropertiesSimple(): Promise<SimplePropertyDTO[]> {
     return await api<SimplePropertyDTO[]>(`/api/properties/my-properties/simple`, {
+        method: 'GET',
+    });
+}
+
+export async function getLockTypeForProperty(propertyId: number): Promise<LockTypeDTO> {
+    return await api<LockTypeDTO>(`/api/properties/my-lock-type/${propertyId}`, {
         method: 'GET',
     });
 }
