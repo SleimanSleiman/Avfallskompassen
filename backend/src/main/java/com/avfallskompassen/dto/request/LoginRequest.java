@@ -14,7 +14,7 @@ public class LoginRequest {
     @NotBlank(message = "Username may not be empty")
     @Size(min = 3, max = 50, message = "Username must be 3–50 characters")
     @Pattern(
-            regexp = "^[A-Za-z0-9._-]+$",
+            regexp = "^[A-Za-zÅÄÖåäö0-9._-]+$",
             message = "Username contains invalid characters"
     )
     private String username;
