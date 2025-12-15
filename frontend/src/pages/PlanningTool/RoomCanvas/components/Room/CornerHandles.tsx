@@ -32,6 +32,24 @@ export default function CornerHandles({
                     radius={5}
                     fill="#7a7a7a"
                     draggable
+                    // Cursor changes
+                    onMouseEnter={(e) => {
+                        const stage = e.target.getStage();
+                        if (stage) stage.container().style.cursor = "grab";
+                    }}
+                    onMouseLeave={(e) => {
+                        const stage = e.target.getStage();
+                        if (stage) stage.container().style.cursor = "default";
+                    }}
+                    onDragStart={(e) => {
+                        const stage = e.target.getStage();
+                        if (stage) stage.container().style.cursor = "grabbing";
+                    }}
+                    onDragEnd={(e) => {
+                        const stage = e.target.getStage();
+                        if (stage) stage.container().style.cursor = "grab";
+                    }}
+
                     //Constrain corner movement to maintain room size and stay within canvas
                     dragBoundFunc={(pos) => {
                         let newPos = { x: pos.x, y: pos.y };
