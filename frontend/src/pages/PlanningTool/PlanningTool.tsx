@@ -69,11 +69,7 @@ export default function PlanningTool({ isAdminMode = false }: PlanningToolProps)
     const [error, setError] = useState<string | null>(null);
     const [property, setProperty] = useState<Property | null>(null);
 
-    useEffect(() => {
-        if (room?.propertyId) {
-            getProperty(room.propertyId).then(setProperty).catch(console.error);
-        }
-    }, [room?.propertyId]);
+    
 
    // Selected IDs
    const [selectedContainerId, setSelectedContainerId] = useState<number | null>(null);
@@ -87,6 +83,12 @@ export default function PlanningTool({ isAdminMode = false }: PlanningToolProps)
         handleDragCorner,
         setRoom
     } = useRoom();
+
+    useEffect(() => {
+        if (room?.propertyId) {
+            getProperty(room.propertyId).then(setProperty).catch(console.error);
+        }
+    }, [room?.propertyId]);
     
     /* ──────────────── Door state & logic ──────────────── */
     const {
