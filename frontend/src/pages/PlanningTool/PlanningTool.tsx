@@ -7,6 +7,7 @@ import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 //Lib
+import { getProperty } from '../../lib/Property';
 import type { Property } from '../../lib/Property';
 import type { ContainerDTO } from '../../lib/Container';
 import { currentUser } from '../../lib/Auth';
@@ -75,6 +76,13 @@ export default function PlanningTool({ isAdminMode = false }: PlanningToolProps)
     /* ──────────────── Messages ──────────────── */
     const [msg, setMsg] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
+    const [property, setProperty] = useState<Property | null>(null);
+
+    useEffect(() => {
+        if (room.propertyId) {
+            getProperty(room.propertyId).then(setProperty).catch(console.error);
+        }
+    }, [room.propertyId]);
 
 
     /* ──────────────── Door state & logic ──────────────── */
@@ -589,6 +597,7 @@ export default function PlanningTool({ isAdminMode = false }: PlanningToolProps)
                         isAdminMode={isAdminMode}
                         hasUnsavedChanges={hasUnsavedChanges}
                         onClose={handleCloseRoom}
+                        existingNames={property?.wasteRooms?.map(r => r.name || "") || []}
                     />
 
                     {/* ActionPanel for selected container or door */}

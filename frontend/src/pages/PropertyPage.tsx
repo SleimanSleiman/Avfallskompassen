@@ -586,6 +586,7 @@ async function onDeleteWasteRoom(propertyId: number, wasteRoomId: number) {
 
       {isCreateRoomOpen && (
         <RoomSizePrompt
+          existingNames={selectedProperty?.wasteRooms?.map(r => r.name) || []}
           onConfirm={(name: string, length: number, width: number) => {
             localStorage.setItem(
               'enviormentRoomData',

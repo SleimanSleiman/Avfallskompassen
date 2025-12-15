@@ -4,12 +4,23 @@ import { MARGIN, SCALE, STAGE_WIDTH, STAGE_HEIGHT, MIN_WIDTH } from "../pages/Pl
 interface RoomSizePromptProps {
   onConfirm: (name: string, length: number, width: number) => void;
   onCancel: () => void;
+  initialName?: string;
+  initialLength?: number;
+  initialWidth?: number;
+  existingNames?: string[];
 }
 
-export default function RoomSizePrompt({ onConfirm, onCancel }: RoomSizePromptProps) {
-  const [name, setName] = useState("");
-  const [length, setLength] = useState("");
-  const [width, setWidth] = useState("");
+export default function RoomSizePrompt({ 
+  onConfirm, 
+  onCancel, 
+  initialName = "", 
+  initialLength, 
+  initialWidth,
+  existingNames = []
+}: RoomSizePromptProps) {
+  const [name, setName] = useState(initialName);
+  const [length, setLength] = useState(initialLength ? String(initialLength) : "");
+  const [width, setWidth] = useState(initialWidth ? String(initialWidth) : "");
   const [error, setError] = useState<string | null>(null);
 
   // Display limits based on stage size and scale
@@ -18,8 +29,21 @@ export default function RoomSizePrompt({ onConfirm, onCancel }: RoomSizePromptPr
   const minValue = Number((MIN_WIDTH * SCALE).toFixed(2));
 
   const handleConfirm = () => {
-    const lengthNum = Number(length);
-    const widthNum = Number(width);
+    // Use initial values if fields are empty
+    const finalName = name.trim() === "" ? initialName : name.trim();
+    const lengthNum = length === "" && initialLength ? initialLength : Number(length);
+    const widthNum = width === "" && initialWidth ? initialWidth : Number(width);
+
+    if (!finalName) {
+        setError("Ange ett namn för rummet.");
+        return;
+    }
+
+    // Check uniqueness (case insensitive), but allow if it's the same name (editing)
+    if (existingNames.some(n => n.toLowerCase() === finalName.toLowerCase() && n.toLowerCase() !== initialName.toLowerCase())) {
+        setError("Ett rum med detta namn finns redan.");
+        return;
+    }
 
     if (Number.isNaN(lengthNum) || Number.isNaN(widthNum)) {  
       setError("Ange giltiga numeriska värden för längd och bredd.");
@@ -40,7 +64,7 @@ export default function RoomSizePrompt({ onConfirm, onCancel }: RoomSizePromptPr
     }
 
     setError(null);
-    onConfirm(name, lengthNum, widthNum);
+    onConfirm(finalName, lengthNum, widthNum);
   };
 
   return (

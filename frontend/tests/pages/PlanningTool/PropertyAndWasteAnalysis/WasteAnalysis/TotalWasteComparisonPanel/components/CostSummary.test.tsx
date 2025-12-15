@@ -80,8 +80,29 @@ describe("CostSummary", () => {
 
         expect(screen.getByTestId("summary-value")).toHaveTextContent("—");
 
+        // Should only show value and per apartment placeholder
         const placeholders = screen.getAllByText("—");
-        expect(placeholders.length).toBe(4); // value + 3 description rows
+        expect(placeholders.length).toBe(2); 
+        
+        expect(screen.queryByText("Snitt i gruppen")).toBeNull();
+        expect(screen.queryByText("Avvikelse")).toBeNull();
+        
         expect(screen.getByTestId("trend-badge")).toHaveTextContent("Oförändrad");
+    });
+
+    it("hides comparison when average is 0", () => {
+        render(
+            <CostSummary
+                propertyCostValue={1000}
+                costAverage={0}
+                costPerApartment={100}
+                costGapSummary="—"
+                costTrend="neutral"
+                costTone="neutral"
+            />
+        );
+
+        expect(screen.queryByText("Snitt i gruppen")).toBeNull();
+        expect(screen.queryByText("Avvikelse")).toBeNull();
     });
 });

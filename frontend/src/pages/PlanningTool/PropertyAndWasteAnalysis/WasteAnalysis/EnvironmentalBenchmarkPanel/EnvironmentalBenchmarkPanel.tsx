@@ -71,10 +71,12 @@ export default function EnvironmentalBenchmarkPanel({
                             description={
                                 <div className="benchmark-description">
                                     {/*Average and benchmark values*/}
-                                    <div className="benchmark-row">
-                                        <span className="benchmark-row-label">Snitt i gruppen</span>
-                                        <span className="benchmark-row-value">{formatLitersPerWeek(averageValue)}</span>
-                                    </div>
+                                    {averageValue != null && averageValue > 0 && (
+                                        <div className="benchmark-row">
+                                            <span className="benchmark-row-label">Snitt i gruppen</span>
+                                            <span className="benchmark-row-value">{formatLitersPerWeek(averageValue)}</span>
+                                        </div>
+                                    )}
                                     <div className="benchmark-row">
                                         <span className="benchmark-row-label">Riktmärke</span>
                                         <span className="benchmark-row-value">{def.benchmark} L</span>
@@ -88,10 +90,12 @@ export default function EnvironmentalBenchmarkPanel({
                                                 value={propertyValue}
                                                 benchmark={def.benchmark}
                                             />
-                                            <div className="benchmark-row">
-                                                <span className="benchmark-row-label">Avvikelse</span>
-                                                <span className="benchmark-row-value">{row?.wasteDiff ?? "—"}</span>
-                                            </div>
+                                            {averageValue != null && averageValue > 0 && (
+                                                <div className="benchmark-row">
+                                                    <span className="benchmark-row-label">Avvikelse</span>
+                                                    <span className="benchmark-row-value">{row?.wasteDiff ?? "—"}</span>
+                                                </div>
+                                            )}
                                         </>
                                     ) : (
                                         //Message if no container data
