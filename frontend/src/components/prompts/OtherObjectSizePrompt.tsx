@@ -2,7 +2,8 @@
 * Pop-up window allowing the user to enter the name, length, and width of an object.
 */
 import { useState } from "react";
-import Prompt from "./Prompt";
+import "../css/prompts.css";
+import Prompt from "../Prompt";
 
 export default function OtherObjectSizePrompt({
   onConfirm,

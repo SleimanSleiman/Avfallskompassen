@@ -4,7 +4,7 @@
  */
 
 import DoorDrag from "./components/DoorDrag";
-import type { Door } from "../../../Types";
+import type { Door } from "../../../lib/Types";
 
 type DoorsLayerProps = {
     doors: Door[];

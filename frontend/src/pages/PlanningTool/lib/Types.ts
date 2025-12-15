@@ -2,7 +2,7 @@
  * Types for the Planning Tool feature
  */
 
-import type { ContainerDTO } from "../../lib/Container";
+import type { ContainerDTO } from "../../../lib/Container";
 
 export type Room = {
     id? : number;

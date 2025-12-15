@@ -3,8 +3,8 @@
  * Handles adding, removing, dragging, rotating and selecting other objects.
  */
 import { useState } from "react";
-import type { OtherObjectInRoom, Room } from "../Types";
-import { clamp, isOverlapping, cmToPixels, SCALE } from "../Constants";
+import type { OtherObjectInRoom, Room } from "../lib/Types";
+import { clamp, isOverlapping, cmToPixels, SCALE } from "../lib/Constants";
 
 export function useOtherObjects(
     room: Room,

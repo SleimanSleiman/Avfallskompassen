@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { MARGIN, SCALE, STAGE_WIDTH, STAGE_HEIGHT, MIN_WIDTH } from "../pages/PlanningTool/Constants";
-import "./css/prompts.css";
-import Prompt from "./Prompt";
+import { MARGIN, SCALE, STAGE_WIDTH, STAGE_HEIGHT, MIN_WIDTH } from "../../pages/PlanningTool/lib/Constants";
+import "../css/prompts.css";
+import Prompt from "../Prompt";
 
 export default function RoomSizePrompt({ onConfirm, onCancel }: RoomSizePromptProps) {
   const [name, setName] = useState("");

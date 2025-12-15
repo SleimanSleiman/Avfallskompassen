@@ -1,6 +1,6 @@
 import { render, screen, fireEvent } from "@testing-library/react";
 import React from "react";
-import ActionPanel from "../../../src/pages/PlanningTool/ActionPanel";
+import ActionPanel from "../../../src/pages/PlanningTool/components/ActionPanel";
 import { vi, describe, it, beforeEach, expect } from "vitest";
 
 // ─────────────── Mock Tooltip ───────────────

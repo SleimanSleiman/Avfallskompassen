@@ -3,7 +3,7 @@
  * Functions to process container and comparison data into stats and table rows.
  */
 import type { DesignStats, DesignTypeStats, CombinedRow, BenchmarkDefinition } from "./types";
-import type { ContainerInRoom } from "../../Types";
+import type { ContainerInRoom } from "../../lib/Types";
 import { normalizeWasteTypeKey, calculatePercentageDifference, computePerApartmentPerWeek, getTrend } from "./utils";
 
 //Build design stats from containers in the room

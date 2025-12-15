@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { createProperty, deleteProperty, updateProperty,getMunicipalities, getLockTypes, getMyPropertiesWithWasteRooms } from '../lib/Property';
 import type { Municipality, Property, PropertyRequest } from '../lib/Property';
 import { currentUser } from '../lib/Auth';
-import RoomSizePrompt from '../components/RoomSizePrompt';
+import RoomSizePrompt from '../components/prompts/RoomSizePrompt';
 import ConfirmModal from '../components/ConfirmModal';
 import { deleteWasteRoom } from '../lib/WasteRoomRequest';
 import Message from '../components/ShowStatus';

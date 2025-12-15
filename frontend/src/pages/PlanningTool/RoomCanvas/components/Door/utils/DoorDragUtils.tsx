@@ -3,7 +3,7 @@
  * Computes constrained drag bounds for doors inside a room.
  */
 
-import { clamp, SCALE } from "../../../../Constants";
+import { clamp, SCALE } from "../../../../lib/Constants";
 
 //Compute the nearest allowed position for a door within room bounds
 export function computeDragBound(door, room, pos: { x: number; y: number }) {

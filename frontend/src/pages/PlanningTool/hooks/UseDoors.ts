@@ -3,8 +3,8 @@
  * Handles adding, removing, dragging, rotating and selecting doors.
  */
 import { useState, useRef, useEffect } from "react";
-import type { Door, Room } from "../Types";
-import { SCALE, clamp } from "../Constants";
+import type { Door, Room } from "../lib/Types";
+import { SCALE, clamp } from "../lib/Constants";
 
 export function useDoors(
     room: Room | null,

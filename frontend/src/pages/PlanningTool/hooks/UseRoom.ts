@@ -1,7 +1,7 @@
 
 import { useState } from "react";
-import { SCALE, STAGE_WIDTH, STAGE_HEIGHT, MIN_WIDTH, MIN_HEIGHT, MARGIN, clamp, mmToPixels, ROOM_VERTICAL_OFFSET, ROOM_HORIZONTAL_OFFSET } from "../Constants";
-import type { Room, ContainerInRoom, Door, OtherObjectInRoom } from "../Types";
+import { SCALE, STAGE_WIDTH, STAGE_HEIGHT, MIN_WIDTH, MIN_HEIGHT, MARGIN, clamp, mmToPixels, ROOM_VERTICAL_OFFSET, ROOM_HORIZONTAL_OFFSET } from "../lib/Constants";
+import type { Room, ContainerInRoom, Door, OtherObjectInRoom } from "../lib/Types";
 
 export function useRoom() {
   const initialRoom = (() => {

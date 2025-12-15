@@ -9,7 +9,7 @@ import EnvironmentalBenchmarkPanel from "./EnvironmentalBenchmarkPanel/Environme
 import InfoTooltip from "../../components/InfoTooltip";
 import type { PropertyComparison } from "../../../../lib/Comparison";
 import type { Property } from "../../../../lib/Property";
-import type { ContainerInRoom } from "../../Types";
+import type { ContainerInRoom } from "../../lib/Types";
 import { buildDesignStats, mapWasteComparisons, mapFrequencyComparisons, buildCombinedRows } from "../utils/builders";
 import { useWasteComparison } from "../hooks/useWasteComparison";
 import './css/analysisPanels.css'

@@ -5,7 +5,7 @@
  */
 
 import { Group } from "react-konva";
-import { clamp, isOverlapping } from "../../../../Constants"
+import { clamp, isOverlapping } from "../../../../lib/Constants"
 
 export default function ContainerDrag({
     container,

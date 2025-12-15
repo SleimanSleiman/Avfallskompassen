@@ -17,7 +17,7 @@ import { useUnsavedChanges } from '../../context/UnsavedChangesContext';
 
 //Components
 import RoomCanvas from './RoomCanvas/RoomCanvas';
-import ActionPanel from './ActionPanel';
+import ActionPanel from './components/ActionPanel';
 import PropertyOverviewPanel from './PropertyAndWasteAnalysis/PropertyOverview/PropertyOverviewPanel';
 import WasteAnalysisPanels from './PropertyAndWasteAnalysis/WasteAnalysis/WasteAnalysisPanels'
 import { Tooltip } from "../../components/Tooltip";
@@ -34,11 +34,9 @@ import { useLayoutHistory } from './hooks/UseLayoutHistory';
 import { useSaveRoom, useWasteRoomRequestBuilder } from './hooks/UseSaveRoom';
 import { usePropertyHighlights } from './hooks/usePropertyHighlights';
 
-import { SCALE, ROOM_HORIZONTAL_OFFSET, ROOM_VERTICAL_OFFSET, STAGE_HEIGHT, STAGE_WIDTH } from './Constants';
+import { SCALE, ROOM_HORIZONTAL_OFFSET, ROOM_VERTICAL_OFFSET, STAGE_HEIGHT, STAGE_WIDTH } from './lib/Constants';
 import PlanningToolPopup from './components/PlanningToolPopup';
 import type { PreparedRoomState } from './components/PlanningToolPopup';
-
-const DEFAULT_ROOM_METERS = 5;
 
 import { driver } from "driver.js";
 import "driver.js/dist/driver.css";
@@ -52,6 +50,8 @@ export default function PlanningTool({ isAdminMode = false }: PlanningToolProps)
     const { setHasUnsavedChanges } = useUnsavedChanges();
 
     const defaultRoomState = useMemo(() => {
+        const DEFAULT_ROOM_METERS = 5;
+
         const widthPx = DEFAULT_ROOM_METERS / SCALE;
         const heightPx = DEFAULT_ROOM_METERS / SCALE;
         return {

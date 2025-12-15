@@ -4,7 +4,7 @@
  */
 
 import DoorMeasurement from "./components/DoorMeasurement";
-import type { Door } from "../../../../Types";
+import type { Door } from "../../../../lib/Types";
 
 type DoorMeasurementLayerProps = {
     doors: Door[];

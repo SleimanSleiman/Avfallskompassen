@@ -2,8 +2,8 @@
  * Pop-up window allowing the user to enter the width of a door.
  */
 import { useState } from "react";
-import "./css/prompts.css";
-import Prompt from "./Prompt";
+import "../css/prompts.css";
+import Prompt from "../Prompt";
 
 /* ─────────────── Props ──────────────── */
 interface DoorWidthPromptProps {

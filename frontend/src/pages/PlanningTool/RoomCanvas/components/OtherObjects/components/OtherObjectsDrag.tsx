@@ -5,7 +5,7 @@
  */
 import { Group } from "react-konva";
 import { useState } from "react";
-import { clamp, isOverlapping } from "../../../../Constants";
+import { clamp, isOverlapping } from "../../../../lib/Constants";
 
 export default function OtherObjectDrag({
     object,

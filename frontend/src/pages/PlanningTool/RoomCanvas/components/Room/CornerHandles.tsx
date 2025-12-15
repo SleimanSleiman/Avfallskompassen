@@ -4,8 +4,8 @@
  */
 
 import { Circle } from "react-konva";
-import { clamp, STAGE_WIDTH, STAGE_HEIGHT, MARGIN, MIN_WIDTH, MIN_HEIGHT } from "../../../Constants";
-import type { Room } from "../../../Types";
+import { clamp, STAGE_WIDTH, STAGE_HEIGHT, MARGIN, MIN_WIDTH, MIN_HEIGHT } from "../../../lib/Constants";
+import type { Room } from "../../../lib/Types";
 
 type CornerHandlesProps = {
   corners: { x: number; y: number }[];

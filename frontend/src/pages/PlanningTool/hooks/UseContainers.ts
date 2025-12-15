@@ -4,10 +4,10 @@
  */
 import { useState, useRef } from "react";
 import type { DragEvent as ReactDragEvent } from "react";
-import type { ContainerInRoom, Room } from "../Types";
+import type { ContainerInRoom, Room } from "../lib/Types";
 import type { ContainerDTO } from "../../../lib/Container";
 import { fetchContainersByMunicipalityAndService } from "../../../lib/Container";
-import { mmToPixels, clamp, DRAG_DATA_FORMAT, STAGE_WIDTH, STAGE_HEIGHT, SCALE, isOverlapping } from "../Constants";
+import { mmToPixels, clamp, DRAG_DATA_FORMAT, STAGE_WIDTH, STAGE_HEIGHT, SCALE, isOverlapping } from "../lib/Constants";
 import { useLayoutHistory } from "./UseLayoutHistory";
 
 /* ──────────────── Helper functions ──────────────── */
