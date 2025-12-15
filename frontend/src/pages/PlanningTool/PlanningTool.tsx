@@ -5,7 +5,7 @@
  */
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-
+ 
 //Lib
 import { getProperty } from '../../lib/Property';
 import type { Property } from '../../lib/Property';
@@ -14,7 +14,6 @@ import { currentUser } from '../../lib/Auth';
 
 //Context
 import { useUnsavedChanges } from '../../context/UnsavedChangesContext';
-
 
 //Components
 import RoomCanvas from './RoomCanvas/RoomCanvas';
@@ -65,6 +64,22 @@ export default function PlanningTool({ isAdminMode = false }: PlanningToolProps)
         };
     }, []);
 
+    /* ──────────────── Messages ──────────────── */
+    const [msg, setMsg] = useState<string | null>(null);
+    const [error, setError] = useState<string | null>(null);
+    const [property, setProperty] = useState<Property | null>(null);
+
+    useEffect(() => {
+        if (room?.propertyId) {
+            getProperty(room.propertyId).then(setProperty).catch(console.error);
+        }
+    }, [room?.propertyId]);
+
+   // Selected IDs
+   const [selectedContainerId, setSelectedContainerId] = useState<number | null>(null);
+   const [selectedDoorId, setSelectedDoorId] = useState<number | null>(null);
+   const [selectedOtherObjectId, setSelectedOtherObjectId] = useState<number | null>(null);
+
     /* ──────────────── Room state & logic ──────────────── */
     const {
         room,
@@ -72,24 +87,7 @@ export default function PlanningTool({ isAdminMode = false }: PlanningToolProps)
         handleDragCorner,
         setRoom
     } = useRoom();
-
-    /* ──────────────── Messages ──────────────── */
-    const [msg, setMsg] = useState<string | null>(null);
-    const [error, setError] = useState<string | null>(null);
-    const [property, setProperty] = useState<Property | null>(null);
-
-    useEffect(() => {
-        if (room.propertyId) {
-            getProperty(room.propertyId).then(setProperty).catch(console.error);
-        }
-    }, [room.propertyId]);
-
-
-    /* ──────────────── Door state & logic ──────────────── */
-    const [selectedContainerId, setSelectedContainerId] = useState<number | null>(null);
-    const [selectedDoorId, setSelectedDoorId] = useState<number | null>(null);
-    const [selectedOtherObjectId, setSelectedOtherObjectId] = useState<number | null>(null);
-
+    
     /* ──────────────── Door state & logic ──────────────── */
     const {
         doors,
@@ -101,6 +99,9 @@ export default function PlanningTool({ isAdminMode = false }: PlanningToolProps)
         handleSelectDoor,
         getDoorZones,
         doorOffsetRef,
+        restoreDoorState,
+        isDoorDragging,
+        setIsDoorDragging,
     } = useDoors(room, setSelectedDoorId, setSelectedContainerId,setSelectedOtherObjectId, setError, setMsg);
 
     /* ──────────────── Other Objects state & logic ──────────────── */
@@ -147,7 +148,7 @@ export default function PlanningTool({ isAdminMode = false }: PlanningToolProps)
         redo,
         getContainerZones,
         isContainerInsideRoom,
-    } = useContainers(room, setSelectedContainerId, setSelectedDoorId, setSelectedOtherObjectId, getDoorZones(), getOtherObjectZones(),setError,setMsg);
+    } = useContainers(room, setSelectedContainerId, setSelectedDoorId, setSelectedOtherObjectId, getDoorZones(), getOtherObjectZones(),setError,setMsg, isDoorDragging);
 
     // Track the saved state for comparison
     // ...existing code...
@@ -552,6 +553,9 @@ export default function PlanningTool({ isAdminMode = false }: PlanningToolProps)
                         handleSelectDoor={handleSelectDoor}
                         handleAddDoor={handleAddDoor}
                         doorZones={getDoorZones()}
+                        restoreDoorState={restoreDoorState}
+                        isDraggingDoor={isDoorDragging}
+                        setIsDraggingDoor={setIsDoorDragging}
 
                         containers={containersInRoom}
                         selectedContainerId={selectedContainerId}

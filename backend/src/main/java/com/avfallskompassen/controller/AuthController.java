@@ -6,6 +6,7 @@ import com.avfallskompassen.model.User;
 import com.avfallskompassen.security.JwtUtil;
 import com.avfallskompassen.services.UserService;
 import jakarta.annotation.Nullable;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -37,7 +38,7 @@ public class AuthController {
      * @return LoginResponse with authentication result
      */
     @PostMapping("/login")
-    public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest loginRequest) {
         try {
             Optional<User> userOptional = userService.findByUsername(loginRequest.getUsername());
             
@@ -95,7 +96,7 @@ public class AuthController {
      * @return LoginResponse with registration result
      */
     @PostMapping("/register")
-    public ResponseEntity<LoginResponse> register(@RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<LoginResponse> register(@Valid @RequestBody LoginRequest loginRequest) {
         try {
             User newUser = userService.createUser(loginRequest.getUsername(), loginRequest.getPassword());
             // produce token for the newly registered user if JwtUtil available
