@@ -30,7 +30,20 @@ export default function DoorDrag({
             y={door.y}
             draggable
             dragBoundFunc={dragBoundFunc}
-            onDragStart={() => setIsOverZone(false)}
+            // Cursor changes
+            onMouseEnter={(e) => {
+                const stage = e.target.getStage();
+                if (stage) stage.container().style.cursor = "grab";
+            }}
+            onMouseLeave={(e) => {
+                const stage = e.target.getStage();
+                if (stage) stage.container().style.cursor = "default";
+            }}
+            onDragStart={(e) => {
+                const stage = e.target.getStage();
+                if (stage) stage.container().style.cursor = "grabbing";
+                setIsOverZone(false);
+            }}
             onDragMove={(e) => {
                 const pos = e.target.position();
                 handleDragDoor(door.id, pos);
@@ -44,6 +57,9 @@ export default function DoorDrag({
                 setIsOverZone(overlapping);
             }}
             onDragEnd={(e) => {
+                const stage = e.target.getStage();
+                if (stage) stage.container().style.cursor = "grab";
+
                 const pos = e.target.position();
                 //Check if overlapping any other door
                 const overlapping = doors
