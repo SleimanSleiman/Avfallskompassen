@@ -5,6 +5,7 @@ import com.avfallskompassen.dto.request.PropertyRequest;
 import com.avfallskompassen.model.*;
 import com.avfallskompassen.repository.MunicipalityRepository;
 import com.avfallskompassen.repository.PropertyRepository;
+import com.avfallskompassen.services.ActivityService;
 import com.avfallskompassen.services.PropertyService;
 import com.avfallskompassen.services.UserService;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -29,13 +30,16 @@ public class PropertyServiceImpl implements PropertyService {
     private PropertyRepository propertyRepository;
     private com.avfallskompassen.repository.MunicipalityRepository municipalityRepository;
     private UserService userService;
+    private ActivityService activityService;
 
     public PropertyServiceImpl(PropertyRepository propertyRepository,
                                MunicipalityRepository municipalityRepository,
-                               UserService userService) {
+                               UserService userService,
+                               ActivityService activityService) {
         this.propertyRepository = propertyRepository;
         this.municipalityRepository = municipalityRepository;
         this.userService = userService;
+        this.activityService = activityService;
     }
 
     /**
@@ -91,7 +95,10 @@ public class PropertyServiceImpl implements PropertyService {
             );
             property.setMunicipality(municipality);
 
-            return propertyRepository.save(property);
+            Property savedProperty = propertyRepository.save(property);
+            activityService.saveActivity(user, ActivityType.CREATED_PROPERTY, "Skapade en fastighet med addressen " + property.getAddress());
+
+            return savedProperty;
         } catch (DataIntegrityViolationException e) {
             throw new RuntimeException("Failed to create property: duplicate address");
         }
@@ -264,7 +271,13 @@ public class PropertyServiceImpl implements PropertyService {
         }
 
         try {
-            return propertyRepository.save(property);
+            Property updatedProperty = propertyRepository.save(property);
+            Optional<User> userOptional = userService.findByUsername(username);
+            if (userOptional.isPresent()) {
+                User user = userOptional.get();
+                activityService.saveActivity(user, ActivityType.CHANGED_PROPERTY, "Du ändrade fastigheten med addresesen " + property.getAddress());
+            }
+            return updatedProperty;
         } catch (DataIntegrityViolationException e) {
             throw new RuntimeException("Failed to update property: " + e.getMessage());
         }
