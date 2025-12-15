@@ -1,10 +1,7 @@
 import { useState } from "react";
 import { MARGIN, SCALE, STAGE_WIDTH, STAGE_HEIGHT, MIN_WIDTH } from "../pages/PlanningTool/Constants";
-
-interface RoomSizePromptProps {
-  onConfirm: (name: string, length: number, width: number) => void;
-  onCancel: () => void;
-}
+import "./css/prompts.css";
+import Prompt from "./Prompt";
 
 export default function RoomSizePrompt({ onConfirm, onCancel }: RoomSizePromptProps) {
   const [name, setName] = useState("");
@@ -44,64 +41,20 @@ export default function RoomSizePrompt({ onConfirm, onCancel }: RoomSizePromptPr
   };
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
-      <div className="bg-white rounded-2xl border shadow-soft p-6 w-80">
-        <h2 className="text-lg font-black mb-4">Ange namn, längd och bredd på miljörummet</h2>
+    <Prompt
+      title="Ange namn, längd och bredd på miljörummet"
+      onCancel={onCancel}
+      onConfirm={handleConfirm}
+    >
+      <input className="prompt-input" placeholder="Rummets namn" value={name} onChange={e => setName(e.target.value)} />
+      <input className="prompt-input" type="number" placeholder="Längd (meter)" value={length} onChange={e => setLength(e.target.value)} />
+      <input className="prompt-input" type="number" placeholder="Bredd (meter)" value={width} onChange={e => setWidth(e.target.value)} />
 
-        <div className="space-y-3">
-          <input
-            type="text"
-            placeholder="Rummets namn"
-            value={name}
-            onChange={(e) => {
-              setName(e.target.value);
-              setError(null);
-            }}
-            className="w-full border border-gray-300 rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-nsr-teal focus:border-nsr-teal"
-          />
-          <input
-            type="number"
-            placeholder="Längd (meter)"
-            value={length}
-            onChange={(e) => {
-              setLength(e.target.value);
-              setError(null);
-            }}
-            className="w-full border border-gray-300 rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-nsr-teal focus:border-nsr-teal"
-          />
-          <input
-            type="number"
-            placeholder="Bredd (meter)"
-            value={width}
-            onChange={(e) => {
-              setWidth(e.target.value);
-              setError(null);
-            }}
-            className="w-full border border-gray-300 rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-nsr-teal focus:border-nsr-teal"
-          />
+      {error && (
+        <div className="prompt-error">
+          <p className="prompt-error-text">{error}</p>
         </div>
-
-        {error && (
-          <div className="mt-3 p-3 rounded-xl bg-red-50 border border-red-200">
-            <p className="text-sm text-red-700 font-medium">{error}</p>
-          </div>
-        )}
-
-        <div className="flex justify-end gap-3 mt-6">
-          <button
-            onClick={onCancel}
-            className="inline-flex items-center justify-center rounded-xl px-4 py-2 font-medium bg-red-500 text-white hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors"
-          >
-            Avbryt
-          </button>
-          <button
-            onClick={handleConfirm}
-            className="inline-flex items-center justify-center rounded-xl px-4 py-2 font-medium bg-nsr-accent text-[#121212] hover:bg-nsr-accent/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-nsr-accent transition-colors"
-          >
-            Bekräfta
-          </button>
-        </div>
-      </div>
-    </div>
+      )}
+    </Prompt>
   );
 }

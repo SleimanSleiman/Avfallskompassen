@@ -167,8 +167,8 @@ export default function InfoTooltip({
                 onClick={() => (isActive ? closeTooltipImmediately() : openTooltip())}
                 className={`inline-flex h-6 w-6 items-center justify-center rounded-full border text-xs font-semibold shadow-soft transition focus:outline-none focus-visible:ring-2 focus-visible:ring-nsr-teal/40 ${
                     isActive
-                    ? "border-nsr-teal bg-nsr-teal/10 text-nsr-teal"
-                    : "border-white/60 bg-white text-gray-500 hover:border-nsr-teal hover:text-nsr-teal"
+                        ? "border-nsr-teal bg-nsr-teal/10 text-nsr-teal"
+                        : "border-gray-300 bg-gray-50 text-gray-600 hover:border-nsr-teal hover:text-nsr-teal hover:bg-white"
                 }`}
             >
                 i
