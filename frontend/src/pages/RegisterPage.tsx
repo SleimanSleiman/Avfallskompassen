@@ -41,7 +41,7 @@ export default function RegisterPage() {
 
         setTimeout(() => {
           navigate('/dashboard');
-        }, 2000);
+        }, 600);
         // Clear form on success
         setUsername('');
         setPassword('');

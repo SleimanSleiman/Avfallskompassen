@@ -11,6 +11,7 @@ import com.avfallskompassen.model.WasteRoom;
 import com.avfallskompassen.repository.ContainerTypeRepository;
 import com.avfallskompassen.repository.PropertyRepository;
 import com.avfallskompassen.repository.WasteRoomRepository;
+import com.avfallskompassen.services.ActivityService;
 import com.avfallskompassen.services.ContainerService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -40,6 +41,9 @@ class WasteRoomServiceImplTest {
 
     @Mock
     private ContainerService containerService;
+
+    @Mock
+    private ActivityService activityService;
 
     @InjectMocks
     private WasteRoomServiceImpl wasteRoomService;
@@ -345,8 +349,14 @@ class WasteRoomServiceImplTest {
     void deleteWasteRoom_ValidRequest_DeleteSuccessfully() {
         Long wasteRoomId = 1L;
 
+        Property property = new Property();
+        property.setId(10L);
+        property.setAddress("Test Address");
+
+
         WasteRoom existingRoom = new WasteRoom();
         existingRoom.setId(wasteRoomId);
+        existingRoom.setProperty(property);
 
         when(wasteRoomRepository.findById(wasteRoomId)).thenReturn(Optional.of(existingRoom));
         doNothing().when(wasteRoomRepository).delete(existingRoom);

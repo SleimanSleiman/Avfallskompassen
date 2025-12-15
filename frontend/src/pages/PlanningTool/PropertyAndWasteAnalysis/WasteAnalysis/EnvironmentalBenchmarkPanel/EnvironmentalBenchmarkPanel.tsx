@@ -6,9 +6,9 @@ import type { CombinedRow } from "../../utils/types";
 import type { ContainerInRoom } from "../../../Types";
 import SummaryStat from "../components/SummaryStat";
 import BenchmarkBar from "./components/BenchmarkBar";
-import { BENCHMARK_STATUS_STYLES } from "../../utils/constants"
+import { BENCHMARK_STATUS_STYLES, BENCHMARK_TITLE_STYLES } from "../../utils/constants"
 import { findRowForBenchmark } from "../../utils/builders"
-import { formatLitersPerWeek } from "../../utils/utils";
+import { formatLitersPerWeek, normalizeWasteTypeKey } from "../../utils/utils";
 import '../css/benchmarkPanel.css'
 
 type EnvironmentalBenchmarkPanelProps = {
@@ -55,10 +55,13 @@ export default function EnvironmentalBenchmarkPanel({
                         tone: statusTone,
                     } = BENCHMARK_STATUS_STYLES[status];
 
+                    const normalizedKey = normalizeWasteTypeKey(def.key);
+                    const titleClass = BENCHMARK_TITLE_STYLES[normalizedKey] ?? "text-gray-900";
+
                     return (
                         <SummaryStat
                             key={def.key}
-                            title={def.label}
+                            title={<span className={titleClass}>{def.label}</span>}
                             value={hasData ? formatLitersPerWeek(propertyValue) : "—"}
                             tone={statusTone}
                             size="compact"

@@ -61,6 +61,14 @@ public interface PropertyRepository extends JpaRepository<Property, Long> {
     List<Property> findByCreatedByUsername(String username);
 
     /**
+     * Find which user created a certain property
+     * @param id Id to the property
+     * @return User who created the property
+     */
+    @Query("SELECT p.createdBy FROM Property p WHERE p.id = :id")
+    User findCreatedByUserByPropertyId(Long id);
+
+    /**
      * Check if a property with the given ID exists and is created by the specified user.
      * @param propertyId the property ID
      * @param user the user

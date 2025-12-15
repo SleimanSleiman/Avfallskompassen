@@ -6,6 +6,7 @@ import com.avfallskompassen.dto.request.PropertyRequest;
 import com.avfallskompassen.model.*;
 import com.avfallskompassen.repository.MunicipalityRepository;
 import com.avfallskompassen.repository.PropertyRepository;
+import com.avfallskompassen.services.ActivityService;
 import com.avfallskompassen.services.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -34,6 +35,9 @@ public class PropertyServiceImplTest {
 
     @Mock
     private UserService userService;
+
+    @Mock
+    private ActivityService activityService;
 
     @InjectMocks
     private PropertyServiceImpl service;

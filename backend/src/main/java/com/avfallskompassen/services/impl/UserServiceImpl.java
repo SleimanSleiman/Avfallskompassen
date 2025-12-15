@@ -1,8 +1,10 @@
 package com.avfallskompassen.services.impl;
 
 import com.avfallskompassen.dto.UserDTO;
+import com.avfallskompassen.model.ActivityType;
 import com.avfallskompassen.model.User;
 import com.avfallskompassen.repository.UserRepository;
+import com.avfallskompassen.services.ActivityService;
 import com.avfallskompassen.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -28,6 +30,9 @@ public class UserServiceImpl implements UserService {
     
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private ActivityService activityService;
     
     /**
      * Finds a user by their username.
@@ -79,7 +84,9 @@ public class UserServiceImpl implements UserService {
         
         String encodedPassword = passwordEncoder.encode(password);
         User user = new User(username, encodedPassword);
-        return userRepository.save(user);
+        User savedUser = userRepository.save(user);
+        activityService.saveActivity(savedUser, ActivityType.REGISTERED, "Du blev registrerad på hemsidan. Välkommen till Avfallskompassen!");
+        return savedUser;
     }
     
     /**
@@ -114,6 +121,7 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
         user.setRole(newRole);
         User savedUser = userRepository.save(user);
+        activityService.saveActivity(savedUser, ActivityType.CHANGED_ROLE, "Got new role : " + savedUser.getRole());
         return new UserDTO(savedUser);
     }
 

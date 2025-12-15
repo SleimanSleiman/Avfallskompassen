@@ -131,10 +131,6 @@ public class ContainerServiceImpl implements ContainerService {
     private ContainerDTO mapToDTO(ContainerPlan plan) {
         var type = plan.getContainerType();
 
-        String topViewUrl = plan.getImageTopViewUrl() != null
-                ? plan.getImageTopViewUrl()
-                : type.getImageTopViewUrl();
-
         return new ContainerDTO(
                 plan.getId(),
                 plan.getMunicipalityService().getServiceType().getName(),
@@ -142,8 +138,8 @@ public class ContainerServiceImpl implements ContainerService {
                 type.getWidth(),
                 type.getDepth(),
                 type.getHeight(),
-                type.getImageFrontViewUrl(),
-                topViewUrl,
+                plan.getImageFrontViewUrl(),
+                plan.getImageTopViewUrl(),
                 plan.getEmptyingFrequencyPerYear(),
                 plan.getCost()
         );
