@@ -45,3 +45,10 @@ export type OtherObjectInRoom = {
     height: number;
     rotation: number;
 };
+
+export type Zone = {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+};

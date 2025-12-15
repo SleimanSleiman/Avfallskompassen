@@ -4,7 +4,7 @@
  */
 import { useState, useRef, useEffect } from "react";
 import type { DragEvent as ReactDragEvent } from "react";
-import type { ContainerInRoom, Room } from "../lib/Types";
+import type { ContainerInRoom, Room, Zone } from "../lib/Types";
 import type { ContainerDTO } from "../../../lib/Container";
 import { fetchContainersByMunicipalityAndService } from "../../../lib/Container";
 import { mmToPixels, clamp, DRAG_DATA_FORMAT, STAGE_WIDTH, STAGE_HEIGHT, SCALE, isOverlapping } from "../lib/Constants";
@@ -46,7 +46,7 @@ function calculateInitialPosition(
 function buildContainerZones(
     containers: ContainerInRoom[],
     excludeId?: number
-) {
+): Zone[] {
     const buffer = 0.1 / SCALE; //10cm buffer between containers
     return containers
         .filter(c => c.id !== excludeId)
@@ -69,10 +69,10 @@ function buildContainerZones(
 }
 
 function validateContainerPlacement(
-    newRect: { x: number; y: number; width: number; height: number },
-    doorZones: { x: number; y: number; width: number; height: number }[] = [],
-    containerZones: { x: number; y: number; width: number; height: number }[] = [],
-    otherObjectZones: { x: number; y: number; width: number; height: number }[] = [],
+    newRect: Zone,
+    doorZones: Zone[] = [],
+    containerZones: Zone[] = [],
+    otherObjectZones: Zone[] = [],
 ) {
     const overlapsDoor = doorZones.some(zone => isOverlapping(newRect, zone));
     const overlapsContainer = containerZones.some(zone => isOverlapping(newRect, zone));
