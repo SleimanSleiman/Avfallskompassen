@@ -1,7 +1,7 @@
 import "@testing-library/jest-dom";
 import { render, screen, fireEvent } from "@testing-library/react";
 import { describe, it, expect, vi } from "vitest";
-import DoorWidthPrompt from "../../src/components/DoorWidthPrompt";
+import DoorWidthPrompt from "../../../src/components/prompts/DoorWidthPrompt";
 
 //Tests for DoorWidthPrompt component
 describe("DoorWidthPrompt", () => {

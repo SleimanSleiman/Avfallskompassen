@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, vi } from "vitest";
 import { renderHook, act } from "@testing-library/react";
 import { useSaveRoom, useWasteRoomRequestBuilder } from "../../../../src/pages/PlanningTool/hooks/UseSaveRoom";
 import * as WasteRoomRequest from "../../../../src/lib/WasteRoomRequest";
-import { SCALE } from "../../../../src/pages/PlanningTool/Constants";
+import { SCALE } from "../../../../src/pages/PlanningTool/lib/Constants";
 
 describe("useSaveRoom", () => {
     beforeEach(() => {
