@@ -41,11 +41,11 @@ export function useOtherObjects(
         return objects
             .filter(obj => obj.id !== excludeId)
             .map(obj => {
-                const rotation = obj.rotation || 0;
-                const rot = rotation % 180;
+                const rotation = obj.rotation ?? 0;
+                const rotated = rotation === 90 || rotation === 270;
+                const width = rotated ? obj.height : obj.width;
+                const height = rotated ? obj.width : obj.height;
 
-                const width = rot === 90 ? obj.height : obj.width;
-                const height = rot === 90 ? obj.width : obj.height;
 
                 const centerX = obj.x + obj.width / 2;
                 const centerY = obj.y + obj.height / 2;
@@ -81,7 +81,7 @@ export function useOtherObjects(
         let { x, y } = calculateInitialPosition(room, widthPx, heightPx);
         const objectZones = buildOtherObjectZones(otherObjects);
         const containerZones = getContainerZones();
-        let newRect = { x, y, widthPx, heightPx };
+        let newRect = { x, y, width: widthPx, height: heightPx };
 
         let isValid = validateOtherObjectPlacement(newRect, doorZones, objectZones, containerZones);
 
@@ -91,7 +91,7 @@ export function useOtherObjects(
 
             for (let tryY = room.y; tryY <= room.y + room.height - heightPx; tryY += step) {
                 for (let tryX = room.x; tryX <= room.x + room.width - widthPx; tryX += step) {
-                    newRect = { x: tryX, y: tryY, widthPx, heightPx };
+                    newRect = { x: tryX, y: tryY, width: widthPx, height: heightPx };
                    if (validateOtherObjectPlacement(newRect, doorZones, objectZones, getContainerZones())) {
                        x = tryX;
                        y = tryY;

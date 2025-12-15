@@ -2,7 +2,7 @@
  * Custom hook for managing container placement in the canvas and fetching available container
  * types from the API.
  */
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import type { DragEvent as ReactDragEvent } from "react";
 import type { ContainerInRoom, Room } from "../lib/Types";
 import type { ContainerDTO } from "../../../lib/Container";
@@ -70,9 +70,9 @@ function buildContainerZones(
 
 function validateContainerPlacement(
     newRect: { x: number; y: number; width: number; height: number },
-    doorZones: { x: number; y: number; width: number; height: number }[],
-    containerZones: { x: number; y: number; width: number; height: number }[],
-    otherObjectZones: { x: number; y: number; width: number; height: number }[],
+    doorZones: { x: number; y: number; width: number; height: number }[] = [],
+    containerZones: { x: number; y: number; width: number; height: number }[] = [],
+    otherObjectZones: { x: number; y: number; width: number; height: number }[] = [],
 ) {
     const overlapsDoor = doorZones.some(zone => isOverlapping(newRect, zone));
     const overlapsContainer = containerZones.some(zone => isOverlapping(newRect, zone));
@@ -90,7 +90,8 @@ export function useContainers(
     doorZones: { x: number; y: number; width: number; height: number }[] = [],
     otherObjectZones: { x: number; y: number; width: number; height: number }[] = [],
     setError,
-    setMsg
+    setMsg,
+    isDoorDragging?: boolean,
 ) {
 
     /* ──────────────── Containers State ──────────────── */
@@ -289,6 +290,57 @@ export function useContainers(
             aabbY + aabbHeight <= room.y + room.height
         );
     };
+
+    //When door zones change, push overlapping containers away from doors
+    useEffect(() => {
+        if (!isDoorDragging) return;
+        if (doorZones.length === 0) return;
+
+        const STEP = 10;
+        const MAX = 200;
+
+        //Generate offsets sorted by distance
+        const offsets: { dx: number; dy: number; dist: number }[] = [];
+        for (let dy = -MAX; dy <= MAX; dy += STEP) {
+            for (let dx = -MAX; dx <= MAX; dx += STEP) {
+                offsets.push({ dx, dy, dist: Math.abs(dx) + Math.abs(dy) });
+            }
+        }
+        offsets.sort((a, b) => a.dist - b.dist);
+
+        const temp = [...containersInRoom];
+        let changed = false;
+
+        //Try to move each overlapping container
+        for (let i = 0; i < temp.length; i++) {
+            const c = temp[i];
+
+            //Check if container overlaps any door zone
+            const cRect = { x: c.x, y: c.y, width: c.width, height: c.height };
+            const overlapsDoor = doorZones.some(dz => isOverlapping(cRect, dz));
+            if (!overlapsDoor) continue;
+
+            //Try offsets until a valid position is found
+            for (const { dx, dy } of offsets) {
+                const testX = clamp(c.x + dx, room.x, room.x + room.width - c.width);
+                const testY = clamp(c.y + dy, room.y, room.y + room.height - c.height);
+                const testRect = { x: testX, y: testY, width: c.width, height: c.height };
+
+                const containerZones = buildContainerZones(temp, c.id);
+
+                if (validateContainerPlacement(testRect, doorZones, containerZones)) {
+                    temp[i] = { ...c, x: testX, y: testY };
+                    changed = true;
+                    break;
+                }
+            }
+        }
+
+        //If any containers were moved, save the new state
+        if (changed) {
+            saveContainers(temp);
+        }
+    }, [doorZones]);
 
     /* ──────────────── Return ──────────────── */
     return {
