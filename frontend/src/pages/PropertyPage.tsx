@@ -70,21 +70,6 @@ export default function PropertyPage() {
         }
     }
 
-    const allowedMunicipalityNames = useMemo(() => (
-        new Set([
-            'bjuv',
-            'båstad',
-            'helsingborg',
-            'höganäs',
-            'åstorp',
-            'ängelholm',
-        ])
-    ), []);
-
-    const allowedMunicipalities = useMemo(() => (
-        municipalities.filter((m) => allowedMunicipalityNames.has((m.name || '').toLowerCase()))
-    ), [municipalities, allowedMunicipalityNames]);
-
     async function loadProperties() {
         try {
             setLoadingProperties(true);
@@ -162,7 +147,7 @@ export default function PropertyPage() {
                     numberOfApartments: 1,
                     lockTypeId: 1,
                     accessPathLength: 0,
-                    municipalityId: allowedMunicipalities.length > 0 ? allowedMunicipalities[0].id : 0
+                    municipalityId : 0
                 });
                 setShowForm(false);
                 setEditingId(null);
@@ -409,12 +394,15 @@ async function onDeleteWasteRoom(propertyId: number, wasteRoomId: number) {
                   onChange={(e) => handleInputChange('municipalityId', parseInt(e.target.value))}
                 >
                   <option value={0}>Välj kommun</option>
-                  {formData.municipalityId !== 0 && !allowedMunicipalities.some(m => m.id === formData.municipalityId) && (
-                    <option value={formData.municipalityId}>{getMunicipalityName(formData.municipalityId)}</option>
-                  )}
-                  {allowedMunicipalities.map((m) => (
-                    <option key={m.id} value={m.id}>{m.name}</option>
-                  ))}
+                      {municipalities.map((m) => (
+                        <option
+                          key={m.id}
+                          value={m.id}
+                          disabled={m.name.toLowerCase() !== 'helsingborg'}
+                        >
+                          {m.name}
+                        </option>
+                      ))}
                 </select>
               </div>
               
