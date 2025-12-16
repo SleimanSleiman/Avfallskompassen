@@ -6,6 +6,7 @@ import type { ContainerDTO } from "../../../lib/Container";
 
 export type Room = {
     id? : number;
+    propertyId?: number;
     name? : string;
     x: number;
     y: number;

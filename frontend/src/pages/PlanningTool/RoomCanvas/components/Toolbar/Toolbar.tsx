@@ -33,6 +33,7 @@ type ToolbarProps = {
     setMsg: (msg: string | null) => void;
     setError: (error: string | null) => void;
     setIsSaving: (saving: boolean) => void;
+    isSaving?: boolean;
     undo?: () => void;
     redo?: () => void;
     selectedContainerInfo: ContainerDTO | null;
@@ -47,6 +48,7 @@ type ToolbarProps = {
     closePanels: () => void;
     hasUnsavedChanges?: () => boolean;
     onClose?: () => void;
+    existingNames?: string[];
 };
 
 export default function Toolbar({
@@ -63,6 +65,7 @@ export default function Toolbar({
     setMsg,
     setError,
     setIsSaving,
+    isSaving = false,
     undo,
     redo,
     selectedContainerInfo,
@@ -77,6 +80,7 @@ export default function Toolbar({
     closePanels,
     hasUnsavedChanges = () => false,
     onClose,
+    existingNames = [],
 }: ToolbarProps) {
 
     const [isRoomPromptOpen, setIsRoomPromptOpen] = useState(false);
@@ -279,10 +283,11 @@ export default function Toolbar({
             {!isAdminMode && (
                 <button
                     onClick={handleSaveRoom}
-                    className="group toolbar-btn"
+                    disabled={isSaving}
+                    className={`group toolbar-btn ${isSaving ? "opacity-50 cursor-not-allowed" : ""}`}
                 >
                     <Save className="toolbar-icon" />
-                    <span className="toolbar-label">Spara design</span>
+                    <span className="toolbar-label">{isSaving ? "Sparar..." : "Spara design"}</span>
                 </button>
             )}
 
@@ -316,6 +321,10 @@ export default function Toolbar({
             {/* Prompts */}
             {isRoomPromptOpen && (
                 <RoomSizePrompt
+                    initialName={room.name}
+                    initialLength={Number((room.height * SCALE).toFixed(2))}
+                    initialWidth={Number((room.width * SCALE).toFixed(2))}
+                    existingNames={existingNames}
                     onConfirm={(name, length, width) => handleConfirmRoomSize(name, length, width)}
                     onCancel={() => setIsRoomPromptOpen(false)}
                 />
