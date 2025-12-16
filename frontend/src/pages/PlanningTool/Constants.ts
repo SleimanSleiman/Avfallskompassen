@@ -48,3 +48,4 @@ export const DRAG_DATA_FORMAT = 'application/avfallskompassen-container';
 export const GRID_SIZE_PX = 1 / SCALE;
 
 export const LOCK_I_LOCK_COMPATIBLE_SIZES = [190, 240, 243, 370];
+export const LOCK_I_LOCK_COST = 100;

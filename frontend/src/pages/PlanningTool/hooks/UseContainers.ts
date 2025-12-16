@@ -7,7 +7,7 @@ import type { DragEvent as ReactDragEvent } from "react";
 import type { ContainerInRoom, Room } from "../Types";
 import type { ContainerDTO } from "../../../lib/Container";
 import { fetchContainersByMunicipalityAndService } from "../../../lib/Container";
-import { mmToPixels, clamp, DRAG_DATA_FORMAT, STAGE_WIDTH, STAGE_HEIGHT, SCALE, isOverlapping } from "../Constants";
+import { mmToPixels, clamp, DRAG_DATA_FORMAT, STAGE_WIDTH, STAGE_HEIGHT, SCALE, isOverlapping, LOCK_I_LOCK_COST } from "../Constants";
 import { useLayoutHistory } from "./UseLayoutHistory";
 
 /* ──────────────── Helper functions ──────────────── */
@@ -252,18 +252,38 @@ export function useContainers(
     };
 
     const handleAddLockILock = (id: number) => {
-        const newState = containersInRoom.map(c =>
-            c.id === id ? { ...c, lockILock: true } : c
-        );
+        const newState = containersInRoom.map(c => {
+            if (c.id !== id || c.lockILock) return c; // prevent double add
+
+            return {
+                ...c,
+                lockILock: true,
+                container: {
+                    ...c.container,
+                    cost: c.container.cost + LOCK_I_LOCK_COST,
+                },
+            };
+        });
+
         saveContainers(newState);
     };
 
     const handleRemoveLockILock = (id: number) => {
-        const newState = containersInRoom.map(c =>
-            c.id === id ? { ...c, lockILock: false } : c
-        );
+        const newState = containersInRoom.map(c => {
+            if (c.id !== id || !c.lockILock) return c; // prevent double remove
+
+            return {
+                ...c,
+                lockILock: false,
+                container: {
+                    ...c.container,
+                    cost: c.container.cost - LOCK_I_LOCK_COST,
+                },
+            };
+        });
+
         saveContainers(newState);
-    }
+    };
 
     /* ──────────────── API Fetch ──────────────── */
     const fetchAvailableContainers = async (service: { id: number; name: string }) => {
