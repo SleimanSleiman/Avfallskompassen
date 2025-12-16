@@ -142,7 +142,8 @@ export default function NavBar() {
             <nav className="hidden md:flex items-center gap-6 text-white font-black text-lg">
               {isAdmin ? (
                 <>
-                  <NavLink to="/admin" className={({ isActive }) => `nav-link hover:text-white transition-colors ${isActive ? 'nav-link-active' : ''}`}>Admin</NavLink>
+                  <NavLink to="/admin" end className={({ isActive }) => `nav-link hover:text-white transition-colors ${isActive ? 'nav-link-active' : ''}`}>Dashboard</NavLink>
+                  <NavLink to="/admin/data" className={({ isActive }) => `nav-link hover:text-white transition-colors ${isActive ? 'nav-link-active' : ''}`}>Hantera priser</NavLink>
                   <div className="flex items-center gap-3">
                     {user && <span className="text-sm">Hej {user.username}!</span>}
                     <button
@@ -228,7 +229,8 @@ export default function NavBar() {
           <nav className="mx-auto max-w-7xl px-4 py-3 flex flex-col gap-3 font-black">
             {isAdmin ? (
               <>
-                <NavLink to="/admin" className="text-nsr-ink">Admin</NavLink>
+                <NavLink to="/admin" className="text-nsr-ink" onClick={() => setOpen(false)}>Dashboard</NavLink>
+                <NavLink to="/admin/data" className="text-nsr-ink" onClick={() => setOpen(false)}>Hantera priser</NavLink>
                 <button onClick={handleLogout} className="text-left text-nsr-ink">Logga ut</button>
               </>
             ) : (
