@@ -28,6 +28,7 @@ type ActionPanelProps = {
     handleShowContainerInfo: (id: number) => void;
 
     handleAddLockILock: (containerId: number) => void;
+    handleRemoveLockILock: (containerId: number) => void;
 
     stageWrapperRef?: React.RefObject<HTMLDivElement | null>;
     pos: { left: number; top: number } | null;
@@ -54,6 +55,7 @@ export default function ActionPanel({
     handleShowContainerInfo,
 
     handleAddLockILock,
+    handleRemoveLockILock,
 
     stageWrapperRef,
     pos,
@@ -112,6 +114,8 @@ export default function ActionPanel({
     const selectedContainer = selectedContainerId !== null
         ? containers.find(c => c.id === selectedContainerId)
         : null;
+
+    const hasLockILock = !!selectedContainer?.lockILock;
 
     // Define which sizes are compatible for lock-i-lock
     const compatibleSizes = [190, 240, 243, 370];
@@ -288,12 +292,16 @@ export default function ActionPanel({
                     </button>
                     {canAddLockILock && (
                       <button
-                        onClick={() => handleAddLockILock(selectedContainerId!)}
-                        className="flex flex-col items-center justify-center text-green-700 hover:text-green-900 transition min-w-[64px] group"
+                        onClick={() => {hasLockILock ? handleRemoveLockILock(selectedContainerId) : handleAddLockILock(selectedContainerId!)}}
+                        className={`flex flex-col items-center justify-center transition min-w-[64px] group ${
+                          hasLockILock
+                            ? "text-red-600 hover:text-red-800"
+                            : "text-green-700 hover:text-green-900"
+                        }`}
                       >
                         <Vault className="w-5 h-5" />
                         <span className="text-xs font-medium max-h-0 overflow-hidden transition-all duration-300 group-hover:max-h-20">
-                          Lägg till lock-i-lock
+                          {hasLockILock ? "Ta bort lock-i-lock" : "Lägg till lock-i-lock"}
                         </span>
                       </button>
                     )}

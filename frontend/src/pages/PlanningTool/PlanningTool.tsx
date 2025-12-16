@@ -134,6 +134,7 @@ export default function PlanningTool({ isAdminMode = false }: PlanningToolProps)
         handleStageDragLeave,
         handleRotateContainer,
         handleAddLockILock,
+        handleRemoveLockILock,
         handleShowContainerInfo,
         selectedContainerInfo,
         setSelectedContainerInfo,
@@ -612,6 +613,7 @@ export default function PlanningTool({ isAdminMode = false }: PlanningToolProps)
                                 handleRotateOtherObject={handleRotateOtherObject}
                                 handleShowContainerInfo={handleShowContainerInfo}
                                 handleAddLockILock={handleAddLockILock}
+                                handleRemoveLockILock={handleRemoveLockILock}
                                 stageWrapperRef={stageWrapperRef}
                                 pos={actionPanelPos}
                                 setPos={setActionPanelPos}

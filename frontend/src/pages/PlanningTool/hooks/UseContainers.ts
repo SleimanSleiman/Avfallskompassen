@@ -254,6 +254,13 @@ export function useContainers(
         saveContainers(newState);
     };
 
+    const handleRemoveLockILock = (id: number) => {
+        const newState = containersInRoom.map(c =>
+            c.id === id ? { ...c, lockILock: false } : c
+        );
+        saveContainers(newState);
+    }
+
     /* ──────────────── API Fetch ──────────────── */
     const fetchAvailableContainers = async (service: { id: number; name: string }) => {
         setIsLoadingContainers(true);
@@ -370,6 +377,7 @@ export function useContainers(
         handleSelectContainer,
         handleRotateContainer,
         handleAddLockILock,
+        handleRemoveLockILock,
 
         fetchAvailableContainers,
 
