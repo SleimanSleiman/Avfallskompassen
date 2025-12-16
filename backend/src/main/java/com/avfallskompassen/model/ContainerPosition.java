@@ -25,6 +25,9 @@ public class ContainerPosition {
     @Column(nullable = false)
     private double angle;
 
+    @Column(name = "has_lock_i_lock", nullable = false)
+    private boolean hasLockILock = false;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "container_plan_id", nullable = false)
     private ContainerPlan containerPlan;
@@ -63,6 +66,14 @@ public class ContainerPosition {
 
     public void setAngle(double angle) {
         this.angle = angle;
+    }
+
+    public boolean getHasLockILock() {
+        return hasLockILock;
+    }
+
+    public void setHasLockILock(boolean hasLockILock) {
+        this.hasLockILock = hasLockILock;
     }
 
     public WasteRoom getWasteRoom() {

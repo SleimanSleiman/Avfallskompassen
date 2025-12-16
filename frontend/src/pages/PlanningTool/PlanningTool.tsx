@@ -133,6 +133,7 @@ export default function PlanningTool({ isAdminMode = false }: PlanningToolProps)
         handleStageDragOver,
         handleStageDragLeave,
         handleRotateContainer,
+        handleAddLockILock,
         handleShowContainerInfo,
         selectedContainerInfo,
         setSelectedContainerInfo,
@@ -141,9 +142,6 @@ export default function PlanningTool({ isAdminMode = false }: PlanningToolProps)
         getContainerZones,
         isContainerInsideRoom,
     } = useContainers(room, setSelectedContainerId, setSelectedDoorId, setSelectedOtherObjectId, getDoorZones(), getOtherObjectZones(),setError,setMsg, isDoorDragging);
-
-    // Track the saved state for comparison
-    // ...existing code...
 
     // Track the saved state for comparison
     const [savedRoomState, setSavedRoomState] = useState<{ room: any; doors: any; containers: any; otherObjects: any } | null>(null);
@@ -613,6 +611,7 @@ export default function PlanningTool({ isAdminMode = false }: PlanningToolProps)
                                 handleRotateContainer={handleRotateContainer}
                                 handleRotateOtherObject={handleRotateOtherObject}
                                 handleShowContainerInfo={handleShowContainerInfo}
+                                handleAddLockILock={handleAddLockILock}
                                 stageWrapperRef={stageWrapperRef}
                                 pos={actionPanelPos}
                                 setPos={setActionPanelPos}

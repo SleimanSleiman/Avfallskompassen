@@ -106,7 +106,7 @@ export function useContainers(
     const stageWrapperRef = useRef<HTMLDivElement | null>(null);
 
     //Add a new container to the room
-    const handleAddContainer = (container: ContainerDTO, position?: { x: number; y: number }) => {
+    const handleAddContainer = (container: ContainerDTO, position?: { x: number; y: number}, lockILock: boolean = false ) => {
         let { x, y } = calculateInitialPosition(room, container, position);
         const newRect = createContainerRect(container, x, y);
 
@@ -153,6 +153,7 @@ export function useContainers(
             width: newRect.width,
             height: newRect.height,
             rotation: 0,
+            lockILock,
         };
 
         handleSelectContainer(newContainer.id);
@@ -244,6 +245,13 @@ export function useContainers(
     const handleStageDragLeave = (event: ReactDragEvent<HTMLDivElement>) => {
         if (event.currentTarget.contains(event.relatedTarget as Node)) return;
         setIsStageDropActive(false);
+    };
+
+    const handleAddLockILock = (id: number) => {
+        const newState = containersInRoom.map(c =>
+            c.id === id ? { ...c, lockILock: true } : c
+        );
+        saveContainers(newState);
     };
 
     /* ──────────────── API Fetch ──────────────── */
@@ -361,6 +369,7 @@ export function useContainers(
         moveAllContainers,
         handleSelectContainer,
         handleRotateContainer,
+        handleAddLockILock,
 
         fetchAvailableContainers,
 

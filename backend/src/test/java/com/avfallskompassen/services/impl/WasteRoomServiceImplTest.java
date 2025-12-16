@@ -278,7 +278,7 @@ class WasteRoomServiceImplTest {
     void updateWasteRoom_ValidRequest_ReturnChangedContainers() {
         Long wasteRoomId = 1L;
 
-        List<ContainerPositionRequest> newContainers = List.of(new ContainerPositionRequest(1L, 5, 5, 0));
+        List<ContainerPositionRequest> newContainers = List.of(new ContainerPositionRequest(1L, 5, 5, 0, false));
         WasteRoomRequest request = new WasteRoomRequest(12.5, 8.0, 1.0, 2.0, List.of(), newContainers, List.of(), 1L, "Name");
 
         Property property = new Property();

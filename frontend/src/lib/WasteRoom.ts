@@ -42,6 +42,7 @@ export type ContainerPosition = {
     x : number;
     y : number;
     angle : number;
+    hasLockILock : boolean;
     containerDTO : ContainerDTO;
     wasteRoomId : number;
 }

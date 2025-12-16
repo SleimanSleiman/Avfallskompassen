@@ -11,16 +11,18 @@ public class ContainerPositionDTO {
     private double x;
     private double y;
     private double angle;
+    private boolean hasLockILock;
     ContainerDTO containerDTO;
     private Long containerPlanId;
     private Long wasteRoomId;
 
     // Doesn't serve any real purpose for the server. Just put this here to simply the testing -- Anton
-    public ContainerPositionDTO(Long id, double x, double y, double angle, Long containerPlanId, Long wasteRoomId) {
+    public ContainerPositionDTO(Long id, double x, double y, double angle, boolean hasLockILock, Long containerPlanId, Long wasteRoomId) {
         this.id = id;
         this.x = x;
         this.y = y;
         this.angle = angle;
+        this.hasLockILock = hasLockILock;
         this.containerPlanId = containerPlanId;
         this.wasteRoomId = wasteRoomId;
     }
@@ -38,6 +40,14 @@ public class ContainerPositionDTO {
 
     public double getAngle() { return angle; }
     public void setAngle(double angle) { this.angle = angle; }
+
+    public boolean getHasLockILock() {
+        return hasLockILock;
+    }
+
+    public void setHasLockILock(boolean hasLockILock) {
+        this.hasLockILock = hasLockILock;
+    }
 
     public Long getContainerPlanId() { return containerPlanId; }
     public void setContainerPlanId(Long containerPlanId) { this.containerPlanId = containerPlanId; }
@@ -60,6 +70,7 @@ public class ContainerPositionDTO {
         dto.setX(entity.getX());
         dto.setY(entity.getY());
         dto.setAngle(entity.getAngle());
+        dto.setHasLockILock(entity.getHasLockILock());
         dto.setContainerDTO(ContainerDTO.fromEntity(entity.getContainerPlan()));
         dto.setWasteRoomId(entity.getWasteRoom() != null ? entity.getWasteRoom().getId() : null);
         return dto;

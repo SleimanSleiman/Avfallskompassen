@@ -112,6 +112,7 @@ public class ContainerServiceImpl implements ContainerService {
         dto.setX(position.getX());
         dto.setY(position.getY());
         dto.setAngle(position.getAngle());
+        dto.setHasLockILock(position.getHasLockILock());
         dto.setWasteRoomId(position.getWasteRoom().getId());
 
         ContainerPlan plan = position.getContainerPlan();
