@@ -62,6 +62,9 @@ export default function AdminPlanningEditor({
   const [planData, setPlanData] = useState<any>(null);
   const [isLoadingRoom, setIsLoadingRoom] = useState(true);
 
+  const [msg, setMsg] = useState<string>('');
+  const [error, setError] = useState<string>('');
+
   // Fetch the actual waste room data from the database
   useEffect(() => {
     const loadWasteRoomData = async () => {
