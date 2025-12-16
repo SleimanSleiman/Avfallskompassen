@@ -8,6 +8,7 @@
 import { Group, Rect, Image as KonvaImage, Text } from "react-konva";
 import useImage from "use-image";
 import type { ContainerInRoom } from "../../../Types";
+import lidIconUrl from "../../../../../../assets/lid_icon.png";
 
 export default function ContainerImage({
     container,
@@ -27,6 +28,8 @@ export default function ContainerImage({
     );
 
     const image = status === "loaded" ? img : null;
+
+    const [lidImg] = useImage(lidIconUrl);
 
 
       return (
@@ -53,11 +56,12 @@ export default function ContainerImage({
           )}
 
           {/* Lock-i-lock indicator */}
-          {container.lockILock && (
-            <Text
-              text="🔵"
-              fontSize={container.width / 3}
-              x={container.width - container.width * 0.2}
+          {container.lockILock && lidImg && (
+            <KonvaImage
+              image={lidImg}
+              width={container.width / 1.5}
+              height={container.width / 1.5}
+              x={container.width - container.width * 0.25}
               y={container.height * 0.05}
             />
           )}
