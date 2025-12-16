@@ -57,6 +57,7 @@ type RoomCanvasProps = {
     moveAllContainers: (dx: number, dy: number) => void;
     setSelectedContainerInfo: (v: ContainerDTO | null) => void;
     selectedContainerInfo: ContainerDTO | null;
+    closeContainerInfo: () => void;
     draggedContainer: ContainerDTO | null;
     getContainerZones: (excludeId?: number) => { x: number; y: number; width: number; height: number }[];
 
@@ -128,6 +129,7 @@ export default function RoomCanvas({
     moveAllContainers,
     setSelectedContainerInfo,
     selectedContainerInfo,
+    closeContainerInfo,
     draggedContainer,
     getContainerZones,
 

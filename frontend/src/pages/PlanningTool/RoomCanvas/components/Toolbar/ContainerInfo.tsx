@@ -5,21 +5,23 @@
 
 import React, { useRef, useState, useEffect } from "react";
 import { X } from "lucide-react";
-import type { ContainerDTO } from "../../../../../lib/Container";
+import type { ContainerInRoom } from "../../../Types";
+import { LOCK_I_LOCK_COMPATIBLE_SIZES } from "../../../Constants";
 import './css/roomCanvasToolbar.css'
 
 type ContainerInfoProps = {
-    container: ContainerDTO;
+    c: ContainerInRoom;
     onClose: () => void;
     pos: { left: number; top: number } | null;
     setPos: React.Dispatch<React.SetStateAction<{ left: number; top: number } | null>>;
 };
 
-export default function ContainerInfo({ container, onClose, pos, setPos}: ContainerInfoProps) {
+export default function ContainerInfo({ c, onClose, pos, setPos}: ContainerInfoProps) {
     const panelRef = useRef<HTMLDivElement | null>(null);
     const [dragging, setDragging] = useState(false);
     const [offset, setOffset] = useState({ x: 0, y: 0 });
     const actualPos = pos || { left: 100, top: 100 };
+    const isCompatibleWithLockILock = LOCK_I_LOCK_COMPATIBLE_SIZES.includes(c.container.size);
 
     //Initialize position if null
     useEffect(() => {
@@ -72,8 +74,8 @@ export default function ContainerInfo({ container, onClose, pos, setPos}: Contai
         >
             <div className="selected-container-header">
                 <div>
-                    <h3 className="selected-container-name">{container.name}</h3>
-                    <p className="selected-container-subtitle">{container.size} L · {container.cost} kr/år</p>
+                    <h3 className="selected-container-name">{c.container.name}</h3>
+                    <p className="selected-container-subtitle">{c.container.size} L · {c.container.cost} kr/år</p>
                 </div>
                 <button
                     onClick={onClose}
@@ -85,17 +87,18 @@ export default function ContainerInfo({ container, onClose, pos, setPos}: Contai
             </div>
             <div className="selected-container-body">
                 <img
-                    src={`http://localhost:8081${container.imageFrontViewUrl}`}
-                    alt={container.name}
+                    src={`http://localhost:8081${c.container.imageFrontViewUrl}`}
+                    alt={c.container.name}
                     className="selected-container-image"
                 />
                 <div className="selected-container-info">
-                    <p>Mått: {container.width} × {container.height} × {container.depth} mm</p>
-                    <p>Tömningsfrekvens: {container.emptyingFrequencyPerYear}/år</p>
-                    <p>Service: {container.serviceTypeName}</p>
-                    {[190, 240, 243, 370].includes(container.size) && (
-                        <p className="selected-container-lock-i-lock">
-                            Kompatibel med lock-i-lock (100 kr/år per lock)
+                    <p>Mått: {c.container.width} × {c.container.height} × {c.container.depth} mm</p>
+                    <p>Tömningsfrekvens: {c.container.emptyingFrequencyPerYear}/år</p>
+                    {isCompatibleWithLockILock && (
+                        <p>
+                            {c.lockILock
+                                ? "Lock-i-lock tillagt (100 kr/år)"
+                                : "Kompatibel med lock-i-lock (ej tillagt)"}
                         </p>
                     )}
                 </div>
