@@ -190,6 +190,6 @@
     @apply border-emerald-600 text-emerald-700 hover:bg-emerald-50;
 }
 
-.container-btn-info {
-    @apply border-gray-300 text-gray-600 hover:bg-gray-100;
+.container-btn-lock {
+  @apply border-blue-600 text-blue-700 hover:bg-blue-50;
 }
