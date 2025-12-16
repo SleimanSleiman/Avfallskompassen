@@ -3,7 +3,7 @@
  * Manages state and logic for room layout, doors, containers, and service types.
  * Renders the RoomCanvas, Sidebar, and ActionPanel components.
  */
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 //Lib
@@ -381,22 +381,25 @@ export default function PlanningTool({ isAdminMode = false }: PlanningToolProps)
         
         return roomChanged || doorsChanged || containersChanged || objectsChanged;
     }, [room, doors, containersInRoom, otherObjects, savedRoomState]);
+const hasUnsavedChangesRef = useRef(false);
 
-    // Update context when unsaved changes status changes
+    //Open ConfirmModal for unsaved changes during logout or navigation in site
     useEffect(() => {
-        const hasChanges = hasUnsavedChanges();
-        setHasUnsavedChanges(hasChanges);
-        if (hasChanges) {
-            const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-                e.preventDefault();
-                e.returnValue = '';
-                return '';
-            };
-            
-            window.addEventListener('beforeunload', handleBeforeUnload);
-            return () => window.removeEventListener('beforeunload', handleBeforeUnload);
-        }
-    }, [room, doors, containersInRoom, otherObjects, savedRoomState, setHasUnsavedChanges]);
+      hasUnsavedChangesRef.current = hasUnsavedChanges();
+      setHasUnsavedChanges(hasUnsavedChangesRef);
+    }, [room, doors, containersInRoom, otherObjects, savedRoomState]);
+
+    //Opens browser prompt for unsaved changes during exit or reload of page
+    useEffect(() => {
+      const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+        if (!hasUnsavedChangesRef.current) return;
+        e.preventDefault();
+        e.returnValue = '';
+      };
+      window.addEventListener('beforeunload', handleBeforeUnload);
+      return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+    }, []);
+
 
     // Handle close without saving
     const handleCloseRoom = useCallback(() => {
