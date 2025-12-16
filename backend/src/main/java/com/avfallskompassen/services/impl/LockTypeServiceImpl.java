@@ -61,4 +61,19 @@ public class LockTypeServiceImpl implements LockTypeService {
                 .map(LockTypeDto::new)
                 .collect(Collectors.toList());
     }
+
+    /**
+     * Updates the cost of a lock type.
+     * @param id The ID of the lock type to update
+     * @param cost The new cost value
+     * @return Updated LockTypeDto
+     */
+    @Transactional
+    public LockTypeDto updateLockTypeCost(Long id, java.math.BigDecimal cost) {
+        LockType lockType = lockTypeRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("No Locktype found with ID: " + id));
+        lockType.setCost(cost);
+        lockType = lockTypeRepository.save(lockType);
+        return new LockTypeDto(lockType);
+    }
 }

@@ -11,6 +11,7 @@ import NotificationCenter from './components/NotificationCenter';
 import { currentUser } from './lib/Auth';
 import PlanningTool from './pages/PlanningTool/PlanningTool';
 import AdminPage from './pages/AdminPage';
+import AdminDataPage from './pages/AdminDataPage';
 import AllWasteroomPage from "./pages/AllWasteroomPage";
 import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
@@ -189,6 +190,11 @@ export default function App() {
             <Route path="/admin" element={
               <ProtectedRoute>
                 <AdminPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/data" element={
+              <ProtectedRoute>
+                <AdminDataPage />
               </ProtectedRoute>
             } />
               <Route path="/statistics" element={

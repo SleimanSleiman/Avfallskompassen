@@ -48,7 +48,9 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             // load user to validate existence
             User user = userService.findByUsername(username).orElse(null);
             if (user != null) {
-                SimpleGrantedAuthority authority = new SimpleGrantedAuthority("ROLE_" + role);
+                // Normalize role to uppercase to ensure consistency
+                String normalizedRole = (role != null ? role.toUpperCase() : user.getRole().toUpperCase());
+                SimpleGrantedAuthority authority = new SimpleGrantedAuthority("ROLE_" + normalizedRole);
                 UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                         username, null, List.of(authority)
                 );
