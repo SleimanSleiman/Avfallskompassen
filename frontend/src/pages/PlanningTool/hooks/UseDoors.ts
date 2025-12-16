@@ -11,6 +11,8 @@ export function useDoors(
     setSelectedDoorId: (id: number | null) => void,
     setSelectedContainerId: (id: number | null) => void,
     setSelectedOtherObjectId: (id: number | null) => void,
+    setError,
+    setMsg
 ) {
 
     /* ──────────────── Door state ──────────────── */
@@ -18,6 +20,9 @@ export function useDoors(
 
     //Stores relative position (offset) of each door along the wall
     const doorOffsetRef = useRef<Record<number, number>>({});
+
+    //Dragging state
+    const [isDoorDragging, setIsDoorDragging] = useState(false);
 
     //Returns the default outward rotation based on wall direction
     const getOutwardRotation = (wall: Door["wall"]) => {
@@ -29,26 +34,125 @@ export function useDoors(
         }
     };
 
-    /* ──────────────── Add Door ──────────────── */
+    /* ──────────────── Add Door with Collision Check ──────────────── */
     const handleAddDoor = (doorData: { width: number; wall?: Door["wall"] }) => {
-        //Adds door to centre of bottom wall with outward rotation
+        if (!room) return false;
+
         const { width, wall = "bottom" } = doorData;
 
         if (doors.length === 0 && width < 1.2) {
-            alert("Minst en dörr måste vara 1.2 meter bred.");
+            setMsg("");
+            setError("");
+            setTimeout(() => setError("Minst en dörr måste vara 1.2 meter bred."), 10);
             return false;
         }
 
-        const x = room.x + room.width / 2;
-        const y = room.y + room.height;
+        const doorSizePx = width / SCALE;
+
+        // Room boundaries
+        const topY = room.y;
+        const bottomY = room.y + room.height;
+        const leftX = room.x;
+        const rightX = room.x + room.width;
+
+        // Try to find a free position on any wall
+        const walls: Door["wall"][] = ["bottom", "top", "left", "right"];
+        let placed = false;
+        let newX = 0;
+        let newY = 0;
+        let newWall: Door["wall"] = wall;
+
+        for (let w of walls) {
+            // Define start position and step along the wall
+            let steps: { x: number; y: number }[] = [];
+            const margin = 0.01;
+            switch (w) {
+                case "bottom": {
+                    const startX = leftX + margin * room.width;
+                    const endX = rightX - margin * room.width - doorSizePx;
+                    const step = doorSizePx + 0.05;
+                    for (let x = startX; x <= endX; x += step) steps.push({ x, y: bottomY });
+                    break;
+                }
+                case "top": {
+                    const startX = leftX + margin * room.width + doorSizePx; // shift start to account for rotation
+                    const endX = rightX - margin * room.width;
+                    const step = doorSizePx + 0.05;
+                    for (let x = startX; x <= endX; x += step) steps.push({ x, y: topY });
+                    break;
+                }
+                case "left": {
+                    const startY = topY + margin * room.height;
+                    const endY = bottomY - margin * room.height - doorSizePx;
+                    const step = doorSizePx + 0.05;
+                    for (let y = startY; y <= endY; y += step) steps.push({ x: leftX, y });
+                    break;
+                }
+                case "right": {
+                    const startY = topY + margin * room.height + doorSizePx; // shift start to account for rotation
+                    const endY = bottomY - margin * room.height;
+                    const step = doorSizePx + 0.05;
+                    for (let y = startY; y <= endY; y += step) steps.push({ x: rightX, y });
+                    break;
+                }
+            }
+
+            // Check each possible position
+            for (let pos of steps) {
+                const collision = doors.some(d => {
+                    if (d.wall !== w) return false;
+                    const dSize = d.width / SCALE;
+                    if (w === "top" || w === "bottom") {
+                        return !(pos.x + doorSizePx <= d.x || pos.x >= d.x + dSize);
+                    } else {
+                        return !(pos.y + doorSizePx <= d.y || pos.y >= d.y + dSize);
+                    }
+                });
+
+                if (!collision) {
+                    newX = pos.x;
+                    newY = pos.y;
+                    newWall = w;
+                    placed = true;
+                    break;
+                }
+            }
+
+            if (placed) break;
+        }
+
+        if (!placed) {
+            alert("Det finns ingen plats för dörren på någon vägg.");
+            return false;
+        }
 
         const id = Date.now();
-        doorOffsetRef.current[id] = 0.5;
+        const newDoor = {
+                id,
+                width: doorData.width,
+                x: newX,
+                y: newY,
+                wall: newWall,
+                rotation: getOutwardRotation(newWall),
+                swingDirection: "outward"
+        };
 
-        setDoors(prev => [
-            ...prev,
-            { id, width, x, y, wall, rotation: getOutwardRotation(wall), swingDirection: "outward" }
-        ]);
+        //Calculate offset along the wall (0 = start, 1 = end)
+        let offset = 0.5;
+        switch (newWall) {
+            case "bottom":
+            case "top":
+                offset = (newX - leftX) / room.width;
+                break;
+            case "left":
+            case "right":
+                offset = (newY - topY) / room.height;
+                break;
+        }
+
+        doorOffsetRef.current[id] = offset;
+
+        setDoors(prev => [...prev, newDoor]);
 
         handleSelectDoor(id);
         return true;
@@ -228,7 +332,9 @@ export function useDoors(
         const minimumSizeDoors = doors.filter(d => d.width >= 1.2);
 
         if (doorToRemove.width >= 1.2 && minimumSizeDoors.length === 1) {
-            alert("Minst en dörr måste vara 1.2 meter bred.");
+            setMsg("");
+            setError("");
+            setTimeout(() => setError("Minst en dörr måste vara 1.2 meter bred."), 10);
             return;
         }
 
@@ -257,6 +363,23 @@ export function useDoors(
         });
     };
 
+    const restoreDoorState = (id, state) => {
+        setDoors(prev =>
+            prev.map(d =>
+                d.id !== id
+                    ? d
+                    : {
+                        ...d,
+                        x: state.x,
+                        y: state.y,
+                        wall: state.wall,
+                        rotation: state.rotation,
+                        swingDirection: state.swingDirection
+                    }
+            )
+        );
+    };
+
     /* ──────────────── Return ──────────────── */
     return {
         doors,
@@ -269,6 +392,9 @@ export function useDoors(
         handleSelectDoor,
         getDoorZones,
         doorOffsetRef,
+        restoreDoorState,
+        isDoorDragging,
+        setIsDoorDragging
     };
 }
 

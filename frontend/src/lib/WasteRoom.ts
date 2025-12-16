@@ -64,6 +64,10 @@ export async function getWasteRoomsByPropertyId(propertyId : number): Promise<Wa
     return get<WasteRoom[]>(`/api/properties/${propertyId}/wasterooms`);
 }
 
+export async function getWasteRoomById(wasteRoomId: number): Promise<WasteRoom> {
+    return get<WasteRoom>(`/api/wasterooms/${wasteRoomId}`);
+}
+
 export async function getActiveWasteRoomsByPropertyId(propertyId : number): Promise<WasteRoomImgDTO> {
     return get<WasteRoomImgDTO>(`/api/properties/${propertyId}/active/wasteroom`);
 }

@@ -30,22 +30,12 @@ public class ContainerType {
     @Column(nullable = false)
     private double height;
 
-    //TODO: make nullable = false when completing container type data
-    @Column(nullable = true)
-    private String imageFrontViewUrl;
-
-    //TODO: make nullable = false when completing container type data
-    @Column(nullable = true)
-    private String imageTopViewUrl;
-
-    public ContainerType(String name, int size, double width, double depth, double height, String imageFrontViewUrl, String imageTopViewUrl) {
+    public ContainerType(String name, int size, double width, double depth, double height) {
         this.name = name;
         this.size = size;
         this.width = width;
         this.depth = depth;
         this.height = height;
-        this.imageFrontViewUrl = imageFrontViewUrl;
-        this.imageTopViewUrl = imageTopViewUrl;
     }
 
     public ContainerType() {
@@ -98,21 +88,5 @@ public class ContainerType {
 
     public void setHeight(double height) {
         this.height = height;
-    }
-
-    public String getImageFrontViewUrl() {
-        return imageFrontViewUrl;
-    }
-
-    public void setImageFrontViewUrl(String imageFrontViewUrl) {
-        this.imageFrontViewUrl = imageFrontViewUrl;
-    }
-
-    public String getImageTopViewUrl() {
-        return imageTopViewUrl;
-    }
-
-    public void setImageTopViewUrl(String imageTopViewUrl) {
-        this.imageTopViewUrl = imageTopViewUrl;
     }
 }

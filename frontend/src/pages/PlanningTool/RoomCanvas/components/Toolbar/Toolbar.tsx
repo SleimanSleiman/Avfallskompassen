@@ -4,15 +4,20 @@
  * saving the design, and performing undo/redo actions.
  */
 
-import { React, useState } from "react";
-import { Save, Ruler, DoorOpen, Undo, Redo, PillBottle, X, SquarePlus } from "lucide-react";
+import { useState, useCallback } from "react";
+import { Save, Ruler, DoorOpen, Undo, Redo, SquarePlus, ArrowLeft } from "lucide-react";
+import { LiaDumpsterSolid } from "react-icons/lia";
 import { SCALE, STAGE_WIDTH, STAGE_HEIGHT, MARGIN, clamp, MIN_HEIGHT, MIN_WIDTH } from "../../../Constants"
 import RoomSizePrompt from "../../../../../components/RoomSizePrompt";
 import DoorWidthPrompt from "../../../../../components/DoorWidthPrompt";
 import OtherObjectSizePrompt from "../../../../../components/OtherObjectSizePrompt";
 import ContainerInfo from "./ContainerInfo"
 import ConfirmModal from "../../../../../components/ConfirmModal";
+import type { Room } from "../../../Types";
+import type { ContainerDTO } from "../../../../../lib/Container";
+import type { OtherObjectInRoom, ContainerInRoom } from "../../../Types";
 import './css/roomCanvasToolbar.css'
+import LoadingBar from "../../../../../components/LoadingBar";
 
 type ToolbarProps = {
     roomName?: string;
@@ -27,6 +32,8 @@ type ToolbarProps = {
     doorsLength: number;
     setMsg: (msg: string | null) => void;
     setError: (error: string | null) => void;
+    setIsSaving: (saving: boolean) => void;
+    isSaving?: boolean;
     undo?: () => void;
     redo?: () => void;
     selectedContainerInfo: ContainerDTO | null;
@@ -36,9 +43,12 @@ type ToolbarProps = {
     handleAddOtherObject: (name: string, length: number, width: number) => boolean;
     isContainerInsideRoom: (rect: { x: number; y: number; width: number; height: number }, room: Room) => boolean;
     isObjectInsideRoom: (rect: { x: number; y: number; width: number; height: number }, room: Room) => boolean;
-    containers: ContainerDTO[];
-    otherObjects: OtherObjectDTO[];
+    containers: ContainerInRoom[];
+    otherObjects: OtherObjectInRoom[];
     closePanels: () => void;
+    hasUnsavedChanges?: () => boolean;
+    onClose?: () => void;
+    existingNames?: string[];
 };
 
 export default function Toolbar({
@@ -54,6 +64,8 @@ export default function Toolbar({
     doorsLength,
     setMsg,
     setError,
+    setIsSaving,
+    isSaving = false,
     undo,
     redo,
     selectedContainerInfo,
@@ -66,6 +78,9 @@ export default function Toolbar({
     containers,
     otherObjects,
     closePanels,
+    hasUnsavedChanges = () => false,
+    onClose,
+    existingNames = [],
 }: ToolbarProps) {
 
     const [isRoomPromptOpen, setIsRoomPromptOpen] = useState(false);
@@ -74,6 +89,7 @@ export default function Toolbar({
     const [containerInfoPos, setContainerInfoPos] = useState<{ left: number; top: number } | null>(null);
     const [showOutsideWarning, setShowOutsideWarning] = useState(false);
     const [pendingSaveThumbnail, setPendingSaveThumbnail] = useState<string | null>(null);
+    const [showCloseConfirm, setShowCloseConfirm] = useState(false);
 
     //Safe wrappers for optional undo/redo
     const safeUndo = useCallback(() => {
@@ -129,9 +145,14 @@ export default function Toolbar({
     const handleSaveRoom = async () => {
         setMsg("");
         setError("");
-        if (!saveRoom) return;
+        setIsSaving(true);
+        if (!saveRoom) {
+            setIsSaving(false);
+            return;
+        }
         if (doorsLength === 0) {
             setTimeout(() => setError("Det måste finnas en dörr innan du sparar rummet"), 10);
+            setIsSaving(false);
             return;
         }
 
@@ -153,6 +174,8 @@ export default function Toolbar({
             setTimeout(() => setMsg("Rummet har sparats"), 10);
         } catch (err) {
             setTimeout(() => setError("Rummet gick inte att spara. Vänligen försök senare igen"), 10);
+        } finally {
+            setIsSaving(false);
         }
     };
 
@@ -167,6 +190,8 @@ export default function Toolbar({
             setTimeout(() => setMsg("Rummet har sparats"), 10);
         } catch (err) {
             setTimeout(() => setError("Rummet gick inte att spara. Vänligen försök igen senare"), 10);
+        } finally {
+            setIsSaving(false);
         }
     };
 
@@ -176,8 +201,36 @@ export default function Toolbar({
         setPendingSaveThumbnail(null);
     };
 
+    //Handle close button
+    const handleCloseClick = useCallback(() => {
+        if (hasUnsavedChanges()) {
+            closePanels();
+            setShowCloseConfirm(true);
+        } else if (onClose) {
+            onClose();
+        }
+    }, [hasUnsavedChanges, onClose]);
+
+    //Handle close without saving
+    const handleCloseWithoutSaving = useCallback(() => {
+        setShowCloseConfirm(false);
+        if (onClose) {
+            onClose();
+        }
+    }, [onClose]);
+
     return (
         <div id="toolbar-panel" className="toolbar-panel">
+            {/* Close button */}
+            <button
+                onClick={handleCloseClick}
+                className="group toolbar-btn"
+                title="Stäng rummets redigerare"
+            >
+                <ArrowLeft className="toolbar-icon" />
+                <span className="toolbar-label">Stäng</span>
+            </button>
+
             {/* Change room size */}
             <button
                 onClick={() => {
@@ -209,7 +262,7 @@ export default function Toolbar({
                 onClick={toggleContainerPanel}
                 className={`group toolbar-btn ${isContainerPanelOpen ? "toolbar-btn-active" : ""}`}
             >
-                <PillBottle className="toolbar-icon" />
+                <LiaDumpsterSolid className="toolbar-icon toolbar-icon-dumpster" />
                 <span className="toolbar-label">Lägg till sopkärl</span>
             </button>
 
@@ -230,10 +283,11 @@ export default function Toolbar({
             {!isAdminMode && (
                 <button
                     onClick={handleSaveRoom}
-                    className="group toolbar-btn"
+                    disabled={isSaving}
+                    className={`group toolbar-btn ${isSaving ? "opacity-50 cursor-not-allowed" : ""}`}
                 >
                     <Save className="toolbar-icon" />
-                    <span className="toolbar-label">Spara design</span>
+                    <span className="toolbar-label">{isSaving ? "Sparar..." : "Spara design"}</span>
                 </button>
             )}
 
@@ -267,6 +321,10 @@ export default function Toolbar({
             {/* Prompts */}
             {isRoomPromptOpen && (
                 <RoomSizePrompt
+                    initialName={room.name}
+                    initialLength={Number((room.height * SCALE).toFixed(2))}
+                    initialWidth={Number((room.width * SCALE).toFixed(2))}
+                    existingNames={existingNames}
                     onConfirm={(name, length, width) => handleConfirmRoomSize(name, length, width)}
                     onCancel={() => setIsRoomPromptOpen(false)}
                 />
@@ -312,6 +370,19 @@ export default function Toolbar({
                     cancelLabel="Avbryt"
                     onConfirm={handleConfirmForcedSave}
                     onCancel={handleCancelForcedSave}
+                />
+            )}
+
+            {/* Confirmation modal for unsaved changes when closing */}
+            {showCloseConfirm && (
+                <ConfirmModal
+                    open={showCloseConfirm}
+                    title="Osparade ändringar"
+                    message="Du har osparade ändringar. Är du säker på att du vill stänga?"
+                    confirmLabel="Stäng utan att spara"
+                    cancelLabel="Avbryt"
+                    onConfirm={handleCloseWithoutSaving}
+                    onCancel={() => setShowCloseConfirm(false)}
                 />
             )}
         </div>

@@ -4,7 +4,7 @@
  * Handles tracking of valid movement positions and zone detection.
  */
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import ContainerDrag from "./ContainerDrag"
 import ContainerImage from "./ContainerImage"
 
@@ -28,6 +28,11 @@ export default function ContainerItem({
 
     //Tracks whether the container is currently overlapping a restricted zone
     const [isOverZone, setIsOverZone] = useState(false);
+
+    useEffect(() => {
+        setLastValidPos({ x: container.x, y: container.y });
+    }, [container.x, container.y]);
+
 
     return (
         <ContainerDrag

@@ -4,10 +4,8 @@ import { ChevronDown, ChevronUp } from "lucide-react";
 import { useParams, useLocation, Link } from 'react-router-dom';
 import { getCollectionFee, getAnnualCost, getPropertyContainers, type AnnualCostDTO } from '../lib/Statistics';
 import { useComparison } from './PlanningTool/hooks/useComparison';
+import { getLockTypeForProperty} from "../lib/Statistics";
 import LoadingBar from '../components/LoadingBar';
-
-//TODO: Ändra hårdkodade uträkningen av grön/gul/röd till riktiga värden som kan ändras via admin panel.
-//TODO: Bryt ut delar och bygga komponenter av dem.
 
 interface ContainerData {
   fractionType: string;
@@ -17,8 +15,13 @@ interface ContainerData {
   emptyingFrequency: number;
   cost: number;
 }
-
 interface CollectionFee {
+    cost: number;
+}
+
+interface LockType {
+    id: number;
+    name: string;
     cost: number;
 }
 
@@ -179,6 +182,7 @@ export default function StatisticsPage() {
 
   const [loading, setLoading] = useState(true);
   const [collectionFee, setCollectionFee] = useState<CollectionFee | null>(null);
+  const [lockType, setLockType] = useState<LockType | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [containers, setContainers] = useState<ContainerData[]>([]);
   const [data, setData] = useState<{
@@ -205,9 +209,9 @@ export default function StatisticsPage() {
       const containerCost = Number(c.cost) || 0;
       const qty = Number(c.quantity) || 0;
       const freq = Number(c.emptyingFrequency) || 0;
-      const lock = Number(collectionFee?.cost) || 0;
+      const collection = Number(collectionFee?.cost) || 0;
 
-      const unitPricePerEmptying = qty * lock * freq;
+      const unitPricePerEmptying = qty * collection * freq;
       const annualForThisContainerType = unitPricePerEmptying + containerCost * qty;
 
       return sum + annualForThisContainerType;
@@ -250,18 +254,35 @@ export default function StatisticsPage() {
     };
   });
 
+    const totalAnnualCollectionFee = containerSummaries.reduce((sum, summary) => {
+        return sum + summary.containers.reduce((containerSum, container) => {
+            const qty = Number(container.quantity) || 0;
+            const freq = Number(container.emptyingFrequency) || 0;
+            const collection = Number(collectionFee?.cost) || 0;
+            return containerSum + (qty * collection * freq);
+        }, 0);
+    }, 0);
+
+    const totalAnnualLockCost = lockType ? containerSummaries.reduce((sum, summary) => {
+        return sum + summary.containers.reduce((containerSum, container) => {
+            const qty = Number(container.quantity) || 0;
+            const freq = Number(container.emptyingFrequency) || 0;
+            const lockCost = Number(lockType.cost) || 0;
+            return containerSum + (qty * lockCost * freq);
+        }, 0);
+    }, 0) : 0;
+
     useEffect(() => {
         if (!propertyIdNumber) return;
 
         async function loadStatistics() {
             try {
-                const [containersData, annualCostData, collectionFeeData] = await Promise.all([
+                const [containersData, annualCostData, collectionFeeData, lockTypeData] = await Promise.all([
                     getPropertyContainers(propertyIdNumber),
                     getAnnualCost(propertyIdNumber),
                     getCollectionFee(propertyIdNumber),
+                    getLockTypeForProperty(propertyIdNumber),
                 ]);
-
-                console.log(propertyIdNumber);
 
                 const formattedContainers = containersData.map((c) => ({
                     fractionType: c.fractionType,
@@ -278,11 +299,15 @@ export default function StatisticsPage() {
                     annualCost: annualCostData,
                 });
 
-                console.debug("collectionFeeData", collectionFeeData);
                 setCollectionFee({
                     cost: Number(collectionFeeData?.cost) || 0,
                 });
-                console.log(collectionFeeData.cost);
+
+                setLockType({
+                    id: lockTypeData.id,
+                    name: lockTypeData.name,
+                    cost: lockTypeData.cost,
+                });
 
                 setLoading(false);
             } catch (err: unknown) {
@@ -324,6 +349,66 @@ export default function StatisticsPage() {
           <Link to="/statistics" className="btn-secondary text-sm self-end">← Tillbaka till fastigheter</Link>
         </div>
       </div>
+
+        <section className="mb-8 grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="rounded-2xl border bg-white p-6 shadow-soft">
+                <div className="flex items-center justify-between mb-4">
+                    <div>
+                        <h3 className="text-lg font-black text-nsr-ink">Dragvägskostnad</h3>
+                        <p className="text-xs text-gray-500 mt-1">Per hämtning och kärl</p>
+                    </div>
+                    <div className="rounded-full bg-nsr-teal/10 p-3">
+                        <svg className="w-6 h-6 text-nsr-teal" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+                        </svg>
+                    </div>
+                </div>
+
+                <div className="space-y-3">
+                    <div className="flex items-baseline justify-between">
+                        <span className="text-sm text-gray-600">Pris per hämtning:</span>
+                        <span className="text-2xl font-black text-nsr-ink">{collectionFee?.cost.toLocaleString() || 0} kr</span>
+                    </div>
+
+                    <div className="pt-3 border-t border-gray-200">
+                        <div className="flex items-baseline justify-between">
+                            <span className="text-sm font-semibold text-gray-700">Total årskostnad:</span>
+                            <span className="text-xl font-black text-nsr-teal">{totalAnnualCollectionFee.toLocaleString()} kr</span>
+                        </div>
+                        <p className="text-xs text-gray-500 mt-1">Baserat på alla kärl och hämtningsfrekvenser</p>
+                    </div>
+                </div>
+            </div>
+
+            <div className="rounded-2xl border bg-white p-6 shadow-soft">
+                <div className="flex items-center justify-between mb-4">
+                    <div>
+                        <h3 className="text-lg font-black text-nsr-ink">Lås</h3>
+                        <p className="text-xs text-gray-500 mt-1">{lockType?.name || 'Inget lås valt'}</p>
+                    </div>
+                    <div className="rounded-full bg-amber-500/10 p-3">
+                        <svg className="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                        </svg>
+                    </div>
+                </div>
+
+                <div className="space-y-3">
+                    <div className="flex items-baseline justify-between">
+                        <span className="text-sm text-gray-600">Pris per hämtning:</span>
+                        <span className="text-2xl font-black text-nsr-ink">{lockType?.cost.toLocaleString() || 0} kr</span>
+                    </div>
+
+                    <div className="pt-3 border-t border-gray-200">
+                        <div className="flex items-baseline justify-between">
+                            <span className="text-sm font-semibold text-gray-700">Total årskostnad:</span>
+                            <span className="text-xl font-black text-amber-600">{totalAnnualLockCost.toLocaleString()} kr</span>
+                        </div>
+                        <p className="text-xs text-gray-500 mt-1">Baserat på alla kärl och hämtningsfrekvenser</p>
+                    </div>
+                </div>
+            </div>
+        </section>
 
       <section className="mb-8 rounded-2xl border bg-white p-6 shadow-soft overflow-x-auto">
         <div className="mb-4 space-y-1">

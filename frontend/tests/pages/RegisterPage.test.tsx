@@ -15,6 +15,16 @@ function renderWithRouter(ui: React.ReactNode) {
 describe("RegisterPage", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+
+    Object.defineProperty(window, 'localStorage', {
+        value: {
+          getItem: vi.fn(),
+          setItem: vi.fn(),
+          removeItem: vi.fn(),
+          clear: vi.fn(),
+        },
+        writable: true,
+      });
   });
 
   it("renders the registration form", () => {
@@ -118,7 +128,7 @@ describe("RegisterPage", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Skapa konto" }));
 
-expect(await screen.findByText("Kontot har skapats!")).toBeInTheDocument();
+    expect(await screen.findByText("Kontot har skapats!")).toBeInTheDocument();
 
     await waitFor(() => {
       expect(screen.getByLabelText("Användarnamn")).toHaveValue("");

@@ -12,13 +12,36 @@ import { currentUser } from './lib/Auth';
 import PlanningTool from './pages/PlanningTool/PlanningTool';
 import AdminPage from './pages/AdminPage';
 import AllWasteroomPage from "./pages/AllWasteroomPage";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { startInactivityTimer, stopInactivityTimer } from "./lib/InactivityTimer";
+import { UnsavedChangesProvider } from './context/UnsavedChangesContext';
+import { ActivityList } from './components/ActivityList';
+import { getUsersLatestActivities } from './lib/Activity';
+import type { Activity } from './lib/Activity';
 
 function Dashboard() {
   const user = currentUser();
   const isAdmin = String(user?.role || '').toUpperCase().includes('ADMIN');
+  const [activities, setActivities] = useState<Activity[]>([]);
+  const [loading, setLoading] = useState(true); 
+
+  useEffect(() => {
+    async function fetchActivities() {
+      setLoading(true);
+      try {
+        const data = await getUsersLatestActivities(20);
+        setActivities(data);
+      } catch (err) {
+        console.error("Failed to fetch activities", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchActivities();
+  }, []);
+
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -109,25 +132,7 @@ function Dashboard() {
         )}
 
         {/* Recent Activity Section */}
-        <div className="bg-white rounded-2xl p-6 shadow-soft">
-          <h2 className="text-xl font-black text-nsr-ink mb-6">Senaste aktivitet</h2>
-          <div className="space-y-4">
-            <div className="flex items-center p-4 bg-gray-50 rounded-xl">
-              <div className="w-2 h-2 bg-nsr-accent rounded-full mr-4"></div>
-              <div className="flex-1">
-                <p className="brodtext text-gray-700">Du loggade in på systemet</p>
-                <p className="text-sm text-gray-500">Idag kl. {new Date().toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit' })}</p>
-              </div>
-            </div>
-            <div className="flex items-center p-4 bg-gray-50 rounded-xl">
-              <div className="w-2 h-2 bg-nsr-teal rounded-full mr-4"></div>
-              <div className="flex-1">
-                <p className="brodtext text-gray-700">Välkommen till NSR Planeringsverktyg!</p>
-                <p className="text-sm text-gray-500">Börja med att hantera dina fastigheter eller använd planeringsverktyget</p>
-              </div>
-            </div>
-          </div>
-        </div>
+        <ActivityList activities={activities} loading={loading} />
       </div>
     </div>
   );
@@ -153,67 +158,69 @@ export default function App() {
     }, [location.pathname]);
     
   return (
-    <div className="min-h-screen flex flex-col">
-      <NavBar />
-      <div className="flex-1">
-        <Routes>
-          <Route
-            path="/"
+    <UnsavedChangesProvider>
+      <div className="min-h-screen flex flex-col">
+        <NavBar />
+        <div className="flex-1">
+          <Routes>
+            <Route
+              path="/"
+              element={
+                currentUser() ? <Navigate to="/dashboard" replace /> : <Navigate to="/login" replace />
+              }
+            />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/register" element={<RegisterPage />} />
+            <Route path="/dashboard" element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            } />
+            <Route path="/properties" element={
+              <ProtectedRoute>
+                <PropertyPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/planningTool" element={
+              <ProtectedRoute>
+                <PlanningTool />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin" element={
+              <ProtectedRoute>
+                <AdminPage />
+              </ProtectedRoute>
+            } />
+              <Route path="/statistics" element={
+                  <ProtectedRoute>
+                      <StatisticsOverviewPage/>
+                  </ProtectedRoute>
+               }/>
+            <Route path="/statistics/:propertyId" element={
+              <ProtectedRoute>
+                <StatisticsPage />
+              </ProtectedRoute>
+            } />
+            <Route
+            path="/allWasteroom/:propertyId"
             element={
-              currentUser() ? <Navigate to="/dashboard" replace /> : <Navigate to="/login" replace />
+              <ProtectedRoute>
+                <AllWasteroomPage />
+              </ProtectedRoute>
             }
           />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/register" element={<RegisterPage />} />
-          <Route path="/dashboard" element={
-            <ProtectedRoute>
-              <Dashboard />
-            </ProtectedRoute>
-          } />
-          <Route path="/properties" element={
-            <ProtectedRoute>
-              <PropertyPage />
-            </ProtectedRoute>
-          } />
-          <Route path="/planningTool" element={
-            <ProtectedRoute>
-              <PlanningTool />
-            </ProtectedRoute>
-          } />
-          <Route path="/admin" element={
-            <ProtectedRoute>
-              <AdminPage />
-            </ProtectedRoute>
-          } />
-            <Route path="/statistics" element={
-                <ProtectedRoute>
-                    <StatisticsOverviewPage/>
-                </ProtectedRoute>
-             }/>
-          <Route path="/statistics/:propertyId" element={
-            <ProtectedRoute>
-              <StatisticsPage />
-            </ProtectedRoute>
-          } />
           <Route
-          path="/allWasteroom/:propertyId"
-          element={
-            <ProtectedRoute>
-              <AllWasteroomPage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/reports"
-          element={
-            <ProtectedRoute>
-              <ReportsPage />
-            </ProtectedRoute>
-          }
-        />
-        </Routes>
+            path="/reports"
+            element={
+              <ProtectedRoute>
+                <ReportsPage />
+              </ProtectedRoute>
+            }
+          />
+          </Routes>
+        </div>
+        <Footer />
       </div>
-      <Footer />
-    </div>
+    </UnsavedChangesProvider>
   );
 }

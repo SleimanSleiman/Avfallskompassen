@@ -295,7 +295,7 @@ public class WasteRoomControllerIT {
         );
 
         ContainerType containerType = containerTypeRepository.save(
-                new ContainerType("Restavfall", 1, 100, 100, 150,"","")
+                new ContainerType("Restavfall", 1, 100, 100, 150)
         );
 
         containerPlan = containerPlanRepository.save(
@@ -304,6 +304,7 @@ public class WasteRoomControllerIT {
                         containerType,
                         12,
                         new BigDecimal("200.00"),
+                        null,
                         null
                 )
         );

@@ -8,14 +8,14 @@ import com.avfallskompassen.dto.request.WasteRoomRequest;
 import com.avfallskompassen.exception.ResourceNotFoundException;
 import com.avfallskompassen.model.*;
 import com.avfallskompassen.repository.*;
+import com.avfallskompassen.services.ActivityService;
 import com.avfallskompassen.services.ContainerService;
+import com.avfallskompassen.services.UserService;
 import com.avfallskompassen.services.WasteRoomService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -36,6 +36,7 @@ public class WasteRoomServiceImpl implements WasteRoomService {
     private final WasteRoomRepository wasteRoomRepository;
     private final PropertyRepository propertyRepository;
     private final ContainerService containerService;
+    private final ActivityService activityService;
 
     @Value("${supabase.url}")
     private String supabaseUrl;
@@ -50,11 +51,14 @@ public class WasteRoomServiceImpl implements WasteRoomService {
     public WasteRoomServiceImpl(
             WasteRoomRepository wasteRoomRepository,
             PropertyRepository propertyRepository,
-            ContainerService containerService
+            ContainerService containerService,
+            ActivityService activityService,
+            UserService userService
     ) {
         this.wasteRoomRepository = wasteRoomRepository;
         this.propertyRepository = propertyRepository;
         this.containerService = containerService;
+        this.activityService = activityService;
     }
 
     /**
@@ -89,6 +93,10 @@ public class WasteRoomServiceImpl implements WasteRoomService {
         WasteRoom savedRoom = wasteRoomRepository.save(wasteRoom);
         saveThumbnail(request.getThumbnailBase64(), savedRoom.getId(), savedRoom);
         savedRoom = wasteRoomRepository.save(savedRoom);
+
+        User user = propertyRepository.findCreatedByUserByPropertyId(request.getPropertyId());
+
+        activityService.saveActivity(user, ActivityType.CREATED_WASTEROOM, "Ett miljörum skapades på fastigheten med addressen " + savedRoom.getProperty().getAddress());
 
         return WasteRoomDTO.fromEntity(savedRoom);
     }
@@ -184,6 +192,11 @@ public class WasteRoomServiceImpl implements WasteRoomService {
         saveThumbnail(request.getThumbnailBase64(), wasteRoomId, updated);
 
         updated = wasteRoomRepository.save(updated);
+
+        Property propertyWithUpdatedRoom = updated.getProperty();
+
+        User user = propertyRepository.findCreatedByUserByPropertyId(propertyWithUpdatedRoom.getId());
+        activityService.saveActivity(user, ActivityType.SAVED_WASTEROOM, "Ett miljörum i fastigheten med addressen " + propertyWithUpdatedRoom.getAddress() + " har uppdaterats");
         return WasteRoomDTO.fromEntity(updated);
     }
 
@@ -192,6 +205,9 @@ public class WasteRoomServiceImpl implements WasteRoomService {
     public void deleteWasteRoom(Long wasteRoomId) {
         WasteRoom wasteRoom = findWasteRoomById(wasteRoomId);
         wasteRoomRepository.delete(wasteRoom);
+        Property propertyWithDeletedRoom = wasteRoom.getProperty();
+        User user = propertyRepository.findCreatedByUserByPropertyId(propertyWithDeletedRoom.getId());
+        activityService.saveActivity(user, ActivityType.DELETED_WASTEROOM, "Ett miljörum på fastigheten med addressen " + propertyWithDeletedRoom.getAddress() + " har tagits bort");
     }
 
     /**
@@ -474,6 +490,9 @@ public class WasteRoomServiceImpl implements WasteRoomService {
         // Set new version as active
         newVersion.setIsActive(true);
         WasteRoom savedRoom = wasteRoomRepository.save(newVersion);
+
+        User ownerOfProperty = propertyRepository.findCreatedByUserByPropertyId(propertyId);
+        activityService.saveActivity(ownerOfProperty, ActivityType.ADMIN_SAVED_VERSION_OF_WASTE_ROOM, "En admin har skapat en egen version av ett miljö rum i fastigheten " + property.getAddress());
         
         return mapWasteRoomToDTO(savedRoom);
     }

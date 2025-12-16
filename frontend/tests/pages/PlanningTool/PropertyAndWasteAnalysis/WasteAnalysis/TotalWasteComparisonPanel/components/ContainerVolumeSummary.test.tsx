@@ -48,7 +48,7 @@ describe("ContainerVolumeSummary", () => {
         expect(screen.getByTestId("trend-badge")).toHaveTextContent("Ökar");
     });
 
-    it("renders placeholder when average is null", () => {
+    it("hides comparison when average is null", () => {
         render(
             <ContainerVolumeSummary
                 totalVolumeLabel="800 L"
@@ -60,6 +60,23 @@ describe("ContainerVolumeSummary", () => {
             />
         );
 
-        expect(screen.getByText("— L")).toBeDefined();
+        expect(screen.queryByText("Snitt i gruppen")).toBeNull();
+        expect(screen.queryByText("Avvikelse")).toBeNull();
+    });
+
+    it("hides comparison when average is 0", () => {
+        render(
+            <ContainerVolumeSummary
+                totalVolumeLabel="800 L"
+                containerAverageVolume={0}
+                containerGapSummary="—"
+                containerTrend="neutral"
+                containerLabel="Oförändrad"
+                containerTone="neutral"
+            />
+        );
+
+        expect(screen.queryByText("Snitt i gruppen")).toBeNull();
+        expect(screen.queryByText("Avvikelse")).toBeNull();
     });
 });

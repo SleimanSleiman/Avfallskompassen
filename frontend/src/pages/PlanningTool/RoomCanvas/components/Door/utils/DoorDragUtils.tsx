@@ -68,3 +68,19 @@ export function getDoorRect (door, x, y) {
 
    return { x, y, width: w, height: h };
 };
+
+// Get the rectangle representing the door's "zone" for object collision
+export function getDoorZone(door, x, y) {
+    const doorSize = door.width / SCALE;
+
+    switch (door.wall) {
+        case "top":
+            return { x: x - doorSize, y: y, width: doorSize, height: doorSize };
+        case "bottom":
+            return { x: x, y: y - doorSize, width: doorSize, height: doorSize };
+        case "left":
+            return { x: x, y: y, width: doorSize, height: doorSize };
+        case "right":
+            return { x: x - doorSize, y: y - doorSize, width: doorSize, height: doorSize };
+    }
+}

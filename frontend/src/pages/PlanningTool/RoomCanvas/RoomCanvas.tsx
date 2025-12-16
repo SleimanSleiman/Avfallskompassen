@@ -27,6 +27,7 @@ import type { Room, ContainerInRoom, Door, OtherObjectInRoom } from "../Types";
 import type { ContainerDTO } from "../../../lib/Container";
 import Message from "../../../components/ShowStatus";
 import './css/roomCanvasStage.css'
+import LoadingBar from "../../../components/LoadingBar";
 
 /* ─────────────── RoomCanvas Props ──────────────── */
 type RoomCanvasProps = {
@@ -41,9 +42,12 @@ type RoomCanvasProps = {
     doors: Door[];
     selectedDoorId: number | null;
     handleSelectDoor: (id: number | null) => void;
-    handleDragDoor: (id: number, pos: { x: number; y: number; wall: Door["wall"]; rotation: number }) => void;
+    handleDragDoor: (id: number, pos: { x: number; y: number }) => void;
     handleAddDoor: (door: { width: number }) => boolean;
     doorZones: { x: number; y: number; width: number; height: number }[];
+    restoreDoorState: (id: number, state: { x: number; y: number; wall: Door["wall"]; rotation: number; swingDirection: Door["swingDirection"];}) => void;
+    isDraggingDoor?: boolean;
+    setIsDraggingDoor?: Dispatch<SetStateAction<boolean>>;
 
     /* ───────────── Container Props ───────────── */
     containers: ContainerInRoom[];
@@ -91,8 +95,11 @@ type RoomCanvasProps = {
     /* ───────────── Misc / Utilities ───────────── */
     undo?: () => void;
     redo?: () => void;
-    saveRoom?: (thumbnailBase64: string | null) => void;
+    saveRoom?: (thumbnailBase64: string | null) => Promise<void>;
     isAdminMode?: boolean;
+    hasUnsavedChanges?: () => boolean;
+    onClose?: () => void;
+    existingNames?: string[];
 };
 
 export default function RoomCanvas({
@@ -110,6 +117,9 @@ export default function RoomCanvas({
     handleDragDoor,
     handleAddDoor,
     doorZones,
+    restoreDoorState,
+    isDraggingDoor,
+    setIsDraggingDoor,
 
     /* ───────────── Container Props ───────────── */
     containers,
@@ -159,11 +169,16 @@ export default function RoomCanvas({
     redo,
     saveRoom,
     isAdminMode = false,
+    hasUnsavedChanges = () => false,
+    onClose,
+    existingNames = [],
 }: RoomCanvasProps) {
     const [isDraggingContainer, setIsDraggingContainer] = useState(false);
     const [isDraggingOtherObject, setIsDraggingOtherObject] = useState(false);
     const [msg, setMsg] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
+    const [isSaving, setIsSaving] = useState(false);
+    
 
     //Handle container panel state and ref
     const {
@@ -234,6 +249,7 @@ export default function RoomCanvas({
 
             {/* Feedback messages */}
             <div className="stage-content-wrapper">
+                {isSaving && <LoadingBar message="Sparar rummet…"/>}
                 {msg && <Message message={msg} type="success" />}
                 {error && <Message message={error} type="error" />}
             </div>
@@ -279,6 +295,8 @@ export default function RoomCanvas({
                         doorsLength={doors.length}
                         setMsg={setMsg}
                         setError={setError}
+                        setIsSaving={setIsSaving}
+                        isSaving={isSaving}
                         undo={undo}
                         redo={redo}
                         selectedContainerInfo={selectedContainerInfo}
@@ -291,6 +309,9 @@ export default function RoomCanvas({
                         containers={containers}
                         otherObjects={otherObjects}
                         closePanels={closePanels}
+                        hasUnsavedChanges={hasUnsavedChanges}
+                        onClose={onClose}
+                        existingNames={existingNames}
                     />
 
                     {/* Konva Stage */}
@@ -329,6 +350,10 @@ export default function RoomCanvas({
                                 room={room}
                                 handleDragDoor={handleDragDoor}
                                 handleSelectDoor={handleSelectDoor}
+                                isDraggingDoor={isDraggingDoor}
+                                setIsDraggingDoor={setIsDraggingDoor}
+                                getOtherObjectZones={getOtherObjectZones}
+                                restoreDoorState={restoreDoorState}
                             />
 
                             {/* Measurements between door and corners*/}
@@ -374,7 +399,7 @@ export default function RoomCanvas({
                             />
 
                             {/* Blocked zones overlay */}
-                            {(isDraggingContainer || isDraggingOtherObject || draggedContainer) && (
+                            {(isDraggingContainer || isDraggingOtherObject || isDraggingDoor || draggedContainer) && (
                                 <BlockedZones zones={zones} />
                             )}
                         </Layer>

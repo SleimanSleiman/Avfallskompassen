@@ -1,15 +1,23 @@
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { currentUser, logout } from '../lib/Auth';
+import { useUnsavedChanges } from '../context/UnsavedChangesContext';
+import ConfirmModal from './ConfirmModal';
 
 export default function NavBar() {
   const [open, setOpen] = useState(false);
   const [user, setUser] = useState(currentUser());
   const isAdmin = String(user?.role || '').toUpperCase().includes('ADMIN');
   const location = useLocation();
+  // Hide nav entirely on auth pages
   const hideMenu = ["/login", "/register"].includes(location.pathname);
+  const { hasUnsavedChanges, setHasUnsavedChanges } = useUnsavedChanges();
+  const [pendingLogout, setPendingLogout] = useState(false);
+  // Store target path while waiting for unsaved-changes confirmation
+  const [pendingNavigation, setPendingNavigation] = useState<string | null>(null);
 
   useEffect(() => {
+    // Keep user state in sync with storage/auth changes across tabs
     setUser(currentUser());
 
     const handleStorageChange = () => {
@@ -26,17 +34,62 @@ export default function NavBar() {
   }, []);
 
   function handleLogout() {
+    // Clear persisted planning selections even if logout gets cancelled
+    localStorage.removeItem("trashRoomData");
+    localStorage.removeItem('enviormentRoomData');
+    localStorage.removeItem('selectedProperty');
+    localStorage.removeItem('selectedPropertyId');
+    if (hasUnsavedChanges) {
+      setPendingLogout(true);
+    } else {
+      logout();
+      setUser(null);
+      setHasUnsavedChanges(false);
+      window.location.href = '/login';
+    }
+  }
+
+  function handleConfirmLogout() {
+    // Proceed with logout after user confirms discarding unsaved changes
+    setPendingLogout(false);
     logout();
     setUser(null);
+    setHasUnsavedChanges(false);
     window.location.href = '/login';
+  }
+
+  function handleCancelLogout() {
+    setPendingLogout(false);
+  }
+
+  function handleNavigation(path: string) {
+    // Prompt before leaving planning tool with unsaved changes
+    if (hasUnsavedChanges && location.pathname.includes('/planningTool')) {
+      setPendingNavigation(path);
+    } else {
+      window.location.href = path;
+    }
+  }
+
+  function handleConfirmNavigation() {
+    if (pendingNavigation) {
+      setHasUnsavedChanges(false);
+      window.location.href = pendingNavigation;
+    }
+  }
+
+  function handleCancelNavigation() {
+    setPendingNavigation(null);
   }
 
   function resetPlanningToolState() {
     if (typeof window === 'undefined') return;
+    // Clear cached planning tool data to avoid stale selections
     localStorage.removeItem('enviormentRoomData');
     localStorage.removeItem('trashRoomData');
     localStorage.removeItem('selectedProperty');
     localStorage.removeItem('selectedPropertyId');
+    setHasUnsavedChanges(false);
   }
 
   return (
@@ -82,9 +135,33 @@ export default function NavBar() {
                 </>
               ) : (
                 <>
-                  <NavLink to="/dashboard" className={({ isActive }) => `nav-link hover:text-white transition-colors ${isActive ? 'nav-link-active' : ''}`}>Dashboard</NavLink>
-                  <NavLink to="/statistics" className={({ isActive }) => `nav-link hover:text-white transition-colors ${isActive ? 'nav-link-active' : ''}`}>Statistik</NavLink>
-                  <NavLink to="/properties" className={({ isActive }) => `nav-link hover:text-white transition-colors ${isActive ? 'nav-link-active' : ''}`}>Mina fastigheter</NavLink>
+                  <button 
+                    onClick={(e) => {
+                      e.preventDefault();
+                      handleNavigation('/dashboard');
+                    }}
+                    className={`nav-link hover:text-white transition-colors ${location.pathname === '/dashboard' ? 'nav-link-active' : ''}`}
+                  >
+                    Dashboard
+                  </button>
+                  <button 
+                    onClick={(e) => {
+                      e.preventDefault();
+                      handleNavigation('/statistics');
+                    }}
+                    className={`nav-link hover:text-white transition-colors ${location.pathname === '/statistics' ? 'nav-link-active' : ''}`}
+                  >
+                    Statistik
+                  </button>
+                  <button 
+                    onClick={(e) => {
+                      e.preventDefault();
+                      handleNavigation('/properties');
+                    }}
+                    className={`nav-link hover:text-white transition-colors ${location.pathname === '/properties' ? 'nav-link-active' : ''}`}
+                  >
+                    Mina fastigheter
+                  </button>
                   <NavLink
                     to="/planningTool"
                     onClick={resetPlanningToolState}
@@ -92,9 +169,16 @@ export default function NavBar() {
                   >
                     Planeringsverktyg
                   </NavLink>
-                  <NavLink to="/reports" className={({ isActive }) => `nav-link hover:text-white transition-colors ${isActive ? 'nav-link-active' : ''}`}>Rapporter</NavLink>
+                  <button 
+                    onClick={(e) => {
+                      e.preventDefault();
+                      handleNavigation('/reports');
+                    }}
+                    className={`nav-link hover:text-white transition-colors ${location.pathname === '/reports' ? 'nav-link-active' : ''}`}
+                  >
+                    Rapporter
+                  </button>
                   <div className="flex items-center gap-3">
-                    {user && <span className="text-sm">Hej {user.username}!</span>}
                     {user ? (
                       <button
                         onClick={handleLogout}
@@ -129,11 +213,47 @@ export default function NavBar() {
               </>
             ) : (
               <>
-                <NavLink to="/dashboard" className="text-nsr-ink">Dashboard</NavLink>
-                <NavLink to="/properties" className="text-nsr-ink">Mina fastigheter</NavLink>
-                <NavLink to="/statistics" className="text-nsr-ink">Statistik</NavLink>
+                <button 
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setOpen(false);
+                    handleNavigation('/dashboard');
+                  }}
+                  className="text-left text-nsr-ink"
+                >
+                  Dashboard
+                </button>
+                <button 
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setOpen(false);
+                    handleNavigation('/properties');
+                  }}
+                  className="text-left text-nsr-ink"
+                >
+                  Mina fastigheter
+                </button>
+                <button 
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setOpen(false);
+                    handleNavigation('/statistics');
+                  }}
+                  className="text-left text-nsr-ink"
+                >
+                  Statistik
+                </button>
                 <NavLink to="/planningTool" onClick={resetPlanningToolState} className="text-nsr-ink">Planeringsverktyg</NavLink>
-                <NavLink to="/reports" className="text-nsr-ink">Rapporter</NavLink>
+                <button 
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setOpen(false);
+                    handleNavigation('/reports');
+                  }}
+                  className="text-left text-nsr-ink"
+                >
+                  Rapporter
+                </button>
                 {user ? (
                   <button onClick={handleLogout} className="text-left text-nsr-ink">Logga ut</button>
                 ) : (
@@ -143,6 +263,32 @@ export default function NavBar() {
             )}
           </nav>
         </div>
+      )}
+
+      {/* Confirmation modal for unsaved changes when logging out */}
+      {pendingLogout && (
+        <ConfirmModal
+          open={pendingLogout}
+          title="Osparade ändringar"
+          message="Du har osparade ändringar. Är du säker på att du vill logga ut?"
+          confirmLabel="Logga ut utan att spara"
+          cancelLabel="Avbryt"
+          onConfirm={handleConfirmLogout}
+          onCancel={handleCancelLogout}
+        />
+      )}
+
+      {/* Confirmation modal for unsaved changes when navigating */}
+      {pendingNavigation && (
+        <ConfirmModal
+          open={!!pendingNavigation}
+          title="Osparade ändringar"
+          message="Du har osparade ändringar. Är du säker på att du vill navigera bort från planeringsverktyget?"
+          confirmLabel="Navigera utan att spara"
+          cancelLabel="Avbryt"
+          onConfirm={handleConfirmNavigation}
+          onCancel={handleCancelNavigation}
+        />
       )}
     </header>
   );

@@ -36,18 +36,22 @@ export default function CostSummary({
             //Show cost details for average, per apartment, and deviation
             description={
                 <div className="summary-grid">
-                    <div className="summary-row">
-                        <span>Snitt i gruppen</span>
-                        <span className="summary-row-label">{formatCurrency(costAverage)}</span>
-                    </div>
+                    {costAverage !== null && costAverage > 0 && (
+                        <div className="summary-row">
+                            <span>Snitt i gruppen</span>
+                            <span className="summary-row-label">{formatCurrency(costAverage)}</span>
+                        </div>
+                    )}
                     <div className="summary-row">
                         <span>Per lägenhet</span>
                         <span className="summary-row-label">{formatCurrency(costPerApartment)}</span>
                     </div>
-                    <div className="summary-row summary-row-pt">
-                        <span>Avvikelse</span>
-                        <span className="summary-row-label">{costGapSummary}</span>
-                    </div>
+                    {costAverage !== null && costAverage > 0 && (
+                        <div className="summary-row summary-row-pt">
+                            <span>Avvikelse</span>
+                            <span className="summary-row-label">{costGapSummary}</span>
+                        </div>
+                    )}
                 </div>
             }
         />
