@@ -78,7 +78,7 @@ public class ContainerServiceImpl implements ContainerService {
     }
 
     public List<PropertyContainerDTO> getContainersByPropertyId(Long propertyId) {
-        List<ContainerPosition> positions = containerPositionRepository.findByPropertyId(propertyId);
+        List<ContainerPosition> positions = containerPositionRepository.findByPropertyIdAndIsActive(propertyId);
 
         Map<ContainerPlan, Long> grouped = positions.stream()
                 .collect(Collectors.groupingBy(ContainerPosition::getContainerPlan, Collectors.counting()));
