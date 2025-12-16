@@ -19,7 +19,7 @@ type AdminPlanningEditorProps = {
 };
 
 // Wrapper component that ensures localStorage is set before PlanningTool mounts
-function PlanningToolWrapper({ planData, isLoading }: { planData: any; isLoading: boolean }) {
+function PlanningToolWrapper({ planData, isLoading, property }: { planData: any; isLoading: boolean; property?: any }) {
   const [initialized, setInitialized] = useState(false);
 
   if (isLoading) {
@@ -44,7 +44,8 @@ function PlanningToolWrapper({ planData, isLoading }: { planData: any; isLoading
     setInitialized(true);
   }
 
-  return <PlanningTool isAdminMode={true} />;
+  if (!planData || !property) return <LoadingBar />;
+  return <PlanningTool isAdminMode={true} property={property} />;
 }
 
 export default function AdminPlanningEditor({
@@ -377,11 +378,14 @@ export default function AdminPlanningEditor({
       {/* Planning Tool */}
       <div className="mx-auto max-w-7xl px-4 py-6">
         <div className="rounded-2xl border bg-white p-6 shadow-soft">
-          <PlanningToolWrapper
-            key={`${plan.id}-${plan.selectedVersion ?? plan.activeVersionNumber}`}
-            planData={planData}
-            isLoading={isLoadingRoom}
-          />
+          {planData?.property && (
+            <PlanningToolWrapper
+              key={`${plan.id}-${plan.selectedVersion ?? plan.activeVersionNumber}`}
+              planData={planData}
+              isLoading={isLoadingRoom}
+              property={planData.property}
+            />
+          )}
         </div>
       </div>
 

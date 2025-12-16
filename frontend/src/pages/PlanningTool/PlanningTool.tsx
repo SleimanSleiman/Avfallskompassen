@@ -42,9 +42,10 @@ import "driver.js/dist/driver.css";
 
 type PlanningToolProps = {
     isAdminMode?: boolean;
+    property?: Property;
 };
 
-export default function PlanningTool({ isAdminMode = false }: PlanningToolProps) {
+export default function PlanningTool({ isAdminMode = false, property }: PlanningToolProps) {
     const navigate = useNavigate();
     const { setHasUnsavedChanges } = useUnsavedChanges();
 
@@ -235,7 +236,9 @@ export default function PlanningTool({ isAdminMode = false }: PlanningToolProps)
     const serviceTypes = useServiceTypes();
 
 
-    const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
+    const [selectedProperty, setSelectedProperty] = useState<Property | null>(
+        isAdminMode && property ? property : null
+    );
     const [hasCheckedStoredProperty, setHasCheckedStoredProperty] = useState(false);
     const [showPropertyPicker, setShowPropertyPicker] = useState(false);
     const clearPlanningStorage = useCallback(() => {
@@ -245,6 +248,14 @@ export default function PlanningTool({ isAdminMode = false }: PlanningToolProps)
         localStorage.removeItem('selectedProperty');
         localStorage.removeItem('selectedPropertyId');
     }, []);
+
+    useEffect(() => {
+      if (isAdminMode && property?.id) {
+        localStorage.setItem('selectedPropertyId', String(property.id));
+        localStorage.setItem('selectedProperty', JSON.stringify({ propertyId: property.id }));
+        setSelectedProperty(property);
+      }
+    }, [isAdminMode, property]);
 
     useEffect(() => {
         if (isAdminMode) return;
