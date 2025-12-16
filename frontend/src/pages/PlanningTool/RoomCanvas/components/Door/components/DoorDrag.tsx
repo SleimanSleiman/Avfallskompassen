@@ -4,7 +4,7 @@
  */
 import { useState, useEffect } from "react";
 import { Group } from "react-konva";
-import { clamp, isOverlapping} from "../../../../Constants";
+import { isOverlapping} from "../../../../Constants";
 import DoorVisual from "./DoorVisual";
 import { computeDragBound, getDoorRect, getDoorZone } from "../utils/DoorDragUtils";
 

@@ -152,7 +152,7 @@ export default function App() {
 
       if (isInPlanningTool) {
         stopInactivityTimer();
-      } else {
+      } else { 
         startInactivityTimer();
       }
     }, [location.pathname]);

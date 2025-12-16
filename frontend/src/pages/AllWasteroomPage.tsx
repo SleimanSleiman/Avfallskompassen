@@ -5,7 +5,7 @@ import { deleteWasteRoom } from "../lib/WasteRoomRequest";
 import { useEffect, useState } from "react";
 import RoomSizePrompt from "../components/RoomSizePrompt";
 import greybox from "../assets/greybox.png";
-import Message from "../components/ShowStatus";
+import Message from "../components/ShowMessage";
 import ConfirmModal from "../components/ConfirmModal";
 
 
@@ -33,8 +33,6 @@ export default function AllaMiljoRumPage() {
 
             try {
                 const data = await getWasteRoomsByPropertyId(Number(propertyId));
-                console.log(data);
-
                 const sorted = data.sort(
                     (a, b) =>
                         new Date(b.updatedAt ?? 0).getTime() -

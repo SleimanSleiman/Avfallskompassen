@@ -17,7 +17,6 @@ import type { Room } from "../../../Types";
 import type { ContainerDTO } from "../../../../../lib/Container";
 import type { OtherObjectInRoom, ContainerInRoom } from "../../../Types";
 import './css/roomCanvasToolbar.css'
-import LoadingBar from "../../../../../components/LoadingBar";
 
 type ToolbarProps = {
     roomName?: string;

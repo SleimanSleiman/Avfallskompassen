@@ -108,7 +108,6 @@ export function useLayoutHistory<T>(initialState: T) {
   /** Undo the last layout change */
   const undo = () => {
     const changed = historyRef.current.undo(layoutRef.current);
-      console.log("Undo called — changed:", changed);
 
     if (changed) {
       setState(layoutRef.current.getState());
@@ -118,7 +117,6 @@ export function useLayoutHistory<T>(initialState: T) {
   /** Redo the last undone layout change */
   const redo = () => {
     const changed = historyRef.current.redo(layoutRef.current);
-      console.log("Redo called — changed:", changed);
     if (changed) {
       setState(layoutRef.current.getState());
     }

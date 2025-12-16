@@ -2,8 +2,8 @@
  * useContainerComparison hook
  * Computes comparison data for total container volume and trend vs similar properties.
  */
-import { calculatePercentageDifference, getTrend, formatNumber, normalizeWasteTypeKey } from "../../../utils/utils";
-import type { SummaryTone } from "../../../utils/types";
+import { calculatePercentageDifference, getTrend, formatNumber, normalizeWasteTypeKey } from "../../../utils/Utils";
+import type { SummaryTone } from "../../../utils/Types";
 
 export function useContainerComparison({
     designStats,

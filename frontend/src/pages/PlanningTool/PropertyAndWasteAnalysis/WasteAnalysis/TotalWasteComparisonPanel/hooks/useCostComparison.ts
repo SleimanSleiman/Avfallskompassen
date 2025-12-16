@@ -2,9 +2,9 @@
  * useCostComparison hook
  * Computes cost-related metrics and trend for a property vs comparison group.
  */
-import { calculatePercentageDifference, getTrend, formatCurrencySigned, formatPercentageSigned } from "../../../utils/utils";
+import { calculatePercentageDifference, getTrend, formatCurrencySigned, formatPercentageSigned } from "../../../utils/Utils";
 import type { PropertyComparison } from "../../../../../../lib/Comparison";
-import type { SummaryTone, CombinedRow } from "../../../utils/types";
+import type { SummaryTone, CombinedRow } from "../../../utils/Types";
 
 export function useCostComparison({
     designStats,

@@ -122,7 +122,9 @@ export function useDoors(
         }
 
         if (!placed) {
-            alert("Det finns ingen plats för dörren på någon vägg.");
+            setMsg("");
+            setError("");
+            setTimeout(() => setError("Det finns ingen plats för dörren på någon vägg."), 10);
             return false;
         }
 

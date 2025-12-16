@@ -2,9 +2,9 @@
  * Builders module
  * Functions to process container and comparison data into stats and table rows.
  */
-import type { DesignStats, DesignTypeStats, CombinedRow, BenchmarkDefinition } from "./types";
+import type { DesignStats, DesignTypeStats, CombinedRow, BenchmarkDefinition } from "./Types";
 import type { ContainerInRoom } from "../../Types";
-import { normalizeWasteTypeKey, calculatePercentageDifference, computePerApartmentPerWeek, getTrend } from "./utils";
+import { normalizeWasteTypeKey, calculatePercentageDifference, computePerApartmentPerWeek, getTrend } from "./Utils";
 
 //Build design stats from containers in the room
 export function buildDesignStats(containersInRoom: ContainerInRoom[]): DesignStats {

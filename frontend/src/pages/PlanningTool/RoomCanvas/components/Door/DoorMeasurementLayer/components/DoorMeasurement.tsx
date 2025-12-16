@@ -2,7 +2,7 @@
  * DoorMeasurement Component
  * Renders measurement lines and text for a single door.
  */
-import { Line, Text } from "react-konva";
+import { Line } from "react-konva";
 import type { Door } from "../../../../../Types";
 import { getLinesAndTexts } from "../utils/doorMeasurementUtils";
 

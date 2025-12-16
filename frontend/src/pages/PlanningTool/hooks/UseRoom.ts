@@ -6,7 +6,7 @@ import type { Room, ContainerInRoom, Door, OtherObjectInRoom } from "../Types";
 export function useRoom() {
   const initialRoom = (() => {
     const saved = typeof window !== "undefined"
-      ? (localStorage.getItem("enviormentRoomData") ?? localStorage.getItem("trashRoomData"))
+      ? (localStorage.getItem("enviormentRoomData"))
       : null;
 
     const defaultWidthMeters = 5;

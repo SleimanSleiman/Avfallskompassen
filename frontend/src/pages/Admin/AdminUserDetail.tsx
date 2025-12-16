@@ -105,8 +105,6 @@ export default function AdminUserDetail({ user, onBack }: AdminUserDetailProps) 
                     `/api/admin/properties/${prop.id}/wasterooms/${encodeURIComponent(roomName)}/versions`
                   );
 
-                  console.log(`Fetched versions for room "${roomName}":`, allVersions);
-
                   // Check if we got valid data
                   if (!allVersions || allVersions.length === 0) {
                     console.warn(`No versions returned for room "${roomName}", using fallback`);

@@ -25,7 +25,7 @@ import useContainerZones from "./hooks/useContainerZones";
 import { STAGE_WIDTH, STAGE_HEIGHT, GRID_SIZE_PX } from "../Constants";
 import type { Room, ContainerInRoom, Door, OtherObjectInRoom } from "../Types";
 import type { ContainerDTO } from "../../../lib/Container";
-import Message from "../../../components/ShowStatus";
+import Message from "../../../components/ShowMessage";
 import './css/roomCanvasStage.css'
 import LoadingBar from "../../../components/LoadingBar";
 

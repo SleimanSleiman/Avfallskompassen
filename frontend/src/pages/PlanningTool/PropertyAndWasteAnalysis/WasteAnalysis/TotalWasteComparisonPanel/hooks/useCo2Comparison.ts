@@ -3,9 +3,9 @@
  * Computes annual CO₂ savings per property based on container volumes and CO2 factors.
  */
 import { useMemo } from "react";
-import { CO2_SAVING_DEFINITIONS, WEEK_PER_YEAR } from "../../../utils/constants";
-import { normalizeWasteTypeKey, formatNumber, formatCo2 } from "../../../utils/utils";
-import type { CombinedRow, SummaryTone } from "../../../utils/types";
+import { CO2_SAVING_DEFINITIONS, WEEK_PER_YEAR } from "../../../utils/Constants";
+import { normalizeWasteTypeKey, formatNumber, formatCo2 } from "../../../utils/Utils";
+import type { CombinedRow, SummaryTone } from "../../../utils/Types";
 
 export function useCo2Comparison({
     designStats,

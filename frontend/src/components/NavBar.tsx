@@ -35,7 +35,6 @@ export default function NavBar() {
 
   function handleLogout() {
     // Clear persisted planning selections even if logout gets cancelled
-    localStorage.removeItem("trashRoomData");
     localStorage.removeItem('enviormentRoomData');
     localStorage.removeItem('selectedProperty');
     localStorage.removeItem('selectedPropertyId');
@@ -86,7 +85,6 @@ export default function NavBar() {
     if (typeof window === 'undefined') return;
     // Clear cached planning tool data to avoid stale selections
     localStorage.removeItem('enviormentRoomData');
-    localStorage.removeItem('trashRoomData');
     localStorage.removeItem('selectedProperty');
     localStorage.removeItem('selectedPropertyId');
     setHasUnsavedChanges(false);

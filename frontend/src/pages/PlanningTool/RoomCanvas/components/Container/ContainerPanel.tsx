@@ -4,9 +4,8 @@
  * select sizes, drag containers onto the canvas, or add them directly.
  */
 
-import { useCallback, useEffect, forwardRef, type ForwardRef, Dispatch, type SetStateAction, useRef} from "react";
-import { Package, Package2, X } from "lucide-react";
-import { IoNewspaperOutline } from "react-icons/io5";
+import { useEffect, forwardRef, Dispatch, type SetStateAction, useRef} from "react";
+import { Package2, X } from "lucide-react";
 import { FaWineBottle, FaAppleAlt, FaNewspaper } from "react-icons/fa";
 import { PiBeerBottleBold } from "react-icons/pi";
 import { GiOpenedFoodCan, GiSwapBag } from "react-icons/gi";

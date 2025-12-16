@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { createWasteRoom, updateWasteRoom, type ContainerPositionRequest, type DoorRequest, type RoomRequest } from "../../../lib/WasteRoomRequest";
+import { createWasteRoom, updateWasteRoom, type RoomRequest } from "../../../lib/WasteRoomRequest";
 import type { ContainerInRoom, Door, Room, OtherObjectInRoom } from "../Types";
 import { SCALE } from "../Constants";
 

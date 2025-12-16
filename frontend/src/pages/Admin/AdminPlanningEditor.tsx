@@ -6,7 +6,7 @@ import AdminSaveVersionModal from './AdminSaveVersionModal';
 import { currentUser } from '../../lib/Auth';
 import { createAdminVersion } from '../../lib/WasteRoomRequest';
 import type { DoorRequest, ContainerPositionRequest } from '../../lib/WasteRoomRequest';
-import Message from '../../components/ShowStatus';
+import Message from '../../components/ShowMessage';
 import { getWasteRoomById } from '../../lib/WasteRoom';
 import LoadingBar from '../../components/LoadingBar';
 
@@ -27,20 +27,9 @@ function PlanningToolWrapper({ planData, isLoading }: { planData: any; isLoading
   }
 
   if (typeof window !== 'undefined' && !initialized && planData) {
-    console.log('PlanningToolWrapper - Loading room data:', {
-      name: planData.name,
-      width: planData.width,
-      length: planData.length,
-      x: planData.x,
-      y: planData.y,
-      containerCount: planData.containers?.length || 0,
-      doorCount: planData.doors?.length || 0,
-      version: planData.version,
-      wasteRoomId: planData.wasteRoomId
-    });
-    localStorage.removeItem('trashRoomData');
     localStorage.removeItem('enviormentRoomData');
-    localStorage.setItem('trashRoomData', JSON.stringify(planData));
+    localStorage.removeItem('enviormentRoomData');
+    localStorage.setItem('enviormentRoomData', JSON.stringify(planData));
     setInitialized(true);
   }
 
@@ -70,26 +59,10 @@ export default function AdminPlanningEditor({
         const defaultVersionNumber = plan.selectedVersion ?? plan.activeVersionNumber ?? plan.versions[plan.versions.length - 1].versionNumber;
         const selectedVersion = plan.versions.find((v) => v.versionNumber === defaultVersionNumber) || plan.versions[plan.versions.length - 1];
 
-        console.log('Admin room editor - Selected version:', {
-          versionNumber: selectedVersion.versionNumber,
-          wasteRoomId: selectedVersion.wasteRoomId,
-          roomName: plan.name,
-          propertyId: property.id
-        });
-
         // Fetch the actual waste room from the database using its wasteRoomId
         if (selectedVersion.wasteRoomId) {
-          console.log('Fetching waste room from database with ID:', selectedVersion.wasteRoomId);
           const wasteRoom = await getWasteRoomById(selectedVersion.wasteRoomId);
-          console.log('Successfully fetched from DATABASE:', {
-            id: wasteRoom.id,
-            name: wasteRoom.name,
-            dimensions: `${wasteRoom.width}m × ${wasteRoom.length}m`,
-            doors: wasteRoom.doors?.length || 0,
-            containers: wasteRoom.containers?.length || 0,
-            position: { x: wasteRoom.x, y: wasteRoom.y }
-          });
-          
+
           setPlanData({
             length: wasteRoom.length,
             width: wasteRoom.width,
@@ -141,20 +114,10 @@ export default function AdminPlanningEditor({
   const handleConfirmSave = async () => {
     setSaving(true);
     try {
-      const savedData = localStorage.getItem('trashRoomData');
-      console.log('========== READING FROM LOCALSTORAGE ==========');
-      console.log('Raw localStorage data:', savedData);
+      const savedData = localStorage.getItem('enviormentRoomData');
       const currentPlanData = savedData ? JSON.parse(savedData) : {};
-      console.log('Parsed currentPlanData:', {
-        hasContainers: !!currentPlanData.containers,
-        containerCount: currentPlanData.containers?.length,
-        hasDoors: !!currentPlanData.doors,
-        doorCount: currentPlanData.doors?.length,
-          x: currentPlanData.x,
-          y: currentPlanData.y
-      });
-
-            setMsg("")
+      
+      setMsg("")
       setError("");
       setTimeout(() => setMsg("Version sparad"), 10);
       
@@ -166,7 +129,6 @@ export default function AdminPlanningEditor({
 
       // Prepare doors in the correct format for the backend
       const rawDoors = currentPlanData.doors || selectedVersion.doors || [];
-      console.log('Raw doors before mapping:', rawDoors);
 
       const doors: DoorRequest[] = rawDoors.map((d: any) => ({
         x: d.x ?? 0,
@@ -177,28 +139,11 @@ export default function AdminPlanningEditor({
         swingDirection: d.swingDirection ?? 'inward'
       }));
 
-      console.log('Mapped doors for backend:', doors);
-
       const rawContainers = currentPlanData.containers || selectedVersion.containers || [];
-      console.log('========== SAVE VERSION DEBUG ==========');
-      console.log('Raw containers before mapping:', rawContainers);
-      console.log('Number of containers:', rawContainers.length);
-      console.log('currentPlanData.containers length:', currentPlanData.containers?.length);
-      console.log('selectedVersion.containers length:', selectedVersion.containers?.length);
 
       const containers: ContainerPositionRequest[] = rawContainers.map((c: any) => {
         // Try multiple ways to get the container type ID
         const containerId = c.container?.id ?? c.containerDTO?.id ?? c.containerType?.id ?? c.id;
-        console.log('Container mapping:', {
-          original: c,
-          extractedId: containerId,
-          x: c.x,
-          y: c.y,
-          angle: c.rotation ?? c.angle,
-          hasContainer: !!c.container,
-          hasContainerDTO: !!c.containerDTO,
-          containerName: c.container?.name ?? c.containerDTO?.name
-        });
 
         return {
           id: containerId,
@@ -208,7 +153,6 @@ export default function AdminPlanningEditor({
         };
       });
 
-      console.log('Mapped containers for backend:', containers);
       const roomX = currentPlanData.x !== undefined ? currentPlanData.x : selectedVersion.x ?? 150;
       const roomY = currentPlanData.y !== undefined ? currentPlanData.y : selectedVersion.y ?? 150;
 
@@ -250,20 +194,8 @@ export default function AdminPlanningEditor({
             return;
         }
 
-      console.log('========== SAVE REQUEST PAYLOAD ==========');
-      console.log('Full request payload being sent to backend:', requestPayload);
-      console.log('Room position - x:', requestPayload.x, 'y:', requestPayload.y);
-      console.log('Room dimensions - length:', requestPayload.length, 'width:', requestPayload.width);
-      console.log('Containers:', requestPayload.containers.map(c => ({ id: c.id, x: c.x, y: c.y })));
-      console.log('Doors:', requestPayload.doors.map(d => ({ x: d.x, y: d.y, wall: d.wall })));
-      console.log('Property ID:', property.id, 'Room Name:', plan.name);
-
-        console.log("Width:", requestPayload.width);
-        console.log("Length:", requestPayload.length);
-
       // Call the backend API to save the new version
       const savedVersion = await createAdminVersion(property.id, plan.name, requestPayload);
-      console.log('Backend response - saved version:', savedVersion);
 
       // Also call onSave to update local state
       onSave(

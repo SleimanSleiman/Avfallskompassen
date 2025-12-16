@@ -2,8 +2,8 @@
  * Utility functions
  * General helpers for formatting, trend calculation, and per-apartment computations.
  */
-import type { Trend } from "./types";
-import { WEEK_PER_YEAR } from "./constants"
+import type { Trend } from "./Types";
+import { WEEK_PER_YEAR } from "./Constants"
 
 //Normalize a string to a consistent key for waste type comparison
 export function normalizeWasteTypeKey(value?: string) {

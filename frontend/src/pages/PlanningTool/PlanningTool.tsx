@@ -8,7 +8,6 @@ import { useNavigate } from 'react-router-dom';
 
 //Lib
 import type { Property } from '../../lib/Property';
-import type { ContainerDTO } from '../../lib/Container';
 import { currentUser } from '../../lib/Auth';
 
 //Context
@@ -19,8 +18,7 @@ import RoomCanvas from './RoomCanvas/RoomCanvas';
 import ActionPanel from './ActionPanel';
 import PropertyOverviewPanel from './PropertyAndWasteAnalysis/PropertyOverview/PropertyOverviewPanel';
 import WasteAnalysisPanels from './PropertyAndWasteAnalysis/WasteAnalysis/WasteAnalysisPanels'
-import { Tooltip } from "../../components/Tooltip";
-import Message from '../../components/ShowStatus';
+import Message from '../../components/ShowMessage';
 
 //Hooks
 import { useRoom } from './hooks/UseRoom';
@@ -28,10 +26,9 @@ import { useDoors } from './hooks/UseDoors';
 import { useContainers } from './hooks/UseContainers';
 import { useServiceTypes } from './hooks/UseServiceTypes';
 import { useOtherObjects } from './hooks/UseOtherObjects';
-import { useComparison } from './hooks/useComparison';
-import { useLayoutHistory } from './hooks/UseLayoutHistory';
+import { useComparison } from './hooks/UseComparison';
 import { useSaveRoom, useWasteRoomRequestBuilder } from './hooks/UseSaveRoom';
-import { usePropertyHighlights } from './hooks/usePropertyHighlights';
+import { usePropertyHighlights } from './hooks/UsePropertyHighlights';
 
 import { SCALE, ROOM_HORIZONTAL_OFFSET, ROOM_VERTICAL_OFFSET, STAGE_HEIGHT, STAGE_WIDTH } from './Constants';
 import PlanningToolPopup from './components/PlanningToolPopup';
@@ -108,7 +105,7 @@ export default function PlanningTool({ isAdminMode = false }: PlanningToolProps)
         handleRemoveOtherObject,
         isObjectInsideRoom,
         moveAllObjects,
-    } = useOtherObjects(room, setSelectedOtherObjectId, setSelectedContainerId, setSelectedDoorId, getDoorZones(), () => getContainerZones());
+    } = useOtherObjects(room, setSelectedOtherObjectId, setSelectedContainerId, setSelectedDoorId, getDoorZones(), () => getContainerZones(), setMsg, setError);
 
     /* ──────────────── Container state & logic ──────────────── */
     const {
@@ -209,7 +206,7 @@ export default function PlanningTool({ isAdminMode = false }: PlanningToolProps)
         }
 
         try {
-            const stored = localStorage.getItem('trashRoomData');
+            const stored = localStorage.getItem('enviormentRoomData');
             if (!stored) {
                 return;
             }
@@ -224,7 +221,7 @@ export default function PlanningTool({ isAdminMode = false }: PlanningToolProps)
                 length: room.width * SCALE,  // Convert back to meters
             };
 
-            localStorage.setItem('trashRoomData', JSON.stringify(updated));
+            localStorage.setItem('enviormentRoomData', JSON.stringify(updated));
         } catch (error) {
             console.error('Failed to sync state to localStorage', error);
         }
@@ -241,7 +238,6 @@ export default function PlanningTool({ isAdminMode = false }: PlanningToolProps)
     const clearPlanningStorage = useCallback(() => {
         if (typeof window === 'undefined') return;
         localStorage.removeItem('enviormentRoomData');
-        localStorage.removeItem('trashRoomData');
         localStorage.removeItem('selectedProperty');
         localStorage.removeItem('selectedPropertyId');
     }, []);
@@ -273,8 +269,7 @@ export default function PlanningTool({ isAdminMode = false }: PlanningToolProps)
 
         try {
             // Check both storage keys (matching UseRoom.ts pattern)
-            // enviormentRoomData is set by popup selection, trashRoomData is legacy
-            const stored = localStorage.getItem('enviormentRoomData') ?? localStorage.getItem('trashRoomData');
+            const stored = localStorage.getItem('enviormentRoomData');
             if (!stored) {
                 setSelectedProperty(null);
                 return;
@@ -313,7 +308,6 @@ export default function PlanningTool({ isAdminMode = false }: PlanningToolProps)
     const handlePopupSelection = useCallback((prepared: PreparedRoomState) => {
         const { property, propertyId: preparedId, storagePayload, roomState } = prepared;
         localStorage.setItem('enviormentRoomData', JSON.stringify(storagePayload));
-        localStorage.removeItem('trashRoomData');
         localStorage.setItem('selectedPropertyId', String(preparedId));
         localStorage.setItem('selectedProperty', JSON.stringify({ propertyId: preparedId }));
         setSelectedProperty(property);

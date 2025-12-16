@@ -15,7 +15,7 @@ export function UnsavedChangesProvider({ children }: { children: React.ReactNode
     return hasUnsavedChanges;
   }, [hasUnsavedChanges]);
 
-  return (
+  return ( 
     <UnsavedChangesContext.Provider value={{ hasUnsavedChanges, setHasUnsavedChanges, checkUnsavedChanges }}>
       {children}
     </UnsavedChangesContext.Provider>

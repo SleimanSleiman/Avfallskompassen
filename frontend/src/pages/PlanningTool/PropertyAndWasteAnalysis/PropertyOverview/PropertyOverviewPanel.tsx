@@ -2,11 +2,7 @@
  * PropertyOverviewPanel component
  * Displays key property highlights and a waste type summary panel.
  */
-import { MapPin, Home, Users } from "lucide-react";
 import WasteTypeSummaryPanel from './WasteTypeSummaryPanel/WasteTypeSummaryPanel';
-import type { Property } from '../../../../lib/Property';
-import type { ContainerDTO } from '../../../../lib/Container';
-import type { PropertyComparison } from '../../../../lib/Comparison';
 import './css/overviewPanel.css'
 
 export default function PropertyOverviewPanel({

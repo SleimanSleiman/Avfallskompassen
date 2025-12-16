@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { getMyProperties, type Property } from '../lib/Property';
-import { useComparison } from './PlanningTool/hooks/useComparison';
+import { useComparison } from './PlanningTool/hooks/UseComparison';
 
 type ComparisonScaleProps = {
   title: string;

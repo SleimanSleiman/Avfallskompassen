@@ -3,7 +3,7 @@ import React from 'react';
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { useParams, useLocation, Link } from 'react-router-dom';
 import { getCollectionFee, getAnnualCost, getPropertyContainers, type AnnualCostDTO } from '../lib/Statistics';
-import { useComparison } from './PlanningTool/hooks/useComparison';
+import { useComparison } from './PlanningTool/hooks/UseComparison';
 import { getLockTypeForProperty} from "../lib/Statistics";
 import LoadingBar from '../components/LoadingBar';
 

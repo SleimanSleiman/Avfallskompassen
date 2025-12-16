@@ -25,7 +25,6 @@ export default function LoginPage() {
       if (res.success) {
         startInactivityTimer();
         setMsg(res.message || 'Inloggning lyckades');
-        localStorage.removeItem("trashRoomData");
         localStorage.removeItem('enviormentRoomData');
         localStorage.removeItem('selectedProperty');
         localStorage.removeItem('selectedPropertyId');

@@ -6,7 +6,7 @@ import { currentUser } from '../lib/Auth';
 import RoomSizePrompt from '../components/RoomSizePrompt';
 import ConfirmModal from '../components/ConfirmModal';
 import { deleteWasteRoom } from '../lib/WasteRoomRequest';
-import Message from '../components/ShowStatus';
+import Message from '../components/ShowMessage';
 import LoadingBar from '../components/LoadingBar';
 import PlanVersionDropdown from '../components/PlanVersionDropdown';
 import type { WasteRoom } from '../lib/WasteRoom';
@@ -89,7 +89,6 @@ export default function PropertyPage() {
         try {
             setLoadingProperties(true);
             const data = await getMyPropertiesWithWasteRooms();
-            console.log(data);
             setProperties(data);
         } catch (err: any) {
             setError('Kunde inte ladda fastigheter: ' + err.message);

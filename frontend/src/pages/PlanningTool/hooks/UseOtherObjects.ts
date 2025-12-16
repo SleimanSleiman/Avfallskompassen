@@ -12,7 +12,9 @@ export function useOtherObjects(
     setSelectedContainerId: (id: number | null) => void,
     setSelectedDoorId: (id: number | null) => void,
     doorZones: { x: number; y: number; width: number; height: number }[] = [],
-    getContainerZones: () => { x: number; y: number; width: number; height: number }[] = () => []
+    getContainerZones: () => { x: number; y: number; width: number; height: number }[] = () => [],
+    setMsg,
+    setError
 ) {
     /* ──────────────── Other Objects state ──────────────── */
     const [otherObjects, setOtherObjects] = useState<OtherObjectInRoom[]>([]);
@@ -103,8 +105,9 @@ export function useOtherObjects(
             }
 
             if (!foundSpot) {
-                alert("Det finns ingen ledig plats för objektet i rummet.");
-                return false;
+                setMsg("");
+                setError("");
+                setTimeout(() => setError("Det finns ingen ledig plats för objektet i rummet."), 10);                return false;
             }
         }
 

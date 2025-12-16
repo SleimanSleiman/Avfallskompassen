@@ -2,16 +2,14 @@
  * WasteAnalysisPanels component
  * Displays total waste comparison and environmental benchmark panels with proper loading and error handling.
  */
-import { useMemo } from "react";
-import { Loader2, AlertCircle } from "lucide-react";
+import { AlertCircle } from "lucide-react";
 import TotalWasteComparisonPanel from "./TotalWasteComparisonPanel/TotalWasteComparisonPanel";
 import EnvironmentalBenchmarkPanel from "./EnvironmentalBenchmarkPanel/EnvironmentalBenchmarkPanel";
 import InfoTooltip from "../../components/InfoTooltip";
 import type { PropertyComparison } from "../../../../lib/Comparison";
 import type { Property } from "../../../../lib/Property";
 import type { ContainerInRoom } from "../../Types";
-import { buildDesignStats, mapWasteComparisons, mapFrequencyComparisons, buildCombinedRows } from "../utils/builders";
-import { useWasteComparison } from "../hooks/useWasteComparison";
+import { useWasteComparison } from "../hooks/UseWasteComparison";
 import './css/analysisPanels.css'
 import LoadingBar from "../../../../components/LoadingBar";
 

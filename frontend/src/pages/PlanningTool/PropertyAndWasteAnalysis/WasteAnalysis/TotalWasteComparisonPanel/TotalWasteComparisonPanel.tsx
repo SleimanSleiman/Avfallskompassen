@@ -2,12 +2,11 @@
  * TotalWasteComparisonPanel component
  * Displays summaries for cost, container volume, container overview, and CO₂ for a property.
  */
-import { useMemo } from "react";
 import type { PropertyComparison } from "../../../../../lib/Comparison";
-import type { CombinedRow } from "../../utils/types";
-import { useCostComparison } from "./hooks/useCostComparison";
-import { useContainerComparison } from "./hooks/useContainerComparison";
-import { useCo2Comparison } from "./hooks/useCo2Comparison";
+import type { CombinedRow } from "../../utils/Types";
+import { useCostComparison } from "./hooks/UseCostComparison";
+import { useContainerComparison } from "./hooks/UseContainerComparison";
+import { useCo2Comparison } from "./hooks/UseCo2Comparison";
 import Co2Summary from "./components/Co2Summary";
 import CostSummary from "./components/CostSummary";
 import ContainerVolumeSummary from "./components/ContainerVolumeSummary";

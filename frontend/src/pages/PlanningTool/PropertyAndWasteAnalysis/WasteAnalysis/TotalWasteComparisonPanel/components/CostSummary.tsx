@@ -4,8 +4,8 @@
  */
 import SummaryStat from "../../components/SummaryStat";
 import TrendBadge from "../../../components/TrendBadge";
-import { formatCurrency } from "../../../utils/utils";
-import { TREND_CONFIG } from "../../../utils/constants";
+import { formatCurrency } from "../../../utils/Utils";
+import { TREND_CONFIG } from "../../../utils/Constants";
 import '../../css/wasteComparison.css'
 
 type CostSummaryProps = {

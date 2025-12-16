@@ -3,8 +3,8 @@
  * Shows an overview of containers, including number of fractions, average emptying frequency, and largest cost contributor.
  */
 import SummaryStat from "../../components/SummaryStat";
-import { formatNumber, formatPercentage } from "../../../utils/utils";
-import type { CombinedRow } from "../../../utils/types";
+import { formatNumber, formatPercentage } from "../../../utils/Utils";
+import type { CombinedRow } from "../../../utils/Types";
 import Tooltip from "../../../../../../components/Tooltip";
 import '../../css/wasteComparison.css'
 

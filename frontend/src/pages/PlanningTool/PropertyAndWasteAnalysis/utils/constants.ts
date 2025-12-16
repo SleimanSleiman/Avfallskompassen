@@ -2,7 +2,7 @@
  * Constants
  * Defines benchmarks, CO2 savings, trend configurations and summary styles.
  */
-import type { BenchmarkDefinition, CarbonSavingDefinition, Trend, SummaryTone, SummarySize, TrendBadgeSize, BenchmarkStatus } from "./types";
+import type { BenchmarkDefinition, CarbonSavingDefinition, Trend, SummaryTone, SummarySize, TrendBadgeSize, BenchmarkStatus } from "./Types";
 import { TrendingUp, TrendingDown, Minus, CheckCircle, AlertCircle } from "lucide-react";
 import '../css/constants.css'
 

@@ -8,7 +8,7 @@ import {
     formatNumber,
     formatVolume,
     formatLitersPerWeek,
-} from "../../../utils/utils";
+} from "../../../utils/Utils";
 import TrendBadge from "../../../components/TrendBadge";
 import '../../css/table.css'
 

@@ -2,7 +2,7 @@
  * SummaryStat component
  * Displays a labeled summary statistic with optional description, tone, size, and badge.
  */
-import { SUMMARY_SIZE_STYLES, SUMMARY_TONE_STYLES } from "../../utils/constants"
+import { SUMMARY_SIZE_STYLES, SUMMARY_TONE_STYLES } from "../../utils/Constants"
 import '../css/summaryStat.css'
 
 export default function SummaryStat({

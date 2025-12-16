@@ -2,9 +2,8 @@
  * WasteTypeComparisonPanel component
  * Displays waste type comparison table and handles loading, errors, and empty states.
  */
-import React, { useMemo } from "react";
-import { Loader2, AlertCircle } from "lucide-react";
-import { useWasteComparison } from "../../hooks/useWasteComparison";
+import { AlertCircle } from "lucide-react";
+import { useWasteComparison } from "../../hooks/UseWasteComparison";
 import WasteTable from "./components/WasteTable";
 import '../css/summaryPanel.css'
 import LoadingBar from "../../../../../components/LoadingBar";

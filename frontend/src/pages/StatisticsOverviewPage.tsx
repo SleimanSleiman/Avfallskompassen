@@ -45,7 +45,6 @@ export default function StatisticsOverviewPage() {
     }
 
     function exportPDF(p: Property) {
-      console.log("Export PDF for property", p.id);
     }
 
     if (loading) {
