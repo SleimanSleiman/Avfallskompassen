@@ -153,6 +153,13 @@ export async function getUsersPropertiesWithWasteRooms(username : string): Promi
     });
 }
 
+export async function getProperty(id: number): Promise<Property> {
+    return await api<Property>(`/api/properties/${id}`, {
+        method: 'GET',
+        headers: getAuthHeaders()
+    });
+}
+
 export async function deleteProperty(id: number): Promise<PropertyResponse> {
     return await api<PropertyResponse>(`/api/properties/${id}`, {
         method: 'DELETE',

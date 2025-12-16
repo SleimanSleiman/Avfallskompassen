@@ -100,4 +100,25 @@ describe("EnvironmentalBenchmarkPanel", () => {
 
         expect(screen.getAllByText(/Lägg till kärl i ritningen/).length).toBeGreaterThan(0);
     });
+
+    it("hides comparison when average is 0", () => {
+        const rowsWithZeroAverage = [
+            {
+                ...combinedRows[0],
+                averagePerWeek: 0,
+            }
+        ];
+
+        render(
+            <EnvironmentalBenchmarkPanel
+                designStats={mockDesignStats}
+                combinedRows={rowsWithZeroAverage}
+                activeBenchmarks={[activeBenchmarks[0]]}
+                designHasContainers={true}
+            />
+        );
+
+        expect(screen.queryByText("Snitt i gruppen")).toBeNull();
+        expect(screen.queryByText("Avvikelse")).toBeNull();
+    });
 });
