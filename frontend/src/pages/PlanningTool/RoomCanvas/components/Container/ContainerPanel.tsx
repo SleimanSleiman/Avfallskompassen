@@ -13,7 +13,7 @@ import { GiOpenedFoodCan, GiSwapBag } from "react-icons/gi";
 import { BsFillBoxSeamFill } from "react-icons/bs";
 import { FaJugDetergent } from "react-icons/fa6";
 import type { ContainerDTO } from "../../../../../lib/Container";
-import { DRAG_DATA_FORMAT } from "../../../Constants";
+import { DRAG_DATA_FORMAT, LOCK_I_LOCK_COMPATIBLE_SIZES } from "../../../Constants";
 import LoadingBar from "../../../../../components/LoadingBar";
 import './css/roomCanvasPanel.css'
 
@@ -27,7 +27,7 @@ type ContainerPanelProps = {
     selectedSize: { [key: number]: number | null };
     setSelectedSize: React.Dispatch<React.SetStateAction<{ [key: number]: number | null }>>;
     fetchContainers: (service: { id: number; name: string }) => Promise<void>;
-    handleAddContainer: (container: ContainerDTO) => void;
+    handleAddContainer: (container: ContainerDTO, lockILock?: boolean) => void;
     setSelectedContainerInfo: (container: ContainerDTO) => void;
     isLoadingContainers: boolean;
     setIsStageDropActive: (v: boolean) => void;
@@ -288,6 +288,9 @@ const ContainerPanel = forwardRef(function ContainerPanel(
                                                 <p>{container.width} × {container.height} × {container.depth} mm</p>
                                                 <p>Tömningsfrekvens: {container.emptyingFrequencyPerYear}/år</p>
                                                 <p>Kostnad: {container.cost} kr/år</p>
+                                                {LOCK_I_LOCK_COMPATIBLE_SIZES.includes(container.size) && (
+                                                    <p>Kostnad för lock-i-lock: 100 kr/år</p>
+                                                )}
                                             </div>
                                         </div>
 
@@ -299,12 +302,14 @@ const ContainerPanel = forwardRef(function ContainerPanel(
                                             >
                                                 Lägg till
                                             </button>
-                                            <button
-                                                onClick={() => setSelectedContainerInfo(container)}
-                                                className="container-btn container-btn-info"
-                                            >
-                                                Info
-                                            </button>
+                                           {LOCK_I_LOCK_COMPATIBLE_SIZES.includes(container.size) && (
+                                               <button
+                                                 onClick={() => handleAddContainer(container, undefined, true)}
+                                                 className="container-btn container-btn-add"
+                                               >
+                                                 Lägg till med lock-i-lock
+                                               </button>
+                                           )}
                                         </div>
                                     </div>
                                 ))}

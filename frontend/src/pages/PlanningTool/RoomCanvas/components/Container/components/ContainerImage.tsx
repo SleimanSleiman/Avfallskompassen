@@ -55,11 +55,11 @@ export default function ContainerImage({
           {/* Lock-i-lock indicator */}
           {container.lockILock && (
             <Text
-                      text="✅"
-                      fontSize={container.width / 3} // small relative to container
-                      x={container.width - container.width * 0.2} // top-right corner
-                      y={container.height * 0.05}
-                    />
+              text="✅"
+              fontSize={container.width / 3}
+              x={container.width - container.width * 0.2}
+              y={container.height * 0.05}
+            />
           )}
 
         </Group>

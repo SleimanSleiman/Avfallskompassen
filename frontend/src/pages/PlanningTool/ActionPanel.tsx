@@ -4,6 +4,7 @@
  */
 import InfoTooltip from "./components/InfoTooltip";
 import type { ContainerInRoom as Container, Door, OtherObjectInRoom } from "./Types";
+import { LOCK_I_LOCK_COMPATIBLE_SIZES } from "./Constants"
 import { RotateCcw, Trash2, Info, Vault } from "lucide-react";
 import { useRef, useState, useEffect } from 'react';
 
@@ -118,9 +119,8 @@ export default function ActionPanel({
     const hasLockILock = !!selectedContainer?.lockILock;
 
     // Define which sizes are compatible for lock-i-lock
-    const compatibleSizes = [190, 240, 243, 370];
     const canAddLockILock = selectedContainer
-        ? compatibleSizes.includes(selectedContainer.container.size)
+        ? LOCK_I_LOCK_COMPATIBLE_SIZES.includes(selectedContainer.container.size)
         : false;
 
     //Determine button texts based on selection

@@ -88,7 +88,7 @@ type RoomCanvasProps = {
     setSelectedSize: Dispatch<SetStateAction<{ [key: number]: number | null }>>;
     isLoadingContainers: boolean;
     fetchContainers: (service: { id: number; name: string }) => Promise<void>;
-    handleAddContainer: (container: ContainerDTO, position?: { x: number; y: number }) => void;
+    handleAddContainer: (container: ContainerDTO, position?: { x: number; y: number }, lockILock?: boolean) => void;
     onContainerPanelHeightChange?: (height: number) => void;
     setDraggedContainer: Dispatch<SetStateAction<ContainerDTO | null>>;
 
