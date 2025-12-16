@@ -4,7 +4,7 @@
  * Each object is rendered as a rectangle.
  */
 import { Rect } from 'react-konva';
-import type { OtherObjectInRoom, Room } from '../../../Types';
+import type { OtherObjectInRoom, Room } from '../../../lib/Types';
 import OtherObjectDrag from './components/OtherObjectsDrag';
 
 type OtherObjectsLayerProps = {

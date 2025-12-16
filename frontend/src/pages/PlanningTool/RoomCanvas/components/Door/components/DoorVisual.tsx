@@ -3,7 +3,7 @@
  * Draws the arc and line that represent a door and its swing direction.
  */
 import { Arc, Line } from "react-konva";
-import { SCALE } from "../../../../Constants";
+import { SCALE } from "../../../../lib/Constants";
 
 export default function DoorVisual({ door, selected, isOverZone }) {
     //Determine the color of the door based on its state

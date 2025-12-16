@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { clamp, mmToPixels, isOverlapping, SCALE } from '../../../src/pages/PlanningTool/Constants';
+import { clamp, mmToPixels, isOverlapping, SCALE } from '../../../../src/pages/PlanningTool/lib/Constants';
 
 describe('Constants utilities', () => {
     //Test clamp function

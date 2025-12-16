@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, fireEvent } from '@testing-library/react';
 import DoorDrag from '../../../../../../../src/pages/PlanningTool/RoomCanvas/components/Door/components/DoorDrag';
 import * as DoorDragUtils from '../../../../../../../src/pages/PlanningTool/RoomCanvas/components/Door/utils/DoorDragUtils';
-import * as Constants from '../../../../../../../src/pages/PlanningTool/Constants';
+import * as Constants from '../../../../../../../src/pages/PlanningTool/lib/Constants';
 
 vi.mock('react-konva', async () => {
     const actual = await vi.importActual('react-konva');

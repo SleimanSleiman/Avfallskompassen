@@ -22,8 +22,8 @@ import OtherObjectMeasurementLayer from "./components/OtherObjects/OtherObjectsM
 import Toolbar from "./components/Toolbar/Toolbar";
 import useContainerPanel from "./hooks/useContainerPanel";
 import useContainerZones from "./hooks/useContainerZones";
-import { STAGE_WIDTH, STAGE_HEIGHT, GRID_SIZE_PX } from "../Constants";
-import type { Room, ContainerInRoom, Door, OtherObjectInRoom } from "../Types";
+import { STAGE_WIDTH, STAGE_HEIGHT, GRID_SIZE_PX } from "../lib/Constants";
+import type { Room, ContainerInRoom, Door, OtherObjectInRoom } from "../lib/Types";
 import type { ContainerDTO } from "../../../lib/Container";
 import Message from "../../../components/ShowStatus";
 import './css/roomCanvasStage.css'

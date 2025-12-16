@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { describe, it, expect, vi } from "vitest";
 import DoorVisual from "../../../../../../../src/pages/PlanningTool/RoomCanvas/components/Door/components/DoorVisual";
-import { SCALE } from "../../../../../../../src/pages/PlanningTool/Constants";
+import { SCALE } from "../../../../../../../src/pages/PlanningTool/lib/Constants";
 
 // Mock react-konva components
 vi.mock("react-konva", () => ({

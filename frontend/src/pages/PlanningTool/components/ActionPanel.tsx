@@ -2,8 +2,8 @@
  * ActionPanel component for managing bins and doors in the planning tool.
  * Displays the selected item and provides controls to view info, rotate, or remove it.
  */
-import InfoTooltip from "./components/InfoTooltip";
-import type { ContainerInRoom as Container, Door, OtherObjectInRoom } from "./Types";
+import InfoTooltip from "./InfoTooltip";
+import type { ContainerInRoom as Container, Door, OtherObjectInRoom } from "../lib/Types";
 import { RotateCcw, Trash2, Info } from "lucide-react";
 import { useRef, useState, useEffect } from 'react';
 

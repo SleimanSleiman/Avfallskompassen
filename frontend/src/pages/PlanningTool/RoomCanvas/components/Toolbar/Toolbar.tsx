@@ -7,13 +7,13 @@
 import { useState, useCallback } from "react";
 import { Save, Ruler, DoorOpen, Undo, Redo, SquarePlus, ArrowLeft } from "lucide-react";
 import { LiaDumpsterSolid } from "react-icons/lia";
-import { SCALE, STAGE_WIDTH, STAGE_HEIGHT, MARGIN, clamp, MIN_HEIGHT, MIN_WIDTH } from "../../../Constants"
-import RoomSizePrompt from "../../../../../components/RoomSizePrompt";
-import DoorWidthPrompt from "../../../../../components/DoorWidthPrompt";
-import OtherObjectSizePrompt from "../../../../../components/OtherObjectSizePrompt";
+import { SCALE, STAGE_WIDTH, STAGE_HEIGHT, MARGIN, clamp, MIN_HEIGHT, MIN_WIDTH } from "../../../lib/Constants"
+import RoomSizePrompt from "../../../../../components/prompts/RoomSizePrompt";
+import DoorWidthPrompt from "../../../../../components/prompts/DoorWidthPrompt";
+import OtherObjectSizePrompt from "../../../../../components/prompts/OtherObjectSizePrompt";
 import ContainerInfo from "./ContainerInfo"
 import ConfirmModal from "../../../../../components/ConfirmModal";
-import type { Room } from "../../../Types";
+import type { Room } from "../../../lib/Types";
 import type { ContainerDTO } from "../../../../../lib/Container";
 import type { OtherObjectInRoom, ContainerInRoom } from "../../../Types";
 import './css/roomCanvasToolbar.css'

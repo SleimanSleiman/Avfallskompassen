@@ -5,7 +5,11 @@
 
 /* Modal box */
 .prompt-box {
-  @apply bg-white rounded-2xl border shadow-soft p-6 w-80;
+  @apply relative bg-white rounded-2xl border shadow-soft p-6 w-80;
+}
+
+.prompt-tooltip {
+  @apply absolute top-2 right-2;
 }
 
 /* Headings */
@@ -16,6 +20,10 @@
 /* Input fields */
 .prompt-input {
   @apply w-full border border-gray-300 rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-nsr-teal focus:border-nsr-teal;
+}
+
+.prompt-input-group {
+  @apply space-y-3;
 }
 
 /* Error messages */

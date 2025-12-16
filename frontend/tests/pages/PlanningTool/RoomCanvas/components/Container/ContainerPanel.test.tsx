@@ -1,7 +1,7 @@
 import { render, screen, fireEvent } from "@testing-library/react";
 import { describe, it, expect, vi, afterEach } from "vitest";
 import ContainerPanel from "../../../../../../src/pages/PlanningTool/RoomCanvas/components/Container/ContainerPanel";
-import { DRAG_DATA_FORMAT } from "../../../../../../src/pages/PlanningTool/Constants"
+import { DRAG_DATA_FORMAT } from "../../../../../../src/pages/PlanningTool/lib/Constants"
 import * as lucide from "lucide-react";
 
 vi.mock("lucide-react", () => ({

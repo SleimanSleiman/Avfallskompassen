@@ -14,7 +14,7 @@ vi.mock("../../src/lib/WasteRoomRequest", () => ({
 }));
 
 // Mock RoomSizePrompt (to simplify)
-vi.mock("../../src/components/RoomSizePrompt", () => ({
+vi.mock("../../src/components/prompts/RoomSizePrompt", () => ({
     default: ({ onCancel }: any) => (
         <div data-testid="room-size-prompt">
             <button onClick={onCancel}>Cancel</button>

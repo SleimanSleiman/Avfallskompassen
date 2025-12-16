@@ -3,7 +3,7 @@
  * Displays per-apartment waste benchmarks with status badges and comparison to averages.
  */
 import type { CombinedRow } from "../../utils/types";
-import type { ContainerInRoom } from "../../../Types";
+import type { ContainerInRoom } from "../../../lib/Types";
 import SummaryStat from "../components/SummaryStat";
 import BenchmarkBar from "./components/BenchmarkBar";
 import { BENCHMARK_STATUS_STYLES, BENCHMARK_TITLE_STYLES } from "../../utils/constants"
