@@ -81,10 +81,10 @@ export default function ContainerDrag({
     };
 
     const WALL_INSET_BY_SIZE: Record<number, number> = {
-        660: 12,   // allow slight push toward wall
+        660: 12,
         370: -1,
         240: -4,
-        190: -4,   // pull clamp inward to prevent overflow
+        190: -4,
     };
 
     const WALL_INSET =
@@ -95,7 +95,6 @@ export default function ContainerDrag({
 
     return (
         <Group
-            /* 🔹 Group is TOP-LEFT aligned and NEVER rotates */
             x={container.x}
             y={container.y}
             draggable
@@ -104,8 +103,6 @@ export default function ContainerDrag({
                 handleSelectContainer(container.id);
                 setIsDraggingContainer(true);
             }}
-
-            /* --- Pure AABB clamping --- */
             dragBoundFunc={(pos) => {
                 const x = clamp(
                     pos.x,
@@ -124,9 +121,6 @@ export default function ContainerDrag({
 
                 return { x, y };
             }}
-
-
-            /* --- Wall snap (rotation only, no geometry distortion) --- */
             onDragMove={(e) => {
                 const node = e.target;
 
@@ -151,10 +145,7 @@ export default function ContainerDrag({
                     });
                 }
             }}
-
-            /* --- Finalize placement --- */
             onDragEnd={(e) => {
-                console.log(container.container.size);
                 const node = e.target;
 
                 let x = clamp(
@@ -185,7 +176,6 @@ export default function ContainerDrag({
                 setIsOverZone(false);
             }}
         >
-            {/* 🔹 Visual content rotates, not the Group */}
             <Group
                 x={container.width / 2}
                 y={container.height / 2}
