@@ -15,15 +15,32 @@ vi.mock("../../../../../../src/components/prompts/OtherObjectSizePrompt", () => 
     default: () => <div data-testid="other-object-size-prompt" />,
 }));
 
-
-vi.mock("./ContainerInfo", () => ({
+vi.mock(
+  "../../../../../../src/pages/PlanningTool/RoomCanvas/components/Toolbar/ContainerInfo",
+  () => ({
     default: ({ onClose }: any) => (
-        <div data-testid="container-info">
-            <button data-testid="close" onClick={onClose} />
-        </div>
+      <div data-testid="container-info">
+        <button data-testid="close" onClick={onClose}>
+          Close
+        </button>
+      </div>
     ),
-}));
+  })
+);
 
+const mockContainerInfo = {
+  id: 1,
+  container: {
+    name: "Container 1",
+    size: 240,
+    width: 100,
+    height: 100,
+    depth: 100,
+    cost: 1000,
+    emptyingFrequencyPerYear: 12,
+    imageFrontViewUrl: "/c1.png",
+  }
+};
 
 describe("Toolbar component", () => {
     const toggleContainerPanel = vi.fn();
@@ -118,7 +135,7 @@ describe("Toolbar component", () => {
     });
 
     it("renders selected container info and can close it", () => {
-        const { getByLabelText } = render(
+        const { getByTestId } = render(
             <Toolbar
                 roomName="Room A"
                 isContainerPanelOpen={false}
@@ -134,14 +151,14 @@ describe("Toolbar component", () => {
                 setError={setError}
                 undo={undo}
                 redo={redo}
-                selectedContainerInfo={{ id: 1 }}
+                selectedContainerInfo={mockContainerInfo} // <- updated shape
                 setSelectedContainerInfo={setSelectedContainerInfo}
                 generateThumbnail={generateThumbnail}
                 handleAddOtherObject={handleAddOtherObject}
             />
         );
 
-        const closeBtn = getByLabelText("Stäng information");
+        const closeBtn = getByTestId("close");
         fireEvent.click(closeBtn);
         expect(setSelectedContainerInfo).toHaveBeenCalledWith(null);
     });

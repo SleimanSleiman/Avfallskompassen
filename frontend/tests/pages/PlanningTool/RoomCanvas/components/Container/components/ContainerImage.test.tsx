@@ -5,6 +5,9 @@ import ContainerImage from "../../../../../../../src/pages/PlanningTool/RoomCanv
 
 // Mock react-konva components
 vi.mock("react-konva", () => ({
+    Group: ({ children }: any) => (
+        <div data-testid="group">{children}</div>
+    ),
     Rect: ({ width, height, fill, stroke, strokeWidth, cornerRadius }: any) => (
         <div
             data-testid="rect"
@@ -26,7 +29,11 @@ vi.mock("react-konva", () => ({
             data-perfectdrawenabled={perfectDrawEnabled}
         />
     ),
+    Text: ({ text }: any) => (
+        <div data-testid="konva-text">{text}</div>
+    ),
 }));
+
 
 // Mock use-image
 vi.mock("use-image", () => ({

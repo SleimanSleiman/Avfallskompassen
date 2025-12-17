@@ -25,8 +25,8 @@ describe("ContainerPanel component", () => {
     ];
 
     const availableContainers = [
-        { id: 1, name: "Container 1", serviceTypeId: 1, size: 10, width: 100, height: 100, depth: 100, cost: 1000, emptyingFrequencyPerYear: 12, imageFrontViewUrl: "/c1.png" },
-        { id: 2, name: "Container 2", serviceTypeId: 2, size: 20, width: 200, height: 200, depth: 200, cost: 2000, emptyingFrequencyPerYear: 6, imageFrontViewUrl: "/c2.png" },
+        { id: 1, name: "Container 1", serviceTypeId: 1, size: 190, width: 100, height: 100, depth: 100, cost: 1000, emptyingFrequencyPerYear: 12, imageFrontViewUrl: "/c1.png" },
+        { id: 2, name: "Container 2", serviceTypeId: 2, size: 240, width: 200, height: 200, depth: 200, cost: 2000, emptyingFrequencyPerYear: 6, imageFrontViewUrl: "/c2.png" },
         ];
 
     const selectedSize: { [key: number]: number | null } = {};
@@ -89,11 +89,17 @@ describe("ContainerPanel component", () => {
         expect(defaultProps.handleAddContainer).toHaveBeenCalledWith(availableContainers[0]);
     });
 
-    it("calls setSelectedContainerInfo when 'Info' clicked", () => {
+    it("calls handleAddContainer with lock-i-lock when 'Lägg till med lock-i-lock' clicked", () => {
         render(<ContainerPanel {...defaultProps} selectedType="Mat" />);
-        const infoBtn = screen.getByText("Info");
-        fireEvent.click(infoBtn);
-        expect(defaultProps.setSelectedContainerInfo).toHaveBeenCalledWith(availableContainers[0]);
+
+        const lockBtn = screen.getByText("Lägg till med lock-i-lock");
+        fireEvent.click(lockBtn);
+
+        expect(defaultProps.handleAddContainer).toHaveBeenCalledWith(
+            availableContainers[0],
+            undefined,
+            true
+        );
     });
 
     it("handles drag start and drag end", () => {
