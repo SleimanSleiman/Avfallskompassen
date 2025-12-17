@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { createProperty, deleteProperty, updateProperty,getMunicipalities, getLockTypes, getMyPropertiesWithWasteRooms } from '../lib/Property';
 import type { Municipality, Property, PropertyRequest } from '../lib/Property';
 import { currentUser } from '../lib/Auth';
-import RoomSizePrompt from '../components/RoomSizePrompt';
+import RoomSizePrompt from '../components/prompts/RoomSizePrompt';
 import ConfirmModal from '../components/ConfirmModal';
 import { deleteWasteRoom } from '../lib/WasteRoomRequest';
 import Message from '../components/ShowStatus';
@@ -69,21 +69,6 @@ export default function PropertyPage() {
             setError('Kunde inte ladda kommuner: ' + err.message);
         }
     }
-
-    const allowedMunicipalityNames = useMemo(() => (
-        new Set([
-            'bjuv',
-            'båstad',
-            'helsingborg',
-            'höganäs',
-            'åstorp',
-            'ängelholm',
-        ])
-    ), []);
-
-    const allowedMunicipalities = useMemo(() => (
-        municipalities.filter((m) => allowedMunicipalityNames.has((m.name || '').toLowerCase()))
-    ), [municipalities, allowedMunicipalityNames]);
 
     async function loadProperties() {
         try {
@@ -162,7 +147,7 @@ export default function PropertyPage() {
                     numberOfApartments: 1,
                     lockTypeId: 1,
                     accessPathLength: 0,
-                    municipalityId: allowedMunicipalities.length > 0 ? allowedMunicipalities[0].id : 0
+                    municipalityId : 0
                 });
                 setShowForm(false);
                 setEditingId(null);
@@ -409,12 +394,15 @@ async function onDeleteWasteRoom(propertyId: number, wasteRoomId: number) {
                   onChange={(e) => handleInputChange('municipalityId', parseInt(e.target.value))}
                 >
                   <option value={0}>Välj kommun</option>
-                  {formData.municipalityId !== 0 && !allowedMunicipalities.some(m => m.id === formData.municipalityId) && (
-                    <option value={formData.municipalityId}>{getMunicipalityName(formData.municipalityId)}</option>
-                  )}
-                  {allowedMunicipalities.map((m) => (
-                    <option key={m.id} value={m.id}>{m.name}</option>
-                  ))}
+                      {municipalities.map((m) => (
+                        <option
+                          key={m.id}
+                          value={m.id}
+                          disabled={m.name.toLowerCase() !== 'helsingborg'}
+                        >
+                          {m.name}
+                        </option>
+                      ))}
                 </select>
               </div>
               
@@ -586,6 +574,7 @@ async function onDeleteWasteRoom(propertyId: number, wasteRoomId: number) {
 
       {isCreateRoomOpen && (
         <RoomSizePrompt
+          existingNames={selectedProperty?.wasteRooms?.map(r => r.name) || []}
           onConfirm={(name: string, length: number, width: number) => {
             localStorage.setItem(
               'enviormentRoomData',

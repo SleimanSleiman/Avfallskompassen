@@ -34,14 +34,18 @@ export default function ContainerVolumeSummary({
             //Show average and deviation details
             description={
                 <div className="summary-grid">
-                    <div className="summary-row">
-                        <span>Snitt i gruppen</span>
-                        <span className="summary-row-label">{containerAverageVolume ?? "—"} L</span>
-                    </div>
-                    <div className="summary-row">
-                        <span>Avvikelse</span>
-                        <span className="summary-row-label">{containerGapSummary}</span>
-                    </div>
+                    {containerAverageVolume !== null && containerAverageVolume > 0 && (
+                        <>
+                            <div className="summary-row">
+                                <span>Snitt i gruppen</span>
+                                <span className="summary-row-label">{containerAverageVolume} L</span>
+                            </div>
+                            <div className="summary-row">
+                                <span>Avvikelse</span>
+                                <span className="summary-row-label">{containerGapSummary}</span>
+                            </div>
+                        </>
+                    )}
                 </div>
             }
         />

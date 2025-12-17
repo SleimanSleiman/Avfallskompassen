@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { createWasteRoom, updateWasteRoom, type ContainerPositionRequest, type DoorRequest, type RoomRequest } from "../../../lib/WasteRoomRequest";
-import type { ContainerInRoom, Door, Room, OtherObjectInRoom } from "../Types";
-import { SCALE } from "../Constants";
+import type { ContainerInRoom, Door, Room, OtherObjectInRoom } from "../lib/Types";
+import { SCALE } from "../lib/Constants";
 
 export function useSaveRoom() {
     const [isSaving, setIsSaving] = useState(false);

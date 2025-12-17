@@ -1,6 +1,6 @@
 import { renderHook, act } from "@testing-library/react";
 import { useDoors } from "../../../../src/pages/PlanningTool/hooks/useDoors";
-import { SCALE } from "../../../../src/pages/PlanningTool/Constants";
+import { SCALE } from "../../../../src/pages/PlanningTool/lib/Constants";
 
 //Mock room data
 const mockRoom = {

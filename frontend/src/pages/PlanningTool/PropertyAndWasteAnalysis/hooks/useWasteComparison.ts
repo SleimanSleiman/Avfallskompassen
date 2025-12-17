@@ -8,7 +8,7 @@ import { normalizeWasteTypeKey } from "../utils/utils";
 import { WASTE_BENCHMARKS } from "../utils/constants";
 import type { PropertyComparison } from "../../../../lib/Comparison";
 import type { Property } from "../../../../lib/Property";
-import type { ContainerInRoom } from "../../Types";
+import type { ContainerInRoom } from "../../lib/Types";
 
 export function useWasteComparison({
     comparisonData,

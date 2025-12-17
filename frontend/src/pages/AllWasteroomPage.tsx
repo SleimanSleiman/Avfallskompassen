@@ -3,7 +3,7 @@ import { getWasteRoomsByPropertyId } from "../lib/WasteRoom";
 import type { WasteRoom } from "../lib/WasteRoom";
 import { deleteWasteRoom } from "../lib/WasteRoomRequest";
 import { useEffect, useState } from "react";
-import RoomSizePrompt from "../components/RoomSizePrompt";
+import RoomSizePrompt from "../components/prompts/RoomSizePrompt";
 import greybox from "../assets/greybox.png";
 import Message from "../components/ShowStatus";
 import ConfirmModal from "../components/ConfirmModal";

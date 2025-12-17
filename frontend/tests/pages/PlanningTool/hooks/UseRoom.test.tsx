@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import { renderHook, act } from "@testing-library/react";
 import { useRoom } from "../../../../src/pages/PlanningTool/hooks/UseRoom";
-import { STAGE_WIDTH, STAGE_HEIGHT, SCALE, MIN_WIDTH, MIN_HEIGHT, ROOM_HORIZONTAL_OFFSET, ROOM_VERTICAL_OFFSET } from "../../../../src/pages/PlanningTool/Constants";
+import { STAGE_WIDTH, STAGE_HEIGHT, SCALE, MIN_WIDTH, MIN_HEIGHT, ROOM_HORIZONTAL_OFFSET, ROOM_VERTICAL_OFFSET } from "../../../../src/pages/PlanningTool/lib/Constants";
 
 describe("useRoom", () => {
     const defaultRoomWidthMeters = 5;

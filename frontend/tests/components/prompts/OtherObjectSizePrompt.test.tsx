@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
 import { render, fireEvent, screen } from "@testing-library/react";
-import OtherObjectSizePrompt from "../../src/components/OtherObjectSizePrompt";
+import OtherObjectSizePrompt from "../../../src/components/prompts/OtherObjectSizePrompt";
 
 describe("OtherObjectSizePrompt", () => {
     const onConfirm = vi.fn();
@@ -13,7 +13,7 @@ describe("OtherObjectSizePrompt", () => {
     it("renders prompt with inputs and buttons", () => {
         render(<OtherObjectSizePrompt onConfirm={onConfirm} onCancel={onCancel} />);
 
-        expect(screen.getByPlaceholderText(/T.ex. skåp, brandsläckare/)).toBeTruthy();
+        expect(screen.getByPlaceholderText(/T.ex. skåp/)).toBeTruthy();
         expect(screen.getByPlaceholderText(/Bredd/)).toBeTruthy();
         expect(screen.getByPlaceholderText(/Djup/)).toBeTruthy();
         expect(screen.getByText("Avbryt")).toBeTruthy();

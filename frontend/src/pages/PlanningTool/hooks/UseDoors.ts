@@ -3,8 +3,8 @@
  * Handles adding, removing, dragging, rotating and selecting doors.
  */
 import { useState, useRef, useEffect } from "react";
-import type { Door, Room } from "../Types";
-import { SCALE, clamp } from "../Constants";
+import type { Door, Room, Zone } from "../lib/Types";
+import { SCALE, clamp } from "../lib/Constants";
 
 export function useDoors(
     room: Room | null,
@@ -350,7 +350,7 @@ export function useDoors(
     };
 
     /* ──────────────── Door Zones & Collision ──────────────── */
-    const getDoorZones = () => {
+    const getDoorZones = (): Zone[] => {
         if (!doors || doors.length === 0) return [];
         return doors.map(door => {
             const doorSize = door.width / SCALE;

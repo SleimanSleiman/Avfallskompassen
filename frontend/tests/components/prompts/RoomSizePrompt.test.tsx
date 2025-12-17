@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach} from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import "@testing-library/jest-dom";
-import RoomSizePrompt from "../../src/components/RoomSizePrompt";
+import RoomSizePrompt from "../../../src/components/prompts/RoomSizePrompt";
 
 describe("RoomSizePrompt", () => {
   let onConfirm: ReturnType<typeof vi.fn>;

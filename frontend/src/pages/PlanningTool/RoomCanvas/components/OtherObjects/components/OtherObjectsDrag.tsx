@@ -5,7 +5,7 @@
  */
 import { Group } from "react-konva";
 import { useState } from "react";
-import { clamp, isOverlapping } from "../../../../Constants";
+import { clamp, isOverlapping } from "../../../../lib/Constants";
 
 export default function OtherObjectDrag({
     object,
@@ -51,8 +51,20 @@ export default function OtherObjectDrag({
             offsetY={object.height / 2}
             rotation={object.rotation}
             draggable
+            // Cursor style changes
+            onMouseEnter={(e) => {
+                const stage = e.target.getStage();
+                if (stage) stage.container().style.cursor = "grab";
+            }}
+            onMouseLeave={(e) => {
+                const stage = e.target.getStage();
+                if (stage) stage.container().style.cursor = "default";
+            }}
             onClick={() => handleSelectOtherObject(object.id)}
-            onDragStart={() => {
+            onDragStart={(e) => {
+                const stage = e.target.getStage();
+                if (stage) stage.container().style.cursor = "grabbing";
+
                 setIsDraggingOtherObject(true);
                 handleSelectOtherObject(object.id);
             }}
@@ -78,6 +90,9 @@ export default function OtherObjectDrag({
                 setIsOverZone(checkZones(newX, newY, object.rotation));
             }}
             onDragEnd={(e) => {
+                const stage = e.target.getStage();
+                if (stage) stage.container().style.cursor = "grab";
+
                 const newX = e.target.x() - object.width / 2;
                 const newY = e.target.y() - object.height / 2;
 

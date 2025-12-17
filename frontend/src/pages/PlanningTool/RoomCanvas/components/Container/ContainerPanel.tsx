@@ -12,7 +12,7 @@ import { GiOpenedFoodCan, GiSwapBag } from "react-icons/gi";
 import { BsFillBoxSeamFill } from "react-icons/bs";
 import { FaJugDetergent } from "react-icons/fa6";
 import type { ContainerDTO } from "../../../../../lib/Container";
-import { DRAG_DATA_FORMAT, LOCK_I_LOCK_COMPATIBLE_SIZES } from "../../../Constants";
+import { DRAG_DATA_FORMAT, LOCK_I_LOCK_COMPATIBLE_SIZES } from "../../../lib/Constants";
 import LoadingBar from "../../../../../components/LoadingBar";
 import InfoTooltip from "../../../components/InfoTooltip";
 import './css/roomCanvasPanel.css'

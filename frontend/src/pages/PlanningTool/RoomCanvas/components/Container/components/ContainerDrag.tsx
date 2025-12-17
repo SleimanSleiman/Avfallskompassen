@@ -5,7 +5,7 @@
  */
 
 import { Group } from "react-konva";
-import { clamp, isOverlapping } from "../../../../Constants"
+import { clamp, isOverlapping } from "../../../../lib/Constants"
 
 export default function ContainerDrag({
     container,
@@ -54,8 +54,22 @@ export default function ContainerDrag({
             offsetY={container.height / 2}
             rotation={container.rotation}
             draggable
+            //Change cursor styles on hover/drag
+            onMouseEnter={(e) => {
+                const stage = e.target.getStage();
+                stage.container().style.cursor = "grab";
+            }}
+            onMouseLeave={(e) => {
+                const stage = e.target.getStage();
+                stage.container().style.cursor = "default";
+            }}
+
             onClick={() => handleSelectContainer(container.id)}
-            onDragStart={() => {
+            onDragStart={(e) => {
+                //Closed hand while dragging
+                const stage = e.target.getStage();
+                stage.container().style.cursor = "grabbing";
+
                 handleSelectContainer(container.id);
                 setIsDraggingContainer(true);
             }}
@@ -74,6 +88,10 @@ export default function ContainerDrag({
                 return { x: newX, y: newY };
             }}
             onDragEnd={(e) => {
+                //Open hand on drag end
+                const stage = e.target.getStage();
+                stage.container().style.cursor = "grab";
+
                 //Final intended position after drag
                 const newX = e.target.x() - container.width / 2;
                 const newY = e.target.y() - container.height / 2;

@@ -3,8 +3,8 @@
  * Handles adding, removing, dragging, rotating and selecting other objects.
  */
 import { useState } from "react";
-import type { OtherObjectInRoom, Room } from "../Types";
-import { clamp, isOverlapping, cmToPixels, SCALE } from "../Constants";
+import type { OtherObjectInRoom, Room, Zone } from "../lib/Types";
+import { clamp, isOverlapping, cmToPixels, SCALE } from "../lib/Constants";
 
 export function useOtherObjects(
     room: Room,
@@ -35,7 +35,7 @@ export function useOtherObjects(
     }
 
     //Build zones for existing other objects, excluding a specific ID if provided
-    function buildOtherObjectZones(objects: OtherObjectInRoom[], excludeId?: number) {
+    function buildOtherObjectZones(objects: OtherObjectInRoom[], excludeId?: number): Zone[] {
         const buffer = 0.1 / SCALE; // 10 cm buffer
 
         return objects
@@ -62,10 +62,10 @@ export function useOtherObjects(
 
     //Validate placement of a new other object
     function validateOtherObjectPlacement(
-        newRect: { x: number; y: number; width: number; height: number },
-        doorZones: { x: number; y: number; width: number; height: number }[],
-        objectZones: { x: number; y: number; width: number; height: number }[],
-        containerZones: { x: number; y: number; width: number; height: number }[],
+        newRect: Zone,
+        doorZones: Zone[] = [],
+        containerZones: Zone[] = [],
+        objectZones: Zone[] = [],
     ) {
         const overlapsDoor = doorZones.some(zone => isOverlapping(newRect, zone));
         const overlapsObject = objectZones.some(zone => isOverlapping(newRect, zone));
