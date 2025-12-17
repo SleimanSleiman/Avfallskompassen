@@ -32,11 +32,7 @@ export default function ContainerDrag({
 }) {
     const WALL_INSET = getWallInsetForContainer(container);
     if (typeof getWallInsetForContainer !== "function") {
-    console.error("ContainerDrag props:", {
-        getWallInsetForContainer,
-        getSnappedRotationForContainer,
-        container,
-    });
+
     throw new Error("ContainerDrag missing getWallInsetForContainer");
 }
 
