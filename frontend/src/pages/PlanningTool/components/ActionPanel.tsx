@@ -4,7 +4,7 @@
  */
 import InfoTooltip from "./InfoTooltip";
 import type { ContainerInRoom as Container, Door, OtherObjectInRoom } from "../lib/Types";
-import { LOCK_I_LOCK_COMPATIBLE_SIZES } from "./Constants"
+import { LOCK_I_LOCK_COMPATIBLE_SIZES } from "../lib/Constants"
 import { RotateCcw, Trash2, Info, Vault } from "lucide-react";
 import { useRef, useState, useEffect } from 'react';
 

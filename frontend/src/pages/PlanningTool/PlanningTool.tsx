@@ -405,9 +405,10 @@ const hasUnsavedChangesRef = useRef(false);
 
     //Open ConfirmModal for unsaved changes during logout or navigation in site
     useEffect(() => {
-      hasUnsavedChangesRef.current = hasUnsavedChanges();
-      setHasUnsavedChanges(hasUnsavedChangesRef);
-    }, [room, doors, containersInRoom, otherObjects, savedRoomState]);
+      const hasChanges = hasUnsavedChanges();
+      hasUnsavedChangesRef.current = hasChanges;
+      setHasUnsavedChanges(hasChanges);
+    }, [hasUnsavedChanges]);
 
     //Opens browser prompt for unsaved changes during exit or reload of page
     useEffect(() => {

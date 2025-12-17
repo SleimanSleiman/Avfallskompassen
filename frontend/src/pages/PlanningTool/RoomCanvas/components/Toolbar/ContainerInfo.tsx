@@ -5,8 +5,8 @@
 
 import React, { useRef, useState, useEffect } from "react";
 import { X } from "lucide-react";
-import type { ContainerInRoom } from "../../../Types";
-import { LOCK_I_LOCK_COMPATIBLE_SIZES, getContainerCost } from "../../../Constants";
+import type { ContainerInRoom } from "../../../lib/Types";
+import { LOCK_I_LOCK_COMPATIBLE_SIZES, getContainerCost } from "../../../lib/Constants";
 import './css/roomCanvasToolbar.css'
 
 type ContainerInfoProps = {

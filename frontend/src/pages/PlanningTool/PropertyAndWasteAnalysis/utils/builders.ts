@@ -5,7 +5,7 @@
 import type { DesignStats, DesignTypeStats, CombinedRow, BenchmarkDefinition } from "./types";
 import type { ContainerInRoom } from "../../lib/Types";
 import { normalizeWasteTypeKey, calculatePercentageDifference, computePerApartmentPerWeek, getTrend } from "./utils";
-import { getContainerCost } from "../../Constants";
+import { getContainerCost } from "../../lib/Constants";
 
 //Build design stats from containers in the room
 export function buildDesignStats(containersInRoom: ContainerInRoom[]): DesignStats {
