@@ -1,15 +1,11 @@
 package com.avfallskompassen.controller;
 
-import com.avfallskompassen.dto.RoomPdfDTO;
 import com.avfallskompassen.dto.WasteRoomDTO;
 import com.avfallskompassen.dto.request.WasteRoomRequest;
-import com.avfallskompassen.services.RoomPdfService;
 import com.avfallskompassen.services.WasteRoomService;
 import jakarta.validation.Valid;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -23,11 +19,9 @@ import java.util.List;
 @CrossOrigin(origins = "*")
 public class WasteRoomController {
     private final WasteRoomService wasteRoomService;
-    private final RoomPdfService roomPdfService;
 
-    public WasteRoomController(WasteRoomService wasteRoomService, RoomPdfService roomPdfService) {
+    public WasteRoomController(WasteRoomService wasteRoomService) {
         this.wasteRoomService = wasteRoomService;
-        this.roomPdfService = roomPdfService;
     }
 
     /**
@@ -88,76 +82,4 @@ public class WasteRoomController {
         List<WasteRoomDTO> rooms = wasteRoomService.getWasteRoomsByPropertyId(propertyId);
         return ResponseEntity.ok(rooms);
     }
-
-    /**
-     * Handles requests for uploading a PDF connected to a waste room
-     * @Author Christian Storck
-     * @param file Multipart file containing the PDF document
-     * @param roomId Id to the waste room the PDF should be connected to
-     * @return A status code with either an error message or a DTO containing information
-     * about the uploaded PDF
-     */
-    @PostMapping("/upload-pdf")
-    public ResponseEntity<RoomPdfDTO> uploadPdf(@RequestParam("file")MultipartFile file,
-                                                 @RequestParam("roomId") Long roomId) {
-        if (file.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Uploaded file is empty");
-        }
-        try {
-            RoomPdfDTO response = roomPdfService.uploadPdf(file, roomId);
-            return ResponseEntity.status(HttpStatus.CREATED).body(response);
-        } catch (IllegalArgumentException e) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
-        } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to upload PDF", e);
-        }
-    }
-
-    /**
-     * Handles requests for fetching all PDFs connected to a certain waste room
-     * @Author Christian Storck
-     * @param roomId Id to the waste room
-     * @return A status code with either an error message or a list containing DTOs
-     * representing the PDFs connected to the room
-     */
-    @GetMapping("/{roomId}/pdfs")
-    public ResponseEntity<List<RoomPdfDTO>> getRoomPdfs(@PathVariable Long roomId) {
-        try {
-            List<RoomPdfDTO> pdfs = roomPdfService.getPdfsByRoomId(roomId);
-            return ResponseEntity.ok(pdfs);
-        } catch (IllegalArgumentException e) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
-        }
-    }
-
-    /**
-     * Handles requests for downloading a specific PDF connected to a waste room
-     * @Author Christian Storck
-     * @param pdfId Id to the PDF that should be downloaded
-     * @return A status code with the requested PDF file or an error message if not found
-     */
-    @GetMapping("/wasterooms/download/{id}")
-    public ResponseEntity<byte[]> downloadPdf(@PathVariable Long pdfId) {
-        try {
-            byte[] pdfData = roomPdfService.downloadPdf(pdfId);
-
-            if (pdfData == null || pdfData.length == 0) {
-                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "PDF not found with id: " + pdfId);
-            }
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_PDF);
-            headers.setContentDisposition(ContentDisposition.attachment()
-                    .filename("room-" + pdfId + ".pdf")
-                    .build());
-
-            return new ResponseEntity<>(pdfData, headers, HttpStatus.OK);
-
-        } catch (IllegalArgumentException e) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
-        } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error while downloading PDF", e);
-        }
-    }
-
-
 }

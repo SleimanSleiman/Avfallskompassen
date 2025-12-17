@@ -8,7 +8,6 @@ import com.avfallskompassen.dto.request.WasteRoomRequest;
 import com.avfallskompassen.exception.BadRequestException;
 import com.avfallskompassen.exception.InternalServerException;
 import com.avfallskompassen.exception.ResourceNotFoundException;
-import com.avfallskompassen.services.RoomPdfService;
 import com.avfallskompassen.services.WasteRoomService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,9 +37,6 @@ class WasteRoomControllerTest {
 
     @MockBean
     private WasteRoomService wasteRoomService;
-
-    @MockBean
-    private RoomPdfService roomPdfService;
 
     @Test
     void createWasteRoom_ReturnOK() throws Exception{
@@ -296,17 +292,5 @@ class WasteRoomControllerTest {
         mockMvc.perform(get("/api/properties/{propertyId}/wasterooms", 99L))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.error").value("No waste rooms found"));
-    }
-
-    @Test
-    void uploadPdf() {
-    }
-
-    @Test
-    void getRoomPdfs() {
-    }
-
-    @Test
-    void downloadPfd() {
     }
 }

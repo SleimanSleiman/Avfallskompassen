@@ -5,7 +5,6 @@ import com.avfallskompassen.dto.PropertyContainerDTO;
 import com.avfallskompassen.model.*;
 import com.avfallskompassen.repository.ContainerPlanRepository;
 import com.avfallskompassen.repository.ContainerPositionRepository;
-import com.avfallskompassen.services.ContainerService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
