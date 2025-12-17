@@ -21,6 +21,8 @@ type ContainersLayerProps = {
         rect: { x: number; y: number; width: number; height: number },
         room: Room
     ) => boolean;
+    getWallInsetForContainer: (c: ContainerInRoom) => number;
+    getSnappedRotationForContainer: (c: ContainerInRoom) => number;
 };
 
 export default function ContainersLayer({
@@ -34,6 +36,8 @@ export default function ContainersLayer({
     getContainerZones,
     setIsDraggingContainer,
     isContainerInsideRoom,
+    getWallInsetForContainer,
+    getSnappedRotationForContainer
 }: ContainersLayerProps) {
     return (
         <>
@@ -50,6 +54,8 @@ export default function ContainersLayer({
                     handleSelectContainer={handleSelectContainer}
                     setIsDraggingContainer={setIsDraggingContainer}
                     isContainerInsideRoom={isContainerInsideRoom}
+                    getWallInsetForContainer={getWallInsetForContainer}
+                    getSnappedRotationForContainer={getSnappedRotationForContainer}
                 />
             ))}
         </>

@@ -342,6 +342,48 @@ export function useContainers(
         }
     }, [doorZones]);
 
+    /* ──────────────── Wall helpers (used by ContainerDrag) ──────────────── */
+
+    // Tune wall inset by container size (in pixels)
+    const WALL_INSET_BY_SIZE: Record<number, number> = {
+        660: 12,
+        370: -1,
+        240: -4,
+        190: -4,
+    };
+
+    // Get wall inset for a specific container
+    const getWallInsetForContainer = (c: ContainerInRoom): number => {
+        return WALL_INSET_BY_SIZE[c.container?.size] ?? 0;
+    };
+
+    // Snap container rotation when close to a wall
+    const getSnappedRotationForContainer = (c: ContainerInRoom): number => {
+        const SNAP_DISTANCE = 20;
+
+        const leftDist = Math.abs(c.x - room.x);
+        const rightDist = Math.abs(room.x + room.width - (c.x + c.width));
+        const topDist = Math.abs(c.y - room.y);
+        const bottomDist = Math.abs(room.y + room.height - (c.y + c.height));
+
+        const min = Math.min(leftDist, rightDist, topDist, bottomDist);
+
+        if (min > SNAP_DISTANCE) return c.rotation ?? 0;
+
+        switch (min) {
+            case topDist:
+                return 0;
+            case rightDist:
+                return 90;
+            case bottomDist:
+                return 180;
+            case leftDist:
+                return 270;
+            default:
+                return c.rotation ?? 0;
+        }
+    };
+
     /* ──────────────── Return ──────────────── */
     return {
         containersInRoom,
@@ -372,6 +414,9 @@ export function useContainers(
         handleShowContainerInfo,
 
         getContainerZones: (excludeId?: number) => buildContainerZones(containersInRoom, excludeId),
+
+        getWallInsetForContainer,
+        getSnappedRotationForContainer,
 
         undo,
         redo,

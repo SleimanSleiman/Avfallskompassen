@@ -151,6 +151,8 @@ export default function PlanningTool({ isAdminMode = false, property }: Planning
         redo,
         getContainerZones,
         isContainerInsideRoom,
+        getWallInsetForContainer,
+        getSnappedRotationForContainer,
     } = useContainers(room, setSelectedContainerId, setSelectedDoorId, setSelectedOtherObjectId, getDoorZones(), getOtherObjectZones(),setError,setMsg, isDoorDragging);
 
     // Track the saved state for comparison
@@ -618,6 +620,9 @@ const hasUnsavedChangesRef = useRef(false);
                         hasUnsavedChanges={hasUnsavedChanges}
                         onClose={handleCloseRoom}
                         existingNames={loadedProperty?.wasteRooms?.map(r => r.name || "") || []}
+
+                        getWallInsetForContainer={getWallInsetForContainer}
+                        getSnappedRotationForContainer={getSnappedRotationForContainer}
                     />
 
                     {/* ActionPanel for selected container or door */}
