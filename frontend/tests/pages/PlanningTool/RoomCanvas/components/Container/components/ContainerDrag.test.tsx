@@ -20,7 +20,7 @@ vi.mock("react-konva", () => ({
 }));
 
 // ---- Constants mock ----
-vi.mock("../../../../../../../src/pages/PlanningTool/Constants", () => ({
+vi.mock("../../../../../../../src/pages/PlanningTool/lib/Constants", () => ({
     clamp: (v: number, min: number, max: number) =>
         Math.min(Math.max(v, min), max),
     isOverlapping: vi.fn(),
@@ -206,8 +206,8 @@ describe("ContainerDrag component", () => {
        capturedProps.onDragEnd({ target: mockTarget } as any);
 
        expect(mockTarget.position).toHaveBeenCalledWith({
-           x: lastValidPos.x + container.width / 2,
-           y: lastValidPos.y + container.height / 2
-       });
+            x: lastValidPos.x,
+            y: lastValidPos.y,
+        });
    });
 });

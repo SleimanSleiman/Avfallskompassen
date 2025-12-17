@@ -9,7 +9,7 @@
  */
 
 import { Group } from "react-konva";
-import { clamp, isOverlapping } from "../../../../Constants";
+import { clamp, isOverlapping } from "../../../../lib/Constants"
 
 const WALL_SNAP_DISTANCE = 20; // px
 
