@@ -7,7 +7,7 @@
 
 import { Rect, Image as KonvaImage } from "react-konva";
 import useImage from "use-image";
-import type { ContainerInRoom } from "../../../Types";
+import type { ContainerInRoom } from "../../../lib/Types";
 
 export default function ContainerImage({
     container,

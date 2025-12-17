@@ -22,8 +22,8 @@ import OtherObjectMeasurementLayer from "./components/OtherObjects/OtherObjectsM
 import Toolbar from "./components/Toolbar/Toolbar";
 import useContainerPanel from "./hooks/useContainerPanel";
 import useContainerZones from "./hooks/useContainerZones";
-import { STAGE_WIDTH, STAGE_HEIGHT, GRID_SIZE_PX } from "../Constants";
-import type { Room, ContainerInRoom, Door, OtherObjectInRoom } from "../Types";
+import { STAGE_WIDTH, STAGE_HEIGHT, GRID_SIZE_PX } from "../lib/Constants";
+import type { Room, ContainerInRoom, Door, OtherObjectInRoom } from "../lib/Types";
 import type { ContainerDTO } from "../../../lib/Container";
 import Message from "../../../components/ShowStatus";
 import './css/roomCanvasStage.css'
@@ -99,6 +99,7 @@ type RoomCanvasProps = {
     isAdminMode?: boolean;
     hasUnsavedChanges?: () => boolean;
     onClose?: () => void;
+    existingNames?: string[];
 };
 
 export default function RoomCanvas({
@@ -170,6 +171,7 @@ export default function RoomCanvas({
     isAdminMode = false,
     hasUnsavedChanges = () => false,
     onClose,
+    existingNames = [],
 }: RoomCanvasProps) {
     const [isDraggingContainer, setIsDraggingContainer] = useState(false);
     const [isDraggingOtherObject, setIsDraggingOtherObject] = useState(false);
@@ -294,6 +296,7 @@ export default function RoomCanvas({
                         setMsg={setMsg}
                         setError={setError}
                         setIsSaving={setIsSaving}
+                        isSaving={isSaving}
                         undo={undo}
                         redo={redo}
                         selectedContainerInfo={selectedContainerInfo}
@@ -308,6 +311,7 @@ export default function RoomCanvas({
                         closePanels={closePanels}
                         hasUnsavedChanges={hasUnsavedChanges}
                         onClose={onClose}
+                        existingNames={existingNames}
                     />
 
                     {/* Konva Stage */}

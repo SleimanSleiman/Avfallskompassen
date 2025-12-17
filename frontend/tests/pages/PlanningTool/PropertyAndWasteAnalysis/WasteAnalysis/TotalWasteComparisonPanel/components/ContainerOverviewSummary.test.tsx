@@ -69,4 +69,20 @@ describe("ContainerOverviewSummary", () => {
             )
         ).toBeDefined();
     });
+
+    it("hides comparison frequency when it is 0", () => {
+        render(
+            <ContainerOverviewSummary
+                designHasContainers={true}
+                containerCount={4}
+                typeMapSize={3}
+                averageFrequencyAll={12.5}
+                comparisonAverageFrequency={0}
+                frequencyDifference={null}
+                dominantCostRow={null}
+            />
+        );
+
+        expect(screen.queryByText(/\(snitt:/)).toBeNull();
+    });
 });

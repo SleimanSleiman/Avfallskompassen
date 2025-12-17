@@ -1,10 +1,10 @@
 import { render, screen, fireEvent } from "@testing-library/react";
 import React from "react";
-import ActionPanel from "../../../src/pages/PlanningTool/ActionPanel";
+import ActionPanel from "../../../../src/pages/PlanningTool/components/ActionPanel";
 import { vi, describe, it, beforeEach, expect } from "vitest";
 
 // ─────────────── Mock Tooltip ───────────────
-vi.mock("../../../src/pages/PlanningTool/components/InfoTooltip", () => ({
+vi.mock("../../../../src/pages/PlanningTool/components/InfoTooltip", () => ({
     default: ({ text }: { text: string }) => <div data-testid="mock-tooltip">{text}</div>,
 }));
 

@@ -1,9 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, fireEvent } from "@testing-library/react";
 import RoomShape from "../../../../../../src/pages/PlanningTool/RoomCanvas/components/Room/RoomShape";
-import type { Room } from "../../../../../../src/pages/PlanningTool/Types";
+import type { Room } from "../../../../../../src/pages/PlanningTool/lib/Types";
 
-vi.mock("../../../../../../src/pages/PlanningTool/Constants", () => ({
+vi.mock("../../../../../../src/pages/PlanningTool/lib/Constants", () => ({
     SCALE: 0.01,
     STAGE_WIDTH: 800,
     STAGE_HEIGHT: 600,

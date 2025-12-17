@@ -1,6 +1,7 @@
 package com.avfallskompassen.services.impl;
 
 import com.avfallskompassen.dto.CollectionFeeDTO;
+import com.avfallskompassen.dto.CollectionFeeAdminDTO;
 import com.avfallskompassen.model.CollectionFee;
 import com.avfallskompassen.repository.CollectionFeeRepository;
 import com.avfallskompassen.services.CollectionFeeService;
@@ -9,6 +10,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Service class that serves DTO's to the controller layer. Handles the CollectionFee calculations.
@@ -71,5 +74,34 @@ public class CollectionFeeServiceImpl implements CollectionFeeService {
         double dragPathLength = property.getAccessPathLength();
 
         return findCollectionFeeByMunicipalityId(municipalityId, dragPathLength);
+    }
+
+    /**
+     * Updates the cost of a collection fee.
+     * @param id The ID of the collection fee to update
+     * @param cost The new cost value
+     * @return Updated CollectionFeeDTO
+     */
+    public CollectionFeeDTO updateCollectionFeeCost(Long id, BigDecimal cost) {
+        CollectionFee collectionFee = collectionFeeRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Collection fee not found with ID: " + id));
+        collectionFee.setCost(cost);
+        collectionFee = collectionFeeRepository.save(collectionFee);
+        return new CollectionFeeDTO(collectionFee.getId(), collectionFee.getCost());
+    }
+
+    /**
+     * Gets all collection fees with municipality information for admin management.
+     * @return List of CollectionFeeAdminDTO
+     */
+    public List<CollectionFeeAdminDTO> getAllCollectionFees() {
+        return collectionFeeRepository.findAllWithMunicipality()
+                .stream()
+                .map(fee -> new CollectionFeeAdminDTO(
+                        fee.getId(),
+                        fee.getMunicipality() != null ? fee.getMunicipality().getName() : "Unknown",
+                        fee.getCost()
+                ))
+                .collect(Collectors.toList());
     }
 }

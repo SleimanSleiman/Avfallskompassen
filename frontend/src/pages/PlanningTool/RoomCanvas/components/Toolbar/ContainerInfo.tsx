@@ -5,7 +5,7 @@
 
 import React, { useRef, useState, useEffect } from "react";
 import { X } from "lucide-react";
-import type { ContainerDTO } from "../../../../../lib/Container";
+import type { ContainerDTO } from "../../../../../lib/lib/Container";
 import './css/roomCanvasToolbar.css'
 
 type ContainerInfoProps = {

@@ -3,8 +3,8 @@ import type { Property } from '../../../lib/Property';
 import type { WasteRoom } from '../../../lib/WasteRoom';
 import { getMyPropertiesWithWasteRooms } from '../../../lib/Property';
 import { MapPin, Home, Users, ChevronDown, Plus, LayoutGrid } from 'lucide-react';
-import type { ContainerInRoom, Door } from '../Types';
-import { mmToPixels, SCALE } from '../Constants';
+import type { ContainerInRoom, Door } from '../lib/Types';
+import { mmToPixels, SCALE } from '../lib/Constants';
 
 type WasteRoomContainer = NonNullable<WasteRoom['containers']>[number];
 

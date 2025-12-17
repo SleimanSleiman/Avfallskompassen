@@ -2,9 +2,8 @@ import { render } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import "@testing-library/jest-dom";
 import ContainerDrag from "../../../../../../../src/pages/PlanningTool/RoomCanvas/components/Container/components/ContainerDrag";
-import { isOverlapping } from "../../../../../../../src/pages/PlanningTool/Constants";
+import { clamp, isOverlapping } from "../../../../../../../src/pages/PlanningTool/lib/Constants";
 
-// ---- react-konva mock ----
 let capturedProps: any;
 
 vi.mock("react-konva", () => ({
@@ -106,7 +105,16 @@ describe("ContainerDrag component", () => {
         capturedProps.onClick();
         expect(handleSelectContainer).toHaveBeenCalledWith(container.id);
 
-        capturedProps.onDragStart();
+        // Mock event with target.getStage()
+        const mockEvent = {
+            target: {
+                getStage: () => ({
+                    container: () => ({ style: { cursor: "" } })
+                })
+            }
+        };
+
+        capturedProps.onDragStart(mockEvent as any);
         expect(handleSelectContainer).toHaveBeenCalledWith(container.id);
         expect(setIsDraggingContainer).toHaveBeenCalledWith(true);
     });
@@ -140,6 +148,9 @@ describe("ContainerDrag component", () => {
             x: () => desiredPos.x + container.width / 2,
             y: () => desiredPos.y + container.height / 2,
             position: vi.fn(),
+            getStage: () => ({
+                container: () => ({ style: { cursor: "" } })
+            })
         };
 
         const expectedPos = {
@@ -158,4 +169,45 @@ describe("ContainerDrag component", () => {
         expect(setIsOverZone).toHaveBeenCalledWith(false);
         expect(setIsDraggingContainer).toHaveBeenCalledWith(false);
     });
+
+   it("snaps back to last valid position if overlapping a zone on drag end", () => {
+       (isOverlapping as any).mockImplementation(() => true);
+
+       getContainerZones.mockReturnValue([{ x: 0, y: 0, width: 1, height: 1 }]);
+       render(
+           <ContainerDrag
+               container={container}
+               selected={false}
+               room={room}
+               doorZones={doorZones}
+               otherObjectZones={otherObjectZones}
+               getContainerZones={getContainerZones}
+               setIsDraggingContainer={setIsDraggingContainer}
+               handleDragContainer={handleDragContainer}
+               handleSelectContainer={handleSelectContainer}
+               lastValidPos={lastValidPos}
+               setLastValidPos={setLastValidPos}
+               isOverZone={false}
+               setIsOverZone={setIsOverZone}
+           >
+               {() => <div />}
+           </ContainerDrag>
+       );
+
+       const mockTarget = {
+           x: () => 200,
+           y: () => 220,
+           position: vi.fn(),
+           getStage: () => ({
+               container: () => ({ style: { cursor: "" } })
+           })
+       };
+
+       capturedProps.onDragEnd({ target: mockTarget } as any);
+
+       expect(mockTarget.position).toHaveBeenCalledWith({
+           x: lastValidPos.x + container.width / 2,
+           y: lastValidPos.y + container.height / 2
+       });
+   });
 });

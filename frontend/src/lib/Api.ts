@@ -60,5 +60,8 @@ export const post = <T>(url: string, body?: unknown, opts?: { headers?: Record<s
 export const get = <T>(url: string, opts?: { headers?: Record<string, string> }) => 
   api<T>(url, { method: 'GET', headers: opts?.headers });
 
+export const put = <T>(url: string, body?: unknown, opts?: { headers?: Record<string, string> }) => 
+  api<T>(url, { method: 'PUT', body, headers: opts?.headers });
+
 export const deleteRequest = <T>(url: string, opts?: { headers?: Record<string, string> }) => 
   api<T>(url, { method: 'DELETE', headers: opts?.headers });

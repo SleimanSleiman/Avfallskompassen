@@ -98,8 +98,22 @@ export default function ContainerDrag({
             x={container.x}
             y={container.y}
             draggable
+            //Change cursor styles on hover/drag
+            onMouseEnter={(e) => {
+                const stage = e.target.getStage();
+                stage.container().style.cursor = "grab";
+            }}
+            onMouseLeave={(e) => {
+                const stage = e.target.getStage();
+                stage.container().style.cursor = "default";
+            }}
+
             onClick={() => handleSelectContainer(container.id)}
-            onDragStart={() => {
+            onDragStart={(e) => {
+                //Closed hand while dragging
+                const stage = e.target.getStage();
+                stage.container().style.cursor = "grabbing";
+
                 handleSelectContainer(container.id);
                 setIsDraggingContainer(true);
             }}

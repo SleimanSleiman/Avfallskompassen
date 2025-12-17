@@ -61,6 +61,7 @@ body {
   transform: scaleX(0);
   background-color: #e8c222;
   transition: all 0.22s ease;
+  pointer-events: none;
 }
 
 .nav-link:hover::after {
@@ -71,6 +72,14 @@ body {
 .nav-link-active::after {
   opacity: 1;
   transform: scaleX(1);
+}
+
+/* Hide underline when not active and not hovering */
+.nav-link:not(.nav-link-active):not(:hover)::after {
+  opacity: 0;
+  transform: scaleX(0);
+  height: 0;
+  margin-top: 0;
 }
 
 /* Mock-like footer background */

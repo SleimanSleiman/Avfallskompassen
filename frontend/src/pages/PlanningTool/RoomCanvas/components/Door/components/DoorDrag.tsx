@@ -4,7 +4,7 @@
  */
 import { useState, useEffect } from "react";
 import { Group } from "react-konva";
-import { clamp, isOverlapping} from "../../../../Constants";
+import { clamp, isOverlapping} from "../../../../lib/Constants";
 import DoorVisual from "./DoorVisual";
 import { computeDragBound, getDoorRect, getDoorZone } from "../utils/DoorDragUtils";
 
@@ -67,7 +67,20 @@ export default function DoorDrag({
             y={door.y}
             draggable
             dragBoundFunc={dragBoundFunc}
-            onDragStart={() => setIsOverZone(false)}
+            // Cursor changes
+            onMouseEnter={(e) => {
+                const stage = e.target.getStage();
+                if (stage) stage.container().style.cursor = "grab";
+            }}
+            onMouseLeave={(e) => {
+                const stage = e.target.getStage();
+                if (stage) stage.container().style.cursor = "default";
+            }}
+            onDragStart={(e) => {
+                const stage = e.target.getStage();
+                if (stage) stage.container().style.cursor = "grabbing";
+                setIsOverZone(false);
+            }}
             onDragMove={(e) => {
                 const pos = e.target.position();
                 setIsDraggingDoor(true);
@@ -77,6 +90,9 @@ export default function DoorDrag({
                 setIsOverZone(checkOverlapping(pos));
             }}
             onDragEnd={(e) => {
+                const stage = e.target.getStage();
+                if (stage) stage.container().style.cursor = "grab";
+
                 const pos = e.target.position();
                 //Check if overlapping any other door
                 const overlapping = checkOverlapping(pos);

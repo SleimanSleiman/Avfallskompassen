@@ -3,7 +3,7 @@
  * Renders measurement lines and text for a single door.
  */
 import { Line, Text } from "react-konva";
-import type { Door } from "../../../../../Types";
+import type { Door } from "../../../../../lib/Types";
 import { getLinesAndTexts } from "../utils/doorMeasurementUtils";
 
 type DoorMeasurementProps = {
