@@ -5,7 +5,7 @@
  */
 
 import { useCallback, useEffect, forwardRef, type ForwardRef, Dispatch, type SetStateAction, useRef} from "react";
-import { Package, Package2, X, Vault } from "lucide-react";
+import { Package, Package2, X } from "lucide-react";
 import { FaWineBottle, FaAppleAlt, FaNewspaper } from "react-icons/fa";
 import { PiBeerBottleBold } from "react-icons/pi";
 import { GiOpenedFoodCan, GiSwapBag } from "react-icons/gi";
@@ -288,9 +288,7 @@ const ContainerPanel = forwardRef(function ContainerPanel(
                                                 <p>{container.width} × {container.height} × {container.depth} mm</p>
                                                 <p>Tömningsfrekvens: {container.emptyingFrequencyPerYear}/år</p>
                                                 <p>Kostnad: {container.cost} kr/år</p>
-                                                {LOCK_I_LOCK_COMPATIBLE_SIZES.includes(container.size) && (
-                                                    <p>Kostnad för lock-i-lock: 100 kr/år</p>
-                                                )}
+
                                             </div>
                                             <InfoTooltip text="Lock-i-lock är ett tillval som möjliggör öppning från två håll, vilket gör hanteringen enklare för både
                                                 renhållare och användare. Det kostar 100 kr/år." />
@@ -307,9 +305,8 @@ const ContainerPanel = forwardRef(function ContainerPanel(
                                            {LOCK_I_LOCK_COMPATIBLE_SIZES.includes(container.size) && (
                                              <button
                                                onClick={() => handleAddContainer(container, undefined, true)}
-                                               className="container-btn container-btn-lock flex items-center justify-center gap-1"
+                                               className="container-btn container-btn-lock"
                                              >
-                                               <Vault className="w-4 h-4" />
                                                Lägg till med lock-i-lock
                                              </button>
                                            )}

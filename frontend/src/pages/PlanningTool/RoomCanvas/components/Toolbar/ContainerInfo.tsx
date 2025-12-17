@@ -6,7 +6,7 @@
 import React, { useRef, useState, useEffect } from "react";
 import { X } from "lucide-react";
 import type { ContainerInRoom } from "../../../Types";
-import { LOCK_I_LOCK_COMPATIBLE_SIZES } from "../../../Constants";
+import { LOCK_I_LOCK_COMPATIBLE_SIZES, getContainerCost } from "../../../Constants";
 import './css/roomCanvasToolbar.css'
 
 type ContainerInfoProps = {
@@ -75,7 +75,7 @@ export default function ContainerInfo({ c, onClose, pos, setPos}: ContainerInfoP
             <div className="selected-container-header">
                 <div>
                     <h3 className="selected-container-name">{c.container.name}</h3>
-                    <p className="selected-container-subtitle">{c.container.size} L · {c.container.cost} kr/år</p>
+                    <p className="selected-container-subtitle">{c.container.size} L · {getContainerCost(c)} kr/år</p>
                 </div>
                 <button
                     onClick={onClose}

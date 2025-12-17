@@ -183,13 +183,13 @@
 }
 
 .container-btn {
-    @apply flex-1 rounded-lg border px-3 py-2 text-xs font-semibold transition;
+    @apply rounded-lg border px-3 py-2 text-xs font-semibold transition;
 }
 
 .container-btn-add {
-    @apply border-emerald-600 text-emerald-700 hover:bg-emerald-50;
+    @apply flex-[2] border-emerald-600 text-emerald-700 hover:bg-emerald-50;
 }
 
 .container-btn-lock {
-  @apply border-blue-600 text-blue-700 hover:bg-blue-50;
+    @apply flex-[1] border-blue-600 text-blue-700 hover:bg-blue-50 flex items-center justify-center gap-1;
 }

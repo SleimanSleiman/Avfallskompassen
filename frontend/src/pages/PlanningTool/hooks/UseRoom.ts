@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { SCALE, STAGE_WIDTH, STAGE_HEIGHT, MIN_WIDTH, MIN_HEIGHT, MARGIN, clamp, mmToPixels, ROOM_VERTICAL_OFFSET, ROOM_HORIZONTAL_OFFSET, LOCK_I_LOCK_COST } from "../Constants";
+import { SCALE, STAGE_WIDTH, STAGE_HEIGHT, MIN_WIDTH, MIN_HEIGHT, MARGIN, clamp, mmToPixels, ROOM_VERTICAL_OFFSET, ROOM_HORIZONTAL_OFFSET } from "../Constants";
 import type { Room, ContainerInRoom, Door, OtherObjectInRoom } from "../Types";
 
 export function useRoom() {
@@ -61,12 +61,7 @@ export function useRoom() {
           y: c.y ?? 0,
           width: mmToPixels(containerInfo.width),
           height: mmToPixels(containerInfo.depth),
-          container: {
-              ...containerInfo,
-              cost:
-                containerInfo.cost +
-                (c.hasLockILock ? LOCK_I_LOCK_COST : 0),
-            },
+          container: containerInfo,
           rotation: c.angle ?? 0,
           lockILock: c.hasLockILock ?? false,
         };

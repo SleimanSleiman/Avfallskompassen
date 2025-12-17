@@ -12,6 +12,7 @@ import com.avfallskompassen.services.ContainerService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -85,19 +86,29 @@ public class ContainerServiceImpl implements ContainerService {
 
         List<PropertyContainerDTO> results = grouped.entrySet().stream()
                 .map(entry -> {
-                    ContainerPlan containerPlan = entry.getKey();
-                    Long count = entry.getValue();
+                    ContainerPlan plan = entry.getKey();
+                    long count = entry.getValue();
+
+                    // Count how many containers have the Lock-i-Lock addon
+                    long lockILockCount = positions.stream()
+                            .filter(p -> p.getContainerPlan().equals(plan) && p.getHasLockILock())
+                            .count();
+
+                    // Calculate total cost: plan cost * count + lock-i-lock cost * lockILockCount
+                    BigDecimal totalCost = plan.getCost().multiply(BigDecimal.valueOf(count))
+                            .add(BigDecimal.valueOf(100).multiply(BigDecimal.valueOf(lockILockCount)));
 
                     return new PropertyContainerDTO(
-                            containerPlan.getMunicipalityService().getServiceType().getName(),
-                            containerPlan.getContainerType().getName(),
-                            containerPlan.getContainerType().getSize(),
-                            count.intValue(),
-                            containerPlan.getEmptyingFrequencyPerYear(),
-                            containerPlan.getCost()
+                            plan.getMunicipalityService().getServiceType().getName(),
+                            plan.getContainerType().getName(),
+                            plan.getContainerType().getSize(),
+                            (int) count,
+                            plan.getEmptyingFrequencyPerYear(),
+                            totalCost
                     );
                 })
                 .toList();
+
         return results;
     }
 

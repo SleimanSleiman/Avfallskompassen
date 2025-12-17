@@ -169,7 +169,7 @@ export default function NavBar() {
                   >
                     Planeringsverktyg
                   </NavLink>
-                  <button 
+                  <button
                     onClick={(e) => {
                       e.preventDefault();
                       handleNavigation('/reports');
