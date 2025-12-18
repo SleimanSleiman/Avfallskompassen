@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import React from 'react';
 import { ChevronDown, ChevronUp } from "lucide-react";
-import { useParams, useLocation, Link } from 'react-router-dom';
+import { useParams, useLocation, Link, useNavigate } from 'react-router-dom';
 import { getCollectionFee, getAnnualCost, getPropertyContainers, type AnnualCostDTO } from '../lib/Statistics';
 import { useComparison } from './PlanningTool/hooks/useComparison';
 import { getLockTypeForProperty} from "../lib/Statistics";
@@ -175,6 +175,7 @@ function ComparisonScale({
 export default function StatisticsPage() {
   const { propertyId } = useParams<{ propertyId: string }>();
   const location = useLocation();
+  const navigate = useNavigate();
   const { state } = location as { state?: { propertyName: string; numberOfApartments?: number;} };
   const propertyName = state?.propertyName || '';
   const numberOfApartments = state?.numberOfApartments ?? 0;
@@ -338,6 +339,16 @@ export default function StatisticsPage() {
 
   const propertyDisplayName = propertyName || `#${propertyId}`;
 
+  const handleBack = () => {
+      if (propertyName) {
+        // Came from a property page, go back to that page
+        navigate(-1); // Goes back in history
+      } else {
+        // Fallback to overview if user landed directly on this page
+        navigate('/statistics');
+      }
+    };
+
   return (
     <main className="mx-auto max-w-7xl px-4 py-8">
       <div className="mb-8 rounded-2xl border bg-white p-6 shadow-soft flex flex-col sm:justify-between gap-4">
@@ -346,7 +357,12 @@ export default function StatisticsPage() {
           <p className="mt-2 text-gray-600">Här visas statistik och jämförelser för fastigheten {propertyDisplayName}.</p>
         </div>
         <div className="flex gap-2 items-center">
-          <Link to="/statistics" className="btn-secondary text-sm self-end">← Tillbaka till fastigheter</Link>
+           <button
+              className="btn-secondary text-sm self-end"
+              onClick={handleBack}
+            >
+              ← Tillbaka
+            </button>
         </div>
       </div>
 
