@@ -22,4 +22,13 @@ public interface ContainerPositionRepository extends JpaRepository<ContainerPosi
     where wr.property.id = :propertyId
     """)
     List<ContainerPosition> findByPropertyId(Long propertyId);
+
+    @Query("""
+    select cp
+    from ContainerPosition cp
+    join cp.wasteRoom wr
+    where wr.property.id = :propertyId
+        and wr.isActive = true
+    """)
+    List<ContainerPosition> findByPropertyIdAndIsActive(Long propertyId);
 }
