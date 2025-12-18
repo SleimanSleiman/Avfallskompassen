@@ -94,7 +94,11 @@ export default function AllaMiljoRumPage() {
 
             // Remove locally from state
             setRooms((prev) =>
-                prev.filter((r) => (r.wasteRoomId ?? r.id) !== (room.wasteRoomId ?? room.id))
+                prev.filter((roomVersions) => {
+                    const baseRoom = roomVersions[0];
+                    return (baseRoom.wasteRoomId ?? baseRoom.id) !==
+                           (room.wasteRoomId ?? room.id);
+                })
             );
         } catch (err) {
             setMsg("")
@@ -106,6 +110,13 @@ export default function AllaMiljoRumPage() {
             setRoomToDelete(null);
         }
     }
+
+    const filteredRooms = rooms.filter((roomVersions) => {
+        const room = roomVersions.find(r => r.isActive) ?? roomVersions[0];
+        return room.name
+            ?.toLowerCase()
+            .includes(search.toLowerCase());
+    });
 
     return (
         
@@ -180,7 +191,7 @@ export default function AllaMiljoRumPage() {
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
 
-                        {rooms.map((roomVersions) => {
+                        {filteredRooms.map((roomVersions) => {
                             const room = roomVersions.find(r => r.isActive) ?? roomVersions[0];
                             return (
                             <div key={room.id} className="rounded-xl border bg-white p-5 shadow-soft flex flex-col">
