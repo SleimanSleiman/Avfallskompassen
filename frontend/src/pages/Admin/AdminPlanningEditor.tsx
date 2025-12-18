@@ -80,9 +80,6 @@ export default function AdminPlanningEditor({
   const [msg, setMsg] = useState<string>("");
   const [error, setError] = useState<string>("");
 
-  const [msg, setMsg] = useState<string>('');
-  const [error, setError] = useState<string>('');
-
   // Fetch the actual waste room data from the database
   useEffect(() => {
     const loadWasteRoomData = async () => {
