@@ -47,6 +47,10 @@ export type ContainerPosition = {
     wasteRoomId : number;
 }
 
+export type WasteRoomImgDTO = {
+    thumbnailUrl: string;
+}
+
 export type OtherObject = {
     id: number;
     name: string;
@@ -63,4 +67,8 @@ export async function getWasteRoomsByPropertyId(propertyId : number): Promise<Wa
 
 export async function getWasteRoomById(wasteRoomId: number): Promise<WasteRoom> {
     return get<WasteRoom>(`/api/wasterooms/${wasteRoomId}`);
+}
+
+export async function getActiveWasteRoomsByPropertyId(propertyId : number): Promise<WasteRoomImgDTO> {
+    return get<WasteRoomImgDTO>(`/api/properties/${propertyId}/active/wasteroom`);
 }

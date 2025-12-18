@@ -23,6 +23,7 @@ import java.net.http.HttpResponse;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Service class for handling waste rooms.
@@ -129,6 +130,21 @@ public class WasteRoomServiceImpl implements WasteRoomService {
         return rooms.stream()
                 .map(this::mapWasteRoomToDTO)
                 .toList();
+    }
+
+    /**
+     * Collects the WasteRoom that is marked as active.
+     *
+     * @param propertyId The id of the property whose waste rooms are to be collected
+     * @return A DTO containing the information about the waste room from the database
+     */
+    @Override
+    public WasteRoomImgDTO getActiveRoom(Long propertyId) {
+        WasteRoom room = wasteRoomRepository
+                .findByPropertyIdAndIsActiveTrue(propertyId)
+                .orElseThrow(() -> new RuntimeException("No active waste room found"));
+
+        return new WasteRoomImgDTO(room.getThumbnailUrl());
     }
 
     /**

@@ -20,4 +20,6 @@ public interface WasteRoomRepository extends JpaRepository<WasteRoom, Long> {
     List<WasteRoom> findByPropertyIdAndNameOrderByVersionNumberAsc(Long propertyId, String name);
 
     Optional<WasteRoom> findByPropertyIdAndNameAndIsActiveTrue(Long propertyId, String name);
+
+    Optional <WasteRoom> findByPropertyIdAndIsActiveTrue(Long propertyId);
 }
