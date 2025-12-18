@@ -42,7 +42,7 @@ export default function ContainerOverviewSummary({
                     </Tooltip>
                     <span className="summary-row-label">
                         {formatNumber(averageFrequencyAll, { maximumFractionDigits: 1 })} ggr/år
-                        {comparisonAverageFrequency != null && (
+                        {comparisonAverageFrequency != null && comparisonAverageFrequency > 0 && (
                             <span className="text-xs text-gray-500 ml-1">
                                 (snitt: {formatNumber(comparisonAverageFrequency, { maximumFractionDigits: 1 })}
                                 {frequencyDifference != null && (

@@ -2,6 +2,7 @@ package com.avfallskompassen.controller;
 
 import com.avfallskompassen.dto.RoomPdfDTO;
 import com.avfallskompassen.dto.WasteRoomDTO;
+import com.avfallskompassen.dto.WasteRoomImgDTO;
 import com.avfallskompassen.dto.request.WasteRoomRequest;
 import com.avfallskompassen.services.RoomPdfService;
 import com.avfallskompassen.services.WasteRoomService;
@@ -87,6 +88,18 @@ public class WasteRoomController {
     public ResponseEntity<List<WasteRoomDTO>> getWasteRoomsByPropertyId(@PathVariable Long propertyId) {
         List<WasteRoomDTO> rooms = wasteRoomService.getWasteRoomsByPropertyId(propertyId);
         return ResponseEntity.ok(rooms);
+    }
+
+    /**
+     * Handles requests for fetching an active waste room
+     * @param propertyId Id to property
+     * @return A status code with either an error message or a list containing DTO with information
+     * about the waste room collected.
+     */
+    @GetMapping("/properties/{propertyId}/active/wasteroom")
+    public ResponseEntity <WasteRoomImgDTO> getActiveWasteRoomsByPropertyId(@PathVariable Long propertyId) {
+        WasteRoomImgDTO room = wasteRoomService.getActiveRoom(propertyId);
+        return ResponseEntity.ok(room);
     }
 
     /**

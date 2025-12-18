@@ -72,7 +72,8 @@ public class SecurityConfig {
                     // Allow authenticated access to "manual seen" endpoints
                     .requestMatchers("/api/user/*/has-seen-manual").authenticated()
                     .requestMatchers("/api/user/*/mark-manual-seen").authenticated()
-                    // admin endpoints require ADMIN role
+                    // admin endpoints require ADMIN role (except /api/admin/data which allows authenticated users for development)
+                    .requestMatchers("/api/admin/data/**").authenticated()
                     .requestMatchers("/api/admin/**").hasRole("ADMIN")
                     // other API endpoints require authentication
                     .requestMatchers("/api/**").authenticated()

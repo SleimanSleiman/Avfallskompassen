@@ -4,7 +4,7 @@
  * Each container is rendered using the <ContainerItem> component.
  */
 
-import type { ContainerInRoom, Room } from "../../../Types";
+import type { ContainerInRoom, Room } from "../../../lib/Types";
 import ContainerItem from "./components/ContainerItem";
 
 type ContainersLayerProps = {

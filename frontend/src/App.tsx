@@ -12,6 +12,7 @@ import NotificationCenter from './components/NotificationCenter';
 import { currentUser } from './lib/Auth';
 import PlanningTool from './pages/PlanningTool/PlanningTool';
 import AdminPage from './pages/AdminPage';
+import AdminDataPage from './pages/AdminDataPage';
 import AllWasteroomPage from "./pages/AllWasteroomPage";
 import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
@@ -20,12 +21,18 @@ import { UnsavedChangesProvider } from './context/UnsavedChangesContext';
 import { ActivityList } from './components/ActivityList';
 import { getUsersLatestActivities } from './lib/Activity';
 import type { Activity } from './lib/Activity';
+import { setInactivityLogout } from "./lib/TimerLogoutReason";
 
 function Dashboard() {
   const user = currentUser();
   const isAdmin = String(user?.role || '').toUpperCase().includes('ADMIN');
   const [activities, setActivities] = useState<Activity[]>([]);
-  const [loading, setLoading] = useState(true); 
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    setInactivityLogout(false);
+  }, []);
+
 
   useEffect(() => {
     async function fetchActivities() {
@@ -195,6 +202,11 @@ export default function App() {
             <Route path="/admin" element={
               <ProtectedRoute>
                 <AdminPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/data" element={
+              <ProtectedRoute>
+                <AdminDataPage />
               </ProtectedRoute>
             } />
               <Route path="/statistics" element={

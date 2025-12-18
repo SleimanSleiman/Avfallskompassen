@@ -3,12 +3,12 @@
  * Manages state and logic for room layout, doors, containers, and service types.
  * Renders the RoomCanvas, Sidebar, and ActionPanel components.
  */
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-
+ 
 //Lib
+import { getProperty } from '../../lib/Property';
 import type { Property } from '../../lib/Property';
-import type { ContainerDTO } from '../../lib/Container';
 import { currentUser } from '../../lib/Auth';
 
 //Context
@@ -16,7 +16,7 @@ import { useUnsavedChanges } from '../../context/UnsavedChangesContext';
 
 //Components
 import RoomCanvas from './RoomCanvas/RoomCanvas';
-import ActionPanel from './ActionPanel';
+import ActionPanel from './components/ActionPanel';
 import PropertyOverviewPanel from './PropertyAndWasteAnalysis/PropertyOverview/PropertyOverviewPanel';
 import WasteAnalysisPanels from './PropertyAndWasteAnalysis/WasteAnalysis/WasteAnalysisPanels'
 import { Tooltip } from "../../components/Tooltip";
@@ -33,24 +33,25 @@ import { useLayoutHistory } from './hooks/UseLayoutHistory';
 import { useSaveRoom, useWasteRoomRequestBuilder } from './hooks/UseSaveRoom';
 import { usePropertyHighlights } from './hooks/usePropertyHighlights';
 
-import { SCALE, ROOM_HORIZONTAL_OFFSET, ROOM_VERTICAL_OFFSET, STAGE_HEIGHT, STAGE_WIDTH } from './Constants';
+import { SCALE, ROOM_HORIZONTAL_OFFSET, ROOM_VERTICAL_OFFSET, STAGE_HEIGHT, STAGE_WIDTH } from './lib/Constants';
 import PlanningToolPopup from './components/PlanningToolPopup';
 import type { PreparedRoomState } from './components/PlanningToolPopup';
-
-const DEFAULT_ROOM_METERS = 5;
 
 import { driver } from "driver.js";
 import "driver.js/dist/driver.css";
 
 type PlanningToolProps = {
     isAdminMode?: boolean;
+    property?: Property;
 };
 
-export default function PlanningTool({ isAdminMode = false }: PlanningToolProps) {
+export default function PlanningTool({ isAdminMode = false, property }: PlanningToolProps) {
     const navigate = useNavigate();
     const { setHasUnsavedChanges } = useUnsavedChanges();
 
     const defaultRoomState = useMemo(() => {
+        const DEFAULT_ROOM_METERS = 5;
+
         const widthPx = DEFAULT_ROOM_METERS / SCALE;
         const heightPx = DEFAULT_ROOM_METERS / SCALE;
         return {
@@ -67,6 +68,10 @@ export default function PlanningTool({ isAdminMode = false }: PlanningToolProps)
     const [msg, setMsg] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
 
+    const [loadedProperty, setLoadedProperty] = useState<Property | null>(null);
+
+    
+
    // Selected IDs
    const [selectedContainerId, setSelectedContainerId] = useState<number | null>(null);
    const [selectedDoorId, setSelectedDoorId] = useState<number | null>(null);
@@ -80,6 +85,12 @@ export default function PlanningTool({ isAdminMode = false }: PlanningToolProps)
         setRoom
     } = useRoom();
 
+    useEffect(() => {
+        if (room?.propertyId) {
+            getProperty(room.propertyId).then(setLoadedProperty).catch(console.error);
+        }
+    }, [room?.propertyId]);
+    
     /* ──────────────── Door state & logic ──────────────── */
     const {
         doors,
@@ -235,7 +246,9 @@ export default function PlanningTool({ isAdminMode = false }: PlanningToolProps)
     const serviceTypes = useServiceTypes();
 
 
-    const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
+    const [selectedProperty, setSelectedProperty] = useState<Property | null>(
+        isAdminMode && property ? property : null
+    );
     const [hasCheckedStoredProperty, setHasCheckedStoredProperty] = useState(false);
     const [showPropertyPicker, setShowPropertyPicker] = useState(false);
     const clearPlanningStorage = useCallback(() => {
@@ -245,6 +258,14 @@ export default function PlanningTool({ isAdminMode = false }: PlanningToolProps)
         localStorage.removeItem('selectedProperty');
         localStorage.removeItem('selectedPropertyId');
     }, []);
+
+    useEffect(() => {
+      if (isAdminMode && property?.id) {
+        localStorage.setItem('selectedPropertyId', String(property.id));
+        localStorage.setItem('selectedProperty', JSON.stringify({ propertyId: property.id }));
+        setSelectedProperty(property);
+      }
+    }, [isAdminMode, property]);
 
     useEffect(() => {
         if (isAdminMode) return;
@@ -381,22 +402,25 @@ export default function PlanningTool({ isAdminMode = false }: PlanningToolProps)
         
         return roomChanged || doorsChanged || containersChanged || objectsChanged;
     }, [room, doors, containersInRoom, otherObjects, savedRoomState]);
+const hasUnsavedChangesRef = useRef(false);
 
-    // Update context when unsaved changes status changes
+    //Open ConfirmModal for unsaved changes during logout or navigation in site
     useEffect(() => {
-        const hasChanges = hasUnsavedChanges();
-        setHasUnsavedChanges(hasChanges);
-        if (hasChanges) {
-            const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-                e.preventDefault();
-                e.returnValue = '';
-                return '';
-            };
-            
-            window.addEventListener('beforeunload', handleBeforeUnload);
-            return () => window.removeEventListener('beforeunload', handleBeforeUnload);
-        }
-    }, [room, doors, containersInRoom, otherObjects, savedRoomState, setHasUnsavedChanges]);
+      hasUnsavedChangesRef.current = hasUnsavedChanges();
+      setHasUnsavedChanges(hasUnsavedChangesRef);
+    }, [room, doors, containersInRoom, otherObjects, savedRoomState]);
+
+    //Opens browser prompt for unsaved changes during exit or reload of page
+    useEffect(() => {
+      const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+        if (!hasUnsavedChangesRef.current) return;
+        e.preventDefault();
+        e.returnValue = '';
+      };
+      window.addEventListener('beforeunload', handleBeforeUnload);
+      return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+    }, []);
+
 
     // Handle close without saving
     const handleCloseRoom = useCallback(() => {
@@ -593,6 +617,7 @@ export default function PlanningTool({ isAdminMode = false }: PlanningToolProps)
                         isAdminMode={isAdminMode}
                         hasUnsavedChanges={hasUnsavedChanges}
                         onClose={handleCloseRoom}
+                        existingNames={loadedProperty?.wasteRooms?.map(r => r.name || "") || []}
                     />
 
                     {/* ActionPanel for selected container or door */}

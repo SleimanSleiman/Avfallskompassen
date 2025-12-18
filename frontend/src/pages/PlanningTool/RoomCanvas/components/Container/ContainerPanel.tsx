@@ -13,7 +13,7 @@ import { GiOpenedFoodCan, GiSwapBag } from "react-icons/gi";
 import { BsFillBoxSeamFill } from "react-icons/bs";
 import { FaJugDetergent } from "react-icons/fa6";
 import type { ContainerDTO } from "../../../../../lib/Container";
-import { DRAG_DATA_FORMAT } from "../../../Constants";
+import { DRAG_DATA_FORMAT } from "../../../lib/Constants";
 import LoadingBar from "../../../../../components/LoadingBar";
 import './css/roomCanvasPanel.css'
 

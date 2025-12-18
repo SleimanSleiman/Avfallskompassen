@@ -12,4 +12,8 @@ public interface CollectionFeeService {
     CollectionFeeDTO findCollectionFeeByMunicipalityId(Long id, double distance);
 
     CollectionFeeDTO findCollectionFeeByPropertyId(Long propertyId);
+    
+    CollectionFeeDTO updateCollectionFeeCost(Long id, java.math.BigDecimal cost);
+    
+    java.util.List<com.avfallskompassen.dto.CollectionFeeAdminDTO> getAllCollectionFees();
 }

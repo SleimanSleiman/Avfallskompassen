@@ -2,7 +2,7 @@
  * Component to render measurement lines and texts for other objects in a room.
  */
 import { Line, Text } from "react-konva";
-import type { OtherObjectInRoom } from "../../../../../Types";
+import type { OtherObjectInRoom } from "../../../../../lib/Types";
 import { getLinesAndTexts } from "../utils/otherObjectMeasurementUtils";
 
 type OtherObjectMeasurementProps = {

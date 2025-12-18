@@ -3,15 +3,15 @@ import { render, fireEvent } from "@testing-library/react";
 import Toolbar from "../../../../../../src/pages/PlanningTool/RoomCanvas/components/Toolbar/Toolbar";
 
 // Mocks for prompt components
-vi.mock("../../../../../../src/components/RoomSizePrompt", () => ({
+vi.mock("../../../../../../src/components/prompts/RoomSizePrompt", () => ({
     default: () => <div data-testid="room-size-prompt" />,
 }));
 
-vi.mock("../../../../../../src/components/DoorWidthPrompt", () => ({
+vi.mock("../../../../../../src/components/prompts/DoorWidthPrompt", () => ({
     default: () => <div data-testid="door-width-prompt" />,
 }));
 
-vi.mock("../../../../../../src/components/OtherObjectSizePrompt", () => ({
+vi.mock("../../../../../../src/components/prompts/OtherObjectSizePrompt", () => ({
     default: () => <div data-testid="other-object-size-prompt" />,
 }));
 

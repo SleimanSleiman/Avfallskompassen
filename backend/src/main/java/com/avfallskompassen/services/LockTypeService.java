@@ -14,4 +14,5 @@ public interface LockTypeService {
     LockTypeDto findLockTypeById(Long id);
     List<LockTypeDto> getAllLockTypes();
     LockTypeDto getPropertyLockTypeById(Long id);
+    LockTypeDto updateLockTypeCost(Long id, java.math.BigDecimal cost);
 }

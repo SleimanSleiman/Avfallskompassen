@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from "vitest";
 import { render } from "@testing-library/react";
 import CornerHandles from "../../../../../../src/pages/PlanningTool/RoomCanvas/components/Room/CornerHandles";
 
-vi.mock("../../../../../../src/pages/PlanningTool/Constants", () => ({
+vi.mock("../../../../../../src/pages/PlanningTool/lib/Constants", () => ({
     MARGIN: 10,
     STAGE_WIDTH: 800,
     STAGE_HEIGHT: 600,

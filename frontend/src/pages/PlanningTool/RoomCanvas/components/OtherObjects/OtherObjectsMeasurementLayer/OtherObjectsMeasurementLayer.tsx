@@ -1,7 +1,7 @@
 /**
  * Component for rendering measurement overlays for selected other objects in a room.
  */
-import type { OtherObjectInRoom } from "../../../../Types";
+import type { OtherObjectInRoom } from "../../../../lib/Types";
 import OtherObjectMeasurement from "./components/OtherObjectMeasurement";
 
 type OtherObjectMeasurementLayerProps = {

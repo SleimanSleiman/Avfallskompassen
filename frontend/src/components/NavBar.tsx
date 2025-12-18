@@ -1,8 +1,9 @@
-import { Link, NavLink, useLocation } from 'react-router-dom';
+import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { currentUser, logout } from '../lib/Auth';
 import { useUnsavedChanges } from '../context/UnsavedChangesContext';
 import ConfirmModal from './ConfirmModal';
+import { isInactivityLogout, setInactivityLogout } from "../lib/TimerLogoutReason";
 
 export default function NavBar() {
   const [open, setOpen] = useState(false);
@@ -15,6 +16,8 @@ export default function NavBar() {
   const [pendingLogout, setPendingLogout] = useState(false);
   // Store target path while waiting for unsaved-changes confirmation
   const [pendingNavigation, setPendingNavigation] = useState<string | null>(null);
+  const navigate = useNavigate();
+
 
   useEffect(() => {
     // Keep user state in sync with storage/auth changes across tabs
@@ -34,18 +37,28 @@ export default function NavBar() {
   }, []);
 
   function handleLogout() {
+    if (isInactivityLogout) {
+      logout();
+      setUser(null);
+      setHasUnsavedChanges(false);
+      setInactivityLogout(false);
+      navigate("/login");
+      return;
+    }
+
     // Clear persisted planning selections even if logout gets cancelled
     localStorage.removeItem("trashRoomData");
     localStorage.removeItem('enviormentRoomData');
     localStorage.removeItem('selectedProperty');
     localStorage.removeItem('selectedPropertyId');
+
     if (hasUnsavedChanges) {
       setPendingLogout(true);
     } else {
       logout();
       setUser(null);
       setHasUnsavedChanges(false);
-      window.location.href = '/login';
+      navigate("/login");
     }
   }
 
@@ -55,7 +68,8 @@ export default function NavBar() {
     logout();
     setUser(null);
     setHasUnsavedChanges(false);
-    window.location.href = '/login';
+    setInactivityLogout(false);
+    navigate('/login');
   }
 
   function handleCancelLogout() {
@@ -63,18 +77,24 @@ export default function NavBar() {
   }
 
   function handleNavigation(path: string) {
+    if (isInactivityLogout) {
+      navigate(path);
+      return;
+    }
+
     // Prompt before leaving planning tool with unsaved changes
     if (hasUnsavedChanges && location.pathname.includes('/planningTool')) {
       setPendingNavigation(path);
     } else {
-      window.location.href = path;
+      navigate(path);
     }
   }
 
   function handleConfirmNavigation() {
     if (pendingNavigation) {
       setHasUnsavedChanges(false);
-      window.location.href = pendingNavigation;
+      navigate(pendingNavigation);
+      setPendingNavigation(null);
     }
   }
 
@@ -122,7 +142,8 @@ export default function NavBar() {
             <nav className="hidden md:flex items-center gap-6 text-white font-black text-lg">
               {isAdmin ? (
                 <>
-                  <NavLink to="/admin" className={({ isActive }) => `nav-link hover:text-white transition-colors ${isActive ? 'nav-link-active' : ''}`}>Admin</NavLink>
+                  <NavLink to="/admin" end className={({ isActive }) => `nav-link hover:text-white transition-colors ${isActive ? 'nav-link-active' : ''}`}>Dashboard</NavLink>
+                  <NavLink to="/admin/data" className={({ isActive }) => `nav-link hover:text-white transition-colors ${isActive ? 'nav-link-active' : ''}`}>Hantera priser</NavLink>
                   <button 
                     onClick={(e) => {
                       e.preventDefault();
@@ -226,7 +247,8 @@ export default function NavBar() {
           <nav className="mx-auto max-w-7xl px-4 py-3 flex flex-col gap-3 font-black">
             {isAdmin ? (
               <>
-                <NavLink to="/admin" className="text-nsr-ink">Admin</NavLink>
+                <NavLink to="/admin" className="text-nsr-ink" onClick={() => setOpen(false)}>Dashboard</NavLink>
+                <NavLink to="/admin/data" className="text-nsr-ink" onClick={() => setOpen(false)}>Hantera priser</NavLink>
                 <button 
                   onClick={(e) => {
                     e.preventDefault();
