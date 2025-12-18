@@ -8,7 +8,6 @@ import ConfirmModal from '../components/ConfirmModal';
 import { deleteWasteRoom } from '../lib/WasteRoomRequest';
 import Message from '../components/ShowStatus';
 import LoadingBar from '../components/LoadingBar';
-import PlanVersionDropdown from '../components/PlanVersionDropdown';
 import type { WasteRoom } from '../lib/WasteRoom';
 
 export default function PropertyPage() {
@@ -534,23 +533,24 @@ async function onDeleteWasteRoom(propertyId: number, wasteRoomId: number) {
                   </div>
                 </div>
                 <div className="mt-4 flex flex-wrap gap-2">
-                  <div className="flex-shrink-0 basis-full sm:basis-auto">
-                    <PlanVersionDropdown
-                      rooms={property.wasteRooms}
-                      propertyAddress={property.address}
-                      onOpenVersion={(room) => openRoomVersion(property, room)}
-                    />
-                  </div>
+                  {property.wasteRooms.length > 0 ? (
                     <button
-                        className="btn-secondary-sm"
-                        onClick={() => {
-                            localStorage.setItem("selectedPropertyAddress", property.address);
-                            window.location.href = `/allWasteroom/${property.id}`;
-                        }}
+                      className="btn-secondary-sm"
+                      onClick={() => {
+                        localStorage.setItem("selectedPropertyAddress", property.address);
+                        window.location.href = `/allWasteroom/${property.id}`;
+                      }}
                     >
-                        Visa alla miljörum
+                      Visa alla miljörum ({property.wasteRooms.length})
                     </button>
-                  <button className="btn-secondary-sm" onClick={() => createWasteRoom(property)}>Skapa miljörum</button>
+                  ) : (
+                    <button
+                      className="btn-secondary-sm"
+                      onClick={() => createWasteRoom(property)}
+                    >
+                      Skapa miljörum
+                    </button>
+                  )}
                   <button className="btn-secondary-sm" onClick={() => handleEdit(property)}>Redigera</button>
                   <button
                     className="btn-secondary-sm"
