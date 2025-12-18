@@ -60,7 +60,6 @@ export default function AdminPage() {
       setLoading(true);
       try {
         const userStats = await getUserStats();
-        console.log(userStats);
 
         let numOfProperties = 0;
         for(const row of userStats) {

@@ -224,6 +224,16 @@ export default function PlanVersionDropdown({
                           </button>
                         </div>
                       </div>
+                      {version.thumbnailUrl && (
+                        <div className="mt-2 w-30 h-40 overflow-hidden rounded-md border border-gray-200">
+                          <img
+                            src={version.thumbnailUrl}
+                            alt={`Thumbnail version ${version.versionNumber}`}
+                            className="w-auto h-full object-cover scale-110"
+                          />
+                        </div>
+                      )}
+
                       <div className="mt-1.5 flex flex-wrap items-center gap-1 text-[11px] text-gray-600">
                         <span className="font-medium text-gray-700">
                           {formatDimension(version.width)}m ×{' '}

@@ -498,78 +498,83 @@ async function onDeleteWasteRoom(propertyId: number, wasteRoomId: number) {
         </div>
         
        <div className="grid grid-cols-1 gap-6 p-6 sm:grid-cols-2 lg:grid-cols-3">
-                           {loadingProperties ? (
-                               <div className="col-span-full py-12">
-                                   <LoadingBar message="Laddar fastigheter..." />
-                               </div>
-                           ) : filteredProperties.length === 0 ? (
-                               <div className="col-span-full flex flex-col items-center justify-center py-16 text-center text-gray-500">
-                                   <div className="mb-4">
-                                       <svg className="mx-auto h-12 w-12 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                                       </svg>
-                                   </div>
-                                   <p className="text-lg font-medium">Inga fastigheter ännu</p>
-                                   <p className="mt-1">Klicka på "Lägg till fastighet" för att komma igång.</p>
-                               </div>
-                           ) : (
-                               filteredProperties.map((property) => (
-                                  <div key={property.id} className="rounded-xl border border-gray-200 p-5 hover:shadow-md transition-shadow">
-                <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0">
-                    <h3 className="truncate text-base font-semibold text-gray-900">{property.address}</h3>
-                    <div className="mt-2 grid gap-y-1 text-sm text-gray-700">
-                      <div><span className="text-gray-500">Kommun:</span> {getMunicipalityName(property.municipalityId)}</div>
-                      <div><span className="text-gray-500">Lägenheter:</span> {property.numberOfApartments}</div>
-                      <div><span className="text-gray-500">Lås:</span> {property.lockName ?? 'Ingen'}</div>
-                      <div><span className="text-gray-500">Dragväg:</span> {property.accessPathLength}</div>
+         {loadingProperties ? (
+           <div className="col-span-full py-12">
+             <LoadingBar message="Laddar fastigheter..." />
+           </div>
+         ) : filteredProperties.length === 0 ? (
+           <div className="col-span-full flex flex-col items-center justify-center py-16 text-center text-gray-500">
+             <div className="mb-4">
+               <svg className="mx-auto h-12 w-12 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+               </svg>
+             </div>
+             <p className="text-lg font-medium">Inga fastigheter ännu</p>
+             <p className="mt-1">Klicka på "Lägg till fastighet" för att komma igång.</p>
+           </div>
+         ) : (
+           filteredProperties.map((property) => {
+             const uniqueRoomsCount = Array.from(
+               new Set(property.wasteRooms?.map(r => r.name?.trim().toLowerCase()))
+             ).length;
+
+             return (
+               <div key={property.id} className="rounded-xl border border-gray-200 p-5 hover:shadow-md transition-shadow">
+                 <div className="flex items-start justify-between gap-3">
+                   <div className="min-w-0">
+                     <h3 className="truncate text-base font-semibold text-gray-900">{property.address}</h3>
+                     <div className="mt-2 grid gap-y-1 text-sm text-gray-700">
+                       <div><span className="text-gray-500">Kommun:</span> {getMunicipalityName(property.municipalityId)}</div>
+                       <div><span className="text-gray-500">Lägenheter:</span> {property.numberOfApartments}</div>
+                       <div><span className="text-gray-500">Lås:</span> {property.lockName ?? 'Ingen'}</div>
+                       <div><span className="text-gray-500">Dragväg:</span> {property.accessPathLength}</div>
+                     </div>
+                     <div className="mt-3 text-xs text-gray-500">Skapad: {new Date(property.createdAt).toLocaleDateString('sv-SE')}</div>
+                       {/* ===== Waste Rooms Section ===== */}
+                       <div className="mt-3">
+                       </div>
+                       {/* ===== End Waste Rooms Section ===== */}
                     </div>
-                    <div className="mt-3 text-xs text-gray-500">Skapad: {new Date(property.createdAt).toLocaleDateString('sv-SE')}</div>
-                      {/* ===== Waste Rooms Section ===== */}
-                      <div className="mt-3">
-                        
-                      </div>
-                      {/* ===== End Waste Rooms Section ===== */}
+                  </div>
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    {property.wasteRooms.length > 0 ? (
+                      <button
+                        className="btn-secondary-sm"
+                        onClick={() => {
+                          localStorage.setItem("selectedPropertyAddress", property.address);
+                          window.location.href = `/allWasteroom/${property.id}`;
+                        }}
+                      >
+                        Visa alla miljörum ({uniqueRoomsCount})
+                      </button>
+                    ) : (
+                      <button
+                        className="btn-secondary-sm"
+                        onClick={() => createWasteRoom(property)}
+                      >
+                        Skapa miljörum
+                      </button>
+                    )}
+                    <button className="btn-secondary-sm" onClick={() => handleEdit(property)}>Redigera</button>
+                    <button
+                      className="btn-secondary-sm"
+                      type="button"
+                      onClick={() => viewStatistics(property)}
+                    >
+                      Se rapport
+                    </button>
+                    <button
+                      className="inline-flex items-center justify-center rounded-xl2 px-3 py-1 text-sm font-medium border border-red-200 bg-red-50 text-red-700 hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-600"
+                      onClick={() => requestDelete(property.id, property.address)}
+                    >
+                      Ta bort
+                    </button>
                   </div>
                 </div>
-                <div className="mt-4 flex flex-wrap gap-2">
-                  {property.wasteRooms.length > 0 ? (
-                    <button
-                      className="btn-secondary-sm"
-                      onClick={() => {
-                        localStorage.setItem("selectedPropertyAddress", property.address);
-                        window.location.href = `/allWasteroom/${property.id}`;
-                      }}
-                    >
-                      Visa alla miljörum ({property.wasteRooms.length})
-                    </button>
-                  ) : (
-                    <button
-                      className="btn-secondary-sm"
-                      onClick={() => createWasteRoom(property)}
-                    >
-                      Skapa miljörum
-                    </button>
-                  )}
-                  <button className="btn-secondary-sm" onClick={() => handleEdit(property)}>Redigera</button>
-                  <button
-                    className="btn-secondary-sm"
-                    type="button"
-                    onClick={() => viewStatistics(property)}
-                  >
-                    Se rapport
-                  </button>
-                  <button
-                    className="inline-flex items-center justify-center rounded-xl2 px-3 py-1 text-sm font-medium border border-red-200 bg-red-50 text-red-700 hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-600"
-                    onClick={() => requestDelete(property.id, property.address)}
-                  >
-                    Ta bort
-                  </button>
-                </div>
-              </div>
-            ))
-        )}
-          </div>
+              );
+            })
+          )}
+        </div>
       </div>
 
       {isCreateRoomOpen && (
