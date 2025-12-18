@@ -11,6 +11,10 @@ export type LoginResponse = {
   hasSeenPlanningToolManual?: boolean;
 };
 
+export type ChangePasswordResponse = {
+  message: string;
+};
+
 export async function login(username: string, password: string, rememberMe: boolean = true): Promise<LoginResponse> {
   const res = await post<LoginResponse>('/api/auth/login', { username, password });
   if (res.success) {
@@ -49,3 +53,6 @@ export function logout() {
     // Dispatch event to notify components of auth change
     window.dispatchEvent(new Event('auth-change'));
 }
+
+export const changePassword = (oldPassword: string, newPassword: string) =>
+  post<ChangePasswordResponse>('/api/auth/change-password', { oldPassword, newPassword });

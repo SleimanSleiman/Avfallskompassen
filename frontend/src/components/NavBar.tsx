@@ -123,6 +123,15 @@ export default function NavBar() {
               {isAdmin ? (
                 <>
                   <NavLink to="/admin" className={({ isActive }) => `nav-link hover:text-white transition-colors ${isActive ? 'nav-link-active' : ''}`}>Admin</NavLink>
+                  <button 
+                    onClick={(e) => {
+                      e.preventDefault();
+                      handleNavigation('/profile');
+                    }}
+                    className={`nav-link hover:text-white transition-colors ${location.pathname === '/profile' ? 'nav-link-active' : ''}`}
+                  >
+                    Profil
+                  </button>
                   <div className="flex items-center gap-3">
                     {user && <span className="text-sm">Hej {user.username}!</span>}
                     <button
@@ -178,6 +187,15 @@ export default function NavBar() {
                   >
                     Rapporter
                   </button>
+                  <button 
+                    onClick={(e) => {
+                      e.preventDefault();
+                      handleNavigation('/profile');
+                    }}
+                    className={`nav-link hover:text-white transition-colors ${location.pathname === '/profile' ? 'nav-link-active' : ''}`}
+                  >
+                    Profil
+                  </button>
                   <div className="flex items-center gap-3">
                     {user ? (
                       <button
@@ -209,6 +227,16 @@ export default function NavBar() {
             {isAdmin ? (
               <>
                 <NavLink to="/admin" className="text-nsr-ink">Admin</NavLink>
+                <button 
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setOpen(false);
+                    handleNavigation('/profile');
+                  }}
+                  className="text-left text-nsr-ink"
+                >
+                  Profil
+                </button>
                 <button onClick={handleLogout} className="text-left text-nsr-ink">Logga ut</button>
               </>
             ) : (
@@ -253,6 +281,16 @@ export default function NavBar() {
                   className="text-left text-nsr-ink"
                 >
                   Rapporter
+                </button>
+                <button 
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setOpen(false);
+                    handleNavigation('/profile');
+                  }}
+                  className="text-left text-nsr-ink"
+                >
+                  Profil
                 </button>
                 {user ? (
                   <button onClick={handleLogout} className="text-left text-nsr-ink">Logga ut</button>
