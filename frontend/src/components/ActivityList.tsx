@@ -19,25 +19,35 @@ export default function ActivityItem({ message, timestamp, color }) {
   );
 }
 
-export function ActivityList({ activities, loading }) {
+export function ActivityList({ activities = [], loading, error }: { activities?: any[]; loading: boolean; error?: string | null }) {
   const colors = ["bg-nsr-accent", "bg-nsr-teal"];
 
   return (
     <div className="bg-white rounded-2xl p-6 shadow-soft">
       <h2 className="text-xl font-black text-nsr-ink mb-6">Senaste aktivitet</h2>
-      
+
       {loading && <LoadingBar message="Laddar aktiviteter…" />}
-      
+
+      {error && (
+        <div className="mb-4 p-3 rounded border border-red-200 bg-red-50">
+          <p className="text-sm text-red-700">Kunde inte hämta aktiviteter: {error}</p>
+        </div>
+      )}
+
       <div
         className="space-y-4 overflow-y-auto"
         style={{
           maxHeight: "calc(5 * (4rem + 1rem))",
         }}
       >
+        {!loading && activities.length === 0 && !error && (
+          <p className="text-gray-500 brodtext">Inga aktiviteter att visa.</p>
+        )}
+
         {!loading && activities.map((a, idx) => (
           <ActivityItem
             key={idx}
-            message={a.details} 
+            message={a.details}
             timestamp={a.timeStamp}
             color={colors[idx % colors.length]}
           />
