@@ -113,7 +113,7 @@ public class ContainerServiceImplTest {
         ContainerPosition pos2 = new ContainerPosition();
         pos2.setContainerPlan(plan);
 
-        when(containerPositionRepository.findByPropertyId(10L))
+        when(containerPositionRepository.findByPropertyIdAndIsActive(10L))
                 .thenReturn(List.of(pos1, pos2));
 
         List<PropertyContainerDTO> result = service.getContainersByPropertyId(10L);
@@ -128,12 +128,12 @@ public class ContainerServiceImplTest {
         assertEquals(52, dto.getEmptyingFrequency());
         assertEquals(BigDecimal.valueOf(540), dto.getCost());
 
-        verify(containerPositionRepository, times(1)).findByPropertyId(10L);
+        verify(containerPositionRepository, times(1)).findByPropertyIdAndIsActive(10L);
     }
 
     @Test
     void testGetContainersByPropertyId_ReturnsEmptyListWhenNoPositions() {
-        when(containerPositionRepository.findByPropertyId(55L))
+        when(containerPositionRepository.findByPropertyIdAndIsActive(55L))
                 .thenReturn(List.of());
 
         List<PropertyContainerDTO> result = service.getContainersByPropertyId(55L);

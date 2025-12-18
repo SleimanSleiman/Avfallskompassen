@@ -1,6 +1,7 @@
 package com.avfallskompassen.services.impl;
 
 import com.avfallskompassen.dto.WasteRoomDTO;
+import com.avfallskompassen.dto.WasteRoomImgDTO;
 import com.avfallskompassen.dto.request.ContainerPositionRequest;
 import com.avfallskompassen.dto.request.WasteRoomRequest;
 import com.avfallskompassen.exception.ResourceNotFoundException;
@@ -378,5 +379,58 @@ class WasteRoomServiceImplTest {
 
         assertEquals("WasteRoom with id: 99 can't be found", exception.getMessage());
         verify(wasteRoomRepository, never()).delete(any(WasteRoom.class));
+    }
+
+    @Test
+    void getActiveRoom_ValidRequest_ReturnsImgDTO() {
+        Long propertyId = 1L;
+
+        WasteRoom room = new WasteRoom();
+        room.setThumbnailUrl("https://image.url/room.png");
+
+        when(wasteRoomRepository.findByPropertyIdAndIsActiveTrue(propertyId))
+                .thenReturn(Optional.of(room));
+
+        WasteRoomImgDTO result = wasteRoomService.getActiveRoom(propertyId);
+
+        assertNotNull(result);
+        assertEquals("https://image.url/room.png", result.getThumbnailUrl());
+
+        verify(wasteRoomRepository, times(1))
+                .findByPropertyIdAndIsActiveTrue(propertyId);
+    }
+
+    @Test
+    void getActiveRoom_NoActiveRoom_ThrowsException() {
+        Long propertyId = 2L;
+
+        when(wasteRoomRepository.findByPropertyIdAndIsActiveTrue(propertyId))
+                .thenReturn(Optional.empty());
+
+        RuntimeException exception = assertThrows(RuntimeException.class, () ->
+                wasteRoomService.getActiveRoom(propertyId)
+        );
+
+        assertEquals("No active waste room found", exception.getMessage());
+
+        verify(wasteRoomRepository, times(1))
+                .findByPropertyIdAndIsActiveTrue(propertyId);
+    }
+
+    @Test
+    void getActiveRoom_RepositoryFailure_ThrowsException() {
+        Long propertyId = 3L;
+
+        when(wasteRoomRepository.findByPropertyIdAndIsActiveTrue(propertyId))
+                .thenThrow(new RuntimeException("Database down"));
+
+        RuntimeException exception = assertThrows(RuntimeException.class, () ->
+                wasteRoomService.getActiveRoom(propertyId)
+        );
+
+        assertEquals("Database down", exception.getMessage());
+
+        verify(wasteRoomRepository, times(1))
+                .findByPropertyIdAndIsActiveTrue(propertyId);
     }
 }
