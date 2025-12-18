@@ -32,12 +32,6 @@
 		</dependency>
 		<!-- Ensure Mockito works reliably across JDK versions by using inline mock maker -->
 		<dependency>
-			<groupId>org.mockito</groupId>
-			<artifactId>mockito-inline</artifactId>
-			<version>5.14.2</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
 			<groupId>com.h2database</groupId>
 			<artifactId>h2</artifactId>
 			<scope>test</scope>
