@@ -189,15 +189,6 @@ export default function NavBar() {
                   >
                     Planeringsverktyg
                   </NavLink>
-                  <button
-                    onClick={(e) => {
-                      e.preventDefault();
-                      handleNavigation('/reports');
-                    }}
-                    className={`nav-link hover:text-white transition-colors ${location.pathname === '/reports' ? 'nav-link-active' : ''}`}
-                  >
-                    Rapporter
-                  </button>
                   <div className="flex items-center gap-3">
                     {user ? (
                       <button
@@ -265,16 +256,6 @@ export default function NavBar() {
                   Statistik
                 </button>
                 <NavLink to="/planningTool" onClick={resetPlanningToolState} className="text-nsr-ink">Planeringsverktyg</NavLink>
-                <button 
-                  onClick={(e) => {
-                    e.preventDefault();
-                    setOpen(false);
-                    handleNavigation('/reports');
-                  }}
-                  className="text-left text-nsr-ink"
-                >
-                  Rapporter
-                </button>
                 {user ? (
                   <button onClick={handleLogout} className="text-left text-nsr-ink">Logga ut</button>
                 ) : (

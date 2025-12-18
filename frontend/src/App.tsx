@@ -6,7 +6,6 @@ import RegisterPage from './pages/RegisterPage';
 import PropertyPage from './pages/PropertyPage';
 import StatisticsPage from './pages/StatisticsPage';
 import StatisticsOverviewPage from './pages/StatisticsOverviewPage';
-import ReportsPage from './pages/ReportsPage';
 import NotificationCenter from './components/NotificationCenter';
 import { currentUser } from './lib/Auth';
 import PlanningTool from './pages/PlanningTool/PlanningTool';
@@ -221,14 +220,7 @@ export default function App() {
               </ProtectedRoute>
             }
           />
-          <Route
-            path="/reports"
-            element={
-              <ProtectedRoute>
-                <ReportsPage />
-              </ProtectedRoute>
-            }
-          />
+
           </Routes>
         </div>
         <Footer />
