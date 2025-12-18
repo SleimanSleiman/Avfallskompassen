@@ -238,7 +238,8 @@ public class PropertyController {
     public ResponseEntity<PropertyDTO> getPropertyById(
             @PathVariable Long id, 
             @RequestHeader(value = "X-Username", required = false) String username) {
-        
+        System.out.println("PropertyController.getPropertyById - id=" + id + ", X-Username=" + username);
+
         if (username == null || username.isEmpty()) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }

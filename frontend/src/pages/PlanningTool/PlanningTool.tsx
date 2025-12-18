@@ -86,9 +86,16 @@ export default function PlanningTool({ isAdminMode = false, property }: Planning
     } = useRoom();
 
     useEffect(() => {
-        if (room?.propertyId) {
-            getProperty(room.propertyId).then(setLoadedProperty).catch(console.error);
+        if (!room?.propertyId) return;
+
+        // If a property was passed in (admin viewing another user's property),
+        // use it directly instead of calling the ownership-restricted API.
+        if (property && property.id === room.propertyId) {
+            setLoadedProperty(property);
+            return;
         }
+
+        getProperty(room.propertyId).then(setLoadedProperty).catch(console.error);
     }, [room?.propertyId]);
     
     /* ──────────────── Door state & logic ──────────────── */
