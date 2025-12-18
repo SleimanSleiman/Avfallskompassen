@@ -63,6 +63,7 @@ export function useRoom() {
           height: mmToPixels(containerInfo.depth),
           container: containerInfo,
           rotation: c.angle ?? 0,
+          lockILock: c.hasLockILock ?? false,
         };
       });
 

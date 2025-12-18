@@ -53,7 +53,7 @@ describe("ActionPanel", () => {
     it("renders correctly for a selected container", () => {
         renderActionPanel({ selectedContainerId: mockContainer.id });
 
-        expect(screen.getByText("240 L")).toBeDefined();
+        expect(screen.getAllByText("240 L").length).toBeGreaterThan(0);
         expect(screen.getByTestId("mock-tooltip")).toBeDefined();
 
         fireEvent.click(screen.getByText("Information"));
@@ -99,15 +99,23 @@ describe("ActionPanel", () => {
 
     it("updates position when dragging the panel", () => {
         const setPos = vi.fn();
-        renderActionPanel({ selectedContainerId: mockContainer.id, pos: { left: 100, top: 100 }, setPos });
 
-        const panel = screen.getByText("240 L").closest("div")!;
+        const { container } = renderActionPanel({
+            selectedContainerId: mockContainer.id,
+            pos: { left: 100, top: 100 },
+            setPos,
+        });
+
+        const panel = container.querySelector(".cursor-grab") as HTMLElement;
+        expect(panel).toBeTruthy();
+
         fireEvent.mouseDown(panel, { clientX: 120, clientY: 140 });
         fireEvent.mouseMove(window, { clientX: 150, clientY: 170 });
         fireEvent.mouseUp(window);
 
         expect(setPos).toHaveBeenCalled();
-        const lastCall = setPos.mock.calls[setPos.mock.calls.length - 1][0];
+
+        const lastCall = setPos.mock.calls.at(-1)[0];
         expect(lastCall.left).toBeGreaterThanOrEqual(0);
         expect(lastCall.top).toBeGreaterThanOrEqual(0);
     });

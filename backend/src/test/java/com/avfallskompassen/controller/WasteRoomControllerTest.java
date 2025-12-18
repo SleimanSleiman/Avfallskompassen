@@ -48,8 +48,8 @@ class WasteRoomControllerTest {
     @Test
     void createWasteRoom_ReturnOK() throws Exception{
         List<ContainerPositionDTO> containers = List.of(
-                new ContainerPositionDTO(1L,2,2,0,3L,5L),
-                new ContainerPositionDTO(2L,4,4,90,4L,5L)
+                new ContainerPositionDTO(1L,2,2,0,true,3L,5L),
+                new ContainerPositionDTO(2L,4,4,90,false,4L,5L)
         );
 
         List<DoorDTO> doors = List.of(
@@ -155,8 +155,8 @@ class WasteRoomControllerTest {
     @Test
     void updateWasteRoom_ReturnOK() throws Exception{
         List<ContainerPositionDTO> containers = List.of(
-                new ContainerPositionDTO(1L, 2, 2, 0, 3L, 5L),
-                new ContainerPositionDTO(2L, 4, 4, 90, 4L, 5L)
+                new ContainerPositionDTO(1L, 2, 2, 0, true,3L, 5L),
+                new ContainerPositionDTO(2L, 4, 4, 90, false, 4L, 5L)
         );
 
         List<DoorDTO> doors = List.of(

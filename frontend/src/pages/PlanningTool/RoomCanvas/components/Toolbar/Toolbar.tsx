@@ -345,7 +345,7 @@ export default function Toolbar({
             {/* Selected container information */}
             {selectedContainerInfo && (
                 <ContainerInfo
-                    container={selectedContainerInfo}
+                    c={selectedContainerInfo}
                     onClose={() => setSelectedContainerInfo(null)}
                     pos={containerInfoPos}
                     setPos={setContainerInfoPos}

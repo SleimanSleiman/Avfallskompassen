@@ -35,6 +35,7 @@ export type ContainerInRoom = {
     width: number;
     height: number;
     rotation: number;
+    lockILock: boolean;
 };
 
 export type OtherObjectInRoom = {

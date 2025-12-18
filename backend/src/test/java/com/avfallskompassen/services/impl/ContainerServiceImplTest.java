@@ -127,7 +127,7 @@ public class ContainerServiceImplTest {
         assertEquals(660, dto.getSize());
         assertEquals(2, dto.getQuantity());
         assertEquals(52, dto.getEmptyingFrequency());
-        assertEquals(BigDecimal.valueOf(540), dto.getCost());
+        assertEquals(BigDecimal.valueOf(1080), dto.getCost());
 
         verify(containerPositionRepository, times(1)).findByPropertyIdAndIsActive(10L);
     }

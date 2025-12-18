@@ -232,6 +232,7 @@ public class WasteRoomServiceImpl implements WasteRoomService {
             container.setX(request.getX());
             container.setY(request.getY());
             container.setAngle(request.getAngle());
+            container.setHasLockILock(request.getHasLockILock());
             container.setWasteRoom(wasteRoom);
             containerPositions.add(container);
         }

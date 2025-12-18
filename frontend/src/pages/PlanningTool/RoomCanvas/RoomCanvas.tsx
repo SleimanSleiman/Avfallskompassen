@@ -57,6 +57,7 @@ type RoomCanvasProps = {
     moveAllContainers: (dx: number, dy: number) => void;
     setSelectedContainerInfo: (v: ContainerDTO | null) => void;
     selectedContainerInfo: ContainerDTO | null;
+    closeContainerInfo: () => void;
     draggedContainer: ContainerDTO | null;
     getContainerZones: (excludeId?: number) => { x: number; y: number; width: number; height: number }[];
 
@@ -88,7 +89,7 @@ type RoomCanvasProps = {
     setSelectedSize: Dispatch<SetStateAction<{ [key: number]: number | null }>>;
     isLoadingContainers: boolean;
     fetchContainers: (service: { id: number; name: string }) => Promise<void>;
-    handleAddContainer: (container: ContainerDTO, position?: { x: number; y: number }) => void;
+    handleAddContainer: (container: ContainerDTO, position?: { x: number; y: number }, lockILock?: boolean) => void;
     onContainerPanelHeightChange?: (height: number) => void;
     setDraggedContainer: Dispatch<SetStateAction<ContainerDTO | null>>;
 
@@ -129,6 +130,7 @@ export default function RoomCanvas({
     moveAllContainers,
     setSelectedContainerInfo,
     selectedContainerInfo,
+    closeContainerInfo,
     draggedContainer,
     getContainerZones,
 

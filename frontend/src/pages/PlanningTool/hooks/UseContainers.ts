@@ -96,7 +96,7 @@ export function useContainers(
 
     /* ──────────────── Containers State ──────────────── */
     const { state: containersInRoom, save: saveContainers, undo, redo } = useLayoutHistory<ContainerInRoom[]>([]);
-    const [selectedContainerInfo, setSelectedContainerInfo] = useState<ContainerDTO | null>(null);
+    const [selectedContainerInfo, setSelectedContainerInfo] = useState<ContainerInRoom | null>(null);
     const [draggedContainer, setDraggedContainer] = useState<ContainerDTO | null>(null);
     const [availableContainers, setAvailableContainers] = useState<ContainerDTO[]>([]);
     const [isLoadingContainers, setIsLoadingContainers] = useState(false);
@@ -106,7 +106,7 @@ export function useContainers(
     const stageWrapperRef = useRef<HTMLDivElement | null>(null);
 
     //Add a new container to the room
-    const handleAddContainer = (container: ContainerDTO, position?: { x: number; y: number }) => {
+    const handleAddContainer = (container: ContainerDTO, position?: { x: number; y: number}, lockILock: boolean = false ) => {
         let { x, y } = calculateInitialPosition(room, container, position);
         const newRect = createContainerRect(container, x, y);
 
@@ -153,6 +153,7 @@ export function useContainers(
             width: newRect.width,
             height: newRect.height,
             rotation: 0,
+            lockILock,
         };
 
         handleSelectContainer(newContainer.id);
@@ -191,6 +192,10 @@ export function useContainers(
         setSelectedContainerId(id);
         setSelectedDoorId(null);
         setSelectedOtherObjectId(null);
+
+        if (selectedContainerInfo) {
+            handleShowContainerInfo(id);
+        }
     };
 
     //Container rotation
@@ -204,7 +209,7 @@ export function useContainers(
     //Show container info in sidebar
     const handleShowContainerInfo = (id: number) => {
         const container = containersInRoom.find(c => c.id === id);
-        if (container) setSelectedContainerInfo(container.container);
+        if (container) setSelectedContainerInfo(container);
     };
 
     /* ──────────────── Drag & Drop Handlers ──────────────── */
@@ -244,6 +249,20 @@ export function useContainers(
     const handleStageDragLeave = (event: ReactDragEvent<HTMLDivElement>) => {
         if (event.currentTarget.contains(event.relatedTarget as Node)) return;
         setIsStageDropActive(false);
+    };
+
+    const handleAddLockILock = (id: number) => {
+        const newState = containersInRoom.map(c =>
+            c.id === id ? { ...c, lockILock: true } : c
+        );
+        saveContainers(newState);
+    };
+
+    const handleRemoveLockILock = (id: number) => {
+        const newState = containersInRoom.map(c =>
+            c.id === id ? { ...c, lockILock: false } : c
+        );
+        saveContainers(newState);
     };
 
     /* ──────────────── API Fetch ──────────────── */
@@ -361,6 +380,8 @@ export function useContainers(
         moveAllContainers,
         handleSelectContainer,
         handleRotateContainer,
+        handleAddLockILock,
+        handleRemoveLockILock,
 
         fetchAvailableContainers,
 

@@ -29,6 +29,7 @@ export type ContainerPositionRequest = {
     x: number;
     y: number;
     angle: number;
+    hasLockILock?: boolean;
 }
 
 export type OtherObjectRequest = {
