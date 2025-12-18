@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import PlanningTool from '../PlanningTool/PlanningTool';
 import type { AdminUser } from '../AdminPage';
 import type { AdminProperty, RoomPlan } from './AdminUserDetail';
@@ -19,7 +19,17 @@ type AdminPlanningEditorProps = {
 };
 
 // Wrapper component that ensures localStorage is set before PlanningTool mounts
-function PlanningToolWrapper({ planData, isLoading, property }: { planData: any; isLoading: boolean; property?: any }) {
+function PlanningToolWrapper({
+  planData,
+  isLoading,
+  property,
+  onGenerateThumbnail,
+}: {
+  planData: any;
+  isLoading: boolean;
+  property?: any;
+  onGenerateThumbnail: (fn: () => string | null) => void;
+}) {
   const [initialized, setInitialized] = useState(false);
 
   if (isLoading) {
@@ -45,7 +55,13 @@ function PlanningToolWrapper({ planData, isLoading, property }: { planData: any;
   }
 
   if (!planData || !property) return <LoadingBar />;
-  return <PlanningTool isAdminMode={true} property={property} />;
+  return (
+    <PlanningTool
+      isAdminMode={true}
+      property={property}
+      onGenerateThumbnail={onGenerateThumbnail}
+    />
+  );
 }
 
 export default function AdminPlanningEditor({
@@ -62,6 +78,7 @@ export default function AdminPlanningEditor({
   const [versionToReplace, setVersionToReplace] = useState<number | null>(null);
   const [planData, setPlanData] = useState<any>(null);
   const [isLoadingRoom, setIsLoadingRoom] = useState(true);
+  const generateThumbnailRef = useRef<(() => string | null) | null>(null);
 
   const [msg, setMsg] = useState<string>('');
   const [error, setError] = useState<string>('');
@@ -216,6 +233,9 @@ export default function AdminPlanningEditor({
       const roomX = currentPlanData.x !== undefined ? currentPlanData.x : selectedVersion.x ?? 150;
       const roomY = currentPlanData.y !== undefined ? currentPlanData.y : selectedVersion.y ?? 150;
 
+      const thumbnailBase64 =
+        generateThumbnailRef.current?.() ?? null;
+
       const requestPayload = {
         length: currentPlanData.width || selectedVersion.roomHeight,
         width: currentPlanData.length || selectedVersion.roomWidth,
@@ -227,7 +247,8 @@ export default function AdminPlanningEditor({
         propertyId: property.id,
         versionName: versionName || undefined,
         adminUsername,
-        versionToReplace: versionToReplace || undefined
+        versionToReplace: versionToReplace || undefined,
+        thumbnailBase64,
       };
 
         if (requestPayload.length > 9) {
@@ -384,6 +405,7 @@ export default function AdminPlanningEditor({
               planData={planData}
               isLoading={isLoadingRoom}
               property={planData.property}
+              onGenerateThumbnail={(fn) => (generateThumbnailRef.current = fn)}
             />
           )}
         </div>

@@ -43,9 +43,10 @@ import "driver.js/dist/driver.css";
 type PlanningToolProps = {
     isAdminMode?: boolean;
     property?: Property;
+    onGenerateThumbnail?: (fn: () => string | null) => void;
 };
 
-export default function PlanningTool({ isAdminMode = false, property }: PlanningToolProps) {
+export default function PlanningTool({ isAdminMode = false, property, onGenerateThumbnail }: PlanningToolProps) {
     const navigate = useNavigate();
     const { setHasUnsavedChanges } = useUnsavedChanges();
 
@@ -618,6 +619,7 @@ const hasUnsavedChangesRef = useRef(false);
                         hasUnsavedChanges={hasUnsavedChanges}
                         onClose={handleCloseRoom}
                         existingNames={loadedProperty?.wasteRooms?.map(r => r.name || "") || []}
+                        onGenerateThumbnail={onGenerateThumbnail}
                     />
 
                     {/* ActionPanel for selected container or door */}

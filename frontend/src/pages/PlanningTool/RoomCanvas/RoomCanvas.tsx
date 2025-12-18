@@ -9,7 +9,7 @@
  * - Blocked zones overlay when dragging containers or doors.
  */
 import { Stage, Layer } from "react-konva";
-import { useState, type Dispatch, type SetStateAction, useRef} from "react";
+import { useState, useEffect, type Dispatch, type SetStateAction, useRef} from "react";
 import RoomShape from "./components/Room/RoomShape";
 import CornerHandles from "./components/Room/CornerHandles";
 import BlockedZones from "./components/Room/BlockedZones"
@@ -101,6 +101,7 @@ type RoomCanvasProps = {
     hasUnsavedChanges?: () => boolean;
     onClose?: () => void;
     existingNames?: string[];
+    onGenerateThumbnail?: (fn: () => string | null) => void;
 };
 
 export default function RoomCanvas({
@@ -174,6 +175,7 @@ export default function RoomCanvas({
     hasUnsavedChanges = () => false,
     onClose,
     existingNames = [],
+    onGenerateThumbnail,
 }: RoomCanvasProps) {
     const [isDraggingContainer, setIsDraggingContainer] = useState(false);
     const [isDraggingOtherObject, setIsDraggingOtherObject] = useState(false);
@@ -230,6 +232,12 @@ export default function RoomCanvas({
 
         return uri;
     };
+
+    useEffect(() => {
+      if (onGenerateThumbnail) {
+        onGenerateThumbnail(generateThumbnail);
+      }
+    }, [onGenerateThumbnail]);
 
     const closePanels = () => {
         setSelectedContainerInfo(null);

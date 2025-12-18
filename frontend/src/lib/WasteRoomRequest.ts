@@ -83,6 +83,7 @@ export type AdminVersionRequest = {
     versionName?: string;
     adminUsername?: string;
     versionToReplace?: number;
+    thumbnailBase64?: string;
 }
 
 export async function createAdminVersion(

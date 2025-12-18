@@ -476,6 +476,9 @@ public class WasteRoomServiceImpl implements WasteRoomService {
         newVersion.setIsActive(true);
         WasteRoom savedRoom = wasteRoomRepository.save(newVersion);
 
+        saveThumbnail(request.getThumbnailBase64(), savedRoom.getId(), savedRoom);
+        savedRoom = wasteRoomRepository.save(savedRoom);
+
         User ownerOfProperty = propertyRepository.findCreatedByUserByPropertyId(propertyId);
         activityService.saveActivity(ownerOfProperty, ActivityType.ADMIN_SAVED_VERSION_OF_WASTE_ROOM, "En admin har skapat en egen version av ett miljö rum i fastigheten " + property.getAddress());
         
