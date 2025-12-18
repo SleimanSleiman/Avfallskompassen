@@ -98,6 +98,18 @@ public interface PropertyRepository extends JpaRepository<Property, Long> {
 """)
     List<Object[]> getUserPropertyAndWasteRoomStats();
 
+    /**
+     * Returns total number of waste room versions per property for a given user.
+     */
+    @Query("""
+        SELECT p.id, COUNT(wr.id)
+        FROM Property p
+        LEFT JOIN p.wasteRooms wr
+        WHERE p.createdBy.username = :username
+        GROUP BY p.id
+    """)
+    List<Object[]> getPropertyRoomVersionCountsByUser(@Param("username") String username);
+
 
 
 

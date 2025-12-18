@@ -1,15 +1,23 @@
 package com.avfallskompassen.controller;
 
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.avfallskompassen.dto.AdminDataDTO;
 import com.avfallskompassen.dto.CollectionFeeAdminDTO;
 import com.avfallskompassen.dto.ContainerPlanAdminDTO;
 import com.avfallskompassen.dto.LockTypeDto;
 import com.avfallskompassen.dto.request.UpdateCostRequest;
 import com.avfallskompassen.services.AdminDataService;
+
 import jakarta.validation.Valid;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
 
 /**
  * Admin-only controller for managing configurable data (prices, costs, etc.)
