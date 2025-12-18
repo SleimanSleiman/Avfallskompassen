@@ -126,6 +126,29 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public void changePassword(String username, String oldPassword, String newPassword) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new IllegalArgumentException("Användare hittades inte"));
+
+        if (!passwordEncoder.matches(oldPassword, user.getPassword())) {
+            throw new IllegalArgumentException("Nuvarande lösenord stämmer inte");
+        }
+
+        if (newPassword.length() < 6) {
+            throw new IllegalArgumentException("Lösenordet måste vara minst 6 tecken");
+        }
+
+        if (passwordEncoder.matches(newPassword, user.getPassword())) {
+            throw new IllegalArgumentException("Det nya lösenordet måste skilja sig från det gamla");
+        }
+
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+        // Skip activity logging here to avoid constraint issues on existing databases that
+        // may not have the CHANGED_PASSWORD enum value yet.
+    }
+
+    @Override
     public boolean hasSeenPlanningToolManual(String username) {
         return userRepository.findByUsername(username)
                 .map(User::getHasSeenPlanningToolManual)
