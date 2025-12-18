@@ -114,7 +114,7 @@ export default function PlanVersionDropdown({
         onClick={() => setOpen((prev) => !prev)}
         className="btn-secondary-sm inline-flex w-full items-center justify-center gap-2 sm:w-auto sm:justify-center"
       >
-        <span>Planversioner</span>
+        <span>Planversioner ({rooms.length})</span>
         <svg
           className={`h-4 w-4 transition-transform ${
             open ? 'rotate-180' : ''
