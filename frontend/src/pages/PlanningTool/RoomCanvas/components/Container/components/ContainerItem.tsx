@@ -19,6 +19,8 @@ export default function ContainerItem({
     handleSelectContainer,
     setIsDraggingContainer,
     isContainerInsideRoom,
+    getWallInsetForContainer,
+    getSnappedRotationForContainer
 }) {
     //Store the last valid (non-overlapping) position for snap-back functionality
     const [lastValidPos, setLastValidPos] = useState({
@@ -49,6 +51,8 @@ export default function ContainerItem({
             setLastValidPos={setLastValidPos}
             isOverZone={isOverZone}
             setIsOverZone={setIsOverZone}
+            getWallInsetForContainer={getWallInsetForContainer}
+            getSnappedRotationForContainer={getSnappedRotationForContainer}
         >
             {(dragProps) => (
                 <ContainerImage

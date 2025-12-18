@@ -101,6 +101,8 @@ type RoomCanvasProps = {
     hasUnsavedChanges?: () => boolean;
     onClose?: () => void;
     existingNames?: string[];
+    getWallInsetForContainer,
+    getSnappedRotationForContainer,
 };
 
 export default function RoomCanvas({
@@ -174,6 +176,9 @@ export default function RoomCanvas({
     hasUnsavedChanges = () => false,
     onClose,
     existingNames = [],
+    getWallInsetForContainer,
+    getSnappedRotationForContainer,
+    
 }: RoomCanvasProps) {
     const [isDraggingContainer, setIsDraggingContainer] = useState(false);
     const [isDraggingOtherObject, setIsDraggingOtherObject] = useState(false);
@@ -377,6 +382,8 @@ export default function RoomCanvas({
                                 getContainerZones={getContainerZones}
                                 setIsDraggingContainer={setIsDraggingContainer}
                                 isContainerInsideRoom={isContainerInsideRoom}
+                                getWallInsetForContainer={getWallInsetForContainer}
+                                getSnappedRotationForContainer={getSnappedRotationForContainer}
                             />
 
                             {/* Other objects layer */}
