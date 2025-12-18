@@ -57,6 +57,7 @@ export default function AdminUserDetail({ user, onBack }: AdminUserDetailProps) 
   const [properties, setProperties] = useState<AdminProperty[]>([]);
   const [roomPlans, setRoomPlans] = useState<RoomPlan[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingPlansForPropertyId, setLoadingPlansForPropertyId] = useState<number | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [expandedProperties, setExpandedProperties] = useState<Set<number>>(new Set());
   const [deleteConfirm, setDeleteConfirm] = useState<{ planId: number; versionNumber: number; wasteRoomId: number } | null>(null);
@@ -93,7 +94,7 @@ export default function AdminUserDetail({ user, onBack }: AdminUserDetailProps) 
    * och bygg RoomPlan-objekt endast för den fastigheten.
    */
   const fetchPlansForProperty = async (prop: AdminProperty): Promise<RoomPlan[]> => {
-    const rooms = await get<any[]>(`/api/properties/${prop.id}/wasterooms`);
+  const rooms = await get<any[]>(`/api/properties/${prop.id}/wasterooms`);
 
     const roomsByName = new Map<string, any[]>();
     (rooms || []).forEach((r: any) => {
@@ -196,6 +197,8 @@ export default function AdminUserDetail({ user, onBack }: AdminUserDetailProps) 
   }, [properties, searchQuery]);
 
   const toggleProperty = async (propertyId: number) => {
+    // Mark this property as loading its plans
+    setLoadingPlansForPropertyId(propertyId);
     setExpandedProperties((prev) => {
       const newSet = new Set(prev);
       if (newSet.has(propertyId)) {
@@ -216,7 +219,12 @@ export default function AdminUserDetail({ user, onBack }: AdminUserDetailProps) 
         setRoomPlans((prev) => [...prev.filter((p) => p.propertyId !== propertyId), ...newPlans]);
       } catch (e) {
         console.warn('Failed to load room plans for property', propertyId, e);
+      } finally {
+        setLoadingPlansForPropertyId(null);
       }
+    } else {
+      // No need to load, clear loading state
+      setLoadingPlansForPropertyId(null);
     }
   };
 
@@ -512,9 +520,22 @@ export default function AdminUserDetail({ user, onBack }: AdminUserDetailProps) 
                             {planCount} {planCount === 1 ? 'planering' : 'planeringar'}
                           </span>
                         </div>
-                        {planCount === 0 ? (
+
+                        {/* Loading state för just denna fastighets planeringar */}
+                        {loadingPlansForPropertyId === property.id ? (
+                          <div className="space-y-4">
+                            <div className="rounded-lg border-2 border-gray-200 bg-gray-50/50 p-3 sm:p-5">
+                              <div className="mb-3 h-4 w-40 rounded-full bg-gray-200 animate-pulse" />
+                              <div className="mb-3 h-3 w-24 rounded-full bg-gray-100 animate-pulse" />
+                              <div className="mb-4 h-16 rounded-lg bg-gray-100 animate-pulse" />
+                              <div className="h-20 rounded-lg bg-gray-100 animate-pulse" />
+                            </div>
+                          </div>
+                        ) : planCount === 0 ? (
                           <div className="py-8 text-center">
-                            <p className="text-sm text-gray-500 font-medium">Inga planeringar för denna fastighet</p>
+                            <p className="text-sm text-gray-500 font-medium">
+                              Inga planeringar för denna fastighet
+                            </p>
                           </div>
                         ) : (
                           <div className="space-y-4">
