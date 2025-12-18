@@ -42,30 +42,88 @@ function calculateInitialPosition(
     };
 }
 
+function buildFrontBlockedZone(c: ContainerInRoom): Zone | null {
+    const BLOCK_DEPTH = mmToPixels(300);
+    let FRONT_GAP = mmToPixels(250);
+    const rotation = (c.rotation ?? 0) % 360;
+
+    if (c.container?.size === 660) {
+        FRONT_GAP = 0;
+    }
+
+    switch (rotation) {
+        case 0: // facing DOWN
+            return {
+                x: c.x,
+                y: c.y + c.height + FRONT_GAP,
+                width: c.width,
+                height: BLOCK_DEPTH,
+            };
+
+        case 90: // facing LEFT
+            return {
+                x: c.x - BLOCK_DEPTH - FRONT_GAP,
+                y: c.y,
+                width: BLOCK_DEPTH,
+                height: c.height,
+            };
+
+        case 180: // facing UP
+            return {
+                x: c.x,
+                y: c.y - BLOCK_DEPTH - FRONT_GAP,
+                width: c.width,
+                height: BLOCK_DEPTH,
+            };
+
+        case 270: // facing RIGHT
+            return {
+                x: c.x + c.width + FRONT_GAP,
+                y: c.y,
+                width: BLOCK_DEPTH,
+                height: c.height,
+            };
+
+        default:
+            return null;
+    }
+}
+
+
 //Build "no-overlap" zones for existing containers
 function buildContainerZones(
     containers: ContainerInRoom[],
     excludeId?: number
 ): Zone[] {
-    const buffer = 0.1 / SCALE; //10cm buffer between containers
-    return containers
-        .filter(c => c.id !== excludeId)
-        .map(c => {
-            const rotation = c.rotation || 0;
-            const rot = rotation % 180;
-            const width = rot === 90 ? c.height : c.width;
-            const height = rot === 90 ? c.width : c.height;
+    const buffer = 0.1 / SCALE; // 10 cm buffer
+    const zones: Zone[] = [];
 
-            const centerX = c.x + c.width / 2;
-            const centerY = c.y + c.height / 2;
+    for (const c of containers) {
+        if (c.id === excludeId) continue;
 
-            return {
-                x: centerX - (width + buffer * 2) / 2,
-                y: centerY - (height + buffer * 2) / 2,
-                width: width + buffer * 2,
-                height: height + buffer * 2,
-            };
+        // ── Container body (existing behavior)
+        const rotation = c.rotation || 0;
+        const rot = rotation % 180;
+        const width = rot === 90 ? c.height : c.width;
+        const height = rot === 90 ? c.width : c.height;
+
+        const centerX = c.x + c.width / 2;
+        const centerY = c.y + c.height / 2;
+
+        zones.push({
+            x: centerX - (width + buffer * 2) / 2,
+            y: centerY - (height + buffer * 2) / 2,
+            width: width + buffer * 2,
+            height: height + buffer * 2,
         });
+
+        const blocked = buildFrontBlockedZone(c);
+        if (blocked) {
+            zones.push(blocked);
+        }
+    }
+
+    return zones;
 }
 
 function validateContainerPlacement(
