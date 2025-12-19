@@ -124,6 +124,7 @@ export default function AdminPlanningEditor({
             name: plan.name,
             doors: wasteRoom.doors || [],
             containers: wasteRoom.containers || [],
+            otherObjects: wasteRoom.otherObjects || []
           });
         } else {
           console.warn('No wasteRoomId found, using fallback version data');
@@ -141,6 +142,7 @@ export default function AdminPlanningEditor({
             name: plan.name,
             doors: selectedVersion.doors,
             containers: selectedVersion.containers,
+            otherObjects: selectedVersion.otherObjects,
           });
         }
       } catch (error) {
@@ -171,6 +173,7 @@ export default function AdminPlanningEditor({
         containerCount: currentPlanData.containers?.length,
         hasDoors: !!currentPlanData.doors,
         doorCount: currentPlanData.doors?.length,
+
           x: currentPlanData.x,
           y: currentPlanData.y
       });
@@ -233,6 +236,18 @@ export default function AdminPlanningEditor({
       const roomX = currentPlanData.x !== undefined ? currentPlanData.x : selectedVersion.x ?? 150;
       const roomY = currentPlanData.y !== undefined ? currentPlanData.y : selectedVersion.y ?? 150;
 
+      const rawOtherObjects = currentPlanData.otherObjects || selectedVersion.otherObjects || [];
+
+      const otherObjects: OtherObjectRequest[] = rawOtherObjects.map((o: any) => ({
+        name: o.name,
+        x: o.x ?? 0,
+        y: o.y ?? 0,
+        width: o.width ?? 0,
+        depth: o.depth ?? o.height ?? 0,
+        rotation: o.rotation ?? 0,
+      }));
+
+
       const thumbnailBase64 =
         generateThumbnailRef.current?.() ?? null;
 
@@ -243,7 +258,7 @@ export default function AdminPlanningEditor({
         y: roomY,
         doors,
         containers,
-        otherObjects: [],
+        otherObjects,
         propertyId: property.id,
         versionName: versionName || undefined,
         adminUsername,
@@ -300,6 +315,7 @@ export default function AdminPlanningEditor({
           versionName: versionName || undefined,
           doors: selectedVersion.doors,
           containers: selectedVersion.containers,
+          otherObjects: selectedVersion.otherObjects,
           versionToReplace: versionToReplace || undefined,
         },
         adminUsername
