@@ -76,6 +76,7 @@ export function useWasteRoomRequestBuilder(
                 x: c.x,
                 y: c.y,
                 angle: c.rotation,
+                hasLockILock: c.lockILock,
             })),
             otherObjects: validObjects.map(o => ({
                 name: o.name,

@@ -1,9 +1,8 @@
 package com.avfallskompassen.services;
 
-import com.avfallskompassen.dto.LockTypeDto;
-import com.avfallskompassen.model.LockType;
-
 import java.util.List;
+
+import com.avfallskompassen.dto.LockTypeDto;
 
 /**
  * Interface class for the LockTypeServiceImpl

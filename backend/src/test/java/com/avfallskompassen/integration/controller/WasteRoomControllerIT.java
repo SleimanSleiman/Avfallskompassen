@@ -176,7 +176,7 @@ public class WasteRoomControllerIT {
         updateRequest.setWidth(12.0);
         updateRequest.setName("Uppdatera rummet");
         updateRequest.setDoors(List.of(new DoorRequest(2.0, 90, 60,0, "bottom", "inward")));
-        updateRequest.setContainers(List.of(new ContainerPositionRequest(containerPlan.getId(), 70, 80, 100)));
+        updateRequest.setContainers(List.of(new ContainerPositionRequest(containerPlan.getId(), 70, 80, 100, true)));
 
         String updateJson = objectMapper.writeValueAsString(updateRequest);
 
@@ -318,7 +318,7 @@ public class WasteRoomControllerIT {
         request.setX(1.0);
         request.setY(2.0);
         request.setName("Nuvarande rum");
-        request.setContainers(List.of(new ContainerPositionRequest(containerPlan.getId(), 50, 50, 90)));
+        request.setContainers(List.of(new ContainerPositionRequest(containerPlan.getId(), 50, 50, 90, true)));
         request.setDoors(List.of(new DoorRequest(1.2, 80, 50,0, "top","outward")));
         wasteRoomRequest = request;
     }

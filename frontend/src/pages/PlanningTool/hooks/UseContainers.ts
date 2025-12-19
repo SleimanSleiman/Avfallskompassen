@@ -96,7 +96,7 @@ export function useContainers(
 
     /* ──────────────── Containers State ──────────────── */
     const { state: containersInRoom, save: saveContainers, undo, redo } = useLayoutHistory<ContainerInRoom[]>([]);
-    const [selectedContainerInfo, setSelectedContainerInfo] = useState<ContainerDTO | null>(null);
+    const [selectedContainerInfo, setSelectedContainerInfo] = useState<ContainerInRoom | null>(null);
     const [draggedContainer, setDraggedContainer] = useState<ContainerDTO | null>(null);
     const [availableContainers, setAvailableContainers] = useState<ContainerDTO[]>([]);
     const [isLoadingContainers, setIsLoadingContainers] = useState(false);
@@ -106,7 +106,7 @@ export function useContainers(
     const stageWrapperRef = useRef<HTMLDivElement | null>(null);
 
     //Add a new container to the room
-    const handleAddContainer = (container: ContainerDTO, position?: { x: number; y: number }) => {
+    const handleAddContainer = (container: ContainerDTO, position?: { x: number; y: number}, lockILock: boolean = false ) => {
         let { x, y } = calculateInitialPosition(room, container, position);
         const newRect = createContainerRect(container, x, y);
 
@@ -153,6 +153,7 @@ export function useContainers(
             width: newRect.width,
             height: newRect.height,
             rotation: 0,
+            lockILock,
         };
 
         handleSelectContainer(newContainer.id);
@@ -191,6 +192,10 @@ export function useContainers(
         setSelectedContainerId(id);
         setSelectedDoorId(null);
         setSelectedOtherObjectId(null);
+
+        if (selectedContainerInfo) {
+            handleShowContainerInfo(id);
+        }
     };
 
     //Container rotation
@@ -204,7 +209,7 @@ export function useContainers(
     //Show container info in sidebar
     const handleShowContainerInfo = (id: number) => {
         const container = containersInRoom.find(c => c.id === id);
-        if (container) setSelectedContainerInfo(container.container);
+        if (container) setSelectedContainerInfo(container);
     };
 
     /* ──────────────── Drag & Drop Handlers ──────────────── */
@@ -244,6 +249,20 @@ export function useContainers(
     const handleStageDragLeave = (event: ReactDragEvent<HTMLDivElement>) => {
         if (event.currentTarget.contains(event.relatedTarget as Node)) return;
         setIsStageDropActive(false);
+    };
+
+    const handleAddLockILock = (id: number) => {
+        const newState = containersInRoom.map(c =>
+            c.id === id ? { ...c, lockILock: true } : c
+        );
+        saveContainers(newState);
+    };
+
+    const handleRemoveLockILock = (id: number) => {
+        const newState = containersInRoom.map(c =>
+            c.id === id ? { ...c, lockILock: false } : c
+        );
+        saveContainers(newState);
     };
 
     /* ──────────────── API Fetch ──────────────── */
@@ -342,6 +361,48 @@ export function useContainers(
         }
     }, [doorZones]);
 
+    /* ──────────────── Wall helpers (used by ContainerDrag) ──────────────── */
+
+    // Tune wall inset by container size (in pixels)
+    const WALL_INSET_BY_SIZE: Record<number, number> = {
+        660: 12,
+        370: -1,
+        240: -4,
+        190: -4,
+    };
+
+    // Get wall inset for a specific container
+    const getWallInsetForContainer = (c: ContainerInRoom): number => {
+        return WALL_INSET_BY_SIZE[c.container?.size] ?? 0;
+    };
+
+    // Snap container rotation when close to a wall
+    const getSnappedRotationForContainer = (c: ContainerInRoom): number => {
+        const SNAP_DISTANCE = 20;
+
+        const leftDist = Math.abs(c.x - room.x);
+        const rightDist = Math.abs(room.x + room.width - (c.x + c.width));
+        const topDist = Math.abs(c.y - room.y);
+        const bottomDist = Math.abs(room.y + room.height - (c.y + c.height));
+
+        const min = Math.min(leftDist, rightDist, topDist, bottomDist);
+
+        if (min > SNAP_DISTANCE) return c.rotation ?? 0;
+
+        switch (min) {
+            case topDist:
+                return 0;
+            case rightDist:
+                return 90;
+            case bottomDist:
+                return 180;
+            case leftDist:
+                return 270;
+            default:
+                return c.rotation ?? 0;
+        }
+    };
+
     /* ──────────────── Return ──────────────── */
     return {
         containersInRoom,
@@ -361,6 +422,8 @@ export function useContainers(
         moveAllContainers,
         handleSelectContainer,
         handleRotateContainer,
+        handleAddLockILock,
+        handleRemoveLockILock,
 
         fetchAvailableContainers,
 
@@ -372,6 +435,9 @@ export function useContainers(
         handleShowContainerInfo,
 
         getContainerZones: (excludeId?: number) => buildContainerZones(containersInRoom, excludeId),
+
+        getWallInsetForContainer,
+        getSnappedRotationForContainer,
 
         undo,
         redo,

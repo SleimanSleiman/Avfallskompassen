@@ -19,11 +19,15 @@ public class ContainerPositionRequest {
     @NotNull
     private double angle;
 
-    public ContainerPositionRequest(Long id, double x, double y, double angle) {
+    @NotNull
+    private boolean hasLockILock;
+
+    public ContainerPositionRequest(Long id, double x, double y, double angle, boolean hasLockILock) {
         this.id = id;
         this.x = x;
         this.y = y;
         this.angle = angle;
+        this.hasLockILock = hasLockILock;
     }
 
     public Long getId() {
@@ -56,5 +60,13 @@ public class ContainerPositionRequest {
 
     public void setAngle(double angle) {
         this.angle = angle;
+    }
+
+    public boolean getHasLockILock() {
+        return hasLockILock;
+    }
+
+    public void setHasLockILock(boolean hasLockILock) {
+        this.hasLockILock = hasLockILock;
     }
 }

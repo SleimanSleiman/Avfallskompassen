@@ -86,9 +86,16 @@ export default function PlanningTool({ isAdminMode = false, property }: Planning
     } = useRoom();
 
     useEffect(() => {
-        if (room?.propertyId) {
-            getProperty(room.propertyId).then(setLoadedProperty).catch(console.error);
+        if (!room?.propertyId) return;
+
+        // If a property was passed in (admin viewing another user's property),
+        // use it directly instead of calling the ownership-restricted API.
+        if (property && property.id === room.propertyId) {
+            setLoadedProperty(property);
+            return;
         }
+
+        getProperty(room.propertyId).then(setLoadedProperty).catch(console.error);
     }, [room?.propertyId]);
     
     /* ──────────────── Door state & logic ──────────────── */
@@ -144,6 +151,8 @@ export default function PlanningTool({ isAdminMode = false, property }: Planning
         handleStageDragOver,
         handleStageDragLeave,
         handleRotateContainer,
+        handleAddLockILock,
+        handleRemoveLockILock,
         handleShowContainerInfo,
         selectedContainerInfo,
         setSelectedContainerInfo,
@@ -151,10 +160,9 @@ export default function PlanningTool({ isAdminMode = false, property }: Planning
         redo,
         getContainerZones,
         isContainerInsideRoom,
+        getWallInsetForContainer,
+        getSnappedRotationForContainer,
     } = useContainers(room, setSelectedContainerId, setSelectedDoorId, setSelectedOtherObjectId, getDoorZones(), getOtherObjectZones(),setError,setMsg, isDoorDragging);
-
-    // Track the saved state for comparison
-    // ...existing code...
 
     // Track the saved state for comparison
     const [savedRoomState, setSavedRoomState] = useState<{ room: any; doors: any; containers: any; otherObjects: any } | null>(null);
@@ -406,8 +414,9 @@ const hasUnsavedChangesRef = useRef(false);
 
     //Open ConfirmModal for unsaved changes during logout or navigation in site
     useEffect(() => {
-      hasUnsavedChangesRef.current = hasUnsavedChanges();
-      setHasUnsavedChanges(hasUnsavedChangesRef);
+            hasUnsavedChangesRef.current = hasUnsavedChanges();
+            // store boolean (not the ref object) in shared context
+            setHasUnsavedChanges(hasUnsavedChangesRef.current);
     }, [room, doors, containersInRoom, otherObjects, savedRoomState]);
 
     //Opens browser prompt for unsaved changes during exit or reload of page
@@ -618,6 +627,9 @@ const hasUnsavedChangesRef = useRef(false);
                         hasUnsavedChanges={hasUnsavedChanges}
                         onClose={handleCloseRoom}
                         existingNames={loadedProperty?.wasteRooms?.map(r => r.name || "") || []}
+
+                        getWallInsetForContainer={getWallInsetForContainer}
+                        getSnappedRotationForContainer={getSnappedRotationForContainer}
                     />
 
                     {/* ActionPanel for selected container or door */}
@@ -638,6 +650,8 @@ const hasUnsavedChangesRef = useRef(false);
                                 handleRotateContainer={handleRotateContainer}
                                 handleRotateOtherObject={handleRotateOtherObject}
                                 handleShowContainerInfo={handleShowContainerInfo}
+                                handleAddLockILock={handleAddLockILock}
+                                handleRemoveLockILock={handleRemoveLockILock}
                                 stageWrapperRef={stageWrapperRef}
                                 pos={actionPanelPos}
                                 setPos={setActionPanelPos}

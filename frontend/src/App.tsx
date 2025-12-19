@@ -3,6 +3,7 @@ import NavBar from './components/NavBar';
 import Footer from './components/Footer';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
+import ProfilePage from './pages/ProfilePage';
 import PropertyPage from './pages/PropertyPage';
 import StatisticsPage from './pages/StatisticsPage';
 import StatisticsOverviewPage from './pages/StatisticsOverviewPage';
@@ -27,6 +28,7 @@ function Dashboard() {
   const isAdmin = String(user?.role || '').toUpperCase().includes('ADMIN');
   const [activities, setActivities] = useState<Activity[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     setInactivityLogout(false);
@@ -36,11 +38,15 @@ function Dashboard() {
   useEffect(() => {
     async function fetchActivities() {
       setLoading(true);
+      setError(null);
       try {
+        console.log("Fetching activities...");
         const data = await getUsersLatestActivities(20);
-        setActivities(data);
+        console.log("Activities response:", data);
+        setActivities(Array.isArray(data) ? data : []);
       } catch (err) {
         console.error("Failed to fetch activities", err);
+        setError(err instanceof Error ? err.message : String(err));
       } finally {
         setLoading(false);
       }
@@ -139,7 +145,7 @@ function Dashboard() {
         )}
 
         {/* Recent Activity Section */}
-        <ActivityList activities={activities} loading={loading} />
+        <ActivityList activities={activities} loading={loading} error={error} />
       </div>
     </div>
   );
@@ -181,6 +187,11 @@ export default function App() {
             <Route path="/dashboard" element={
               <ProtectedRoute>
                 <Dashboard />
+              </ProtectedRoute>
+            } />
+            <Route path="/profile" element={
+              <ProtectedRoute>
+                <ProfilePage />
               </ProtectedRoute>
             } />
             <Route path="/properties" element={

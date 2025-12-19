@@ -5,6 +5,7 @@
 import type { DesignStats, DesignTypeStats, CombinedRow, BenchmarkDefinition } from "./types";
 import type { ContainerInRoom } from "../../lib/Types";
 import { normalizeWasteTypeKey, calculatePercentageDifference, computePerApartmentPerWeek, getTrend } from "./utils";
+import { getContainerCost } from "../../lib/Constants";
 
 //Build design stats from containers in the room
 export function buildDesignStats(containersInRoom: ContainerInRoom[]): DesignStats {
@@ -14,13 +15,14 @@ export function buildDesignStats(containersInRoom: ContainerInRoom[]): DesignSta
     let containerCount = 0;
 
     //Aggregate data for each container
-    containersInRoom.forEach(({ container }) => {
+    containersInRoom.forEach((c) => {
+        const { container } = c;
         const serviceName = container.serviceTypeName ?? container.name ?? "Övrigt";
         const key = normalizeWasteTypeKey(serviceName);
         const annualVolume = (container.size ?? 0) * (container.emptyingFrequencyPerYear ?? 0);
         const nominalVolume = container.size ?? 0;
         const frequency = container.emptyingFrequencyPerYear ?? 0;
-        const cost = Number(container.cost ?? 0) || 0;
+        const cost = getContainerCost(c);
 
         //Get existing stats for this type or initialize
         const current = typeMap.get(key) ?? {

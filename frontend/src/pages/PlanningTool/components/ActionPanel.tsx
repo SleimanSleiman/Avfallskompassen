@@ -4,7 +4,8 @@
  */
 import InfoTooltip from "./InfoTooltip";
 import type { ContainerInRoom as Container, Door, OtherObjectInRoom } from "../lib/Types";
-import { RotateCcw, Trash2, Info } from "lucide-react";
+import { LOCK_I_LOCK_COMPATIBLE_SIZES } from "../lib/Constants"
+import { RotateCcw, Trash2, Info, Vault } from "lucide-react";
 import { useRef, useState, useEffect } from 'react';
 
 /* ─────────────── ActionPanel Props ──────────────── */
@@ -26,6 +27,9 @@ type ActionPanelProps = {
     handleRotateOtherObject: (id: number) => void;
 
     handleShowContainerInfo: (id: number) => void;
+
+    handleAddLockILock: (containerId: number) => void;
+    handleRemoveLockILock: (containerId: number) => void;
 
     stageWrapperRef?: React.RefObject<HTMLDivElement | null>;
     pos: { left: number; top: number } | null;
@@ -51,6 +55,9 @@ export default function ActionPanel({
 
     handleShowContainerInfo,
 
+    handleAddLockILock,
+    handleRemoveLockILock,
+
     stageWrapperRef,
     pos,
     setPos,
@@ -68,11 +75,31 @@ export default function ActionPanel({
     const [dragging, setDragging] = useState(false);
     const [offset, setOffset] = useState({ x: 0, y: 0 });
 
+    // Helper function to shorten container names
+    const getShortContainerName = (name: string) => {
+        const mapping: Record<string, string> = {
+            "Pappersförpackningar": "Papper",
+            "Metallförpackningar": "Metall",
+            "Restavfall": "Rest",
+            "Matavfall": "Mat",
+        };
+        return mapping[name] ?? name; // default to original name if no mapping exists
+    };
+
     //Determine the name of the selected item
     const selectedName = (() => {
         if (selectedContainerId !== null) {
-            const container = containers.find((c) => c.id === selectedContainerId);
-            return container ? container.container.size + " L" : "Inget objekt valt";
+        const container = containers.find((c) => c.id === selectedContainerId);
+        if (!container) return "Inget objekt valt";
+
+        return (
+            <div className="flex flex-col">
+                <span>{container.container.size} L</span>
+                <span className="text-xs text-gray-500">
+                    {getShortContainerName(container.container.name)}
+                </span>
+            </div>
+        );
         } else if (selectedDoorId !== null) {
             const door = doors.find((d) => d.id === selectedDoorId);
             return door ? "Dörr " + door.width * 100 + "cm" : "Inget objekt valt";
@@ -82,6 +109,18 @@ export default function ActionPanel({
         }
         return "Inget objekt valt";
     })();
+
+    // Determine the selected container object
+    const selectedContainer = selectedContainerId !== null
+        ? containers.find(c => c.id === selectedContainerId)
+        : null;
+
+    const hasLockILock = !!selectedContainer?.lockILock;
+
+    // Define which sizes are compatible for lock-i-lock
+    const canAddLockILock = selectedContainer
+        ? LOCK_I_LOCK_COMPATIBLE_SIZES.includes(selectedContainer.container.size)
+        : false;
 
     //Determine button texts based on selection
     const rotateText =
@@ -250,6 +289,21 @@ export default function ActionPanel({
                             {removeText}
                         </span>
                     </button>
+                    {canAddLockILock && (
+                      <button
+                        onClick={() => {hasLockILock ? handleRemoveLockILock(selectedContainerId) : handleAddLockILock(selectedContainerId!)}}
+                        className={`flex flex-col items-center justify-center transition min-w-[64px] group ${
+                          hasLockILock
+                            ? "text-red-600 hover:text-red-800"
+                            : "text-green-700 hover:text-green-900"
+                        }`}
+                      >
+                        <Vault className="w-5 h-5" />
+                        <span className="text-xs font-medium max-h-0 overflow-hidden transition-all duration-300 group-hover:max-h-20">
+                          {hasLockILock ? "Ta bort lock-i-lock" : "Lägg till lock-i-lock"}
+                        </span>
+                      </button>
+                    )}
                 </div>
             </div>
         </div>

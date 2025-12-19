@@ -57,6 +57,7 @@ type RoomCanvasProps = {
     moveAllContainers: (dx: number, dy: number) => void;
     setSelectedContainerInfo: (v: ContainerDTO | null) => void;
     selectedContainerInfo: ContainerDTO | null;
+    closeContainerInfo: () => void;
     draggedContainer: ContainerDTO | null;
     getContainerZones: (excludeId?: number) => { x: number; y: number; width: number; height: number }[];
 
@@ -88,7 +89,7 @@ type RoomCanvasProps = {
     setSelectedSize: Dispatch<SetStateAction<{ [key: number]: number | null }>>;
     isLoadingContainers: boolean;
     fetchContainers: (service: { id: number; name: string }) => Promise<void>;
-    handleAddContainer: (container: ContainerDTO, position?: { x: number; y: number }) => void;
+    handleAddContainer: (container: ContainerDTO, position?: { x: number; y: number }, lockILock?: boolean) => void;
     onContainerPanelHeightChange?: (height: number) => void;
     setDraggedContainer: Dispatch<SetStateAction<ContainerDTO | null>>;
 
@@ -100,6 +101,8 @@ type RoomCanvasProps = {
     hasUnsavedChanges?: () => boolean;
     onClose?: () => void;
     existingNames?: string[];
+    getWallInsetForContainer,
+    getSnappedRotationForContainer,
 };
 
 export default function RoomCanvas({
@@ -129,6 +132,7 @@ export default function RoomCanvas({
     moveAllContainers,
     setSelectedContainerInfo,
     selectedContainerInfo,
+    closeContainerInfo,
     draggedContainer,
     getContainerZones,
 
@@ -172,6 +176,9 @@ export default function RoomCanvas({
     hasUnsavedChanges = () => false,
     onClose,
     existingNames = [],
+    getWallInsetForContainer,
+    getSnappedRotationForContainer,
+    
 }: RoomCanvasProps) {
     const [isDraggingContainer, setIsDraggingContainer] = useState(false);
     const [isDraggingOtherObject, setIsDraggingOtherObject] = useState(false);
@@ -375,6 +382,8 @@ export default function RoomCanvas({
                                 getContainerZones={getContainerZones}
                                 setIsDraggingContainer={setIsDraggingContainer}
                                 isContainerInsideRoom={isContainerInsideRoom}
+                                getWallInsetForContainer={getWallInsetForContainer}
+                                getSnappedRotationForContainer={getSnappedRotationForContainer}
                             />
 
                             {/* Other objects layer */}

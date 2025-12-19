@@ -6,15 +6,15 @@
 
 import { useCallback, useEffect, forwardRef, type ForwardRef, Dispatch, type SetStateAction, useRef} from "react";
 import { Package, Package2, X } from "lucide-react";
-import { IoNewspaperOutline } from "react-icons/io5";
 import { FaWineBottle, FaAppleAlt, FaNewspaper } from "react-icons/fa";
 import { PiBeerBottleBold } from "react-icons/pi";
 import { GiOpenedFoodCan, GiSwapBag } from "react-icons/gi";
 import { BsFillBoxSeamFill } from "react-icons/bs";
 import { FaJugDetergent } from "react-icons/fa6";
 import type { ContainerDTO } from "../../../../../lib/Container";
-import { DRAG_DATA_FORMAT } from "../../../lib/Constants";
+import { DRAG_DATA_FORMAT, LOCK_I_LOCK_COMPATIBLE_SIZES } from "../../../lib/Constants";
 import LoadingBar from "../../../../../components/LoadingBar";
+import InfoTooltip from "../../../components/InfoTooltip";
 import './css/roomCanvasPanel.css'
 
 type ContainerPanelProps = {
@@ -27,7 +27,7 @@ type ContainerPanelProps = {
     selectedSize: { [key: number]: number | null };
     setSelectedSize: React.Dispatch<React.SetStateAction<{ [key: number]: number | null }>>;
     fetchContainers: (service: { id: number; name: string }) => Promise<void>;
-    handleAddContainer: (container: ContainerDTO) => void;
+    handleAddContainer: (container: ContainerDTO, lockILock?: boolean) => void;
     setSelectedContainerInfo: (container: ContainerDTO) => void;
     isLoadingContainers: boolean;
     setIsStageDropActive: (v: boolean) => void;
@@ -288,7 +288,10 @@ const ContainerPanel = forwardRef(function ContainerPanel(
                                                 <p>{container.width} × {container.height} × {container.depth} mm</p>
                                                 <p>Tömningsfrekvens: {container.emptyingFrequencyPerYear}/år</p>
                                                 <p>Kostnad: {container.cost} kr/år</p>
+
                                             </div>
+                                            <InfoTooltip text="Lock-i-lock är ett tillval som möjliggör öppning från två håll, vilket gör hanteringen enklare för både
+                                                renhållare och användare. Det kostar 100 kr/år." />
                                         </div>
 
                                         {/*Action buttons*/}
@@ -299,12 +302,14 @@ const ContainerPanel = forwardRef(function ContainerPanel(
                                             >
                                                 Lägg till
                                             </button>
-                                            <button
-                                                onClick={() => setSelectedContainerInfo(container)}
-                                                className="container-btn container-btn-info"
-                                            >
-                                                Info
-                                            </button>
+                                           {LOCK_I_LOCK_COMPATIBLE_SIZES.includes(container.size) && (
+                                             <button
+                                               onClick={() => handleAddContainer(container, undefined, true)}
+                                               className="container-btn container-btn-lock"
+                                             >
+                                               Lägg till med lock-i-lock
+                                             </button>
+                                           )}
                                         </div>
                                     </div>
                                 ))}
