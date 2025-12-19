@@ -70,6 +70,15 @@ public interface UserService {
     UserDTO updateUserRole(Integer userId, String newRole);
 
     /**
+     * Changes a user's password after validating the current password.
+     *
+     * @param username the username whose password should be changed
+     * @param oldPassword the user's current password
+     * @param newPassword the desired new password
+     */
+    void changePassword(String username, String oldPassword, String newPassword);
+
+    /**
      * Checks whether the specified user has already seen
      * the interactive Planning Tool manual/tutorial.
      *

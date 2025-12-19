@@ -132,4 +132,36 @@ public class AuthController {
             return ResponseEntity.internalServerError().body(response);
         }
     }
+
+    /**
+     * Publicly exposed password change endpoint (requires correct old password).
+     * Kept here under /api/auth/** to avoid any security matcher conflicts.
+     */
+    @PostMapping("/change-password")
+    public ResponseEntity<LoginResponse> changePassword(@Valid @RequestBody com.avfallskompassen.dto.request.ChangePasswordRequest request,
+                                                        @RequestHeader(value = "X-Username", required = false) String usernameHeader,
+                                                        @RequestHeader(value = "Authorization", required = false) String authHeader) {
+        String username = usernameHeader;
+
+        // Fallback: try to extract username from JWT if provided
+        if ((username == null || username.isBlank()) && jwtUtil != null && authHeader != null && authHeader.startsWith("Bearer ")) {
+            String token = authHeader.substring(7);
+            if (jwtUtil.validateToken(token)) {
+                username = jwtUtil.getUsernameFromToken(token);
+            }
+        }
+
+        if (username == null || username.isBlank()) {
+            return ResponseEntity.badRequest().body(new LoginResponse(false, "Ingen användare angiven", null, null));
+        }
+
+        try {
+            userService.changePassword(username, request.getOldPassword(), request.getNewPassword());
+            return ResponseEntity.ok(new LoginResponse(true, "Lösenordet har uppdaterats", username, null));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(new LoginResponse(false, e.getMessage(), null, null));
+        } catch (RuntimeException e) {
+            return ResponseEntity.internalServerError().body(new LoginResponse(false, "Kunde inte uppdatera lösenordet: " + e.getMessage(), null, null));
+        }
+    }
 }

@@ -1,17 +1,21 @@
 package com.avfallskompassen.controller;
 
 import com.avfallskompassen.dto.ActivityDTO;
+import com.avfallskompassen.dto.request.ChangePasswordRequest;
 import com.avfallskompassen.exception.ResourceNotFoundException;
 import com.avfallskompassen.model.User;
 import com.avfallskompassen.services.ActivityService;
 import com.avfallskompassen.services.UserService;
+import jakarta.annotation.security.PermitAll;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import jakarta.validation.Valid;
 import java.util.List;
+import java.util.Map;
 
 /**
  * REST controller for handling users and activities relating users.
@@ -56,6 +60,34 @@ public class UserController {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Not your account");
         }
         userService.markPlanningToolManualAsSeen(username);
+    }
+
+    /**
+     * Allows an authenticated user to change their password.
+     */
+    @PostMapping("/change-password")
+    @PermitAll
+    public ResponseEntity<Map<String, String>> changePassword(
+            @Valid @RequestBody ChangePasswordRequest request,
+            Authentication auth,
+            @RequestHeader(value = "X-Username", required = false) String headerUsername
+    ) {
+        String username = headerUsername;
+        if ((username == null || username.isBlank()) && auth != null) {
+            username = auth.getName();
+        }
+        if (username == null || username.isBlank()) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Ingen användare är inloggad");
+        }
+
+        try {
+            userService.changePassword(username, request.getOldPassword(), request.getNewPassword());
+            return ResponseEntity.ok(Map.of("message", "Lösenordet har uppdaterats"));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+        } catch (RuntimeException e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Kunde inte uppdatera lösenordet");
+        }
     }
 
     /**

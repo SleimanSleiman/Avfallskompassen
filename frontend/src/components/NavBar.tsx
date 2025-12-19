@@ -144,6 +144,15 @@ export default function NavBar() {
                 <>
                   <NavLink to="/admin" end className={({ isActive }) => `nav-link hover:text-white transition-colors ${isActive ? 'nav-link-active' : ''}`}>Dashboard</NavLink>
                   <NavLink to="/admin/data" className={({ isActive }) => `nav-link hover:text-white transition-colors ${isActive ? 'nav-link-active' : ''}`}>Hantera kostnader</NavLink>
+                  <button
+                    onClick={(e) => {
+                      e.preventDefault();
+                      handleNavigation('/profile');
+                    }}
+                    className={`nav-link hover:text-white transition-colors ${location.pathname === '/profile' ? 'nav-link-active' : ''}`}
+                  >
+                    Profil
+                  </button>
                   <div className="flex items-center gap-3">
                     <button
                       onClick={handleLogout}
@@ -189,6 +198,15 @@ export default function NavBar() {
                   >
                     Planeringsverktyg
                   </NavLink>
+                  <button
+                    onClick={(e) => {
+                      e.preventDefault();
+                      handleNavigation('/profile');
+                    }}
+                    className={`nav-link hover:text-white transition-colors ${location.pathname === '/profile' ? 'nav-link-active' : ''}`}
+                  >
+                    Profil
+                  </button>
                   <div className="flex items-center gap-3">
                     {user ? (
                       <button
@@ -220,7 +238,17 @@ export default function NavBar() {
             {isAdmin ? (
               <>
                 <NavLink to="/admin" className="text-nsr-ink" onClick={() => setOpen(false)}>Dashboard</NavLink>
-                <NavLink to="/admin/data" className="text-nsr-ink" onClick={() => setOpen(false)}>Hantera priser</NavLink>
+                <NavLink to="/admin/data" className="text-nsr-ink" onClick={() => setOpen(false)}>Hantera kostnader</NavLink>
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setOpen(false);
+                    handleNavigation('/profile');
+                  }}
+                  className="text-left text-nsr-ink"
+                >
+                  Profil
+                </button>
                 <button onClick={handleLogout} className="text-left text-nsr-ink">Logga ut</button>
               </>
             ) : (
@@ -256,6 +284,16 @@ export default function NavBar() {
                   Statistik
                 </button>
                 <NavLink to="/planningTool" onClick={resetPlanningToolState} className="text-nsr-ink">Planeringsverktyg</NavLink>
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setOpen(false);
+                    handleNavigation('/profile');
+                  }}
+                  className="text-left text-nsr-ink"
+                >
+                  Profil
+                </button>
                 {user ? (
                   <button onClick={handleLogout} className="text-left text-nsr-ink">Logga ut</button>
                 ) : (
