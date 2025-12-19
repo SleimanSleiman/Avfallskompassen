@@ -1,8 +1,9 @@
 package com.avfallskompassen.dto.request;
 
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.DecimalMin;
 import java.math.BigDecimal;
+
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.NotNull;
 
 /**
  * Request DTO for updating cost values.

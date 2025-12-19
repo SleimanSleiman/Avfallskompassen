@@ -1,17 +1,18 @@
 package com.avfallskompassen.services.impl;
 
-import com.avfallskompassen.dto.CollectionFeeDTO;
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.avfallskompassen.dto.CollectionFeeAdminDTO;
+import com.avfallskompassen.dto.CollectionFeeDTO;
 import com.avfallskompassen.model.CollectionFee;
 import com.avfallskompassen.repository.CollectionFeeRepository;
 import com.avfallskompassen.services.CollectionFeeService;
 import com.avfallskompassen.services.PropertyService;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.math.BigDecimal;
-import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Service class that serves DTO's to the controller layer. Handles the CollectionFee calculations.
