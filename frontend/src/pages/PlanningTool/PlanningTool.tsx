@@ -230,6 +230,8 @@ export default function PlanningTool({ isAdminMode = false, property, onGenerate
             const parsed = JSON.parse(stored);
             const updated = {
                 ...parsed,
+                x: room.x,
+                y: room.y,
                 containers: containersInRoom,
                 doors: doors,
                 otherObjects: otherObjects,
@@ -241,7 +243,7 @@ export default function PlanningTool({ isAdminMode = false, property, onGenerate
         } catch (error) {
             console.error('Failed to sync state to localStorage', error);
         }
-    }, [containersInRoom, doors, otherObjects, room.width, room.height, room.id]);
+    }, [containersInRoom, doors, otherObjects, room.width, room.height, room.x, room.y, room.id]);
 
 
     /* ──────────────── Service Types (API data) ──────────────── */
