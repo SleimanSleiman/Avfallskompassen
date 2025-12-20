@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { login, register, currentUser, logout } from "../../src/lib/Auth";
-import { post } from "../../src/lib/api";
+import { post } from "../../src/lib/Api";
 
 vi.mock("../../src/lib/api", () => ({
   post: vi.fn(),

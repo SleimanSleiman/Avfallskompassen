@@ -83,7 +83,7 @@ export function useOtherObjects(
         const containerZones = getContainerZones();
         let newRect = { x, y, width: widthPx, height: heightPx };
 
-        let isValid = validateOtherObjectPlacement(newRect, doorZones, objectZones, containerZones);
+        const isValid = validateOtherObjectPlacement(newRect, doorZones, objectZones, containerZones);
 
         if (!isValid) {
             const step = 20;

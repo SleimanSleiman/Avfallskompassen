@@ -4,10 +4,10 @@
  */
 import { useState, useRef, useEffect } from "react";
 import type { DragEvent as ReactDragEvent } from "react";
-import type { ContainerInRoom, Room, Zone } from "./lib/Types";
+import type { ContainerInRoom, Room, Zone } from "../lib/Types";
 import type { ContainerDTO } from "../../../lib/Container";
 import { fetchContainersByMunicipalityAndService } from "../../../lib/Container";
-import { mmToPixels, clamp, DRAG_DATA_FORMAT, STAGE_WIDTH, STAGE_HEIGHT, SCALE, isOverlapping } from "../lib/Constants";
+import { mmToPixels, clamp, DRAG_DATA_FORMAT, SCALE, isOverlapping } from "../lib/Constants";
 import { useLayoutHistory } from "./UseLayoutHistory";
 
 /* ──────────────── Helper functions ──────────────── */
@@ -193,9 +193,11 @@ export function useContainers(
         setSelectedDoorId(null);
         setSelectedOtherObjectId(null);
 
-        if (selectedContainerInfo) {
-            handleShowContainerInfo(id);
+        if (id === null) {
+            setSelectedContainerInfo(null)
+            return;
         }
+        handleShowContainerInfo(id);
     };
 
     //Container rotation

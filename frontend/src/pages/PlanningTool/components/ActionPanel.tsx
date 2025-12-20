@@ -6,7 +6,7 @@ import InfoTooltip from "./InfoTooltip";
 import type { ContainerInRoom as Container, Door, OtherObjectInRoom } from "../lib/Types";
 import { LOCK_I_LOCK_COMPATIBLE_SIZES } from "../lib/Constants"
 import { RotateCcw, Trash2, Info, Vault } from "lucide-react";
-import { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 
 /* ─────────────── ActionPanel Props ──────────────── */
 type ActionPanelProps = {
@@ -63,17 +63,57 @@ export default function ActionPanel({
     setPos,
 }: ActionPanelProps) {
 
+    //States for actionpanel positioning
+    const panelRef = useRef<HTMLDivElement | null>(null);
+    const [dragging, setDragging] = useState(false);
+    const [offset, setOffset] = useState({ x: 0, y: 0 });
+
     //Display action panel if an object is selected
     const isVisible = selectedContainerId !== null || selectedDoorId !== null || selectedOtherObjectId !== null;
+
+    useEffect(() => {
+        if (!pos) {
+            const panelEl = panelRef.current;
+            const stageEl = stageWrapperRef?.current;
+            if (!panelEl || !stageEl) return;
+
+            const panelRect = panelEl.getBoundingClientRect();
+            const stageRect = stageEl.getBoundingClientRect();
+            const margin = 10;
+
+            setPos({
+                left: stageRect.width - panelRect.width - margin,
+                top: margin + 200,
+            });
+        }
+    }, [stageWrapperRef, pos, setPos]);
+
+    useEffect(() => {
+        const onMouseMove = (e: MouseEvent) => {
+            if (!dragging || !pos) return;
+            const newPos = {
+                left: Math.max(0, e.clientX - offset.x),
+                top: Math.max(0, e.clientY - offset.y),
+            };
+            setPos(newPos);
+        };
+        const onMouseUp = () => setDragging(false);
+
+        if (dragging) {
+            window.addEventListener("mousemove", onMouseMove);
+            window.addEventListener("mouseup", onMouseUp);
+        }
+        return () => {
+            window.removeEventListener("mousemove", onMouseMove);
+            window.removeEventListener("mouseup", onMouseUp);
+        };
+    }, [dragging, offset, pos, setPos]);
+
     if (!isVisible ) return null;
 
     const defaultPos = { left: 100, top: 200 };
     const actualPos = pos ?? defaultPos;
 
-    //States for actionpanel positioning
-    const panelRef = useRef<HTMLDivElement | null>(null);
-    const [dragging, setDragging] = useState(false);
-    const [offset, setOffset] = useState({ x: 0, y: 0 });
 
     // Helper function to shorten container names
     const getShortContainerName = (name: string) => {
@@ -169,60 +209,9 @@ export default function ActionPanel({
        setDragging(true);
    };
 
-    //Updates the components position during drag
-    const onMouseMove = (e: MouseEvent) => {
-        if (!dragging || !pos) return;
-        const newPos = {
-            left: Math.max(0, e.clientX - offset.x),
-            top: Math.max(0, e.clientY - offset.y),
-        };
-        setPos(newPos);
-    };
-
-    //Ends drag
-    const onMouseUp = () => {
-        setDragging(false);
-    };
-
     //Keeps the drag even when the mouse leaves the panel
-    useEffect(() => {
-        const onMouseMove = (e: MouseEvent) => {
-            if (!dragging || !pos) return;
-            const newPos = {
-                left: Math.max(0, e.clientX - offset.x),
-                top: Math.max(0, e.clientY - offset.y),
-            };
-            setPos(newPos);
-        };
-        const onMouseUp = () => setDragging(false);
-
-        if (dragging) {
-            window.addEventListener("mousemove", onMouseMove);
-            window.addEventListener("mouseup", onMouseUp);
-        }
-        return () => {
-            window.removeEventListener("mousemove", onMouseMove);
-            window.removeEventListener("mouseup", onMouseUp);
-        };
-    }, [dragging, offset, pos, setPos]);
 
     //Sets the panel's initial position
-    useEffect(() => {
-        if (!pos) {
-            const panelEl = panelRef.current;
-            const stageEl = stageWrapperRef?.current;
-            if (!panelEl || !stageEl) return;
-
-            const panelRect = panelEl.getBoundingClientRect();
-            const stageRect = stageEl.getBoundingClientRect();
-            const margin = 10;
-
-            setPos({
-                left: stageRect.width - panelRect.width - margin,
-                top: margin + 200,
-            });
-        }
-    }, [stageWrapperRef, pos, setPos]);
 
     /* ─────────────── Render ──────────────── */
     return (
@@ -291,7 +280,14 @@ export default function ActionPanel({
                     </button>
                     {canAddLockILock && (
                       <button
-                        onClick={() => {hasLockILock ? handleRemoveLockILock(selectedContainerId) : handleAddLockILock(selectedContainerId!)}}
+                        onClick={() => {
+                            if(selectedContainerId == null) return;
+                            if(hasLockILock) {
+                                handleRemoveLockILock(selectedContainerId);
+                            } else {
+                                handleAddLockILock(selectedContainerId)
+                            }
+                        }}
                         className={`flex flex-col items-center justify-center transition min-w-[64px] group ${
                           hasLockILock
                             ? "text-red-600 hover:text-red-800"

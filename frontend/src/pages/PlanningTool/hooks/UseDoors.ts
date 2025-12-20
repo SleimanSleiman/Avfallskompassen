@@ -7,7 +7,7 @@ import type { Door, Room, Zone } from "../lib/Types";
 import { SCALE, clamp } from "../lib/Constants";
 
 export function useDoors(
-    room: Room | null,
+    room: Room,
     setSelectedDoorId: (id: number | null) => void,
     setSelectedContainerId: (id: number | null) => void,
     setSelectedOtherObjectId: (id: number | null) => void,
@@ -62,9 +62,9 @@ export function useDoors(
         let newY = 0;
         let newWall: Door["wall"] = wall;
 
-        for (let w of walls) {
+        for (const w of walls) {
             // Define start position and step along the wall
-            let steps: { x: number; y: number }[] = [];
+            const steps: { x: number; y: number }[] = [];
             const margin = 0.01;
             switch (w) {
                 case "bottom": {
@@ -98,7 +98,7 @@ export function useDoors(
             }
 
             // Check each possible position
-            for (let pos of steps) {
+            for (const pos of steps) {
                 const collision = doors.some(d => {
                     if (d.wall !== w) return false;
                     const dSize = d.width / SCALE;
@@ -127,7 +127,7 @@ export function useDoors(
         }
 
         const id = Date.now();
-        const newDoor = {
+        const newDoor: Door = {
                 id,
                 width: doorData.width,
                 x: newX,
@@ -212,7 +212,8 @@ export function useDoors(
                 break;
         }
 
-        //Snap to closest wall if door goes outside
+        //Snap to the closest wall if door goes outside
+
         if (door.wall === "bottom" || door.wall === "top") {
             if (left <= leftX) {
                 newWall = "left";
@@ -251,7 +252,7 @@ export function useDoors(
         }
 
         //Update offset along the wall (0 = start, 1 = end)
-        let offset = 0.5;
+        let offset;
         if (newWall === "top" || newWall === "bottom") {
             offset = (newX - leftX) / room.width;
         } else {

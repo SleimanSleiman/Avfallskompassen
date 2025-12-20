@@ -4,8 +4,8 @@
  * select sizes, drag containers onto the canvas, or add them directly.
  */
 
-import { useCallback, useEffect, forwardRef, type ForwardRef, Dispatch, type SetStateAction, useRef} from "react";
-import { Package, Package2, X } from "lucide-react";
+import React, {useEffect, forwardRef, type Dispatch, type SetStateAction, useRef, type ForwardedRef} from "react";
+import { Package2, X } from "lucide-react";
 import { FaWineBottle, FaAppleAlt, FaNewspaper } from "react-icons/fa";
 import { PiBeerBottleBold } from "react-icons/pi";
 import { GiOpenedFoodCan, GiSwapBag } from "react-icons/gi";
@@ -16,6 +16,7 @@ import { DRAG_DATA_FORMAT, LOCK_I_LOCK_COMPATIBLE_SIZES } from "../../../lib/Con
 import LoadingBar from "../../../../../components/LoadingBar";
 import InfoTooltip from "../../../components/InfoTooltip";
 import './css/roomCanvasPanel.css'
+import type {IconType} from "react-icons";
 
 type ContainerPanelProps = {
     isOpen: boolean;
@@ -76,7 +77,6 @@ const ContainerPanel = forwardRef(function ContainerPanel(
         setSelectedSize,
         fetchContainers,
         handleAddContainer,
-        setSelectedContainerInfo,
         isLoadingContainers,
         setIsStageDropActive,
         setDraggedContainer,
@@ -304,7 +304,7 @@ const ContainerPanel = forwardRef(function ContainerPanel(
                                             </button>
                                            {LOCK_I_LOCK_COMPATIBLE_SIZES.includes(container.size) && (
                                              <button
-                                               onClick={() => handleAddContainer(container, undefined, true)}
+                                               onClick={() => handleAddContainer(container, true)}
                                                className="container-btn container-btn-lock"
                                              >
                                                Lägg till med lock-i-lock

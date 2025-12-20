@@ -1,8 +1,29 @@
 import pdfMake from "pdfmake/build/pdfmake";
 import pdfFonts from "pdfmake/build/vfs_fonts";
 import type { WasteRoomImgDTO } from "../lib/WasteRoom.ts";
+import type {Content, PageSize, TDocumentDefinitions} from "pdfmake/interfaces";
 
 pdfMake.vfs = pdfFonts.vfs;
+
+type SummaryRow = {
+    type: string;
+    indicator: { label: string};
+    totalVolume: number;
+    totalQuantity: number;
+    totalAnnualVolume: number;
+    litersPerWeekPerApartment: number;
+    costPerYear: number;
+    container?: ContainersRow[];
+};
+
+type ContainersRow = {
+    size?: number;
+    quantity?: number;
+    emptyingFrequency?: number;
+    cost?: number;
+    containerDTO?: {name: string };
+    containerName?: string;
+};
 
 const COLORS = {
     primary: '#007788',
@@ -115,7 +136,7 @@ function createTableCell(
     text: string | number,
     alignment: 'left' | 'right' | 'center' = 'left',
     fillColor: string,
-    options: any = {}
+    options: Partial<Content> = {}
 ) {
     return {
         text: String(text),
@@ -124,7 +145,7 @@ function createTableCell(
         fontSize: FONT_SIZES.small,
         color: COLORS.text.secondary,
         noWrap: false,
-        ...options
+        options
     };
 }
 
@@ -221,7 +242,7 @@ function createTableHeaderRow() {
     ];
 }
 
-function createSummaryRow(summary: any, index: number, totalAnnualVolume: number, totalCost: number) {
+function createSummaryRow(summary: SummaryRow, index: number, totalAnnualVolume: number, totalCost: number) {
     const rowColor = getRowColor(index);
     const indicatorColor = getIndicatorColor(summary.indicator.label);
     const volumePercent = totalAnnualVolume > 0
@@ -251,7 +272,7 @@ function createSummaryRow(summary: any, index: number, totalAnnualVolume: number
     ];
 }
 
-function createContainerRow(container: any, rowColor: string, collectionFee: number) {
+function createContainerRow(container: ContainersRow, rowColor: string, collectionFee: number) {
     const size = Number(container.size || 0);
     const qty = Number(container.quantity || 0);
     const freq = Number(container.emptyingFrequency || 0);
@@ -347,55 +368,62 @@ function buildSummaryTable(containerSummaries: any[], collectionFee: number) {
     };
 }
 
-function createHeader(logoBase64: string, propertyName: string, currentPage: number) {
+
+function createHeader(
+    logoBase64: string,
+    propertyName: string,
+    currentPage: number
+): Content {
     if (currentPage === 1) {
+        const headerColumns: Content[] = [
+            {
+                image: logoBase64,
+                width: 120,
+                margin: [0, 0, 0, 0] as [number, number, number, number],
+            },
+            {
+                stack: [
+                    {
+                        text: "NSR - Rapport",
+                        fontSize: FONT_SIZES.large,
+                        bold: true,
+                        color: COLORS.accent,
+                        alignment: "right",
+                    },
+                    {
+                        text: formatDate(new Date()),
+                        fontSize: FONT_SIZES.normal,
+                        color: COLORS.text.secondary,
+                        alignment: "right",
+                        margin: [0, 4, 0, 0] as [number, number, number, number],
+                    },
+                ],
+                margin: [0, 15, 0, 0] as [number, number, number, number],
+            },
+        ];
+
         return {
-            columns: [
-                {
-                    image: logoBase64,
-                    width: 120,
-                    margin: [0, 0, 0, 0]
-                },
-                {
-                    stack: [
-                        {
-                            text: "NSR - Rapport",
-                            fontSize: FONT_SIZES.large,
-                            bold: true,
-                            color: COLORS.accent,
-                            alignment: "right"
-                        },
-                        {
-                            text: formatDate(new Date()),
-                            fontSize: FONT_SIZES.normal,
-                            color: COLORS.text.secondary,
-                            alignment: "right",
-                            margin: [0, 4, 0, 0]
-                        }
-                    ],
-                    margin: [0, 15, 0, 0]
-                }
-            ],
-            margin: [40, 25, 40, 0]
+            columns: headerColumns,
         };
     }
 
+    const headerColumns: Content[] = [
+        {
+            image: logoBase64,
+            width: 60,
+        },
+        {
+            text: propertyName,
+            fontSize: FONT_SIZES.header,
+            color: COLORS.accent,
+            bold: true,
+            alignment: "right",
+            margin: [0, 8, 0, 0] as [number, number, number, number],
+        },
+    ];
+
     return {
-        columns: [
-            {
-                image: logoBase64,
-                width: 60
-            },
-            {
-                text: propertyName,
-                fontSize: FONT_SIZES.header,
-                color: COLORS.accent,
-                bold: true,
-                alignment: "right",
-                margin: [0, 8, 0, 0]
-            }
-        ],
-        margin: [40, 15, 40, 0]
+        columns: headerColumns,
     };
 }
 
@@ -407,7 +435,7 @@ function createFooter(footerBase64: string | null, currentPage: number, pageCoun
             image: footerBase64,
             width: 515,
             alignment: "center",
-            margin: [0, 0, 0, 10]
+            margin: [0, 0, 0, 10] as [number, number, number, number],
         });
     }
 
@@ -415,12 +443,12 @@ function createFooter(footerBase64: string | null, currentPage: number, pageCoun
         text: `Sida ${currentPage} av ${pageCount}`,
         alignment: "center",
         fontSize: FONT_SIZES.small,
-        color: COLORS.text.secondary
+        color: COLORS.text.secondary,
+        margin: [0,0,0,0] as [number, number, number, number],
     });
 
     return {
         stack: footerContent,
-        margin: [40, 10, 40, 0]
     };
 }
 
@@ -476,14 +504,14 @@ function createStatisticsSection(
                 createStatCard(
                     "Dragväg & Kostnad/Kärl",
                     `${accessPathLength}m - ${collectionFee} kr`,
-                    FONT_SIZES.medium //Testa med large
+                    FONT_SIZES.large
                 ),
-                createStatCard("Lås", lockName, FONT_SIZES.medium)
+                createStatCard("Lås", lockName, FONT_SIZES.large)
             ],
             columnGap: 10,
             margin: [0, 0, 0, 30]
         },
-        createSectionHeader("Volymer och kostnader", FONT_SIZES.subtitle), // Testa med title
+        createSectionHeader("Volymer och kostnader", FONT_SIZES.title),
         table
     ];
 }
@@ -494,7 +522,6 @@ export async function exportStatisticsPdf(
     accessPathLength: number,
     lockName: string,
     containerSummaries: any[] = [],
-    data: any,
     collectionFee: number,
     selectedRoom: WasteRoomImgDTO
 ) {
@@ -519,13 +546,10 @@ export async function exportStatisticsPdf(
 
     const table = buildSummaryTable(containerSummaries, collectionFee);
 
-    const doc = {
+    const doc: TDocumentDefinitions = {
         pageMargins: MARGINS.page,
-        pageSize: "A4",
-
-        header: (currentPage: number) =>
-            createHeader(logoBase64, propertyName, currentPage),
-
+        pageSize: "A4" as PageSize,
+        header: (currentPage: number) => createHeader(logoBase64, propertyName, currentPage),
         content: [
             ...createWasteRoomSection(propertyName, wasteRoomImageBase64),
             { canvas: [], pageBreak: "before" },
@@ -537,10 +561,7 @@ export async function exportStatisticsPdf(
                 table
             )
         ],
-
-        footer: (currentPage: number, pageCount: number) =>
-            createFooter(footerBase64, currentPage, pageCount),
-
+        footer: (currentPage: number, pageCount: number) => createFooter(footerBase64, currentPage, pageCount),
         defaultStyle: {
             font: 'Roboto'
         }

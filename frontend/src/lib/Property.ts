@@ -1,8 +1,9 @@
-import { api, post } from './api';
+import { api } from './Api';
 import { currentUser } from './Auth';
 import type { WasteRoom } from './WasteRoom.ts';
 
 export type Property = {
+  lockTypeId: number;
   id: number;
   address: string;
   numberOfApartments: number;
@@ -141,15 +142,6 @@ export async function getUserStats(): Promise<any> {
     return await api<any>('/api/properties/user/stats', {
         method: 'GET',
         headers: getAuthHeaders()
-    });
-}
-
-export async function getUsersPropertiesWithWasteRooms(username : string): Promise<Property[]> {
-    return await api<Property[]>('/api/properties/admin/user-properties-wasterooms', {
-        method: 'GET',
-        headers: {
-            'X-Username': username,
-        },
     });
 }
 

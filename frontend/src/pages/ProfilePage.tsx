@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { changePassword, currentUser } from '../lib/Auth';
 
 export default function ProfilePage() {
@@ -44,8 +44,8 @@ export default function ProfilePage() {
       setOldPassword('');
       setNewPassword('');
       setConfirmPassword('');
-    } catch (err: any) {
-      setError(err.message || 'Kunde inte uppdatera lösenordet just nu.');
+    } catch (err: unknown) {
+      if (err instanceof Error) setError(err.message || 'Kunde inte uppdatera lösenordet just nu.');
     } finally {
       setLoading(false);
     }

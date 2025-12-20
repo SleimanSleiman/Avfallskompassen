@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from "vitest";
 import { render } from "@testing-library/react";
 import OtherObjectMeasurement from "../../../../../../../../src/pages/PlanningTool/RoomCanvas/components/OtherObjects/OtherObjectsMeasurementLayer/components/OtherObjectMeasurement";
-import * as Utils from "../../../../../../../../src/pages/PlanningTool/RoomCanvas/components/OtherObjects/OtherObjectsMeasurementLayer/utils/otherObjectMeasurementUtils";
+import * as Utils from "../../../../../../../../src/pages/PlanningTool/RoomCanvas/components/OtherObjects/OtherObjectsMeasurementLayer/utils/OtherObjectMeasurementUtils";
 
 // Mock react-konva
 vi.mock("react-konva", () => {

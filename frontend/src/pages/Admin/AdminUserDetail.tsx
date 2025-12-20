@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect } from 'react';
 import type { AdminUser } from '../AdminPage';
 import AdminPlanningEditor from './AdminPlanningEditor';
 import LoadingBar from '../../components/LoadingBar';
-import { get, deleteRequest } from '../../lib/api';
+import { get, deleteRequest } from '../../lib/Api';
 import { getUsersPropertySummaries } from '../../lib/Property';
 import { currentUser } from '../../lib/Auth';
 import ConfirmModal from '../../components/ConfirmModal';

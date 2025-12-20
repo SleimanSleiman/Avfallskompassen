@@ -9,7 +9,6 @@ import { clamp, isOverlapping } from "../../../../lib/Constants";
 
 export default function OtherObjectDrag({
     object,
-    selected,
     room,
     doorZones,
     containerZones,
@@ -74,8 +73,8 @@ export default function OtherObjectDrag({
                 const h = rot === 90 ? object.width : object.height;
 
                 // Clamp to room boundaries using rotated size
-                let newX = clamp(pos.x, room.x + w / 2, room.x + room.width - w / 2);
-                let newY = clamp(pos.y, room.y + h / 2, room.y + room.height - h / 2);
+                const newX = clamp(pos.x, room.x + w / 2, room.x + room.width - w / 2);
+                const newY = clamp(pos.y, room.y + h / 2, room.y + room.height - h / 2);
 
                 // Update overlap status during drag
                 setIsOverZone(checkZones(newX - w / 2, newY - h / 2, object.rotation));

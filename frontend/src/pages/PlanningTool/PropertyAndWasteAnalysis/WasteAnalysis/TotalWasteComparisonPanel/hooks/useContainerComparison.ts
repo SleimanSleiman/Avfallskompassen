@@ -2,7 +2,7 @@
  * useContainerComparison hook
  * Computes comparison data for total container volume and trend vs similar properties.
  */
-import { calculatePercentageDifference, getTrend, formatNumber, normalizeWasteTypeKey } from "../../../utils/utils";
+import { calculatePercentageDifference, getTrend, formatNumber } from "../../../utils/utils";
 import type { SummaryTone } from "../../../utils/types";
 
 export function useContainerComparison({
@@ -78,7 +78,7 @@ export function useContainerComparison({
     //Compute total frequency of all containers
     const totalFrequencyAll = designHasContainers
         ? Array.from(designStats.typeMap.values()).reduce((sum, type) => sum + type.totalFrequency, 0)
-        : 0;;
+        : 0;
 
     //Average frequency across containers
     const averageFrequencyAll =

@@ -1,11 +1,13 @@
-import { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { createProperty, deleteProperty, updateProperty,getMunicipalities, getLockTypes, getMyPropertiesWithWasteRooms } from '../lib/Property';
+import {
+    createProperty, deleteProperty, updateProperty, getMunicipalities, getLockTypes, getMyPropertiesWithWasteRooms,
+    type LockType
+} from '../lib/Property';
 import type { Municipality, Property, PropertyRequest } from '../lib/Property';
 import { currentUser } from '../lib/Auth';
 import RoomSizePrompt from '../components/prompts/RoomSizePrompt';
 import ConfirmModal from '../components/ConfirmModal';
-import { deleteWasteRoom } from '../lib/WasteRoomRequest';
 import Message from '../components/ShowStatus';
 import LoadingBar from '../components/LoadingBar';
 import PlanVersionDropdown from '../components/PlanVersionDropdown';
@@ -26,12 +28,6 @@ export default function PropertyPage() {
     const [sortBy, setSortBy] = useState<'created'|'address'|'apartmentsAsc'|'apartmentsDesc'>('created');
     const [pendingDelete, setPendingDelete] = useState<{ id: number; address: string } | null>(null);
     const [deleting, setDeleting] = useState(false);
-
-    const lockMap: Record<string, number> = {
-        Standard: 1,
-        Electronic: 2,
-        SuperLock: 3
-    };
 
     //Form state
     const [formData, setFormData] = useState<PropertyRequest>({
@@ -65,8 +61,8 @@ export default function PropertyPage() {
         try {
             const data = await getMunicipalities();
             setMunicipalities(data);
-        } catch (err: any) {
-            setError('Kunde inte ladda kommuner: ' + err.message);
+        } catch (err: unknown) {
+           if (err instanceof Error) { setError('Kunde inte ladda kommuner: ' + err.message);}
         }
     }
 
@@ -76,8 +72,8 @@ export default function PropertyPage() {
             const data = await getMyPropertiesWithWasteRooms();
             console.log(data);
             setProperties(data);
-        } catch (err: any) {
-            setError('Kunde inte ladda fastigheter: ' + err.message);
+        } catch (err: unknown) {
+            if (err instanceof  Error) setError('Kunde inte ladda fastigheter: ' + err.message);
         } finally {
             setLoadingProperties(false);
         }
@@ -87,16 +83,11 @@ export default function PropertyPage() {
         try {
             const data = await getLockTypes();
             setLockTypes(data);
-        } catch (err: any) {
-            setError("Kunde inte ladda låstyper: " + err.message);
+        } catch (err: unknown) {
+            if(err instanceof  Error) setError("Kunde inte ladda låstyper: " + err.message);
         }
     }
 
-    const savedProperty = localStorage.getItem('selectedPropertyId');
-    const propertyId = savedProperty && savedProperty !== 'undefined' && savedProperty !== 'null'
-        ? Number(savedProperty)
-        : null;
-    
     const filteredProperties = useMemo(() => {
         const q = query.trim().toLowerCase();
         let list = properties.filter(p =>
@@ -157,8 +148,8 @@ export default function PropertyPage() {
                 setError(response.message || (editingId ? 'Kunde inte uppdatera fastighet' : 'Kunde inte skapa fastighet'));
                 setMsg(null);
             }
-        } catch (err: any) {
-            setError(err.message || 'Något gick fel');
+        } catch (err: unknown) {
+            if (err instanceof  Error) setError(err.message || 'Något gick fel');
         } finally {
             setLoading(false);
         }
@@ -181,8 +172,8 @@ export default function PropertyPage() {
             } else {
                 setError(response.message || 'Kunde inte ta bort fastighet');
             }
-        } catch (err: any) {
-            setError(err.message || 'Kunde inte ta bort fastighet');
+        } catch (err: unknown) {
+            if (err instanceof Error) setError(err.message || 'Kunde inte ta bort fastighet');
         } finally {
             setDeleting(false);
             setPendingDelete(null);
@@ -254,21 +245,6 @@ export default function PropertyPage() {
         }));
     }
 
-async function onDeleteWasteRoom(propertyId: number, wasteRoomId: number) {
-    try {
-        await deleteWasteRoom(wasteRoomId);
-
-        setProperties(prev => {
-            return prev.map(p => {
-                if (p.id !== propertyId) return p;
-                const updatedRooms = (p.wasteRooms ?? []).filter(r => r.wasteRoomId !== wasteRoomId);
-                return { ...p, wasteRooms: updatedRooms };
-            });
-        });
-    } catch (err) {
-        console.error('Could not delete waste room', err);
-    }
-}
   function viewStatistics(p: Property) {
     navigate(`/statistics/${p.id}`, {
       state: { propertyName: p.address,
@@ -574,7 +550,7 @@ async function onDeleteWasteRoom(propertyId: number, wasteRoomId: number) {
 
       {isCreateRoomOpen && (
         <RoomSizePrompt
-          existingNames={selectedProperty?.wasteRooms?.map(r => r.name) || []}
+          existingNames={selectedProperty?.wasteRooms?.map(r => r.name).filter((n): n is string => n != null) || []}
           onConfirm={(name: string, length: number, width: number) => {
             localStorage.setItem(
               'enviormentRoomData',

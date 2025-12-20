@@ -19,7 +19,6 @@ import RoomCanvas from './RoomCanvas/RoomCanvas';
 import ActionPanel from './components/ActionPanel';
 import PropertyOverviewPanel from './PropertyAndWasteAnalysis/PropertyOverview/PropertyOverviewPanel';
 import WasteAnalysisPanels from './PropertyAndWasteAnalysis/WasteAnalysis/WasteAnalysisPanels'
-import { Tooltip } from "../../components/Tooltip";
 import Message from '../../components/ShowStatus';
 
 //Hooks
@@ -29,7 +28,6 @@ import { useContainers } from './hooks/UseContainers';
 import { useServiceTypes } from './hooks/UseServiceTypes';
 import { useOtherObjects } from './hooks/UseOtherObjects';
 import { useComparison } from './hooks/useComparison';
-import { useLayoutHistory } from './hooks/UseLayoutHistory';
 import { useSaveRoom, useWasteRoomRequestBuilder } from './hooks/UseSaveRoom';
 import { usePropertyHighlights } from './hooks/usePropertyHighlights';
 
@@ -292,7 +290,7 @@ export default function PlanningTool({ isAdminMode = false, property }: Planning
         clearPlanningStorage();
         setShowPropertyPicker(true);
     }, [isAdminMode, selectedProperty, hasCheckedStoredProperty, clearPlanningStorage]);
-    const [containerPanelHeight, setContainerPanelHeight] = useState(0);
+    const [ setContainerPanelHeight] = useState(0);
 
     useEffect(() => {
         if (typeof window === 'undefined') {

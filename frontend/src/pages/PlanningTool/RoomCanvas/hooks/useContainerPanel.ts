@@ -4,7 +4,7 @@
  * and handles drag-related state for containers on a canvas.
  */
 
-import { useState, useRef, useEffect } from "react";
+import {useState, useRef, useEffect, useCallback} from "react";
 
 function useContainerPanel({
     onContainerPanelHeightChange,

@@ -5,6 +5,14 @@ import { useState } from "react";
 import "../css/prompts.css";
 import Prompt from "../Prompt";
 
+interface OtherObjectSizePromptProps {
+    onConfirm: (name: string, length: number, width: number) => void;
+    onCancel: () => void;
+    maxLength?: number;
+    maxWidth?: number;
+    minValue?: number;
+}
+
 export default function OtherObjectSizePrompt({
   onConfirm,
   onCancel,

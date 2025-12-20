@@ -67,7 +67,7 @@ export function getDoorRect (door, x, y) {
    const h = door.wall === "left" || door.wall === "right" ? door.width / SCALE : 10;
 
    return { x, y, width: w, height: h };
-};
+}
 
 // Get the rectangle representing the door's "zone" for object collision
 export function getDoorZone(door, x, y) {

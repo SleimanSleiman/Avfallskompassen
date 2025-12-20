@@ -2,7 +2,6 @@
  * TotalWasteComparisonPanel component
  * Displays summaries for cost, container volume, container overview, and CO₂ for a property.
  */
-import { useMemo } from "react";
 import type { PropertyComparison } from "../../../../../lib/Comparison";
 import type { CombinedRow } from "../../utils/types";
 import { useCostComparison } from "./hooks/useCostComparison";
@@ -13,6 +12,7 @@ import CostSummary from "./components/CostSummary";
 import ContainerVolumeSummary from "./components/ContainerVolumeSummary";
 import ContainerOverviewSummary from "./components/ContainerOverviewSummary";
 import '../css/wasteComparison.css'
+import type {buildDesignStats} from "../../utils/builders.ts";
 
 type TotalWasteComparisonPanelProps = {
     designStats: ReturnType<typeof buildDesignStats>;
@@ -20,6 +20,9 @@ type TotalWasteComparisonPanelProps = {
     comparisonData: PropertyComparison;
     safeApartments: number;
     designHasContainers: boolean;
+
+    comparisonLoading: boolean;
+    comparisonError: string | null;
 };
 
 export default function TotalWasteComparisonPanel({
@@ -27,7 +30,6 @@ export default function TotalWasteComparisonPanel({
     combinedRows,
     comparisonData,
     safeApartments,
-    designHasContainers,
 }: TotalWasteComparisonPanelProps) {
 
     //Compute cost-related stats

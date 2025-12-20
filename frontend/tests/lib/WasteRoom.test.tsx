@@ -14,21 +14,22 @@ describe("getWasteRoomsByPropertyId", () => {
 
   it("calls the correct API endpoint", async () => {
     const mockData: WasteRoom[] = [
-      {
-        id: 1,
-        length: 5,
-        width: 4,
-        x: 0,
-        y: 0,
-        createdAt: "2025-01-01",
-        property: {
-          id: 10,
-          address: "Testgatan 1",
-          numberOfApartments: 12,
-          accessPathLength: 3,
-          createdAt: "2025-01-01"
+        {
+            id: 1,
+            length: 5,
+            width: 4,
+            x: 0,
+            y: 0,
+            createdAt: "2025-01-01",
+            property: {
+                id: 10,
+                address: "Testgatan 1",
+                numberOfApartments: 12,
+                accessPathLength: 3,
+                createdAt: "2025-01-01"
+            },
+            thumbnailUrl: ""
         }
-      }
     ];
 
     vi.mocked(get).mockResolvedValue(mockData);

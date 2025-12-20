@@ -1,8 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { describe, it, expect, vi } from "vitest";
-import ActivityItem from "../../src/components/ActivityList.tsx";
-import LoadingBar from "../../src/components/LoadingBar.tsx";
-import { ActivityList } from "../../src/components/ActivityList.tsx";
+import ActivityItem from "../../src/components/ActivityList";
+import { ActivityList } from "../../src/components/ActivityList";
 
 /* ──────────────── Test ActivityList ──────────────── */
 vi.mock("./LoadingBar", () => ({

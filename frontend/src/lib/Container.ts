@@ -1,4 +1,4 @@
-import { get } from './api';
+import { get } from './Api';
 
 export interface ContainerDTO {
   id: number;

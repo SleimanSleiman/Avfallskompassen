@@ -4,8 +4,9 @@
  */
 
 import { Text } from "react-konva";
-import type { Door } from "../../../../lib/Types";
+import type { Door } from "../../../../../lib/Types";
 import { SCALE, STAGE_HEIGHT, STAGE_WIDTH } from "../../../../../lib/Constants";
+import type {JSX} from "react";
 
 const baseMargin = 14;
 const textOffset = -5;

@@ -12,7 +12,7 @@ import ConfirmModal from "../components/ConfirmModal";
 export default function AllaMiljoRumPage() {
     const { propertyId } = useParams();
     const [rooms, setRooms] = useState<WasteRoom[]>([]);
-    const [deleting, setDeleting] = useState<number | null>(null);
+    const [deleting] = useState<number | null>(null);
     const [loading, setLoading] = useState(true);
     const propertyAddress = localStorage.getItem("selectedPropertyAddress");
     const [isCreateRoomOpen, setIsCreateRoomOpen] = useState(false);
@@ -83,16 +83,17 @@ export default function AllaMiljoRumPage() {
         setLoadingDelete(true);
 
         try {
-            await deleteWasteRoom(room.wasteRoomId ?? room.id);
+            await deleteWasteRoom(room.wasteRoomId ?? room.id!);
 
             // Remove locally from state
             setRooms((prev) =>
                 prev.filter((r) => (r.wasteRoomId ?? r.id) !== (room.wasteRoomId ?? room.id))
             );
-        } catch (err) {
+        } catch (err: unknown) {
+            if (err instanceof Error) {
             setMsg("")
             setError("");
-            setTimeout(() => setError("Det gick inte att ta bort rummet"), 10);
+            setTimeout(() => setError("Det gick inte att ta bort rummet"), 10);}
         } finally {
             setLoadingDelete(false);
             setShowConfirm(false);
@@ -182,11 +183,10 @@ export default function AllaMiljoRumPage() {
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
 
-                        {filteredRooms.map((room, i) => (
+                        {filteredRooms.map((room) => (
                             
                             <div key={room.id} className="rounded-xl border bg-white p-5 shadow-soft flex flex-col">
                                 <img
-                                    //src={`http://localhost:8081${room.thumbnailUrl}`}
                                     src={room.thumbnailUrl || greybox}
                                     alt="Miljörum bild"
                                     className="w-full h-40 object-cover rounded-lg mb-3"

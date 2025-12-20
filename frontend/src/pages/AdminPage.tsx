@@ -13,36 +13,11 @@ export type AdminUser = {
   plansCount: number;
 };
 
-type BackendUser = { id: number; username: string; role?: string; createdAt?: string | null };
 type PropertyDTO = { 
   id: number; 
   createdByUsername?: string;
   address?: string;
   municipalityName?: string;
-};
-
-export type AdminProperty = {
-  id: number;
-  userId: number;
-  address: string;
-  numberOfApartments: number;
-  municipalityName: string;
-  lockName: string;
-  accessPathLength: number;
-  createdAt: string;
-};
-
-export type RoomPlan = {
-  id: number;
-  propertyId: number;
-  userId: number;
-  name: string;
-  roomWidth: number;
-  roomHeight: number;
-  createdAt: string;
-  updatedAt: string;
-  version: number;
-  activeVersionNumber: number;
 };
 
 // Component state will hold live data fetched from backend

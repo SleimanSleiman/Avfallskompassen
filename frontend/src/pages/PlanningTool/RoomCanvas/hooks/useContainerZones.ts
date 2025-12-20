@@ -25,8 +25,8 @@ function useContainerZones({
     const isDraggingExistingOther = isDraggingOtherObject && selectedOtherObjectId !== null;
 
     const zones = useMemo(() => {
-        let containerZones: any[] = [];
-        let otherObjectZones: any[] = [];
+        let containerZones: any[];
+        let otherObjectZones: any[];
 
         // ---- CONTAINER ZONES ----
         if (isDraggingExistingContainer) {

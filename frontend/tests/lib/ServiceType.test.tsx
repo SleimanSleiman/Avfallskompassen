@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { fetchServiceTypes } from '../../src/lib/ServiceType';
-import * as api from '../../src/lib/api';
+import * as api from '../../src/lib/Api';
 import * as Auth from '../../src/lib/Auth';
 
 describe('fetchServiceTypes', () => {

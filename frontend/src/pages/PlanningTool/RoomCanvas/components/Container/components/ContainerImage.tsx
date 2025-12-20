@@ -5,9 +5,9 @@
  * - Falls back to a colored rectangle if image loading fails
  */
 
-import { Group, Rect, Image as KonvaImage, Text } from "react-konva";
+import { Group, Rect, Image as KonvaImage } from "react-konva";
 import useImage from "use-image";
-import type { ContainerInRoom } from "../../../lib/Types";
+import type { ContainerInRoom } from "../../../../lib/Types";
 import lidIconUrl from "../../../../../../assets/lid_icon.png";
 
 export default function ContainerImage({

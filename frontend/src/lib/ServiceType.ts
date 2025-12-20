@@ -1,14 +1,10 @@
-import { get } from './api';
-import { currentUser } from './Auth';
+import { get } from './Api';
 
-export const fetchServiceTypes = async () => {
-  // Debug: print whether a token exists (only a short prefix)
-  try {
-    const user = currentUser();
-  } catch (e) {
-    // ignore logging errors in environments without console
-  }
+export interface ServiceType {
+    id: number;
+    name: string;
+}
 
-  // central API helper so Authorization header and base URL are applied.
-  return await get('/api/serviceTypes/all');
+export const fetchServiceTypes = async (): Promise<ServiceType[]> => {
+  return await get<ServiceType[]>('/api/serviceTypes/all');
 };

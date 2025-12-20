@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function Message({ message, type = "success", duration = 5000 }: any) {
   const [visible, setVisible] = useState(true);

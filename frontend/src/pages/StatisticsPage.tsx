@@ -276,12 +276,13 @@ export default function StatisticsPage() {
         if (!propertyIdNumber) return;
 
         async function loadStatistics() {
+
             try {
                 const [containersData, annualCostData, collectionFeeData, lockTypeData] = await Promise.all([
-                    getPropertyContainers(propertyIdNumber),
-                    getAnnualCost(propertyIdNumber),
-                    getCollectionFee(propertyIdNumber),
-                    getLockTypeForProperty(propertyIdNumber),
+                    getPropertyContainers(propertyIdNumber!),
+                    getAnnualCost(propertyIdNumber!),
+                    getCollectionFee(propertyIdNumber!),
+                    getLockTypeForProperty(propertyIdNumber!),
                 ]);
 
                 const formattedContainers = containersData.map((c) => ({

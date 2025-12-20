@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { register } from '../lib/Auth';
 import { Link, useNavigate } from 'react-router-dom';
 

@@ -52,7 +52,7 @@ export default function CornerHandles({
 
                     //Constrain corner movement to maintain room size and stay within canvas
                     dragBoundFunc={(pos) => {
-                        let newPos = { x: pos.x, y: pos.y };
+                        const newPos = { x: pos.x, y: pos.y };
                         const { x, y, width, height } = room;
 
                         switch (index) {

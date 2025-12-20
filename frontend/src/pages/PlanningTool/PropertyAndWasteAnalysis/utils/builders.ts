@@ -6,6 +6,11 @@ import type { DesignStats, DesignTypeStats, CombinedRow, BenchmarkDefinition } f
 import type { ContainerInRoom } from "../../lib/Types";
 import { normalizeWasteTypeKey, calculatePercentageDifference, computePerApartmentPerWeek, getTrend } from "./utils";
 import { getContainerCost } from "../../lib/Constants";
+import type {
+    CollectionFrequencyComparison,
+    PropertyComparison,
+    WasteAmountComparison
+} from "../../../../lib/Comparison.ts";
 
 //Build design stats from containers in the room
 export function buildDesignStats(containersInRoom: ContainerInRoom[]): DesignStats {
