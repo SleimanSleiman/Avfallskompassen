@@ -94,7 +94,7 @@ export default function PlanningTool({ isAdminMode = false, property }: Planning
         }
 
         getProperty(room.propertyId).then(setLoadedProperty).catch(console.error);
-    }, [room?.propertyId]);
+    }, [property, room.propertyId]);
     
     /* ──────────────── Door state & logic ──────────────── */
     const {
@@ -212,7 +212,7 @@ export default function PlanningTool({ isAdminMode = false, property }: Planning
             });
             setHasInitializedFromStorage(true);
         }
-    }, [hasInitializedFromStorage, room.id, setDoors, saveContainers, setOtherObjects, savedRoomState]);
+    }, [hasInitializedFromStorage, room.id, setDoors, saveContainers, setOtherObjects, savedRoomState, room, doorOffsetRef]);
 
     /* ──────────────── Sync state to localStorage on changes ──────────────── */
     useEffect(() => {
@@ -415,7 +415,7 @@ const hasUnsavedChangesRef = useRef(false);
             hasUnsavedChangesRef.current = hasUnsavedChanges();
             // store boolean (not the ref object) in shared context
             setHasUnsavedChanges(hasUnsavedChangesRef.current);
-    }, [room, doors, containersInRoom, otherObjects, savedRoomState]);
+    }, [room, doors, containersInRoom, otherObjects, savedRoomState, hasUnsavedChanges, setHasUnsavedChanges]);
 
     //Opens browser prompt for unsaved changes during exit or reload of page
     useEffect(() => {

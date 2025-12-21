@@ -15,7 +15,7 @@ export default function SummaryStat({
     badge,
     size = "default",
 }: {
-    title: string;
+    title: ReactNode;
     value: string;
     description?: ReactNode;
     tone?: SummaryTone;

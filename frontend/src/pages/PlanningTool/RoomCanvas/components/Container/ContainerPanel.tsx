@@ -144,13 +144,14 @@ const ContainerPanel = forwardRef(function ContainerPanel(
     };
 
     const scrollRef = useRef<HTMLDivElement>(null);
+    const arrowRef = useRef<HTMLDivElement>(null);
     useEffect(() => {
         const el = scrollRef.current;
-        const arrow = document.getElementById("scrollArrow");
+        const arrow = arrowRef.current;
 
         if (!(el instanceof HTMLElement) || !(arrow instanceof HTMLElement)) return;
 
-        function updateArrow() {
+        const updateArrow = () => {
             const isScrollable = el.scrollHeight > el.clientHeight;
             const atBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - 5;
 
@@ -216,7 +217,7 @@ const ContainerPanel = forwardRef(function ContainerPanel(
                                 );
                                 })}
                             </div>
-                            <div className="scroll-arrow" id="scrollArrow">
+                            <div className="scroll-arrow" ref={arrowRef}>
                                 ▼
                             </div>
                         </div>

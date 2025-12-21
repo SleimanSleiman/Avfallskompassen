@@ -2,7 +2,7 @@
  * Custom hook to manage doors within a room in the planning tool.
  * Handles adding, removing, dragging, rotating and selecting doors.
  */
-import { useState, useRef, useEffect } from "react";
+import {useState, useRef, useEffect, type Dispatch, type SetStateAction} from "react";
 import type { Door, Room, Zone } from "../lib/Types";
 import { SCALE, clamp } from "../lib/Constants";
 
@@ -11,8 +11,8 @@ export function useDoors(
     setSelectedDoorId: (id: number | null) => void,
     setSelectedContainerId: (id: number | null) => void,
     setSelectedOtherObjectId: (id: number | null) => void,
-    setError,
-    setMsg
+    setError: Dispatch<SetStateAction<string | null>>,
+    setMsg: Dispatch<SetStateAction<string | null>>
 ) {
 
     /* ──────────────── Door state ──────────────── */

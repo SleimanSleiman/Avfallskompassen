@@ -7,6 +7,25 @@
 import { useState, useEffect } from "react";
 import ContainerDrag from "./ContainerDrag"
 import ContainerImage from "./ContainerImage"
+import type {ContainerInRoom, Room} from "../../../../lib/Types.ts";
+
+type ContainerItemProps = {
+    container: ContainerInRoom;
+    selected: boolean;
+    room: Room;
+    doorZones: { x: number; y: number; width: number; height: number }[];
+    otherObjectZones: { x: number; y: number; width: number; height: number }[];
+    getContainerZones: (excludeId?: number) => { x: number; y: number; width: number; height: number }[];
+    handleDragContainer: (id: number, pos: { x: number; y: number }) => void;
+    handleSelectContainer: (id: number) => void;
+    setIsDraggingContainer: (dragging: boolean) => void;
+    isContainerInsideRoom: (
+        rect: { x: number; y: number; width: number; height: number; rotation?: number },
+        room: Room
+    ) => boolean;
+    getWallInsetForContainer: (c: ContainerInRoom) => number;
+    getSnappedRotationForContainer: (c: ContainerInRoom) => number;
+}
 
 export default function ContainerItem({
     container,
@@ -21,7 +40,7 @@ export default function ContainerItem({
     isContainerInsideRoom,
     getWallInsetForContainer,
     getSnappedRotationForContainer
-}) {
+}: ContainerItemProps) {
     //Store the last valid (non-overlapping) position for snap-back functionality
     const [lastValidPos, setLastValidPos] = useState({
         x: container.x,
@@ -39,7 +58,6 @@ export default function ContainerItem({
     return (
         <ContainerDrag
             container={container}
-            selected={selected}
             room={room}
             doorZones={doorZones}
             otherObjectZones={otherObjectZones}

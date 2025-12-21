@@ -2,7 +2,7 @@
  * Custom hook for managing container placement in the canvas and fetching available container
  * types from the API.
  */
-import { useState, useRef, useEffect } from "react";
+import {useState, useRef, useEffect, type Dispatch, type SetStateAction} from "react";
 import type { DragEvent as ReactDragEvent } from "react";
 import type { ContainerInRoom, Room, Zone } from "../lib/Types";
 import type { ContainerDTO } from "../../../lib/Container";
@@ -89,8 +89,8 @@ export function useContainers(
     setSelectedOtherObjectId: (id: number | null) => void,
     doorZones: { x: number; y: number; width: number; height: number }[] = [],
     otherObjectZones: { x: number; y: number; width: number; height: number }[] = [],
-    setError,
-    setMsg,
+    setError: Dispatch<SetStateAction<string | null>>,
+    setMsg: Dispatch<SetStateAction<string | null>>,
     isDoorDragging?: boolean,
 ) {
 
@@ -361,7 +361,7 @@ export function useContainers(
         if (changed) {
             saveContainers(temp);
         }
-    }, [doorZones]);
+    }, [containersInRoom, doorZones, isDoorDragging, room.height, room.width, room.x, room.y, saveContainers]);
 
     /* ──────────────── Wall helpers (used by ContainerDrag) ──────────────── */
 
