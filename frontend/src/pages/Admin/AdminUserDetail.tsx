@@ -6,6 +6,7 @@ import { get, deleteRequest } from '../../lib/api';
 import { getUsersPropertiesWithWasteRooms } from '../../lib/Property';
 import { currentUser } from '../../lib/Auth';
 import ConfirmModal from '../../components/ConfirmModal';
+import { setWasteRoomActive } from '../../lib/WasteRoomRequest'
 
 // Data types
 export type AdminProperty = {
@@ -45,6 +46,7 @@ export type RoomPlan = {
   updatedAt: string;
   activeVersionNumber: number;
   selectedVersion?: number; // Optional: which version is currently being edited
+  isDraft?: boolean;
 };
 
 
@@ -115,8 +117,10 @@ export default function AdminUserDetail({ user, onBack }: AdminUserDetailProps) 
                   }
 
                   // Find the active version
-                  const activeVersion = allVersions.find((v: any) => v.isActive) || allVersions[0];
-                  const activeVersionNumber = activeVersion?.versionNumber || 1;
+                  const hasActiveVersion = allVersions.some((v: any) => v.isActive);
+                  const activeVersion = allVersions.find((v: any) => v.isActive);
+                  const activeVersionNumber = activeVersion?.versionNumber;
+
 
                   // Map all versions to PlanVersion format
                   const versions: PlanVersion[] = allVersions.map((v: any) => ({
@@ -144,6 +148,7 @@ export default function AdminUserDetail({ user, onBack }: AdminUserDetailProps) 
                     createdAt: prop.createdAt,
                     updatedAt: activeVersion?.updatedAt || new Date().toISOString(),
                     activeVersionNumber: activeVersionNumber,
+                    isDraft: !hasActiveVersion,
                   };
                   plans.push(plan);
                 } catch (versionError) {
@@ -236,20 +241,52 @@ export default function AdminUserDetail({ user, onBack }: AdminUserDetailProps) 
     setSelectedPlan(null);
   };
 
-  const handleSetActiveVersion = (planId: number, versionNumber: number) => {
+  const handleSetActiveVersion = async (planId: number, versionNumber: number, wasteRoomId?: number) => {
+    if (!wasteRoomId) return;
+
+    // Find the plan we are activating
+    const plan = roomPlans.find((p) => p.id === planId);
+    if (!plan) return;
+
+    // Set clicked version active
+    await setWasteRoomActive(wasteRoomId, true);
+
+    // Set all other versions in the same plan as inactive
+    const otherVersions = plan.versions.filter((v) => v.versionNumber !== versionNumber && v.wasteRoomId);
+    await Promise.all(otherVersions.map((v) => setWasteRoomActive(v.wasteRoomId!, false)));
+
+    // Update local state
     setRoomPlans((prev) =>
-      prev.map((plan) =>
-        plan.id === planId
-          ? { ...plan, activeVersionNumber: versionNumber, updatedAt: new Date().toISOString() }
-          : plan
-      )
+      prev.map((p) => {
+        if (p.id !== planId) return p;
+        return {
+          ...p,
+          isDraft: false,
+          activeVersionNumber: versionNumber,
+          versions: p.versions.map((v) => ({
+            ...v,
+            isActive: v.versionNumber === versionNumber,
+          })),
+          updatedAt: new Date().toISOString(),
+        };
+      })
     );
+
     setSelectedPlan((prev) =>
       prev && prev.id === planId
-        ? { ...prev, activeVersionNumber: versionNumber }
+        ? {
+            ...prev,
+            isDraft: false,
+            activeVersionNumber: versionNumber,
+            versions: prev.versions.map((v) => ({
+              ...v,
+              isActive: v.versionNumber === versionNumber,
+            })),
+          }
         : prev
     );
   };
+
 
   const handleDeleteVersion = async (planId: number, versionNumber: number, wasteRoomId: number) => {
     if (!wasteRoomId) {
@@ -309,6 +346,7 @@ export default function AdminUserDetail({ user, onBack }: AdminUserDetailProps) 
                   wasteRoomId: v.wasteRoomId || v.id,
                 }));
 
+                const hasActiveVersion = roomVersions.some((v: any) => v.isActive);
                 const activeVersion = versions.find(v => v.versionNumber === (roomVersions[0].activeVersionNumber || 1)) || versions[0];
                 const plan: RoomPlan = {
                   id: planId,
@@ -319,6 +357,7 @@ export default function AdminUserDetail({ user, onBack }: AdminUserDetailProps) 
                   createdAt: prop.createdAt,
                   updatedAt: new Date().toISOString(),
                   activeVersionNumber: activeVersion.versionNumber,
+                  isDraft: !hasActiveVersion,
                 };
                 plans.push(plan);
               }
@@ -381,6 +420,7 @@ export default function AdminUserDetail({ user, onBack }: AdminUserDetailProps) 
                   `/api/admin/properties/${prop.id}/wasterooms/${encodeURIComponent(roomName)}/versions`
                 );
 
+                const hasActiveVersion = allVersions.some((v: any) => v.isActive);
                 const activeVersion = allVersions.find((v: any) => v.isActive) || allVersions[0];
                 const activeVersionNumber = activeVersion?.versionNumber || 1;
 
@@ -410,6 +450,7 @@ export default function AdminUserDetail({ user, onBack }: AdminUserDetailProps) 
                   createdAt: prop.createdAt,
                   updatedAt: activeVersion?.updatedAt || new Date().toISOString(),
                   activeVersionNumber: activeVersionNumber,
+                  isDraft: !hasActiveVersion,
                 };
                 plans.push(plan);
               } catch (versionError) {
@@ -691,21 +732,24 @@ export default function AdminUserDetail({ user, onBack }: AdminUserDetailProps) 
                                       {/* Active Version Info */}
                                       <div className="mb-4 p-3 bg-white rounded-lg border border-gray-200">
                                         <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">
-                                          Aktiv version
+                                          {plan.isDraft ? "Utkast – ingen aktiv version" : "Aktiv version"}
                                         </div>
-                                        <div className="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-3 flex-wrap">
-                                          <span className="text-sm font-bold text-nsr-ink">
-                                            {activeVersion.roomWidth}m × {activeVersion.roomHeight}m
-                                          </span>
-                                          <span className="hidden sm:inline text-gray-300">•</span>
-                                          <span className="text-sm font-medium text-gray-700">
-                                            Version {activeVersion.versionNumber}
-                                          </span>
-                                          <span className="hidden sm:inline text-gray-300">•</span>
-                                          <span className="text-xs text-gray-600 break-words">
-                                            Uppdaterad: {new Date(plan.updatedAt).toLocaleDateString('sv-SE')}
-                                          </span>
-                                        </div>
+                                        {!plan.isDraft && (
+                                            <div className="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-3 flex-wrap">
+                                              <span className="text-sm font-bold text-nsr-ink">
+                                                {activeVersion.roomWidth}m × {activeVersion.roomHeight}m
+                                              </span>
+                                              <span className="hidden sm:inline text-gray-300">•</span>
+                                              <span className="text-sm font-medium text-gray-700">
+                                                Version {activeVersion.versionNumber}
+                                              </span>
+                                              <span className="hidden sm:inline text-gray-300">•</span>
+                                              <span className="text-xs text-gray-600 break-words">
+                                                Uppdaterad:{" "}
+                                                {new Date(plan.updatedAt).toLocaleDateString("sv-SE")}
+                                              </span>
+                                            </div>
+                                          )}
                                       </div>
 
                                       {/* Version History */}
@@ -749,7 +793,7 @@ export default function AdminUserDetail({ user, onBack }: AdminUserDetailProps) 
                                                       </span>
                                                     ) : (
                                                       <button
-                                                        onClick={() => handleSetActiveVersion(plan.id, version.versionNumber)}
+                                                        onClick={() => handleSetActiveVersion(plan.id, version.versionNumber, version.wasteRoomId)}
                                                         className="text-xs font-semibold text-nsr-accent hover:text-nsr-accent/80 hover:underline whitespace-nowrap"
                                                       >
                                                         Gör aktiv

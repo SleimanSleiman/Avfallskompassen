@@ -25,4 +25,6 @@ public interface WasteRoomService {
     WasteRoomDTO saveAdminVersion(Long propertyId, String roomName, WasteRoomRequest request);
 
     List<WasteRoomDTO> getAllVersionsByPropertyAndName(Long propertyId, String roomName);
+
+    void setWasteRoomActive(Long wasteRoomId, boolean isActive);
 }

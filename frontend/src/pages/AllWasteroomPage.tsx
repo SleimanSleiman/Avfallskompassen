@@ -1,7 +1,7 @@
 import { useParams } from "react-router-dom";
 import { getWasteRoomsByPropertyId } from "../lib/WasteRoom";
 import type { WasteRoom } from "../lib/WasteRoom";
-import { deleteWasteRoom } from "../lib/WasteRoomRequest";
+import { deleteWasteRoom, setWasteRoomActive } from "../lib/WasteRoomRequest";
 import { useEffect, useState } from "react";
 import RoomSizePrompt from "../components/prompts/RoomSizePrompt";
 import greybox from "../assets/greybox.png";
@@ -85,7 +85,7 @@ export default function AllaMiljoRumPage() {
     }
 
     async function removeRoom(room: WasteRoom) {
-        if (!roomToDelete) return; 
+        if (!room) return;
 
         setLoadingDelete(true);
 
@@ -108,6 +108,33 @@ export default function AllaMiljoRumPage() {
             setLoadingDelete(false);
             setShowConfirm(false);
             setRoomToDelete(null);
+        }
+    }
+
+    async function toggleDraft(room: WasteRoom) {
+        if (!room) return;
+
+        const roomId = room.wasteRoomId ?? room.id;
+        if (!roomId) return;
+
+        const newIsActive = !room.isActive;
+
+        try {
+            // 1️⃣ Call backend
+            await setWasteRoomActive(roomId, newIsActive);
+
+            // 2️⃣ Update local state
+            setRooms(prev =>
+                prev.map(roomVersions =>
+                    roomVersions.map(r =>
+                        (r.wasteRoomId ?? r.id) === roomId
+                            ? { ...r, isActive: newIsActive }
+                            : r
+                    )
+                )
+            );
+        } catch (e) {
+            setError("Kunde inte uppdatera utkast-status");
         }
     }
 
@@ -138,6 +165,10 @@ export default function AllaMiljoRumPage() {
                     <h1 className="text-4xl font-bold">Miljörum för {propertyAddress ?? "fastighet"}</h1>
                     <p className="mt-2 text-gray-600">
                         Här kan du hantera, redigera och skapa nya miljörum för denna fastighet.
+                    </p>
+                    <p className="mt-2 text-gray-600">
+                        Om du vill skapa miljörum som inte ska ingå i din slutgiltiga statistik, sätt dem som
+                        "Utkast".
                     </p>
                 </div>
 
@@ -212,6 +243,15 @@ export default function AllaMiljoRumPage() {
                                 <p>Bredd: {room.width}</p>
 
                                 <div className="mt-4 flex flex-wrap gap-2">
+                                <label className="inline-flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+                                    <input
+                                        type="checkbox"
+                                        className="h-4 w-4 rounded border-gray-300 text-nsr-teal focus:ring-nsr-teal"
+                                        checked={!roomVersions.some(r => r.isActive)}
+                                        onChange={() => toggleDraft(room)}
+                                    />
+                                    Sätt som utkast
+                                </label>
                                 <div className="flex-shrink-0 basis-full sm:basis-auto">
                                     <PlanVersionDropdown
                                       rooms={roomVersions}
@@ -219,6 +259,7 @@ export default function AllaMiljoRumPage() {
                                       onOpenVersion={(r) => editRoom(r)}
                                     />
                                 </div>
+                                <div className="flex items-center gap-2">
                                     <button
                                         className="btn-secondary-sm"
                                         onClick={() => editRoom(room)}
@@ -233,6 +274,7 @@ export default function AllaMiljoRumPage() {
                                     >
                                         {deleting === room.id ? "Tar bort..." : "Ta bort"}
                                     </button>
+                                </div>
                                 </div>
                             </div>
                             );

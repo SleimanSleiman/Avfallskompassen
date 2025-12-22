@@ -3,6 +3,7 @@ package com.avfallskompassen.controller;
 import com.avfallskompassen.dto.RoomPdfDTO;
 import com.avfallskompassen.dto.WasteRoomDTO;
 import com.avfallskompassen.dto.WasteRoomImgDTO;
+import com.avfallskompassen.dto.request.ActiveRoomRequest;
 import com.avfallskompassen.dto.request.WasteRoomRequest;
 import com.avfallskompassen.services.RoomPdfService;
 import com.avfallskompassen.services.WasteRoomService;
@@ -172,5 +173,12 @@ public class WasteRoomController {
         }
     }
 
-
+    @PatchMapping("/wasterooms/{id}/active")
+    public ResponseEntity<Void> setWasteRoomActive(
+            @PathVariable Long id,
+            @RequestBody ActiveRoomRequest request
+    ) {
+        wasteRoomService.setWasteRoomActive(id, request.isActive());
+        return ResponseEntity.noContent().build();
+    }
 }
