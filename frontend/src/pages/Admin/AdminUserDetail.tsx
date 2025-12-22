@@ -6,6 +6,8 @@ import { get, deleteRequest } from '../../lib/api';
 import { getUsersPropertySummaries } from '../../lib/Property';
 import { currentUser } from '../../lib/Auth';
 import ConfirmModal from '../../components/ConfirmModal';
+import { updateUserRole } from "../../lib/AdminApi";
+
 
 // Data types
 export type AdminProperty = {
@@ -62,6 +64,10 @@ export default function AdminUserDetail({ user, onBack }: AdminUserDetailProps) 
   const [expandedProperties, setExpandedProperties] = useState<Set<number>>(new Set());
   const [deleteConfirm, setDeleteConfirm] = useState<{ planId: number; versionNumber: number; wasteRoomId: number } | null>(null);
   const [versionCounts, setVersionCounts] = useState<Map<number, number>>(new Map());
+  const [selectedRole, setSelectedRole] = useState<string>(user.role);
+  const [savingRole, setSavingRole] = useState(false);
+  const [roleError, setRoleError] = useState<string | null>(null);
+  const [roleSuccess, setRoleSuccess] = useState<string | null>(null);
 
   /**
    * Helper: hämta bara fastighets-summaries för en användare (utan rooms).
@@ -295,6 +301,23 @@ export default function AdminUserDetail({ user, onBack }: AdminUserDetailProps) 
     }
   };
 
+  const handleUpdateRole = async () => {
+  setSavingRole(true);
+  setRoleError(null);
+  setRoleSuccess(null);
+
+  try {
+      await updateUserRole(user.id, selectedRole);
+      user.role = selectedRole; // uppdatera lokalt
+      setRoleSuccess("Rollen har uppdaterats");
+    } catch (err) {
+      console.error("Failed to update role", err);
+      setRoleError("Kunde inte uppdatera rollen");
+    } finally {
+      setSavingRole(false);
+    }
+  };
+
   if (selectedPlan) {
     return (
       <AdminPlanningEditor
@@ -349,8 +372,43 @@ export default function AdminUserDetail({ user, onBack }: AdminUserDetailProps) 
               </div>
             </div>
           </div>
+            {/* Role management */}
+            <div className="mt-6 rounded-xl border border-gray-200 bg-gray-50 p-4">
+              <h3 className="text-sm font-bold text-gray-700 mb-3">
+                Användarroll
+              </h3>
+
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+                <select
+                  value={selectedRole}
+                  onChange={(e) => setSelectedRole(e.target.value)}
+                  className="rounded-lg border-gray-300 shadow-sm text-sm font-medium focus:border-nsr-teal focus:ring-nsr-teal"
+                >
+                  <option value="USER">Användare</option>
+                  <option value="ADMIN">Admin</option>
+                </select>
+
+                <button
+                  disabled={savingRole || selectedRole === user.role}
+                  onClick={handleUpdateRole}
+                  className="btn-primary-sm disabled:opacity-50"
+                >
+                  {savingRole ? "Sparar…" : "Spara roll"}
+                </button>
+              </div>
+
+              {roleError && (
+                <p className="mt-2 text-sm text-red-600">{roleError}</p>
+              )}
+
+              {roleSuccess && (
+                <p className="mt-2 text-sm text-green-600">{roleSuccess}</p>
+              )}
+            </div>
         </div>
       </div>
+
+      
 
       {/* Properties List */}
       <div className="mb-8 rounded-2xl border border-gray-200 bg-white shadow-soft">
