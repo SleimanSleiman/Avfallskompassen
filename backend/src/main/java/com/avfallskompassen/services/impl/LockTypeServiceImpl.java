@@ -1,14 +1,15 @@
 package com.avfallskompassen.services.impl;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.avfallskompassen.dto.LockTypeDto;
 import com.avfallskompassen.model.LockType;
 import com.avfallskompassen.repository.LockTypeRepository;
 import com.avfallskompassen.services.LockTypeService;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Service class that serves DTO's to the controller layer.

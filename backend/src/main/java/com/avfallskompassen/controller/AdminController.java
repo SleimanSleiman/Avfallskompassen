@@ -1,16 +1,26 @@
 package com.avfallskompassen.controller;
 
+import java.util.List;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.avfallskompassen.dto.UserDTO;
 import com.avfallskompassen.dto.WasteRoomDTO;
 import com.avfallskompassen.dto.request.WasteRoomRequest;
 import com.avfallskompassen.services.UserService;
 import com.avfallskompassen.services.WasteRoomService;
-import jakarta.validation.Valid;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+import jakarta.validation.Valid;
 
 /**
  * Admin-only endpoints for user management and waste room versioning.
@@ -50,7 +60,8 @@ public class AdminController {
      * newly created version
      */
     @PostMapping("/properties/{propertyId}/wasterooms/{roomName}/version")
-    @PreAuthorize("hasRole('ADMIN')")
+    // Temporärt: tillåt alla inloggade användare under utveckling
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<WasteRoomDTO> createAdminVersion(
             @PathVariable Long propertyId,
             @PathVariable String roomName,
@@ -67,7 +78,8 @@ public class AdminController {
      * about all versions of the waste room
      */
     @GetMapping("/properties/{propertyId}/wasterooms/{roomName}/versions")
-    @PreAuthorize("hasRole('ADMIN')")
+    // Temporärt: tillåt alla inloggade användare under utveckling
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<List<WasteRoomDTO>> getAllVersions(
             @PathVariable Long propertyId,
             @PathVariable String roomName) {

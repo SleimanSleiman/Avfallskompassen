@@ -2,6 +2,7 @@ package com.avfallskompassen.controller;
 
 import com.avfallskompassen.dto.LockTypeDto;
 import com.avfallskompassen.dto.PropertySimpleDTO;
+import com.avfallskompassen.dto.PropertySummaryDTO;
 import com.avfallskompassen.dto.UserStatsDTO;
 import com.avfallskompassen.dto.request.PropertyRequest;
 import com.avfallskompassen.dto.response.PropertyResponse;
@@ -186,6 +187,25 @@ public class PropertyController {
         return ResponseEntity.ok(dto);
     }
 
+    /**
+     * Get a lightweight summary of all properties created by a specific user.
+     * Used by admin views to show a user's properties without loading the full
+     * waste room graph upfront.
+     */
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/admin/user-properties-summary")
+    public ResponseEntity<List<PropertySummaryDTO>> getUsersPropertiesSummary(
+            @RequestHeader(value = "X-Username", required = false) String username) {
+
+        if (username == null || username.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        List<PropertySummaryDTO> dto = propertyService.getPropertiesSummaryByUser(username);
+
+        return ResponseEntity.ok(dto);
+    }
+
 
     /**
      * Gets all properties created by current user - Returns a simplified version of the property DTO.
@@ -218,7 +238,8 @@ public class PropertyController {
     public ResponseEntity<PropertyDTO> getPropertyById(
             @PathVariable Long id, 
             @RequestHeader(value = "X-Username", required = false) String username) {
-        
+        System.out.println("PropertyController.getPropertyById - id=" + id + ", X-Username=" + username);
+
         if (username == null || username.isEmpty()) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }

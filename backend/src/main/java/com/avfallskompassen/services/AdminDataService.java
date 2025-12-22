@@ -1,12 +1,11 @@
 package com.avfallskompassen.services;
 
+import java.math.BigDecimal;
+
 import com.avfallskompassen.dto.AdminDataDTO;
 import com.avfallskompassen.dto.CollectionFeeAdminDTO;
 import com.avfallskompassen.dto.ContainerPlanAdminDTO;
 import com.avfallskompassen.dto.LockTypeDto;
-
-import java.math.BigDecimal;
-import java.util.List;
 
 /**
  * Service interface for admin data management.

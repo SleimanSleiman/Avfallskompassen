@@ -156,7 +156,21 @@ export async function getUsersPropertiesWithWasteRooms(username : string): Promi
 export async function getProperty(id: number): Promise<Property> {
     return await api<Property>(`/api/properties/${id}`, {
         method: 'GET',
-        headers: getAuthHeaders()
+        headers: getAuthHeaders(),
+    });
+}
+
+/**
+ * Lightweight admin endpoint: only basic property info for a given user.
+ * Used for initial load in admin user detail view; room details are fetched
+ * per property when needed.
+ */
+export async function getUsersPropertySummaries(username: string): Promise<Property[]> {
+    return await api<Property[]>('/api/properties/admin/user-properties-summary', {
+        method: 'GET',
+        headers: {
+            'X-Username': username,
+        },
     });
 }
 
