@@ -167,11 +167,12 @@ public class PropertyServiceImpl implements PropertyService {
         for (Object[] row : rawRows) {
             Long userId = ((Number) row[0]).longValue();
             String username = (String) row[1];
-            LocalDateTime createdAt = LocalDateTime.ofInstant((Instant) row[2], ZoneId.systemDefault());
-            Long propertiesCount = ((Number) row[3]).longValue();
-            Long wasteRoomsCount = ((Number) row[4]).longValue();
+            String role = (String) row[2];
+            LocalDateTime createdAt = LocalDateTime.ofInstant((Instant) row[3], ZoneId.systemDefault());
+            Long propertiesCount = ((Number) row[4]).longValue();
+            Long wasteRoomsCount = ((Number) row[5]).longValue();
 
-            userStatsDTO.add(new UserStatsDTO(userId, username, createdAt, propertiesCount, wasteRoomsCount));
+            userStatsDTO.add(new UserStatsDTO(userId, username, role, createdAt, propertiesCount, wasteRoomsCount));
         }
         return userStatsDTO;
     }
