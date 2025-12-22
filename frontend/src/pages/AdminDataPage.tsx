@@ -62,14 +62,16 @@ export default function AdminDataPage() {
       setError(null);
       const adminData = await get<AdminData>('/api/admin/data');
       setData(adminData);
-    } catch (e: any) {
-      console.error('Failed to load admin data', e);
-      const errorMessage = e?.message || 'Okänt fel';
-      if (errorMessage.includes('Forbidden') || errorMessage.includes('403')) {
-        setError('Åtkomst nekad (403). Kontrollera att din användare har ADMIN-rollen i databasen. Du kan behöva logga ut och logga in igen efter att rollen har uppdaterats.');
-      } else {
-        setError(`Kunde inte ladda data: ${errorMessage}. Kontrollera att backend-servern körs.`);
-      }
+    } catch (e: unknown) {
+        if(e instanceof Error) {
+            console.error('Failed to load admin data', e);
+            const errorMessage = e?.message || 'Okänt fel';
+            if (errorMessage.includes('Forbidden') || errorMessage.includes('403')) {
+                setError('Åtkomst nekad (403). Kontrollera att din användare har ADMIN-rollen i databasen. Du kan behöva logga ut och logga in igen efter att rollen har uppdaterats.');
+            } else {
+                setError(`Kunde inte ladda data: ${errorMessage}. Kontrollera att backend-servern körs.`);
+            }
+        }
     } finally {
       setLoading(false);
     }
@@ -180,6 +182,9 @@ export default function AdminDataPage() {
         </div>
       </main>
     );
+  }
+  if(!data) {
+      return null;
   }
 
   return (

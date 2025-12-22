@@ -7,12 +7,12 @@ import type {ContainerInRoom} from "./Types.ts";
 export const clamp = (value: number, min: number, max: number) =>
   Math.max(min, Math.min(value, max));
 
-export const mmToPixels = (mm?: number): number => {
+export const mmToPixels = (mm: number): number => {
     const mmToMeter = mm / 1000;
     return mmToMeter / SCALE;
 };
 
-export const cmToPixels = (cm?: number): number => {
+export const cmToPixels = (cm: number): number => {
     const cmToMeter = cm / 100;
     return cmToMeter / SCALE;
 };

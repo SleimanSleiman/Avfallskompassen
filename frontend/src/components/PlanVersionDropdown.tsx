@@ -145,10 +145,7 @@ export default function PlanVersionDropdown({
           </div>
 
           <div className="space-y-3">
-            {groupedRooms.map(({ name, versions, activeVersion, activeIdentifier }) => {
-              const activeVersionDate = activeVersion
-                ? formatDate(activeVersion.updatedAt ?? activeVersion.createdAt)
-                : null;
+            {groupedRooms.map(({ name, versions, activeIdentifier }) => {
               return (
               <div
                 key={name}

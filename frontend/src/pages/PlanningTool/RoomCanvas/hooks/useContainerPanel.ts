@@ -29,12 +29,16 @@ function useContainerPanel({
     useEffect(() => {
         const element = ref.current;
         if (!element) {
-            onContainerPanelHeightChange?.(0);
-            return;
+            if(typeof onContainerPanelHeightChange === "function") {
+                onContainerPanelHeightChange?.(0);
+            }
+                return;
         }
 
         const updateHeight = () => {
-            onContainerPanelHeightChange?.(element.getBoundingClientRect().height);
+            if(typeof  onContainerPanelHeightChange === "function") {
+                onContainerPanelHeightChange?.(element.getBoundingClientRect().height);
+            }
         };
 
         updateHeight();

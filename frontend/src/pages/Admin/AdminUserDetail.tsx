@@ -277,7 +277,7 @@ export default function AdminUserDetail({ user, onBack }: AdminUserDetailProps) 
     }
   };
 
-  const handleSavePlanVersion = async (planId: number, planData: any, adminUsername: string) => {
+  const handleSavePlanVersion = async (planId: number) => {
     // After backend save, reload all room plans to get the latest versions
     setSelectedPlan(null);
     setLoading(true);
@@ -301,7 +301,7 @@ export default function AdminUserDetail({ user, onBack }: AdminUserDetailProps) 
         plan={selectedPlan}
         property={properties.find((p) => p.id === selectedPlan.propertyId)!}
         user={user}
-        onSave={(planData, adminUsername) => handleSavePlanVersion(selectedPlan.id, planData, adminUsername)}
+        onSave={() => handleSavePlanVersion(selectedPlan.id)}
         onBack={handleBackToProperties}
       />
     );

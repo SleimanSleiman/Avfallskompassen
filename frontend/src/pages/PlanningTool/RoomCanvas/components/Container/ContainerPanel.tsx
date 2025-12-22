@@ -28,7 +28,7 @@ type ContainerPanelProps = {
     selectedSize: { [key: number]: number | null };
     setSelectedSize: React.Dispatch<React.SetStateAction<{ [key: number]: number | null }>>;
     fetchContainers: (service: { id: number; name: string }) => Promise<void>;
-    handleAddContainer: (container: ContainerDTO, lockILock?: boolean) => void;
+    handleAddContainer: (container: ContainerDTO, position?: { x: number; y: number }, lockILock?: boolean) => void;
     setSelectedContainerInfo: (container: ContainerDTO) => void;
     isLoadingContainers: boolean;
     setIsStageDropActive: (v: boolean) => void;
@@ -305,7 +305,7 @@ const ContainerPanel = forwardRef(function ContainerPanel(
                                             </button>
                                            {LOCK_I_LOCK_COMPATIBLE_SIZES.includes(container.size) && (
                                              <button
-                                               onClick={() => handleAddContainer(container, true)}
+                                               onClick={() => handleAddContainer(container, undefined,true)}
                                                className="container-btn container-btn-lock"
                                              >
                                                Lägg till med lock-i-lock

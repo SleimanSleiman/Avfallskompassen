@@ -4,9 +4,21 @@
  * and restoring to last valid position if drag ends illegally.
  */
 import { Group } from "react-konva";
-import { useState } from "react";
+import {type ReactNode, useState} from "react";
 import { clamp, isOverlapping } from "../../../../lib/Constants";
+import type {OtherObjectInRoom, Room} from "../../../../lib/Types.ts";
 
+type OtherObjectDragProps = {
+    object: OtherObjectInRoom;
+    room: Room;
+    doorZones: { x: number; y: number; width: number; height: number }[];
+    containerZones: { x: number; y: number; width: number; height: number }[];
+    getOtherObjectZones: (excludeId?: number) => { x: number; y: number; width: number; height: number }[];
+    handleSelectOtherObject: (id: number) => void;
+    handleDragOtherObject: (id: number, pos: { x: number; y: number }) => void;
+    setIsDraggingOtherObject: (val: boolean) => void;
+    children: (props: { isOverZone: boolean }) => ReactNode;
+}
 export default function OtherObjectDrag({
     object,
     room,
@@ -17,7 +29,7 @@ export default function OtherObjectDrag({
     handleDragOtherObject,
     setIsDraggingOtherObject,
     children
-}) {
+}: OtherObjectDragProps) {
     // Tracks the last valid (non-overlapping) position for snap-back
     const [lastValidPos, setLastValidPos] = useState({ x: object.x, y: object.y });
     // Tracks if object is overlapping a forbidden zone

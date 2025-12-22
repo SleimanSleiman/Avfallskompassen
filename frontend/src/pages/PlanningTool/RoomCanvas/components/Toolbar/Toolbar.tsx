@@ -14,7 +14,6 @@ import OtherObjectSizePrompt from "../../../../../components/prompts/OtherObject
 import ContainerInfo from "./ContainerInfo"
 import ConfirmModal from "../../../../../components/ConfirmModal";
 import type { Room } from "../../../lib/Types";
-import type { ContainerDTO } from "../../../../../lib/Container";
 import type { OtherObjectInRoom, ContainerInRoom } from "../../../lib/Types";
 import './css/roomCanvasToolbar.css'
 
@@ -35,8 +34,8 @@ type ToolbarProps = {
     isSaving?: boolean;
     undo?: () => void;
     redo?: () => void;
-    selectedContainerInfo: ContainerDTO | null;
-    setSelectedContainerInfo: (container: ContainerDTO | null) => void;
+    selectedContainerInfo: ContainerInRoom | null;
+    setSelectedContainerInfo: (container: ContainerInRoom | null) => void;
     isAdminMode?: boolean;
     generateThumbnail: () => string | null;
     handleAddOtherObject: (name: string, length: number, width: number) => boolean;

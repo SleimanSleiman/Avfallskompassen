@@ -4,13 +4,15 @@
  */
 import { calculatePercentageDifference, getTrend, formatNumber } from "../../../utils/utils";
 import type { SummaryTone } from "../../../utils/types";
+import type {buildDesignStats} from "../../../utils/builders.ts";
+import type {PropertyComparison} from "../../../../../../lib/Comparison.ts";
 
 export function useContainerComparison({
     designStats,
     comparisonData,
 }: {
-    designStats: any;
-    comparisonData: any;
+    designStats: ReturnType<typeof buildDesignStats>;
+    comparisonData: PropertyComparison;
 }) {
     //Check if design has containers
     const designHasContainers = designStats.containerCount > 0;

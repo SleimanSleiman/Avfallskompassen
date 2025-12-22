@@ -8,8 +8,8 @@
  * - Toolbar and container panel UI.
  * - Blocked zones overlay when dragging containers or doors.
  */
-import { Stage, Layer } from "react-konva";
-import React, { useState, type Dispatch, type SetStateAction, useRef} from "react";
+import {Layer, Stage} from "react-konva";
+import React, {type Dispatch, type SetStateAction, useRef, useState} from "react";
 import RoomShape from "./components/Room/RoomShape";
 import CornerHandles from "./components/Room/CornerHandles";
 import BlockedZones from "./components/Room/BlockedZones"
@@ -18,16 +18,18 @@ import DoorMeasurementLayer from "./components/Door/DoorMeasurementLayer/DoorMea
 import ContainersLayer from "./components/Container/ContainersLayer";
 import ContainerPanel from "./components/Container/ContainerPanel";
 import OtherObjectsLayer from "./components/OtherObjects/OtherObjectsLayer";
-import OtherObjectMeasurementLayer from "./components/OtherObjects/OtherObjectsMeasurementLayer/OtherObjectsMeasurementLayer";
+import OtherObjectMeasurementLayer
+    from "./components/OtherObjects/OtherObjectsMeasurementLayer/OtherObjectsMeasurementLayer";
 import Toolbar from "./components/Toolbar/Toolbar";
 import useContainerPanel from "./hooks/useContainerPanel";
 import useContainerZones from "./hooks/useContainerZones";
-import { STAGE_WIDTH, STAGE_HEIGHT, GRID_SIZE_PX } from "../lib/Constants";
-import type { Room, ContainerInRoom, Door, OtherObjectInRoom } from "../lib/Types";
-import type { ContainerDTO } from "../../../lib/Container";
+import {GRID_SIZE_PX, STAGE_HEIGHT, STAGE_WIDTH} from "../lib/Constants";
+import type {ContainerInRoom, Door, OtherObjectInRoom, Room} from "../lib/Types";
+import type {ContainerDTO} from "../../../lib/Container";
 import Message from "../../../components/ShowStatus";
 import './css/roomCanvasStage.css'
 import LoadingBar from "../../../components/LoadingBar";
+import Konva from "konva";
 
 /* ─────────────── RoomCanvas Props ──────────────── */
 type RoomCanvasProps = {
@@ -46,7 +48,7 @@ type RoomCanvasProps = {
     handleAddDoor: (door: { width: number }) => boolean;
     doorZones: { x: number; y: number; width: number; height: number }[];
     restoreDoorState: (id: number, state: { x: number; y: number; wall: Door["wall"]; rotation: number; swingDirection: Door["swingDirection"];}) => void;
-    isDraggingDoor?: boolean;
+    isDraggingDoor: boolean;
     setIsDraggingDoor?: Dispatch<SetStateAction<boolean>>;
 
     /* ───────────── Container Props ───────────── */
@@ -64,7 +66,7 @@ type RoomCanvasProps = {
     /* ───────────── Other Objects Props ───────────── */
     otherObjects: OtherObjectInRoom[];
     setOtherObjects: (objects: OtherObjectInRoom[]) => void;
-    handleAddOtherObject: (name: string, width: number, height: number) => void;
+    handleAddOtherObject: (name: string, width: number, height: number) => boolean;
     getOtherObjectZones: (excludeId?: number) => { x: number; y: number; width: number; height: number }[];
     handleDragOtherObject: (id: number, pos: { x: number; y: number }) => void;
     handleSelectOtherObject: (id: number | null) => void;
@@ -101,8 +103,8 @@ type RoomCanvasProps = {
     hasUnsavedChanges?: () => boolean;
     onClose?: () => void;
     existingNames?: string[];
-    getWallInsetForContainer,
-    getSnappedRotationForContainer,
+    getWallInsetForContainer: (c: ContainerInRoom) => number;
+    getSnappedRotationForContainer: (c: ContainerInRoom) => number;
 };
 
 export default function RoomCanvas({
@@ -220,18 +222,16 @@ export default function RoomCanvas({
         moveAllObjects(dx, dy);
     };
 
-    const stageRef = useRef<any>(null);
+    const stageRef = useRef<Konva.Stage>(null);
     const generateThumbnail = (): string | null => {
         if (!stageRef.current)
             return null;
 
-        const uri = stageRef.current.toDataURL({
+        return stageRef.current.toDataURL({
             mimeType: "image/png",
             quality: 0.9,
             pixelRatio: 1
         });
-
-        return uri;
     };
 
     const closePanels = () => {

@@ -37,6 +37,7 @@ import type { PreparedRoomState } from './components/PlanningToolPopup';
 
 import { driver } from "driver.js";
 import "driver.js/dist/driver.css";
+import type {ContainerInRoom, Door, OtherObjectInRoom, Room} from "./lib/Types.ts";
 
 type PlanningToolProps = {
     isAdminMode?: boolean;
@@ -163,7 +164,7 @@ export default function PlanningTool({ isAdminMode = false, property }: Planning
     } = useContainers(room, setSelectedContainerId, setSelectedDoorId, setSelectedOtherObjectId, getDoorZones(), getOtherObjectZones(),setError,setMsg, isDoorDragging);
 
     // Track the saved state for comparison
-    const [savedRoomState, setSavedRoomState] = useState<{ room: any; doors: any; containers: any; otherObjects: any } | null>(null);
+    const [savedRoomState, setSavedRoomState] = useState<{ room: Room; doors: Door[]; containers: ContainerInRoom; otherObjects: OtherObjectInRoom } | null>(null);
     const [hasInitializedFromStorage, setHasInitializedFromStorage] = useState(false);
 
     /* ──────────────── Sync the doors and containers when changes are made to the room ──────────────── */
@@ -290,7 +291,7 @@ export default function PlanningTool({ isAdminMode = false, property }: Planning
         clearPlanningStorage();
         setShowPropertyPicker(true);
     }, [isAdminMode, selectedProperty, hasCheckedStoredProperty, clearPlanningStorage]);
-    const [ setContainerPanelHeight] = useState(0);
+    const [ ,setContainerPanelHeight] = useState(0);
 
     useEffect(() => {
         if (typeof window === 'undefined') {
