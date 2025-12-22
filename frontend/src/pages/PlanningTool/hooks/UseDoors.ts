@@ -364,7 +364,7 @@ export function useDoors(
         });
     };
 
-    const restoreDoorState = (id, state) => {
+    const restoreDoorState = (id: number, state: Pick<Door, "x" | "y" | "wall" | "rotation" | "swingDirection">) => {
         setDoors(prev =>
             prev.map(d =>
                 d.id !== id

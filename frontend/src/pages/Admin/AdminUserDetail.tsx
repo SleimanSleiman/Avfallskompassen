@@ -6,6 +6,7 @@ import { get, deleteRequest } from '../../lib/Api';
 import { getUsersPropertySummaries } from '../../lib/Property';
 import { currentUser } from '../../lib/Auth';
 import ConfirmModal from '../../components/ConfirmModal';
+import type {Door} from "../../lib/WasteRoom.ts";
 
 // Data types
 export type AdminProperty = {
@@ -25,7 +26,7 @@ export type PlanVersion = {
   roomHeight: number;
   x: number; // Room x position on canvas
   y: number; // Room y position on canvas
-  doors: any[];
+  doors: Door[];
   containers: any[];
   createdBy: 'user' | 'admin';
   adminUsername?: string; // Only set if createdBy === 'admin'
@@ -174,7 +175,7 @@ export default function AdminUserDetail({ user, onBack }: AdminUserDetailProps) 
     }
     load();
     return () => { mounted = false };
-  }, [user]);
+  }, [fetchPropertySummaries, user]);
 
   const plansByProperty = useMemo(() => {
     const map = new Map<number, RoomPlan[]>();
@@ -252,7 +253,7 @@ export default function AdminUserDetail({ user, onBack }: AdminUserDetailProps) 
     );
   };
 
-  const handleDeleteVersion = async (planId: number, versionNumber: number, wasteRoomId: number) => {
+  const handleDeleteVersion = async (planId: number, wasteRoomId: number) => {
     if (!wasteRoomId) {
       console.error('Cannot delete version: no wasteRoomId');
       return;
@@ -704,7 +705,7 @@ export default function AdminUserDetail({ user, onBack }: AdminUserDetailProps) 
         <ConfirmModal
           open={true}
           onCancel={() => setDeleteConfirm(null)}
-          onConfirm={() => handleDeleteVersion(deleteConfirm.planId, deleteConfirm.versionNumber, deleteConfirm.wasteRoomId)}
+          onConfirm={() => handleDeleteVersion(deleteConfirm.planId, deleteConfirm.wasteRoomId)}
           title="Ta bort version"
           message={`Är du säker på att du vill ta bort Version ${deleteConfirm.versionNumber}? Denna åtgärd kan inte ångras.`}
           confirmLabel="Ta bort"

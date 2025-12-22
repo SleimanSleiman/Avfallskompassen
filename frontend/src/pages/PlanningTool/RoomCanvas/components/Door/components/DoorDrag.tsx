@@ -7,7 +7,29 @@ import { Group } from "react-konva";
 import { isOverlapping} from "../../../../lib/Constants";
 import DoorVisual from "./DoorVisual";
 import { computeDragBound, getDoorRect, getDoorZone } from "../utils/DoorDragUtils";
+import type {Door} from "../../../../lib/Types.ts";
 
+type DoorDragProps = {
+    door: Door;
+    doors: Door[];
+    selected: boolean;
+    room: { x: number; y: number; width: number; height: number };
+    handleDragDoor: (id: number, pos: { x: number; y: number }) => void;
+    handleSelectDoor: (id: number) => void;
+    isDraggingDoor: boolean;
+    setIsDraggingDoor?: (dragging: boolean) => void;
+    getOtherObjectZones?: () => { x: number; y: number; width: number; height: number }[];
+    restoreDoorState: (
+        id: number,
+        state: {
+            x: number;
+            y: number;
+            wall: Door["wall"];
+            rotation: number;
+            swingDirection: Door["swingDirection"];
+        }
+    ) => void;
+}
 export default function DoorDrag({
     door,
     selected,
@@ -19,7 +41,7 @@ export default function DoorDrag({
     setIsDraggingDoor,
     getOtherObjectZones,
     restoreDoorState,
-}) {
+}: DoorDragProps) {
     //Store the last valid (non-overlapping) state for snap-back functionality
     const [lastValidState, setLastValidState] = useState({
         x: door.x,
@@ -33,7 +55,7 @@ export default function DoorDrag({
     const [isOverZone, setIsOverZone] = useState(false);
 
     //Keeps dragging inside room bounds
-    const dragBoundFunc = (pos) => computeDragBound(door, room, pos);
+    const dragBoundFunc = (pos: { x:number; y:number}) => computeDragBound(door, room, pos);
 
     //Checks if a given position is overlapping any other door or object zone
     const checkOverlapping = (pos: { x: number; y: number }) => {
@@ -83,7 +105,9 @@ export default function DoorDrag({
             }}
             onDragMove={(e) => {
                 const pos = e.target.position();
-                setIsDraggingDoor(true);
+                if (setIsDraggingDoor) {
+                    setIsDraggingDoor(true);
+                }
                 handleDragDoor(door.id, pos);
 
                 //Check if overlapping any other door
@@ -114,7 +138,9 @@ export default function DoorDrag({
                 }
 
                 setIsOverZone(false);
-                setIsDraggingDoor(false)
+                if (setIsDraggingDoor) {
+                    setIsDraggingDoor(false)
+                }
             }}
             onClick={(e) => {
                 e.cancelBubble = true;

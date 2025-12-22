@@ -44,7 +44,8 @@ public class PropertyCostController {
 
         } catch(EntityNotFoundException ex) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(Map.of("error","Property not found with id: " + id));
+                    .body(Map.of("error","Property not found",
+                           "propertyId", id));
 
         } catch (Exception ex) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -68,7 +69,8 @@ public class PropertyCostController {
 
         } catch(EntityNotFoundException ex) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(Map.of("error","Property not found for: " + username));
+                    .body(Map.of("error","Property not found" ,
+                            "username", username));
 
         } catch (Exception ex) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)

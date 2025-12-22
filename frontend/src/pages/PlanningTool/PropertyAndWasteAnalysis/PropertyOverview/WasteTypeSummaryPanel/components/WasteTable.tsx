@@ -11,8 +11,28 @@ import {
 } from "../../../utils/utils";
 import TrendBadge from "../../../components/TrendBadge";
 import '../../css/table.css'
+import type {Trend} from "../../../utils/types.ts";
 
-export default function WasteTable({ rows }) {
+type WasteTableRow = {
+    key: string;
+    displayName: string;
+    totalCost?: number | null;
+    costPercentage?: number | null;
+    containerCount?: number | null;
+    propertyFrequency?: number | null;
+    averageFrequency?: number | null;
+    frequencyDiff?: number | null;
+    frequencyTrend?: Trend;
+    propertyAnnualVolume?: number | null;
+    propertyPerWeek?: number | null;
+    averagePerWeek?: number | null;
+}
+
+type WasteTableProps = {
+    rows: WasteTableRow[];
+}
+
+export default function WasteTable({ rows }: WasteTableProps) {
     return (
         <div className="table-wrapper">
             <table className="table">
@@ -85,7 +105,7 @@ export default function WasteTable({ rows }) {
                                             )}
                                         </div>
 
-                                        {row.frequencyDiff != null && (
+                                        {row.frequencyDiff != null && row.frequencyTrend && (
                                             <TrendBadge trend={row.frequencyTrend}>
                                                 {formatPercentage(row.frequencyDiff)}
                                             </TrendBadge>
