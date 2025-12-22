@@ -123,6 +123,36 @@ public class PropertyServiceImpl implements PropertyService {
                 .map(PropertyDTO::new)
                 .toList();
     }
+    
+    /**
+     * Lightweight summary list for admin views – only basic property data,
+     * plus total number of waste room versions per property, but without
+     * loading the full waste room graph.
+     */
+    public List<PropertySummaryDTO> getPropertiesSummaryByUser(String username) {
+        List<Property> properties = propertyRepository.findByCreatedByUsername(username);
+
+        // Build base summaries
+        Map<Long, PropertySummaryDTO> summaryById = new LinkedHashMap<>();
+        for (Property p : properties) {
+            PropertySummaryDTO dto = new PropertySummaryDTO(p);
+            dto.setVersionsCount(0L); // default
+            summaryById.put(p.getId(), dto);
+        }
+
+        // Fetch aggregated version counts per property
+        List<Object[]> counts = propertyRepository.getPropertyRoomVersionCountsByUser(username);
+        for (Object[] row : counts) {
+            Long propertyId = ((Number) row[0]).longValue();
+            Long versionsCount = ((Number) row[1]).longValue();
+            PropertySummaryDTO dto = summaryById.get(propertyId);
+            if (dto != null) {
+                dto.setVersionsCount(versionsCount);
+            }
+        }
+
+        return new java.util.ArrayList<>(summaryById.values());
+    }
 
     /**
      * Collects general info about the all the users in the database.

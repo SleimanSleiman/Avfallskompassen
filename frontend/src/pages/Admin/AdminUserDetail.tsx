@@ -60,136 +60,117 @@ export default function AdminUserDetail({ user, onBack }: AdminUserDetailProps) 
   const [properties, setProperties] = useState<AdminProperty[]>([]);
   const [roomPlans, setRoomPlans] = useState<RoomPlan[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingPlansForPropertyId, setLoadingPlansForPropertyId] = useState<number | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [expandedProperties, setExpandedProperties] = useState<Set<number>>(new Set());
   const [deleteConfirm, setDeleteConfirm] = useState<{ planId: number; versionNumber: number; wasteRoomId: number } | null>(null);
+  const [versionCounts, setVersionCounts] = useState<Map<number, number>>(new Map());
+
+  /**
+   * Helper: hämta bara fastighets-summaries för en användare (utan rooms).
+   */
+  const fetchPropertySummaries = async (username: string) => {
+    const userProps = await getUsersPropertySummaries(username);
+    const mappedProps: AdminProperty[] = userProps.map((p) => ({
+      id: Number(p.id),
+      userId: user.id,
+      address: p.address || '',
+      numberOfApartments: p.numberOfApartments || 0,
+      municipalityName: p.municipalityName || (p as any).municipality || '',
+      lockName: (p as any).lockName || (p as any).lockTypeDto?.name || '',
+      accessPathLength: p.accessPathLength || 0,
+      createdAt: p.createdAt || new Date().toISOString(),
+    }));
+    // initial versionsCount per property kommer direkt från backend (PropertySummaryDTO.versionsCount)
+    const initialCounts = new Map<number, number>();
+    userProps.forEach((p: any) => {
+      if (p.id != null && typeof p.versionsCount === 'number') {
+        initialCounts.set(Number(p.id), p.versionsCount);
+      }
+    });
+    setVersionCounts(initialCounts);
+    return mappedProps;
+  };
+
+  /**
+   * Helper: hämta alla wasterooms för en viss fastighet när den expanderas,
+   * och bygg RoomPlan-objekt endast för den fastigheten.
+   */
+  const fetchPlansForProperty = async (prop: AdminProperty): Promise<RoomPlan[]> => {
+  const rooms = await get<any[]>(`/api/properties/${prop.id}/wasterooms`);
+
+    const roomsByName = new Map<string, any[]>();
+    (rooms || []).forEach((r: any) => {
+      const roomName = r.name || 'Miljörum';
+      if (!roomsByName.has(roomName)) {
+        roomsByName.set(roomName, []);
+      }
+      roomsByName.get(roomName)!.push(r);
+    });
+
+    const plans: RoomPlan[] = [];
+    roomsByName.forEach((roomVersions, roomName) => {
+      if (!roomVersions || roomVersions.length === 0) return;
+
+      const versions: PlanVersion[] = roomVersions.map((v: any) => ({
+        versionNumber: v.versionNumber || 1,
+        roomWidth: v.width || v.roomWidth || 0,
+        roomHeight: v.length || v.roomHeight || 0,
+        x: v.x ?? 150,
+        y: v.y ?? 150,
+        doors: v.doors || [],
+        containers: v.containers || [],
+        createdBy: (v.createdBy || 'user') as 'user' | 'admin',
+        adminUsername: v.adminUsername,
+        createdAt: v.createdAt || new Date().toISOString(),
+        versionName: v.versionName,
+        wasteRoomId: v.wasteRoomId || v.id,
+      }));
+
+      const hasActiveVersion = allVersions.some((v: any) => v.isActive);
+      const active =
+        versions.find((v) => (roomVersions.find((rv: any) => rv.versionNumber === v.versionNumber)?.isActive)) ||
+        versions[versions.length - 1];
+      const activeVersionNumber = active?.versionNumber || versions[versions.length - 1].versionNumber;
+
+      const planId = Number(prop.id) * 1000 + plans.length + 1;
+      const plan: RoomPlan = {
+        id: planId,
+        propertyId: prop.id,
+        userId: user.id,
+        name: roomName,
+        versions: versions.sort((a, b) => a.versionNumber - b.versionNumber),
+        createdAt: prop.createdAt,
+        updatedAt: active?.createdAt || new Date().toISOString(),
+        activeVersionNumber,
+        isDraft: !hasActiveVersion,
+      };
+      plans.push(plan);
+    });
+
+    // uppdatera versions-count för denna fastighet
+    const totalVersions = plans.reduce(
+      (sum, plan) => sum + (plan.versions?.length || 0),
+      0
+    );
+    setVersionCounts((prev) => {
+      const next = new Map(prev);
+      next.set(prop.id, totalVersions);
+      return next;
+    });
+
+    return plans;
+  };
 
   useEffect(() => {
     let mounted = true;
     async function load() {
       setLoading(true);
       try {
-        // Fetch all properties (admin endpoint) and filter by creator username
-        const userProps = await getUsersPropertiesWithWasteRooms(user.username);
-
-        const mappedProps: AdminProperty[] = userProps.map((p) => ({
-          id: Number(p.id),
-          userId: user.id,
-          address: p.address || '',
-          numberOfApartments: p.numberOfApartments || 0,
-          municipalityName: p.municipalityName || p.municipality || '',
-          lockName: (p.lockTypeDto && p.lockTypeDto.name) || p.lockName || '',
-          accessPathLength: p.accessPathLength || 0,
-          createdAt: p.createdAt || new Date().toISOString(),
-        }));
-
-        // For each property, map waste rooms and build simple RoomPlan objects
-        const plans: RoomPlan[] = [];
-        await Promise.all(
-          mappedProps.map(async (prop, idx) => {
-            try {
-              const rooms = await get<any[]>(`/api/properties/${prop.id}/wasterooms`);
-
-              // Group rooms by name to get all versions
-              const roomsByName = new Map<string, any[]>();
-              (rooms || []).forEach((r: any) => {
-                const roomName = r.name || 'Miljörum';
-                if (!roomsByName.has(roomName)) {
-                  roomsByName.set(roomName, []);
-                }
-                roomsByName.get(roomName)!.push(r);
-              });
-
-              // For each unique room name, fetch all versions and create a RoomPlan
-              for (const [roomName, roomVersions] of roomsByName.entries()) {
-                try {
-                  // Fetch all versions for this room
-                  const allVersions = await get<any[]>(
-                    `/api/admin/properties/${prop.id}/wasterooms/${encodeURIComponent(roomName)}/versions`
-                  );
-
-                  console.log(`Fetched versions for room "${roomName}":`, allVersions);
-
-                  // Check if we got valid data
-                  if (!allVersions || allVersions.length === 0) {
-                    console.warn(`No versions returned for room "${roomName}", using fallback`);
-                    throw new Error('No versions found');
-                  }
-
-                  // Find the active version
-                  const hasActiveVersion = allVersions.some((v: any) => v.isActive);
-                  const activeVersion = allVersions.find((v: any) => v.isActive);
-                  const activeVersionNumber = activeVersion?.versionNumber;
-
-
-                  // Map all versions to PlanVersion format
-                  const versions: PlanVersion[] = allVersions.map((v: any) => ({
-                    versionNumber: v.versionNumber || 1,
-                    roomWidth: v.width || v.roomWidth || 0,
-                    roomHeight: v.length || v.roomHeight || 0,
-                    x: v.x ?? 150,
-                    y: v.y ?? 150,
-                    doors: v.doors || [],
-                    containers: v.containers || [],
-                    createdBy: (v.createdBy || 'user') as 'user' | 'admin',
-                    adminUsername: v.adminUsername,
-                    createdAt: v.createdAt || new Date().toISOString(),
-                    versionName: v.versionName,
-                    wasteRoomId: v.wasteRoomId,
-                  }));
-
-                  const planId = prop.id * 1000 + plans.length + 1;
-                  const plan: RoomPlan = {
-                    id: planId,
-                    propertyId: prop.id,
-                    userId: user.id,
-                    name: roomName,
-                    versions: versions.sort((a, b) => a.versionNumber - b.versionNumber),
-                    createdAt: prop.createdAt,
-                    updatedAt: activeVersion?.updatedAt || new Date().toISOString(),
-                    activeVersionNumber: activeVersionNumber,
-                    isDraft: !hasActiveVersion,
-                  };
-                  plans.push(plan);
-                } catch (versionError) {
-                  console.warn(`Failed to fetch versions for room "${roomName}":`, versionError);
-                  // Fallback: create a plan with single version from the first room data
-                  const firstRoom = roomVersions[0];
-                  const planId = prop.id * 1000 + plans.length + 1;
-                  const plan: RoomPlan = {
-                    id: planId,
-                    propertyId: prop.id,
-                    userId: user.id,
-                    name: roomName,
-                    versions: [
-                      {
-                        versionNumber: firstRoom.versionNumber || 1,
-                        roomWidth: firstRoom.width || firstRoom.roomWidth || 0,
-                        roomHeight: firstRoom.length || firstRoom.roomHeight || 0,
-                        x: firstRoom.x ?? 150,
-                        y: firstRoom.y ?? 150,
-                        doors: firstRoom.doors || [],
-                        containers: firstRoom.containers || [],
-                        createdBy: (firstRoom.createdBy || 'user') as 'user' | 'admin',
-                        createdAt: firstRoom.createdAt || new Date().toISOString(),
-                      },
-                    ],
-                    createdAt: prop.createdAt,
-                    updatedAt: new Date().toISOString(),
-                    activeVersionNumber: firstRoom.versionNumber || 1,
-                  };
-                  plans.push(plan);
-                }
-              }
-            } catch (e) {
-              console.warn('Failed to fetch wasterooms for property', prop.id, e);
-            }
-          })
-        );
-
+        const mappedProps = await fetchPropertySummaries(user.username);
         if (!mounted) return;
         setProperties(mappedProps);
-        setRoomPlans(plans);
+        setRoomPlans([]); // room plans laddas lazy per fastighet
       } catch (e) {
         console.error('Failed to load properties/room plans for admin detail', e);
       } finally {
@@ -220,7 +201,9 @@ export default function AdminUserDetail({ user, onBack }: AdminUserDetailProps) 
     );
   }, [properties, searchQuery]);
 
-  const toggleProperty = (propertyId: number) => {
+  const toggleProperty = async (propertyId: number) => {
+    // Mark this property as loading its plans
+    setLoadingPlansForPropertyId(propertyId);
     setExpandedProperties((prev) => {
       const newSet = new Set(prev);
       if (newSet.has(propertyId)) {
@@ -230,6 +213,24 @@ export default function AdminUserDetail({ user, onBack }: AdminUserDetailProps) 
       }
       return newSet;
     });
+
+    // Lazy-load plans för denna fastighet om de inte redan finns
+    const existingPlans = plansByProperty.get(propertyId) || [];
+    if (!existingPlans.length) {
+      try {
+        const prop = properties.find((p) => p.id === propertyId);
+        if (!prop) return;
+        const newPlans = await fetchPlansForProperty(prop);
+        setRoomPlans((prev) => [...prev.filter((p) => p.propertyId !== propertyId), ...newPlans]);
+      } catch (e) {
+        console.warn('Failed to load room plans for property', propertyId, e);
+      } finally {
+        setLoadingPlansForPropertyId(null);
+      }
+    } else {
+      // No need to load, clear loading state
+      setLoadingPlansForPropertyId(null);
+    }
   };
 
   const handleEditPlan = (plan: RoomPlan, versionNumber?: number) => {
@@ -287,7 +288,6 @@ export default function AdminUserDetail({ user, onBack }: AdminUserDetailProps) 
     );
   };
 
-
   const handleDeleteVersion = async (planId: number, versionNumber: number, wasteRoomId: number) => {
     if (!wasteRoomId) {
       console.error('Cannot delete version: no wasteRoomId');
@@ -297,78 +297,13 @@ export default function AdminUserDetail({ user, onBack }: AdminUserDetailProps) 
     try {
       await deleteRequest(`/api/wasterooms/${wasteRoomId}`);
       
-      // Reload room plans after deletion
+      // Reload room plans för just denna fastighet
       setLoading(true);
-      const allProps = await get<any[]>('/api/properties');
-      const userProps = allProps.filter((p) => p.createdByUsername === user.username);
-
-      const mappedProps: AdminProperty[] = userProps.map((p) => ({
-        id: Number(p.id),
-        userId: user.id,
-        address: p.address || '',
-        numberOfApartments: p.numberOfApartments || 0,
-        municipalityName: p.municipalityName || p.municipality || '',
-        lockName: (p.lockTypeDto && p.lockTypeDto.name) || p.lockName || '',
-        accessPathLength: p.accessPathLength || 0,
-        createdAt: p.createdAt || new Date().toISOString(),
-      }));
-
-      const plans: RoomPlan[] = [];
-      await Promise.all(
-        mappedProps.map(async (prop) => {
-          try {
-            const rooms = await get<any[]>(`/api/properties/${prop.id}/wasterooms`);
-            // Group rooms by name
-            const roomsByName = new Map<string, any[]>();
-            (rooms || []).forEach((r: any) => {
-              const roomName = r.name || 'Miljörum 1';
-              if (!roomsByName.has(roomName)) {
-                roomsByName.set(roomName, []);
-              }
-              roomsByName.get(roomName)!.push(r);
-            });
-
-            roomsByName.forEach((roomVersions, roomName) => {
-              if (roomVersions.length > 0) {
-                const planId = prop.id * 1000 + plans.length + 1;
-                const versions: PlanVersion[] = roomVersions.map((v: any) => ({
-                  versionNumber: v.versionNumber || 1,
-                  roomWidth: v.width || v.roomWidth || 0,
-                  roomHeight: v.length || v.roomHeight || 0,
-                  x: v.x ?? 150,
-                  y: v.y ?? 150,
-                  doors: v.doors || [],
-                  containers: v.containers || [],
-                  createdBy: (v.createdBy || 'user') as 'user' | 'admin',
-                  adminUsername: v.adminUsername,
-                  createdAt: v.createdAt || new Date().toISOString(),
-                  versionName: v.versionName,
-                  wasteRoomId: v.wasteRoomId || v.id,
-                }));
-
-                const hasActiveVersion = roomVersions.some((v: any) => v.isActive);
-                const activeVersion = versions.find(v => v.versionNumber === (roomVersions[0].activeVersionNumber || 1)) || versions[0];
-                const plan: RoomPlan = {
-                  id: planId,
-                  propertyId: prop.id,
-                  userId: user.id,
-                  name: roomName,
-                  versions,
-                  createdAt: prop.createdAt,
-                  updatedAt: new Date().toISOString(),
-                  activeVersionNumber: activeVersion.versionNumber,
-                  isDraft: !hasActiveVersion,
-                };
-                plans.push(plan);
-              }
-            });
-          } catch (e) {
-            console.warn('Failed to fetch wasterooms for property', prop.id, e);
-          }
-        })
-      );
-
-      setRoomPlans(plans);
+      const prop = properties.find((p) => p.id === planId / 1000 >> 0) || null;
+      if (prop) {
+        const newPlans = await fetchPlansForProperty(prop);
+        setRoomPlans((prev) => [...prev.filter((p) => p.propertyId !== prop.id), ...newPlans]);
+      }
       setDeleteConfirm(null);
     } catch (error) {
       console.error('Failed to delete version', error);
@@ -384,87 +319,11 @@ export default function AdminUserDetail({ user, onBack }: AdminUserDetailProps) 
     setLoading(true);
 
     try {
-      // Refetch all properties and room plans to get updated versions
-      const allProps = await get<any[]>('/api/properties');
-      const userProps = allProps.filter((p) => p.createdByUsername === user.username);
-
-      const mappedProps: AdminProperty[] = userProps.map((p) => ({
-        id: Number(p.id),
-        userId: user.id,
-        address: p.address || '',
-        numberOfApartments: p.numberOfApartments || 0,
-        municipalityName: p.municipalityName || p.municipality || '',
-        lockName: (p.lockTypeDto && p.lockTypeDto.name) || p.lockName || '',
-        accessPathLength: p.accessPathLength || 0,
-        createdAt: p.createdAt || new Date().toISOString(),
-      }));
-
-      const plans: RoomPlan[] = [];
-      await Promise.all(
-        mappedProps.map(async (prop) => {
-          try {
-            const rooms = await get<any[]>(`/api/properties/${prop.id}/wasterooms`);
-
-            const roomsByName = new Map<string, any[]>();
-            (rooms || []).forEach((r: any) => {
-              const roomName = r.name || 'Miljörum';
-              if (!roomsByName.has(roomName)) {
-                roomsByName.set(roomName, []);
-              }
-              roomsByName.get(roomName)!.push(r);
-            });
-
-            for (const [roomName, roomVersions] of roomsByName.entries()) {
-              try {
-                const allVersions = await get<any[]>(
-                  `/api/admin/properties/${prop.id}/wasterooms/${encodeURIComponent(roomName)}/versions`
-                );
-
-                const hasActiveVersion = allVersions.some((v: any) => v.isActive);
-                const activeVersion = allVersions.find((v: any) => v.isActive) || allVersions[0];
-                const activeVersionNumber = activeVersion?.versionNumber || 1;
-
-                const versions: PlanVersion[] = allVersions.map((v: any) => ({
-                  versionNumber: v.versionNumber || 1,
-                  roomWidth: v.width || v.roomWidth || 0,
-                  roomHeight: v.length || v.roomHeight || 0,
-                  x: v.x ?? 150,
-                  y: v.y ?? 150,
-                  doors: v.doors || [],
-                  containers: v.containers || [],
-                  otherObjects: v.otherObjects || [],
-                  createdBy: (v.createdBy || 'user') as 'user' | 'admin',
-                  adminUsername: v.adminUsername,
-                  createdAt: v.createdAt || new Date().toISOString(),
-                  versionName: v.versionName,
-                  wasteRoomId: v.wasteRoomId,
-                }));
-
-                const newPlanId = prop.id * 1000 + plans.length + 1;
-                const plan: RoomPlan = {
-                  id: newPlanId,
-                  propertyId: prop.id,
-                  userId: user.id,
-                  name: roomName,
-                  versions: versions.sort((a, b) => a.versionNumber - b.versionNumber),
-                  createdAt: prop.createdAt,
-                  updatedAt: activeVersion?.updatedAt || new Date().toISOString(),
-                  activeVersionNumber: activeVersionNumber,
-                  isDraft: !hasActiveVersion,
-                };
-                plans.push(plan);
-              } catch (versionError) {
-                console.warn(`Failed to fetch versions for room ${roomName}:`, versionError);
-              }
-            }
-          } catch (e) {
-            console.warn('Failed to fetch wasterooms for property', prop.id, e);
-          }
-        })
-      );
-
-      setProperties(mappedProps);
-      setRoomPlans(plans);
+      const prop = properties.find((p) => p.id === planId / 1000 >> 0) || null;
+      if (prop) {
+        const newPlans = await fetchPlansForProperty(prop);
+        setRoomPlans((prev) => [...prev.filter((p) => p.propertyId !== prop.id), ...newPlans]);
+      }
     } catch (e) {
       console.error('Failed to reload data after save:', e);
     } finally {
@@ -583,7 +442,8 @@ export default function AdminUserDetail({ user, onBack }: AdminUserDetailProps) 
             {filteredProperties.map((property) => {
               const plans = plansByProperty.get(property.id) || [];
               const planCount = plans.length;
-              const totalVersions = plans.reduce((sum, plan) => sum + (plan.versions?.length || 0), 0);
+              const loadedTotalVersions = plans.reduce((sum, plan) => sum + (plan.versions?.length || 0), 0);
+              const totalVersions = versionCounts.get(property.id) ?? loadedTotalVersions;
               const isExpanded = expandedProperties.has(property.id);
               return (
                 <div key={property.id} className="border-b border-gray-200 last:border-b-0">
@@ -696,9 +556,22 @@ export default function AdminUserDetail({ user, onBack }: AdminUserDetailProps) 
                             {planCount} {planCount === 1 ? 'planering' : 'planeringar'}
                           </span>
                         </div>
-                        {planCount === 0 ? (
+
+                        {/* Loading state för just denna fastighets planeringar */}
+                        {loadingPlansForPropertyId === property.id ? (
+                          <div className="space-y-4">
+                            <div className="rounded-lg border-2 border-gray-200 bg-gray-50/50 p-3 sm:p-5">
+                              <div className="mb-3 h-4 w-40 rounded-full bg-gray-200 animate-pulse" />
+                              <div className="mb-3 h-3 w-24 rounded-full bg-gray-100 animate-pulse" />
+                              <div className="mb-4 h-16 rounded-lg bg-gray-100 animate-pulse" />
+                              <div className="h-20 rounded-lg bg-gray-100 animate-pulse" />
+                            </div>
+                          </div>
+                        ) : planCount === 0 ? (
                           <div className="py-8 text-center">
-                            <p className="text-sm text-gray-500 font-medium">Inga planeringar för denna fastighet</p>
+                            <p className="text-sm text-gray-500 font-medium">
+                              Inga planeringar för denna fastighet
+                            </p>
                           </div>
                         ) : (
                           <div className="space-y-4">

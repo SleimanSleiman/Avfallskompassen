@@ -1,5 +1,12 @@
 package com.avfallskompassen.services.impl;
 
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.avfallskompassen.dto.AdminDataDTO;
 import com.avfallskompassen.dto.CollectionFeeAdminDTO;
 import com.avfallskompassen.dto.ContainerPlanAdminDTO;
@@ -9,12 +16,6 @@ import com.avfallskompassen.repository.ContainerPlanRepository;
 import com.avfallskompassen.services.AdminDataService;
 import com.avfallskompassen.services.CollectionFeeService;
 import com.avfallskompassen.services.LockTypeService;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.math.BigDecimal;
-import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Service implementation for admin data management.

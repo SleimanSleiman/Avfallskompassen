@@ -32,8 +32,13 @@ function PlanningToolWrapper({
 }) {
   const [initialized, setInitialized] = useState(false);
 
-  if (isLoading) {
-    return <LoadingBar />;
+  // Visa alltid loading tills vi har riktig rumsdata att arbeta med
+  if (isLoading || !planData) {
+    return (
+      <div className="py-16">
+        <LoadingBar message="Laddar miljörummet för redigering…" />
+      </div>
+    );
   }
 
   if (typeof window !== 'undefined' && !initialized && planData) {
@@ -48,9 +53,19 @@ function PlanningToolWrapper({
       version: planData.version,
       wasteRoomId: planData.wasteRoomId
     });
+
+    const propertyId = planData.property?.id;
+
     localStorage.removeItem('trashRoomData');
     localStorage.removeItem('enviormentRoomData');
     localStorage.setItem('trashRoomData', JSON.stringify(planData));
+
+    // Se till att jämförelse-API:t får ett propertyId även i admin-läge
+    if (propertyId) {
+      localStorage.setItem('selectedPropertyId', String(propertyId));
+      localStorage.setItem('selectedProperty', JSON.stringify({ propertyId }));
+    }
+
     setInitialized(true);
   }
 
@@ -79,9 +94,8 @@ export default function AdminPlanningEditor({
   const [planData, setPlanData] = useState<any>(null);
   const [isLoadingRoom, setIsLoadingRoom] = useState(true);
   const generateThumbnailRef = useRef<(() => string | null) | null>(null);
-
-  const [msg, setMsg] = useState<string>('');
-  const [error, setError] = useState<string>('');
+  const [msg, setMsg] = useState<string>("");
+  const [error, setError] = useState<string>("");
 
   // Fetch the actual waste room data from the database
   useEffect(() => {
@@ -173,7 +187,6 @@ export default function AdminPlanningEditor({
         containerCount: currentPlanData.containers?.length,
         hasDoors: !!currentPlanData.doors,
         doorCount: currentPlanData.doors?.length,
-
           x: currentPlanData.x,
           y: currentPlanData.y
       });

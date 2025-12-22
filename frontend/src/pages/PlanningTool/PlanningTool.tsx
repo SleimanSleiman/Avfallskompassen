@@ -87,9 +87,16 @@ export default function PlanningTool({ isAdminMode = false, property, onGenerate
     } = useRoom();
 
     useEffect(() => {
-        if (room?.propertyId) {
-            getProperty(room.propertyId).then(setLoadedProperty).catch(console.error);
+        if (!room?.propertyId) return;
+
+        // If a property was passed in (admin viewing another user's property),
+        // use it directly instead of calling the ownership-restricted API.
+        if (property && property.id === room.propertyId) {
+            setLoadedProperty(property);
+            return;
         }
+
+        getProperty(room.propertyId).then(setLoadedProperty).catch(console.error);
     }, [room?.propertyId]);
     
     /* ──────────────── Door state & logic ──────────────── */
@@ -410,10 +417,10 @@ const hasUnsavedChangesRef = useRef(false);
 
     //Open ConfirmModal for unsaved changes during logout or navigation in site
     useEffect(() => {
-      const hasChanges = hasUnsavedChanges();
-      hasUnsavedChangesRef.current = hasChanges;
-      setHasUnsavedChanges(hasChanges);
-    }, [hasUnsavedChanges]);
+            hasUnsavedChangesRef.current = hasUnsavedChanges();
+            // store boolean (not the ref object) in shared context
+            setHasUnsavedChanges(hasUnsavedChangesRef.current);
+    }, [room, doors, containersInRoom, otherObjects, savedRoomState]);
 
     //Opens browser prompt for unsaved changes during exit or reload of page
     useEffect(() => {
