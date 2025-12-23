@@ -143,8 +143,8 @@ export default function NavBar() {
               {isAdmin ? (
                 <>
                   <NavLink to="/admin" end className={({ isActive }) => `nav-link hover:text-white transition-colors ${isActive ? 'nav-link-active' : ''}`}>Dashboard</NavLink>
-                  <NavLink to="/admin/data" className={({ isActive }) => `nav-link hover:text-white transition-colors ${isActive ? 'nav-link-active' : ''}`}>Hantera priser</NavLink>
-                  <button 
+                  <NavLink to="/admin/data" className={({ isActive }) => `nav-link hover:text-white transition-colors ${isActive ? 'nav-link-active' : ''}`}>Hantera kostnader</NavLink>
+                  <button
                     onClick={(e) => {
                       e.preventDefault();
                       handleNavigation('/profile');
@@ -154,7 +154,6 @@ export default function NavBar() {
                     Profil
                   </button>
                   <div className="flex items-center gap-3">
-                    {user && <span className="text-sm">Hej {user.username}!</span>}
                     <button
                       onClick={handleLogout}
                       className="rounded-xl2 bg-nsr-accent px-4 py-2 text-sm text-[#121212] hover:bg-nsr-accent/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-nsr-accent transition-colors"
@@ -202,15 +201,6 @@ export default function NavBar() {
                   <button
                     onClick={(e) => {
                       e.preventDefault();
-                      handleNavigation('/reports');
-                    }}
-                    className={`nav-link hover:text-white transition-colors ${location.pathname === '/reports' ? 'nav-link-active' : ''}`}
-                  >
-                    Rapporter
-                  </button>
-                  <button 
-                    onClick={(e) => {
-                      e.preventDefault();
                       handleNavigation('/profile');
                     }}
                     className={`nav-link hover:text-white transition-colors ${location.pathname === '/profile' ? 'nav-link-active' : ''}`}
@@ -248,8 +238,8 @@ export default function NavBar() {
             {isAdmin ? (
               <>
                 <NavLink to="/admin" className="text-nsr-ink" onClick={() => setOpen(false)}>Dashboard</NavLink>
-                <NavLink to="/admin/data" className="text-nsr-ink" onClick={() => setOpen(false)}>Hantera priser</NavLink>
-                <button 
+                <NavLink to="/admin/data" className="text-nsr-ink" onClick={() => setOpen(false)}>Hantera kostnader</NavLink>
+                <button
                   onClick={(e) => {
                     e.preventDefault();
                     setOpen(false);
@@ -294,17 +284,7 @@ export default function NavBar() {
                   Statistik
                 </button>
                 <NavLink to="/planningTool" onClick={resetPlanningToolState} className="text-nsr-ink">Planeringsverktyg</NavLink>
-                <button 
-                  onClick={(e) => {
-                    e.preventDefault();
-                    setOpen(false);
-                    handleNavigation('/reports');
-                  }}
-                  className="text-left text-nsr-ink"
-                >
-                  Rapporter
-                </button>
-                <button 
+                <button
                   onClick={(e) => {
                     e.preventDefault();
                     setOpen(false);

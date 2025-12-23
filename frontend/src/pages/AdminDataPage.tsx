@@ -196,9 +196,9 @@ export default function AdminDataPage() {
           <span>Tillbaka till Admin Dashboard</span>
         </a>
         <div className="mb-3">
-          <h1 className="h1 rubriktext">Hantera Priser och Kostnader</h1>
+          <h1 className="h1 rubriktext">Hantera Kostnader</h1>
           <p className="mt-2 text-gray-600 brodtext">
-            Uppdatera priser för låstyper, containerplaner och insamlingsavgifter
+            Uppdatera priser för låstyper, kärl och dragvägsavgifter.
           </p>
         </div>
       </div>
@@ -292,7 +292,7 @@ export default function AdminDataPage() {
       <div className="mb-8 rounded-2xl border bg-white shadow-soft">
         <div className="border-b px-6 py-4 bg-gray-50/50">
           <h2 className="text-xl font-black text-nsr-ink">
-            Containerplaner ({data.containerPlans.length})
+            Kärl ({data.containerPlans.length})
           </h2>
         </div>
         <div className="overflow-x-auto">
@@ -303,10 +303,7 @@ export default function AdminDataPage() {
                   Kommun
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                  Tjänsttyp
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                  Container
+                  Abonnemangstyp
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                   Storlek
@@ -333,9 +330,6 @@ export default function AdminDataPage() {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm text-gray-700">{plan.containerTypeName}</div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-700">{plan.containerSize} L</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm text-gray-700">{plan.emptyingFrequencyPerYear}</div>
@@ -395,7 +389,7 @@ export default function AdminDataPage() {
       <div className="mb-8 rounded-2xl border bg-white shadow-soft">
         <div className="border-b px-6 py-4 bg-gray-50/50">
           <h2 className="text-xl font-black text-nsr-ink">
-            Insamlingsavgifter ({data.collectionFees.length})
+            Dragvägsavgifter ({data.collectionFees.length})
           </h2>
         </div>
         <div className="overflow-x-auto">

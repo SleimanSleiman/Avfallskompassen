@@ -43,9 +43,10 @@ import "driver.js/dist/driver.css";
 type PlanningToolProps = {
     isAdminMode?: boolean;
     property?: Property;
+    onGenerateThumbnail?: (fn: () => string | null) => void;
 };
 
-export default function PlanningTool({ isAdminMode = false, property }: PlanningToolProps) {
+export default function PlanningTool({ isAdminMode = false, property, onGenerateThumbnail }: PlanningToolProps) {
     const navigate = useNavigate();
     const { setHasUnsavedChanges } = useUnsavedChanges();
 
@@ -236,6 +237,8 @@ export default function PlanningTool({ isAdminMode = false, property }: Planning
             const parsed = JSON.parse(stored);
             const updated = {
                 ...parsed,
+                x: room.x,
+                y: room.y,
                 containers: containersInRoom,
                 doors: doors,
                 otherObjects: otherObjects,
@@ -247,7 +250,7 @@ export default function PlanningTool({ isAdminMode = false, property }: Planning
         } catch (error) {
             console.error('Failed to sync state to localStorage', error);
         }
-    }, [containersInRoom, doors, otherObjects, room.width, room.height, room.id]);
+    }, [containersInRoom, doors, otherObjects, room.width, room.height, room.x, room.y, room.id]);
 
 
     /* ──────────────── Service Types (API data) ──────────────── */
@@ -627,6 +630,7 @@ const hasUnsavedChangesRef = useRef(false);
                         hasUnsavedChanges={hasUnsavedChanges}
                         onClose={handleCloseRoom}
                         existingNames={loadedProperty?.wasteRooms?.map(r => r.name || "") || []}
+                        onGenerateThumbnail={onGenerateThumbnail}
 
                         getWallInsetForContainer={getWallInsetForContainer}
                         getSnappedRotationForContainer={getSnappedRotationForContainer}
