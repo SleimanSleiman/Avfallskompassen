@@ -9,7 +9,6 @@ import com.avfallskompassen.model.ContainerPosition;
 import com.avfallskompassen.model.ContainerType;
 import com.avfallskompassen.model.Property;
 import com.avfallskompassen.model.WasteRoom;
-import com.avfallskompassen.repository.ContainerTypeRepository;
 import com.avfallskompassen.repository.PropertyRepository;
 import com.avfallskompassen.repository.WasteRoomRepository;
 import com.avfallskompassen.services.ActivityService;

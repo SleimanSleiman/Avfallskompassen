@@ -120,6 +120,7 @@ export default function AdminUserDetail({ user, onBack }: AdminUserDetailProps) 
         y: v.y ?? 150,
         doors: v.doors || [],
         containers: v.containers || [],
+        otherObjects: v.otherObjects || [],
         createdBy: (v.createdBy || 'user') as 'user' | 'admin',
         adminUsername: v.adminUsername,
         createdAt: v.createdAt || new Date().toISOString(),

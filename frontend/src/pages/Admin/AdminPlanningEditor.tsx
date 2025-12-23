@@ -32,7 +32,6 @@ function PlanningToolWrapper({
 }) {
   const [initialized, setInitialized] = useState(false);
 
-  // Visa alltid loading tills vi har riktig rumsdata att arbeta med
   if (isLoading || !planData) {
     return (
       <div className="py-16">
@@ -60,7 +59,6 @@ function PlanningToolWrapper({
     localStorage.removeItem('enviormentRoomData');
     localStorage.setItem('trashRoomData', JSON.stringify(planData));
 
-    // Se till att jämförelse-API:t får ett propertyId även i admin-läge
     if (propertyId) {
       localStorage.setItem('selectedPropertyId', String(propertyId));
       localStorage.setItem('selectedProperty', JSON.stringify({ propertyId }));
