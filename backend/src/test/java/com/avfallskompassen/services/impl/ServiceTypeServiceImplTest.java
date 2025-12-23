@@ -2,7 +2,6 @@ package com.avfallskompassen.services.impl;
 
 import com.avfallskompassen.model.ServiceType;
 import com.avfallskompassen.repository.ServiceTypeRepository;
-import com.avfallskompassen.services.ServiceTypeService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
