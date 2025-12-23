@@ -396,7 +396,7 @@ export default function AdminUserDetail({ user, onBack }: AdminUserDetailProps) 
     return (
       <main className="mx-auto w-full max-w-7xl px-4 py-8 overflow-x-hidden">
         <div className="rounded-2xl border bg-white p-6 shadow-soft text-center">
-          <LoadingBar message="Laddar fastigheter och planeringar…" />
+          <LoadingBar message="Laddar fastigheter…" />
         </div>
       </main>
     );
@@ -608,13 +608,8 @@ export default function AdminUserDetail({ user, onBack }: AdminUserDetailProps) 
 
                         {/* Loading state för just denna fastighets planeringar */}
                         {loadingPlansForPropertyId === property.id ? (
-                          <div className="space-y-4">
-                            <div className="rounded-lg border-2 border-gray-200 bg-gray-50/50 p-3 sm:p-5">
-                              <div className="mb-3 h-4 w-40 rounded-full bg-gray-200 animate-pulse" />
-                              <div className="mb-3 h-3 w-24 rounded-full bg-gray-100 animate-pulse" />
-                              <div className="mb-4 h-16 rounded-lg bg-gray-100 animate-pulse" />
-                              <div className="h-20 rounded-lg bg-gray-100 animate-pulse" />
-                            </div>
+                          <div className="py-6 flex justify-center">
+                            <LoadingBar message="Laddar planeringar…" />
                           </div>
                         ) : planCount === 0 ? (
                           <div className="py-8 text-center">
