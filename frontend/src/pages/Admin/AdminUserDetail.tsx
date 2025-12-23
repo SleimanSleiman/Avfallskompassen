@@ -3,7 +3,7 @@ import type { AdminUser } from '../AdminPage';
 import AdminPlanningEditor from './AdminPlanningEditor';
 import LoadingBar from '../../components/LoadingBar';
 import { get, deleteRequest } from '../../lib/api';
-import { getUsersPropertiesWithWasteRooms } from '../../lib/Property';
+import { getUsersPropertySummaries } from '../../lib/Property';
 import { currentUser } from '../../lib/Auth';
 import ConfirmModal from '../../components/ConfirmModal';
 import { setWasteRoomActive } from '../../lib/WasteRoomRequest'
@@ -127,11 +127,13 @@ export default function AdminUserDetail({ user, onBack }: AdminUserDetailProps) 
         wasteRoomId: v.wasteRoomId || v.id,
       }));
 
-      const hasActiveVersion = allVersions.some((v: any) => v.isActive);
+      const hasActiveVersion = roomVersions.some((v: any) => v.isActive);
       const active =
         versions.find((v) => (roomVersions.find((rv: any) => rv.versionNumber === v.versionNumber)?.isActive)) ||
         versions[versions.length - 1];
-      const activeVersionNumber = active?.versionNumber || versions[versions.length - 1].versionNumber;
+      const activeVersionNumber = hasActiveVersion
+        ? active?.versionNumber
+        : undefined;
 
       const planId = Number(prop.id) * 1000 + plans.length + 1;
       const plan: RoomPlan = {
@@ -286,6 +288,53 @@ export default function AdminUserDetail({ user, onBack }: AdminUserDetailProps) 
           }
         : prev
     );
+  };
+
+  const handleSetPlanToDraft = async (plan: RoomPlan) => {
+    if (plan.isDraft) return;
+
+    try {
+      // Backend: deactivate all versions
+      for (const version of plan.versions) {
+        if (version.wasteRoomId) {
+          await setWasteRoomActive(version.wasteRoomId, false);
+        }
+      }
+
+      // Local state update
+      setRoomPlans(prev =>
+        prev.map(p =>
+          p.id !== plan.id
+            ? p
+            : {
+                ...p,
+                isDraft: true,
+                activeVersionNumber: undefined,
+                versions: p.versions.map(v => ({
+                  ...v,
+                  isActive: false,
+                })),
+              }
+        )
+      );
+
+      setSelectedPlan(prev =>
+        prev && prev.id === plan.id
+          ? {
+              ...prev,
+              isDraft: true,
+              activeVersionNumber: undefined,
+              versions: prev.versions.map(v => ({
+                ...v,
+                isActive: false,
+              })),
+            }
+          : prev
+      );
+    } catch (e) {
+      console.error('Failed to set plan to draft', e);
+      alert('Kunde inte sätta planeringen som utkast');
+    }
   };
 
   const handleDeleteVersion = async (planId: number, versionNumber: number, wasteRoomId: number) => {
@@ -582,15 +631,17 @@ export default function AdminUserDetail({ user, onBack }: AdminUserDetailProps) 
                                 return null;
                               }
 
-                              const activeVersion = plan.versions.find((v) => v.versionNumber === plan.activeVersionNumber) || plan.versions[plan.versions.length - 1];
+                              const activeVersion = plan.isDraft
+                                ? null
+                                : plan.versions.find(v => v.versionNumber === plan.activeVersionNumber);
                               const hasMultipleVersions = plan.versions.length > 1;
                               return (
                                 <div
                                   key={plan.id}
                                   className="rounded-lg border-2 border-gray-200 bg-gray-50/50 p-3 sm:p-5 hover:border-nsr-teal/30 transition-colors"
                                 >
-                                  <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-                                    <div className="flex-1 min-w-0">
+                                  <div className="flex flex-col sm:flex-row gap-4">
+                                    <div className="flex-1 min-w-0 w-full">
                                       <div className="flex items-center gap-2 sm:gap-3 mb-3 flex-wrap">
                                         <h5 className="text-base font-bold text-nsr-ink break-words">
                                           {plan.name}
@@ -633,7 +684,9 @@ export default function AdminUserDetail({ user, onBack }: AdminUserDetailProps) 
                                           </div>
                                           <div className="space-y-2">
                                             {plan.versions.map((version) => {
-                                              const isActive = version.versionNumber === plan.activeVersionNumber;
+                                              const isActive =
+                                                 !plan.isDraft &&
+                                                 version.versionNumber === plan.activeVersionNumber;
                                               return (
                                                 <div
                                                   key={version.versionNumber}
@@ -716,14 +769,28 @@ export default function AdminUserDetail({ user, onBack }: AdminUserDetailProps) 
                                         </div>
                                       )}
                                     </div>
-                                    <button
-                                      onClick={() => handleEditPlan(plan)}
-                                      className="btn-secondary-sm flex-shrink-0 w-full sm:w-auto mt-4 sm:mt-0"
-                                    >
-                                      Redigera
-                                    </button>
+                                    <div className="flex sm:flex-col gap-2 flex-shrink-0 w-full sm:w-auto">
+                                      <button
+                                        onClick={() => handleEditPlan(plan)}
+                                        className="btn-secondary-sm flex-shrink-0 w-full sm:w-auto mt-4 sm:mt-0"
+                                      >
+                                        Redigera
+                                      </button>
+                                      <button
+                                        onClick={() => handleSetPlanToDraft(plan)}
+                                        disabled={plan.isDraft}
+                                        className={`text-sm font-semibold px-3 py-1 rounded-xl border transition
+                                          ${
+                                            plan.isDraft
+                                              ? 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed'
+                                              : 'bg-yellow-50 text-yellow-700 border-yellow-200 hover:bg-yellow-100'
+                                          }`}
+                                      >
+                                        Gör till utkast
+                                      </button>
+                                    </div>
                                   </div>
-                                </div>
+                               </div>
                               );
                             })}
                           </div>

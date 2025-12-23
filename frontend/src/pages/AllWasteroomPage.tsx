@@ -111,31 +111,48 @@ export default function AllaMiljoRumPage() {
         }
     }
 
-    async function toggleDraft(room: WasteRoom) {
-        if (!room) return;
+    async function toggleDraft(roomVersions: WasteRoom[]) {
+      if (!roomVersions.length) return;
 
-        const roomId = room.wasteRoomId ?? room.id;
-        if (!roomId) return;
+      const activeVersion = roomVersions.find(r => r.isActive);
+      const latestVersion = [...roomVersions].sort(
+        (a, b) => (b.versionNumber ?? 0) - (a.versionNumber ?? 0)
+      )[0];
 
-        const newIsActive = !room.isActive;
+      try {
+        if (activeVersion) {
+          await setWasteRoomActive(
+            activeVersion.wasteRoomId ?? activeVersion.id,
+            false
+          );
 
-        try {
-            // 1️⃣ Call backend
-            await setWasteRoomActive(roomId, newIsActive);
+          setRooms(prev =>
+            prev.map(group =>
+              group === roomVersions
+                ? group.map(r => ({ ...r, isActive: false }))
+                : group
+            )
+          );
+        } else {
+          await setWasteRoomActive(
+            latestVersion.wasteRoomId ?? latestVersion.id,
+            true
+          );
 
-            // 2️⃣ Update local state
-            setRooms(prev =>
-                prev.map(roomVersions =>
-                    roomVersions.map(r =>
-                        (r.wasteRoomId ?? r.id) === roomId
-                            ? { ...r, isActive: newIsActive }
-                            : r
-                    )
-                )
-            );
-        } catch (e) {
-            setError("Kunde inte uppdatera utkast-status");
+          setRooms(prev =>
+            prev.map(group =>
+              group === roomVersions
+                ? group.map(r => ({
+                    ...r,
+                    isActive: r === latestVersion
+                  }))
+                : group
+            )
+          );
         }
+      } catch {
+        setError("Kunde inte uppdatera utkast-status");
+      }
     }
 
     const filteredRooms = rooms.filter((roomVersions) => {
@@ -248,7 +265,7 @@ export default function AllaMiljoRumPage() {
                                         type="checkbox"
                                         className="h-4 w-4 rounded border-gray-300 text-nsr-teal focus:ring-nsr-teal"
                                         checked={!roomVersions.some(r => r.isActive)}
-                                        onChange={() => toggleDraft(room)}
+                                        onChange={() => toggleDraft(roomVersions)}
                                     />
                                     Sätt som utkast
                                 </label>
