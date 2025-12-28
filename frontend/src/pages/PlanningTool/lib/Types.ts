@@ -54,3 +54,10 @@ export type Zone = {
     width: number;
     height: number;
 };
+
+export type LayoutSnapshot = {
+  room: Room;
+  doors: Door[];
+  containers: ContainerInRoom[];
+  otherObjects: OtherObjectInRoom[];
+};
