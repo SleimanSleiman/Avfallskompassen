@@ -10,7 +10,6 @@ import { useNavigate } from 'react-router-dom';
 import { getProperty } from '../../lib/Property';
 import type { Property } from '../../lib/Property';
 import { currentUser } from '../../lib/Auth';
-import type { ContainerInRoom } from './lib/Types';
 
 //Context
 import { useUnsavedChanges } from '../../context/UnsavedChangesContext';
@@ -33,7 +32,6 @@ import { useComparison } from './hooks/useComparison';
 import { useLayoutHistory } from './hooks/UseLayoutHistory';
 import { useSaveRoom, useWasteRoomRequestBuilder } from './hooks/UseSaveRoom';
 import { usePropertyHighlights } from './hooks/usePropertyHighlights';
-import { usePlanningLayout } from './hooks/UserPlanningLayout';
 
 import { SCALE, ROOM_HORIZONTAL_OFFSET, ROOM_VERTICAL_OFFSET, STAGE_HEIGHT, STAGE_WIDTH } from './lib/Constants';
 import PlanningToolPopup from './components/PlanningToolPopup';
@@ -65,7 +63,6 @@ export default function PlanningTool({ isAdminMode = false, property }: Planning
             y: (STAGE_HEIGHT - heightPx) / 2 + ROOM_VERTICAL_OFFSET,
         };
     }, []);
-
 
     /* ──────────────── Messages ──────────────── */
     const [msg, setMsg] = useState<string | null>(null);
@@ -134,7 +131,7 @@ export default function PlanningTool({ isAdminMode = false, property }: Planning
     /* ──────────────── Container state & logic ──────────────── */
     const {
         containersInRoom,
-        setContainers,
+        saveContainers,
         draggedContainer,
         setDraggedContainer,
 
@@ -159,6 +156,8 @@ export default function PlanningTool({ isAdminMode = false, property }: Planning
         handleShowContainerInfo,
         selectedContainerInfo,
         setSelectedContainerInfo,
+        undo,
+        redo,
         getContainerZones,
         isContainerInsideRoom,
         getWallInsetForContainer,
@@ -169,50 +168,6 @@ export default function PlanningTool({ isAdminMode = false, property }: Planning
     const [savedRoomState, setSavedRoomState] = useState<{ room: any; doors: any; containers: any; otherObjects: any } | null>(null);
     const [hasInitializedFromStorage, setHasInitializedFromStorage] = useState(false);
 
-        /* ──────────────── Undo-Redo ──────────────── */
-    const {
-        state: layout,
-        save,
-        undo,
-        redo,
-        } = usePlanningLayout({
-        room,
-        doors,
-        containers: containersInRoom,
-        otherObjects,
-    });
-
-    const isRestoringRef = useRef(false);
-
-    const undoLayout = () => {
-    isRestoringRef.current = true;
-    undo();
-    };
-
-    const redoLayout = () => {
-    isRestoringRef.current = true;
-    redo();
-    };
-
-    useEffect(() => {
-        if (!isRestoringRef.current) return;
-
-        setRoom(layout.room);
-        setDoors(layout.doors);
-        setContainers(layout.containers);
-        setOtherObjects(layout.otherObjects);
-
-        isRestoringRef.current = false;
-    }, [layout]);
-    
-    useEffect(() => {
-        save({
-            room,
-            doors,
-            containers: containersInRoom,
-            otherObjects,
-        });
-    }, [containersInRoom]);
     /* ──────────────── Sync the doors and containers when changes are made to the room ──────────────── */
     useEffect(() => {
         // Only sync once on initial load from storage
@@ -246,7 +201,7 @@ export default function PlanningTool({ isAdminMode = false, property }: Planning
         doorOffsetRef.current = offsets;
         setDoors(room.doors);
     }
-        if (room.id && room.containers && room.containers.length > 0) setContainers(room.containers);
+        if (room.id && room.containers && room.containers.length > 0) saveContainers(room.containers);
         if (room.id && room.otherObjects && room.otherObjects.length > 0) setOtherObjects(room.otherObjects);
         
         // Initialize savedRoomState on first load
@@ -259,7 +214,7 @@ export default function PlanningTool({ isAdminMode = false, property }: Planning
             });
             setHasInitializedFromStorage(true);
         }
-    }, [hasInitializedFromStorage, room.id, setDoors, setContainers, setOtherObjects, savedRoomState]);
+    }, [hasInitializedFromStorage, room.id, setDoors, saveContainers, setOtherObjects, savedRoomState]);
 
     /* ──────────────── Sync state to localStorage on changes ──────────────── */
     useEffect(() => {
@@ -665,8 +620,8 @@ const hasUnsavedChangesRef = useRef(false);
                         isObjectInsideRoom={isObjectInsideRoom}
                         moveAllObjects={moveAllObjects}
 
-                        undo={undoLayout}
-                        redo={redoLayout}
+                        undo={undo}
+                        redo={redo}
                         saveRoom={handleSaveRoom}
                         isAdminMode={isAdminMode}
                         hasUnsavedChanges={hasUnsavedChanges}
