@@ -37,6 +37,9 @@ type RoomCanvasProps = {
     setRoom: (room: Room) => void;
     handleDragCorner: (index: number, pos: { x: number; y: number }) => void;
     isContainerInsideRoom: (rect: { x: number; y: number; width: number; height: number }, room: Room) => boolean;
+    onRoomDragEnd: () => void;
+    isDraggingRoomRef: React.MutableRefObject<boolean>;
+
 
     /* ───────────── Door Props ───────────── */
     doors: Door[];
@@ -48,6 +51,7 @@ type RoomCanvasProps = {
     restoreDoorState: (id: number, state: { x: number; y: number; wall: Door["wall"]; rotation: number; swingDirection: Door["swingDirection"];}) => void;
     isDraggingDoor?: boolean;
     setIsDraggingDoor?: Dispatch<SetStateAction<boolean>>;
+    onDoorDragEnd: () => void;
 
     /* ───────────── Container Props ───────────── */
     containers: ContainerInRoom[];
@@ -112,6 +116,8 @@ export default function RoomCanvas({
     setRoom,
     handleDragCorner,
     isContainerInsideRoom,
+    onRoomDragEnd,
+    isDraggingRoomRef,
 
     /* ───────────── Door Props ───────────── */
     doors,
@@ -123,6 +129,7 @@ export default function RoomCanvas({
     restoreDoorState,
     isDraggingDoor,
     setIsDraggingDoor,
+    onDoorDragEnd,
 
     /* ───────────── Container Props ───────────── */
     containers,
@@ -213,7 +220,7 @@ export default function RoomCanvas({
 
 
     //Moves a room and the containers inside it
-    const handleMoveRoom = (newX: number, newY: number) => {
+    const handleMoveRoom = (newX: number, newY: number) => {d
         const dx = newX - room.x;
         const dy = newY - room.y;
 
@@ -341,6 +348,8 @@ export default function RoomCanvas({
                                 room={room}
                                 closePanels={closePanels}
                                 onMove={handleMoveRoom}
+                                onRoomDragEnd={onRoomDragEnd}
+                                isDraggingRoomRef={isDraggingRoomRef}
                             />
 
                             {/* Draggable corners for resizing the room */}
@@ -348,6 +357,7 @@ export default function RoomCanvas({
                                 corners={corners}
                                 room={room}
                                 handleDragCorner={handleDragCorner}
+                                onRoomDragEnd={onRoomDragEnd}
                             />
 
                             {/* Door layer*/}
@@ -361,6 +371,7 @@ export default function RoomCanvas({
                                 setIsDraggingDoor={setIsDraggingDoor}
                                 getOtherObjectZones={getOtherObjectZones}
                                 restoreDoorState={restoreDoorState}
+                                onDoorDragEnd={onDoorDragEnd}
                             />
 
                             {/* Measurements between door and corners*/}

@@ -183,15 +183,37 @@ export default function PlanningTool({ isAdminMode = false, property }: Planning
     });
 
     const isRestoringRef = useRef(false);
+    const isDraggingRoomRef = useRef(false);
 
     const undoLayout = () => {
-    isRestoringRef.current = true;
-    undo();
+        isRestoringRef.current = true;
+        undo();
     };
 
     const redoLayout = () => {
-    isRestoringRef.current = true;
-    redo();
+        isRestoringRef.current = true;
+        redo();
+    };
+
+    const saveDoors = () => {
+        if (isRestoringRef.current) return;
+
+        save({
+            room,
+            doors,
+            containers: containersInRoom,
+            otherObjects,
+        });
+    };
+    const saveRoomLayout = () => {
+        if (isRestoringRef.current) return;
+
+        save({
+            room,
+            doors,
+            containers: containersInRoom,
+            otherObjects,
+        });
     };
 
     useEffect(() => {
@@ -206,6 +228,9 @@ export default function PlanningTool({ isAdminMode = false, property }: Planning
     }, [layout]);
     
     useEffect(() => {
+        if (isRestoringRef.current) return;
+        if (isDraggingRoomRef.current) return;
+
         save({
             room,
             doors,
@@ -213,6 +238,9 @@ export default function PlanningTool({ isAdminMode = false, property }: Planning
             otherObjects,
         });
     }, [containersInRoom]);
+
+    
+
     /* ──────────────── Sync the doors and containers when changes are made to the room ──────────────── */
     useEffect(() => {
         // Only sync once on initial load from storage
@@ -616,6 +644,9 @@ const hasUnsavedChangesRef = useRef(false);
                         corners={corners}
                         handleDragCorner={handleDragCorner}
                         setRoom={setRoom}
+                        onRoomDragEnd={saveRoomLayout}
+                        isDraggingRoomRef={isDraggingRoomRef}
+
 
                         doors={doors}
                         selectedDoorId={selectedDoorId}
@@ -626,6 +657,7 @@ const hasUnsavedChangesRef = useRef(false);
                         restoreDoorState={restoreDoorState}
                         isDraggingDoor={isDoorDragging}
                         setIsDraggingDoor={setIsDoorDragging}
+                        onDoorDragEnd={saveDoors}
 
                         containers={containersInRoom}
                         selectedContainerId={selectedContainerId}

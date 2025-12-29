@@ -11,12 +11,16 @@ type RoomShapeProps = {
     room: Room;
     closePanels: () => void;
     onMove: (x: number, y: number) => void;
+    onRoomDragEnd: () => void;
+    isDraggingRoomRef: React.MutableRefObject<boolean>;
 };
 
 export default function RoomShape({
     room,
     closePanels,
     onMove,
+    onRoomDragEnd,
+    isDraggingRoomRef,
 }: RoomShapeProps) {
     //Convert dimensions to meters for display
     const widthMeters = (room.width * SCALE).toFixed(2);
@@ -46,12 +50,15 @@ export default function RoomShape({
                 }}
                 //Closed hand while dragging
                 onDragStart={(e) => {
+                    isDraggingRoomRef.current = true;
                     const container = e.target.getStage()?.container();
                     if (container) container.style.cursor = 'grabbing';
                 }}
                 onDragEnd={(e) => {
                     const container = e.target.getStage()?.container();
                     if (container) container.style.cursor = 'grab';
+                    isDraggingRoomRef.current = false;
+                    onRoomDragEnd();
                 }}
 
                 onDragMove={(e) => {

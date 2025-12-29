@@ -19,6 +19,7 @@ export default function DoorDrag({
     setIsDraggingDoor,
     getOtherObjectZones,
     restoreDoorState,
+    onDoorDragEnd,
 }) {
     //Store the last valid (non-overlapping) state for snap-back functionality
     const [lastValidState, setLastValidState] = useState({
@@ -115,6 +116,8 @@ export default function DoorDrag({
 
                 setIsOverZone(false);
                 setIsDraggingDoor(false)
+                onDoorDragEnd();
+                console.log("OndoorDragEnd!!!")
             }}
             onClick={(e) => {
                 e.cancelBubble = true;

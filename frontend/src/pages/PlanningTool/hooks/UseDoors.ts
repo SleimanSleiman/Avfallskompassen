@@ -160,31 +160,29 @@ export function useDoors(
 
     /* ──────────────── Drag Door ──────────────── */
     const handleDragDoor = (id: number, pos: { x: number; y: number }) => {
+        setIsDoorDragging(true);
+
         const door = doors.find(d => d.id === id);
-        if (!door) return;
+        if (!door || !room) return;
 
         handleSelectDoor(id);
 
         const widthPx = door.width / SCALE;
 
-        //Room edges
         const topY = room.y;
         const bottomY = room.y + room.height;
         const leftX = room.x;
         const rightX = room.x + room.width;
 
-        //New wall and position variables
         let newWall: Door["wall"] = door.wall;
         let newX = pos.x;
         let newY = pos.y;
 
-        //Door edges
         let left: number;
         let right: number;
         let top: number;
         let bottom: number;
 
-        //Calculate door edges based on wall
         switch (door.wall) {
             case "bottom":
                 left = pos.x;
@@ -212,7 +210,6 @@ export function useDoors(
                 break;
         }
 
-        //Snap to closest wall if door goes outside
         if (door.wall === "bottom" || door.wall === "top") {
             if (left <= leftX) {
                 newWall = "left";
@@ -223,7 +220,7 @@ export function useDoors(
                 newX = rightX;
                 newY = clamp(pos.y, topY, bottomY);
             }
-        } else if (door.wall === "left" || door.wall === "right") {
+        } else {
             if (top <= topY) {
                 newWall = "top";
                 newY = topY;
@@ -235,10 +232,10 @@ export function useDoors(
             }
         }
 
-        const hMargin = 0.01 * room.width;  //horizontal margin for top/bottom walls
-        const vMargin = 0.01 * room.height; //vertical margin for left/right walls
+        // margins
+        const hMargin = 0.01 * room.width;
+        const vMargin = 0.01 * room.height;
 
-        //Clamp position along the wall to stay within room bounds
         switch (newWall) {
             case "bottom":
             case "top":
@@ -250,30 +247,35 @@ export function useDoors(
                 break;
         }
 
-        //Update offset along the wall (0 = start, 1 = end)
-        let offset = 0.5;
-        if (newWall === "top" || newWall === "bottom") {
-            offset = (newX - leftX) / room.width;
-        } else {
-            offset = (newY - topY) / room.height;
+        // rotation
+        let rotation = door.rotation;
+        if (door.wall !== newWall) {
+            rotation = getOutwardRotation(newWall);
+            if (door.swingDirection === "inward") rotation += 180;
         }
-        doorOffsetRef.current[id] = offset;
 
-        //Update door position and rotation
+        // offset update
+        doorOffsetRef.current[id] =
+            newWall === "top" || newWall === "bottom"
+                ? (newX - leftX) / room.width
+                : (newY - topY) / room.height;
+
         setDoors(prev =>
-            prev.map(d => {
-                if (d.id !== id) return d;
-
-                let rotation = d.rotation;
-                if (d.wall !== newWall) {
-                    rotation = getOutwardRotation(newWall);
-                    if (d.swingDirection === "inward") rotation += 180;
-                }
-
-                return { ...d, x: newX, y: newY, wall: newWall, rotation, swingDirection: d.swingDirection ?? "inward" };
-            })
+            prev.map(d =>
+                d.id !== id
+                    ? d
+                    : {
+                        ...d,
+                        x: newX,
+                        y: newY,
+                        wall: newWall,
+                        rotation,
+                        swingDirection: d.swingDirection ?? "inward",
+                    }
+            )
         );
     };
+
 
 
     /* ──────────────── Update on Room Resize ──────────────── */
@@ -394,7 +396,7 @@ export function useDoors(
         doorOffsetRef,
         restoreDoorState,
         isDoorDragging,
-        setIsDoorDragging
+        setIsDoorDragging,
     };
 }
 
