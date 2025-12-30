@@ -98,7 +98,12 @@ vi.mock("../../../src/pages/PlanningTool/hooks/useComparison", () => ({
 }));
 
 vi.mock("../../../src/pages/PlanningTool/hooks/UseLayoutHistory", () => ({
-    useLayoutHistory: () => ({ undo: vi.fn(), redo: vi.fn() }),
+    useLayoutHistory: () => ({
+        state: {},
+        save: vi.fn(),
+        undo: vi.fn(),
+        redo: vi.fn(),
+    }),
 }));
 
 vi.mock("../../../src/pages/PlanningTool/hooks/UseSaveRoom", () => ({
