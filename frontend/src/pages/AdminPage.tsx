@@ -7,13 +7,31 @@ import LoadingBar from '../components/LoadingBar';
 export type AdminUser = {
   id: number;
   username: string;
+  role: "USER" | "ADMIN";
   email?: string;
   createdAt?: string | null;
   propertiesCount: number;
   plansCount: number;
 };
 
-type BackendUser = { id: number; username: string; role?: string; createdAt?: string | null };
+type UserStats = {
+  userId: number;
+  username: string;
+  role: string;
+  createdAt: string;
+  propertiesCount: number;
+  wasteRoomsCount: number;
+};
+
+type BackendUser = {
+  id: number;
+  username: string;
+  role: "USER" | "ADMIN";
+  createdAt?: string;
+  propertiesCount: number;
+  wasteRoomsCount: number;
+};
+
 type PropertyDTO = { 
   id: number; 
   createdByUsername?: string;
@@ -54,6 +72,8 @@ export default function AdminPage() {
   const [users, setUsers] = useState<AdminUser[]>(EMPTY_USERS);
   const [loading, setLoading] = useState(true);
   const [propertiesCount, setPropertiesCount] = useState(0);
+  const [userStats, setUserStats] = useState<UserStats[]>([]);
+
 
   useEffect(() => {
     async function load() {
@@ -70,6 +90,7 @@ export default function AdminPage() {
         const mapped: AdminUser[] = userStats.map((user) => ({
           id: user.userId ?? user.id ?? 0,
           username: user.username ?? "",
+          role: user.role as "USER" | "ADMIN",
           createdAt: user.createdAt || null,
           propertiesCount: user.propertiesCount ?? 0,
           plansCount: user.wasteRoomsCount ?? 0,
