@@ -88,13 +88,14 @@ public interface PropertyRepository extends JpaRepository<Property, Long> {
     SELECT 
         u.id,
         u.username,
+        u.role,
         u.createdAt,
         COUNT(DISTINCT p.id),
         COUNT(wr.id)
     FROM User u
     LEFT JOIN Property p ON p.createdBy.id = u.id
     LEFT JOIN p.wasteRooms wr
-    GROUP BY u.id, u.username, u.createdAt
+    GROUP BY u.id, u.username, u.role, u.createdAt
 """)
     List<Object[]> getUserPropertyAndWasteRoomStats();
 
