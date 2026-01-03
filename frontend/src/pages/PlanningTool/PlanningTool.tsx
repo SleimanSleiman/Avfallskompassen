@@ -155,8 +155,7 @@ export default function PlanningTool({ isAdminMode = false, property, onGenerate
         handleShowContainerInfo,
         selectedContainerInfo,
         setSelectedContainerInfo,
-        undo,
-        redo,
+
         getContainerZones,
         isContainerInsideRoom,
         getWallInsetForContainer,
@@ -168,17 +167,18 @@ export default function PlanningTool({ isAdminMode = false, property, onGenerate
     const [hasInitializedFromStorage, setHasInitializedFromStorage] = useState(false);
 
     /* ──────────────── Undo-Redo ──────────────── */
-    const {
+   const {
         state: layout,
         save,
         undo,
         redo,
-        } = usePlanningLayout({
+    } = useLayoutHistory({
         room,
         doors,
         containers: containersInRoom,
         otherObjects,
     });
+
 
     const isRestoringRef = useRef(false);
     const isDraggingRoomRef = useRef(false);

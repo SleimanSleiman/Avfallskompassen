@@ -61,8 +61,6 @@ vi.mock("../../../src/pages/PlanningTool/hooks/UseContainers", () => ({
         selectedContainerInfo: null,
         setSelectedContainerInfo: vi.fn(),
         handleShowContainerInfo: vi.fn(),
-        undo: vi.fn(),
-        redo: vi.fn(),
         getContainerZones: vi.fn(),
         isContainerInsideRoom: vi.fn(() => true),
     }),
