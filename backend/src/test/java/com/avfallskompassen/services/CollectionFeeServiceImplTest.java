@@ -6,7 +6,6 @@ import com.avfallskompassen.model.Municipality;
 import com.avfallskompassen.model.Property;
 import com.avfallskompassen.repository.CollectionFeeRepository;
 import com.avfallskompassen.services.impl.CollectionFeeServiceImpl;
-import com.avfallskompassen.services.impl.PropertyServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;

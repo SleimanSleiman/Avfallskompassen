@@ -10,7 +10,6 @@ import { useNavigate } from 'react-router-dom';
 import { getProperty } from '../../lib/Property';
 import type { Property } from '../../lib/Property';
 import { currentUser } from '../../lib/Auth';
-import type { ContainerInRoom } from './lib/Types';
 
 //Context
 import { useUnsavedChanges } from '../../context/UnsavedChangesContext';
@@ -33,7 +32,6 @@ import { useComparison } from './hooks/useComparison';
 import { useLayoutHistory } from './hooks/UseLayoutHistory';
 import { useSaveRoom, useWasteRoomRequestBuilder } from './hooks/UseSaveRoom';
 import { usePropertyHighlights } from './hooks/usePropertyHighlights';
-import { usePlanningLayout } from './hooks/UserPlanningLayout';
 
 import { SCALE, ROOM_HORIZONTAL_OFFSET, ROOM_VERTICAL_OFFSET, STAGE_HEIGHT, STAGE_WIDTH } from './lib/Constants';
 import PlanningToolPopup from './components/PlanningToolPopup';
@@ -45,9 +43,10 @@ import "driver.js/dist/driver.css";
 type PlanningToolProps = {
     isAdminMode?: boolean;
     property?: Property;
+    onGenerateThumbnail?: (fn: () => string | null) => void;
 };
 
-export default function PlanningTool({ isAdminMode = false, property }: PlanningToolProps) {
+export default function PlanningTool({ isAdminMode = false, property, onGenerateThumbnail }: PlanningToolProps) {
     const navigate = useNavigate();
     const { setHasUnsavedChanges } = useUnsavedChanges();
 
@@ -65,7 +64,6 @@ export default function PlanningTool({ isAdminMode = false, property }: Planning
             y: (STAGE_HEIGHT - heightPx) / 2 + ROOM_VERTICAL_OFFSET,
         };
     }, []);
-
 
     /* ──────────────── Messages ──────────────── */
     const [msg, setMsg] = useState<string | null>(null);
@@ -132,7 +130,7 @@ export default function PlanningTool({ isAdminMode = false, property }: Planning
     /* ──────────────── Container state & logic ──────────────── */
     const {
         containersInRoom,
-        setContainers,
+        saveContainers,
         draggedContainer,
         setDraggedContainer,
 
@@ -157,6 +155,8 @@ export default function PlanningTool({ isAdminMode = false, property }: Planning
         handleShowContainerInfo,
         selectedContainerInfo,
         setSelectedContainerInfo,
+        undo,
+        redo,
         getContainerZones,
         isContainerInsideRoom,
         getWallInsetForContainer,
@@ -284,7 +284,7 @@ export default function PlanningTool({ isAdminMode = false, property }: Planning
         doorOffsetRef.current = offsets;
         setDoors(room.doors);
     }
-        if (room.id && room.containers && room.containers.length > 0) setContainers(room.containers);
+        if (room.id && room.containers && room.containers.length > 0) saveContainers(room.containers);
         if (room.id && room.otherObjects && room.otherObjects.length > 0) setOtherObjects(room.otherObjects);
         
         // Initialize savedRoomState on first load
@@ -297,7 +297,7 @@ export default function PlanningTool({ isAdminMode = false, property }: Planning
             });
             setHasInitializedFromStorage(true);
         }
-    }, [hasInitializedFromStorage, room.id, setDoors, setContainers, setOtherObjects, savedRoomState]);
+    }, [hasInitializedFromStorage, room.id, setDoors, saveContainers, setOtherObjects, savedRoomState]);
 
     /* ──────────────── Sync state to localStorage on changes ──────────────── */
     useEffect(() => {
@@ -319,6 +319,8 @@ export default function PlanningTool({ isAdminMode = false, property }: Planning
             const parsed = JSON.parse(stored);
             const updated = {
                 ...parsed,
+                x: room.x,
+                y: room.y,
                 containers: containersInRoom,
                 doors: doors,
                 otherObjects: otherObjects,
@@ -330,7 +332,7 @@ export default function PlanningTool({ isAdminMode = false, property }: Planning
         } catch (error) {
             console.error('Failed to sync state to localStorage', error);
         }
-    }, [containersInRoom, doors, otherObjects, room.width, room.height, room.id]);
+    }, [containersInRoom, doors, otherObjects, room.width, room.height, room.x, room.y, room.id]);
 
 
     /* ──────────────── Service Types (API data) ──────────────── */
@@ -708,13 +710,14 @@ const hasUnsavedChangesRef = useRef(false);
                         onOtherObjectDragEnd={saveOtherObjectsLayout}
                         isDraggingOtherObjectRef={isDraggingOtherObjectRef}
 
-                        undo={undoLayout}
-                        redo={redoLayout}
+                        undo={undo}
+                        redo={redo}
                         saveRoom={handleSaveRoom}
                         isAdminMode={isAdminMode}
                         hasUnsavedChanges={hasUnsavedChanges}
                         onClose={handleCloseRoom}
                         existingNames={loadedProperty?.wasteRooms?.map(r => r.name || "") || []}
+                        onGenerateThumbnail={onGenerateThumbnail}
 
                         getWallInsetForContainer={getWallInsetForContainer}
                         getSnappedRotationForContainer={getSnappedRotationForContainer}

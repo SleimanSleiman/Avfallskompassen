@@ -22,6 +22,14 @@ vi.mock("../../src/components/prompts/RoomSizePrompt", () => ({
     ),
 }));
 
+vi.mock("../../src/components/ConfirmModal", () => ({
+    default: ({ onConfirm }: any) => (
+        <button data-testid="confirm-delete" onClick={onConfirm}>
+            confirm
+        </button>
+    ),
+}));
+
 // Mock window.location.href
 Object.defineProperty(window, "location", {
     writable: true,

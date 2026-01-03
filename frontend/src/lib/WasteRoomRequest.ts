@@ -83,6 +83,7 @@ export type AdminVersionRequest = {
     versionName?: string;
     adminUsername?: string;
     versionToReplace?: number;
+    thumbnailBase64?: string;
 }
 
 export async function createAdminVersion(
@@ -114,4 +115,17 @@ export async function getAllWasteRoomVersions(
             method: 'GET'
         }
     );
+}
+
+export async function setWasteRoomActive(
+  wasteRoomId: number,
+  isActive: boolean
+): Promise<void> {
+  return api<void>(`/api/wasterooms/${wasteRoomId}/active`, {
+    method: "PATCH",
+    body: { isActive },
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
 }

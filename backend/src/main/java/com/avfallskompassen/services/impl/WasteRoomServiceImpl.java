@@ -492,6 +492,9 @@ public class WasteRoomServiceImpl implements WasteRoomService {
         newVersion.setIsActive(true);
         WasteRoom savedRoom = wasteRoomRepository.save(newVersion);
 
+        saveThumbnail(request.getThumbnailBase64(), savedRoom.getId(), savedRoom);
+        savedRoom = wasteRoomRepository.save(savedRoom);
+
         User ownerOfProperty = propertyRepository.findCreatedByUserByPropertyId(propertyId);
         activityService.saveActivity(ownerOfProperty, ActivityType.ADMIN_SAVED_VERSION_OF_WASTE_ROOM, "En admin har skapat en egen version av ett miljö rum i fastigheten " + property.getAddress());
         
@@ -528,5 +531,12 @@ public class WasteRoomServiceImpl implements WasteRoomService {
         long validCount = containers.stream().filter(c -> c.getContainerPlan() != null).count();
         if (validCount == 0) return 0.0;
         return totalFrequency / (double) validCount;
+    }
+
+    @Transactional
+    public void setWasteRoomActive(Long wasteRoomId, boolean isActive) {
+        WasteRoom wasteRoom = findWasteRoomById(wasteRoomId);
+        wasteRoom.setIsActive(isActive);
+        wasteRoomRepository.save(wasteRoom);
     }
 }

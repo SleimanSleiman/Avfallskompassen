@@ -8,6 +8,7 @@ import type { ContainerInRoom, Room, Zone } from "./lib/Types";
 import type { ContainerDTO } from "../../../lib/Container";
 import { fetchContainersByMunicipalityAndService } from "../../../lib/Container";
 import { mmToPixels, clamp, DRAG_DATA_FORMAT, STAGE_WIDTH, STAGE_HEIGHT, SCALE, isOverlapping } from "../lib/Constants";
+import { useLayoutHistory } from "./UseLayoutHistory";
 
 /* ──────────────── Helper functions ──────────────── */
 //Create rectangle for container at given position
@@ -82,23 +83,23 @@ function validateContainerPlacement(
 
 /* ──────────────── Main Hook ──────────────── */
 export function useContainers(
-  room: Room,
-  setSelectedContainerId: (id: number | null) => void,
-  setSelectedDoorId: (id: number | null) => void,
-  setSelectedOtherObjectId: (id: number | null) => void,
-  doorZones: Zone[] = [],
-  otherObjectZones: Zone[] = [],
-  setError,
-  setMsg,
-  isDoorDragging?: boolean,
+    room: Room,
+    setSelectedContainerId: (id: number | null) => void,
+    setSelectedDoorId: (id: number | null) => void,
+    setSelectedOtherObjectId: (id: number | null) => void,
+    doorZones: { x: number; y: number; width: number; height: number }[] = [],
+    otherObjectZones: { x: number; y: number; width: number; height: number }[] = [],
+    setError,
+    setMsg,
+    isDoorDragging?: boolean,
 ) {
 
     /* ──────────────── Containers State ──────────────── */
+    const { state: containersInRoom, save: saveContainers, undo, redo } = useLayoutHistory<ContainerInRoom[]>([]);
     const [selectedContainerInfo, setSelectedContainerInfo] = useState<ContainerInRoom | null>(null);
     const [draggedContainer, setDraggedContainer] = useState<ContainerDTO | null>(null);
     const [availableContainers, setAvailableContainers] = useState<ContainerDTO[]>([]);
     const [isLoadingContainers, setIsLoadingContainers] = useState(false);
-    const [containersInRoom, setContainers] = useState<ContainerInRoom[]>([]);
 
     /* ─────────────── Stage State ──────────────── */
     const [isStageDropActive, setIsStageDropActive] = useState(false);
@@ -157,13 +158,13 @@ export function useContainers(
 
         handleSelectContainer(newContainer.id);
         const newState = [...containersInRoom, newContainer];
-        setContainers(newState);
+        saveContainers(newState);
     };
 
     //Remove a container from the room
     const handleRemoveContainer = (id: number) => {
         const newState = containersInRoom.filter(c => c.id !== id);
-        setContainers(newState);
+        saveContainers(newState);
         setSelectedContainerId(null);
     };
 
@@ -172,8 +173,7 @@ export function useContainers(
         const newState = containersInRoom.map(c =>
             c.id === id ? { ...c, ...pos } : c
         );
-        setContainers(newState);
-
+        saveContainers(newState);
     };
 
     //Moves all containers within the room when the room itself is dragged
@@ -184,8 +184,7 @@ export function useContainers(
             y: c.y + dy,
         }));
 
-        setContainers(newState);
-
+        saveContainers(newState);
     };
 
     //Select or deselect a container
@@ -204,7 +203,7 @@ export function useContainers(
         const newState = containersInRoom.map(c =>
             c.id === id ? { ...c, rotation: ((c.rotation || 0) + 90) % 360 } : c
         );
-        setContainers(newState);
+        saveContainers(newState);
     };
 
     //Show container info in sidebar
@@ -256,14 +255,14 @@ export function useContainers(
         const newState = containersInRoom.map(c =>
             c.id === id ? { ...c, lockILock: true } : c
         );
-        setContainers(newState);
+        saveContainers(newState);
     };
 
     const handleRemoveLockILock = (id: number) => {
         const newState = containersInRoom.map(c =>
             c.id === id ? { ...c, lockILock: false } : c
         );
-        setContainers(newState);
+        saveContainers(newState);
     };
 
     /* ──────────────── API Fetch ──────────────── */
@@ -358,7 +357,7 @@ export function useContainers(
 
         //If any containers were moved, save the new state
         if (changed) {
-            setContainers(temp);
+            saveContainers(temp);
         }
     }, [doorZones]);
 
@@ -407,7 +406,7 @@ export function useContainers(
     /* ──────────────── Return ──────────────── */
     return {
         containersInRoom,
-        setContainers,
+        saveContainers,
         draggedContainer,
         setDraggedContainer,
         availableContainers,
@@ -440,6 +439,8 @@ export function useContainers(
         getWallInsetForContainer,
         getSnappedRotationForContainer,
 
+        undo,
+        redo,
         isContainerInsideRoom,
     };
 }
