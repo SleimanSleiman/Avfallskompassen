@@ -532,4 +532,11 @@ public class WasteRoomServiceImpl implements WasteRoomService {
         if (validCount == 0) return 0.0;
         return totalFrequency / (double) validCount;
     }
+
+    @Transactional
+    public void setWasteRoomActive(Long wasteRoomId, boolean isActive) {
+        WasteRoom wasteRoom = findWasteRoomById(wasteRoomId);
+        wasteRoom.setIsActive(isActive);
+        wasteRoomRepository.save(wasteRoom);
+    }
 }

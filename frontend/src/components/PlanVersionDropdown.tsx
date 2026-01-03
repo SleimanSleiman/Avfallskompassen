@@ -80,8 +80,7 @@ export default function PlanVersionDropdown({
       const sorted = [...versions].sort(
         (a, b) => (a.versionNumber ?? 0) - (b.versionNumber ?? 0)
       );
-      const activeVersion =
-        sorted.find((version) => version.isActive) ?? sorted.at(-1);
+      const activeVersion = sorted.find((version) => version.isActive);
       const activeIdentifier =
         activeVersion?.wasteRoomId ?? activeVersion?.versionNumber;
       return {
