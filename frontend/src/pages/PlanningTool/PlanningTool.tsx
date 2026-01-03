@@ -71,8 +71,6 @@ export default function PlanningTool({ isAdminMode = false, property, onGenerate
 
     const [loadedProperty, setLoadedProperty] = useState<Property | null>(null);
 
-    
-
    // Selected IDs
    const [selectedContainerId, setSelectedContainerId] = useState<number | null>(null);
    const [selectedDoorId, setSelectedDoorId] = useState<number | null>(null);
@@ -157,8 +155,7 @@ export default function PlanningTool({ isAdminMode = false, property, onGenerate
         handleShowContainerInfo,
         selectedContainerInfo,
         setSelectedContainerInfo,
-        undo,
-        redo,
+
         getContainerZones,
         isContainerInsideRoom,
         getWallInsetForContainer,
@@ -168,6 +165,91 @@ export default function PlanningTool({ isAdminMode = false, property, onGenerate
     // Track the saved state for comparison
     const [savedRoomState, setSavedRoomState] = useState<{ room: any; doors: any; containers: any; otherObjects: any } | null>(null);
     const [hasInitializedFromStorage, setHasInitializedFromStorage] = useState(false);
+
+    /* ──────────────── Undo-Redo ──────────────── */
+   const {
+        state: layout,
+        save,
+        undo,
+        redo,
+    } = useLayoutHistory({
+        room,
+        doors,
+        containers: containersInRoom,
+        otherObjects,
+    });
+
+
+    const isRestoringRef = useRef(false);
+    const isDraggingRoomRef = useRef(false);
+    const isDraggingOtherObjectRef = useRef(false);
+
+    const undoLayout = () => {
+        isRestoringRef.current = true;
+        undo();
+    };
+
+    const redoLayout = () => {
+        isRestoringRef.current = true;
+        redo();
+    };
+
+    const saveDoors = () => {
+        if (isRestoringRef.current) return;
+
+        save({
+            room,
+            doors,
+            containers: containersInRoom,
+            otherObjects,
+        });
+    };
+    const saveRoomLayout = () => {
+        if (isRestoringRef.current) return;
+
+        save({
+            room,
+            doors,
+            containers: containersInRoom,
+            otherObjects,
+        });
+    };
+    const saveOtherObjectsLayout = () => {
+        if (isRestoringRef.current) return;
+
+        save({
+            room,
+            doors,
+            containers: containersInRoom,
+            otherObjects,
+        });
+    };
+
+    useEffect(() => {
+        if (!isRestoringRef.current) return;
+
+        setRoom(layout.room);
+        setDoors(layout.doors);
+        setContainers(layout.containers);
+        setOtherObjects(layout.otherObjects);
+
+        isRestoringRef.current = false;
+    }, [layout]);
+    
+    useEffect(() => {
+        if (isRestoringRef.current) return;
+        if (isDraggingRoomRef.current) return;
+        if (isDraggingOtherObjectRef.current) return;
+
+        save({
+            room,
+            doors,
+            containers: containersInRoom,
+            otherObjects,
+        });
+    }, [containersInRoom]);
+
+    
 
     /* ──────────────── Sync the doors and containers when changes are made to the room ──────────────── */
     useEffect(() => {
@@ -574,6 +656,8 @@ const hasUnsavedChangesRef = useRef(false);
                         corners={corners}
                         handleDragCorner={handleDragCorner}
                         setRoom={setRoom}
+                        onRoomDragEnd={saveRoomLayout}
+                        isDraggingRoomRef={isDraggingRoomRef}
 
                         doors={doors}
                         selectedDoorId={selectedDoorId}
@@ -584,6 +668,7 @@ const hasUnsavedChangesRef = useRef(false);
                         restoreDoorState={restoreDoorState}
                         isDraggingDoor={isDoorDragging}
                         setIsDraggingDoor={setIsDoorDragging}
+                        onDoorDragEnd={saveDoors}
 
                         containers={containersInRoom}
                         selectedContainerId={selectedContainerId}
@@ -622,6 +707,8 @@ const hasUnsavedChangesRef = useRef(false);
                         selectedOtherObjectId={selectedOtherObjectId}
                         isObjectInsideRoom={isObjectInsideRoom}
                         moveAllObjects={moveAllObjects}
+                        onOtherObjectDragEnd={saveOtherObjectsLayout}
+                        isDraggingOtherObjectRef={isDraggingOtherObjectRef}
 
                         undo={undo}
                         redo={redo}

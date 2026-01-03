@@ -18,6 +18,8 @@ type OtherObjectsLayerProps = {
     handleDragOtherObject: (id: number, pos: { x: number; y: number }) => void;
     setIsDraggingOtherObject: (val: boolean) => void;
     isObjectInsideRoom: (rect: { x: number; y: number; width: number; height: number; rotation?: number },room: Room) => boolean;
+    onOtherObjectDragEnd: () => void;
+    isDraggingOtherObjectRef: React.MutableRefObject<boolean>;
 };
 
 export default function OtherObjectsLayer({
@@ -31,6 +33,8 @@ export default function OtherObjectsLayer({
     handleDragOtherObject,
     setIsDraggingOtherObject,
     isObjectInsideRoom,
+    onOtherObjectDragEnd,
+    isDraggingOtherObjectRef
 }: OtherObjectsLayerProps) {
 
     return (
@@ -55,6 +59,8 @@ export default function OtherObjectsLayer({
                         handleSelectOtherObject={handleSelectOtherObject}
                         handleDragOtherObject={handleDragOtherObject}
                         setIsDraggingOtherObject={setIsDraggingOtherObject}
+                        onOtherObjectDragEnd={onOtherObjectDragEnd}
+                        isDraggingOtherObjectRef={isDraggingOtherObjectRef} 
                     >
                         {() => (
                             <Rect

@@ -25,6 +25,7 @@ type DoorsLayerProps = {
             swingDirection: Door["swingDirection"];
         }
     ) => void;
+    onDoorDragEnd: () => void;
 };
 
 export default function DoorsLayer({
@@ -37,6 +38,7 @@ export default function DoorsLayer({
     setIsDraggingDoor,
     getOtherObjectZones,
     restoreDoorState,
+    onDoorDragEnd,
 }: DoorsLayerProps) {
     return (
         <>
@@ -53,6 +55,7 @@ export default function DoorsLayer({
                     setIsDraggingDoor={setIsDraggingDoor}
                     getOtherObjectZones={getOtherObjectZones}
                     restoreDoorState={restoreDoorState}
+                    onDoorDragEnd={onDoorDragEnd}
                 />
             ))}
         </>

@@ -17,6 +17,8 @@ export default function OtherObjectDrag({
     handleSelectOtherObject,
     handleDragOtherObject,
     setIsDraggingOtherObject,
+    isDraggingOtherObjectRef,
+    onOtherObjectDragEnd,  
     children
 }) {
     // Tracks the last valid (non-overlapping) position for snap-back
@@ -64,7 +66,8 @@ export default function OtherObjectDrag({
             onDragStart={(e) => {
                 const stage = e.target.getStage();
                 if (stage) stage.container().style.cursor = "grabbing";
-
+                
+                isDraggingOtherObjectRef.current = true;
                 setIsDraggingOtherObject(true);
                 handleSelectOtherObject(object.id);
             }}
@@ -109,6 +112,9 @@ export default function OtherObjectDrag({
 
                 setIsOverZone(false);
                 setIsDraggingOtherObject(false);
+
+                isDraggingOtherObjectRef.current = false; 
+                onOtherObjectDragEnd(); 
             }}
         >
             {children({ isOverZone })}

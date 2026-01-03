@@ -61,8 +61,6 @@ vi.mock("../../../src/pages/PlanningTool/hooks/UseContainers", () => ({
         selectedContainerInfo: null,
         setSelectedContainerInfo: vi.fn(),
         handleShowContainerInfo: vi.fn(),
-        undo: vi.fn(),
-        redo: vi.fn(),
         getContainerZones: vi.fn(),
         isContainerInsideRoom: vi.fn(() => true),
     }),
@@ -98,7 +96,12 @@ vi.mock("../../../src/pages/PlanningTool/hooks/useComparison", () => ({
 }));
 
 vi.mock("../../../src/pages/PlanningTool/hooks/UseLayoutHistory", () => ({
-    useLayoutHistory: () => ({ undo: vi.fn(), redo: vi.fn() }),
+    useLayoutHistory: () => ({
+        state: {},
+        save: vi.fn(),
+        undo: vi.fn(),
+        redo: vi.fn(),
+    }),
 }));
 
 vi.mock("../../../src/pages/PlanningTool/hooks/UseSaveRoom", () => ({
