@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import InfoTooltip from "../pages/PlanningTool/components/InfoTooltip";
 
 interface PromptProps {
@@ -19,6 +20,24 @@ export default function Prompt({
   cancelLabel = "Avbryt",
   tooltipText,
 }: PromptProps) {
+
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === "Enter") {
+                e.preventDefault();
+                onConfirm();
+            }
+
+            if (e.key === "Escape") {
+                e.preventDefault();
+                onCancel();
+            }
+        };
+
+        document.addEventListener("keydown", handleKeyDown);
+        return () => document.removeEventListener("keydown", handleKeyDown);
+    }, [onConfirm, onCancel]);
+
   return (
     <div className="prompt-overlay">
       <div className="prompt-box">

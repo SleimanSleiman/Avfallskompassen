@@ -8,8 +8,8 @@
  * - Toolbar and container panel UI.
  * - Blocked zones overlay when dragging containers or doors.
  */
-import {Layer, Stage} from "react-konva";
-import React, {type Dispatch, type SetStateAction, useRef, useState} from "react";
+import { Stage, Layer } from "react-konva";
+import { useState, useEffect, useRef, type Dispatch, type SetStateAction} from "react";
 import RoomShape from "./components/Room/RoomShape";
 import CornerHandles from "./components/Room/CornerHandles";
 import BlockedZones from "./components/Room/BlockedZones"
@@ -105,6 +105,7 @@ type RoomCanvasProps = {
     existingNames?: string[];
     getWallInsetForContainer: (c: ContainerInRoom) => number;
     getSnappedRotationForContainer: (c: ContainerInRoom) => number;
+    onGenerateThumbnail?: (fn: () => string | null) => void;
 };
 
 export default function RoomCanvas({
@@ -176,9 +177,10 @@ export default function RoomCanvas({
     hasUnsavedChanges = () => false,
     onClose,
     existingNames = [],
+    onGenerateThumbnail,
     getWallInsetForContainer,
     getSnappedRotationForContainer,
-    
+
 }: RoomCanvasProps) {
     const [isDraggingContainer, setIsDraggingContainer] = useState(false);
     const [isDraggingOtherObject, setIsDraggingOtherObject] = useState(false);
@@ -233,6 +235,12 @@ export default function RoomCanvas({
             pixelRatio: 1
         });
     };
+
+    useEffect(() => {
+      if (onGenerateThumbnail) {
+        onGenerateThumbnail(generateThumbnail);
+      }
+    }, [onGenerateThumbnail]);
 
     const closePanels = () => {
         setSelectedContainerInfo(null);

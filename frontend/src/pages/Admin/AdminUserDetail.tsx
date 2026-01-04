@@ -28,6 +28,7 @@ export type PlanVersion = {
   y: number; // Room y position on canvas
   doors: Door[];
   containers: any[];
+  otherObjects: any[];
   createdBy: 'user' | 'admin';
   adminUsername?: string; // Only set if createdBy === 'admin'
   createdAt: string;
@@ -118,6 +119,7 @@ export default function AdminUserDetail({ user, onBack }: AdminUserDetailProps) 
         y: v.y ?? 150,
         doors: v.doors || [],
         containers: v.containers || [],
+        otherObjects: v.otherObjects || [],
         createdBy: (v.createdBy || 'user') as 'user' | 'admin',
         adminUsername: v.adminUsername,
         createdAt: v.createdAt || new Date().toISOString(),

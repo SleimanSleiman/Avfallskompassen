@@ -7,12 +7,12 @@ import RoomSizePrompt from "../components/prompts/RoomSizePrompt";
 import greybox from "../assets/greybox.png";
 import Message from "../components/ShowStatus";
 import ConfirmModal from "../components/ConfirmModal";
-
+import PlanVersionDropdown from '../components/PlanVersionDropdown';
 
 export default function AllaMiljoRumPage() {
     const { propertyId } = useParams();
-    const [rooms, setRooms] = useState<WasteRoom[]>([]);
     const [deleting] = useState<number | null>(null);
+    const [rooms, setRooms] = useState<WasteRoom[][]>([]);
     const [loading, setLoading] = useState(true);
     const propertyAddress = localStorage.getItem("selectedPropertyAddress");
     const [isCreateRoomOpen, setIsCreateRoomOpen] = useState(false);
@@ -33,15 +33,22 @@ export default function AllaMiljoRumPage() {
 
             try {
                 const data = await getWasteRoomsByPropertyId(Number(propertyId));
-                console.log(data);
 
-                const sorted = data.sort(
-                    (a, b) =>
-                        new Date(b.updatedAt ?? 0).getTime() -
-                        new Date(a.updatedAt ?? 0).getTime()
+                // Group rooms by wasteRoomId so all versions of the same room are together
+                const groupedRooms = Object.values(
+                  data.reduce<Record<string, WasteRoom[]>>((acc, room) => {
+                    const key = room.name ?? `room-${room.id}`;
+                    if (!acc[key]) acc[key] = [];
+                    acc[key].push(room);
+                    return acc;
+                  }, {})
                 );
 
-                setRooms(sorted);
+                const sortedGroupedRooms = groupedRooms.map(versions =>
+                  versions.sort((a, b) => (b.versionNumber ?? 0) - (a.versionNumber ?? 0))
+                );
+
+                setRooms(sortedGroupedRooms);
             } finally {
                 setLoading(false);
             }
@@ -87,7 +94,11 @@ export default function AllaMiljoRumPage() {
 
             // Remove locally from state
             setRooms((prev) =>
-                prev.filter((r) => (r.wasteRoomId ?? r.id) !== (room.wasteRoomId ?? room.id))
+                prev.filter((roomVersions) => {
+                    const baseRoom = roomVersions[0];
+                    return (baseRoom.wasteRoomId ?? baseRoom.id) !==
+                           (room.wasteRoomId ?? room.id);
+                })
             );
         } catch (err: unknown) {
             if (err instanceof Error) {
@@ -101,13 +112,11 @@ export default function AllaMiljoRumPage() {
         }
     }
 
-    const filteredRooms = rooms.filter(room => {
-        const q = search.toLowerCase();
-        return (
-            room.name?.toLowerCase().includes(q) ||
-            String(room.length).includes(q) ||
-            String(room.width).includes(q)
-        );
+    const filteredRooms = rooms.filter((roomVersions) => {
+        const room = roomVersions.find(r => r.isActive) ?? roomVersions[0];
+        return room.name
+            ?.toLowerCase()
+            .includes(search.toLowerCase());
     });
 
     return (
@@ -183,8 +192,9 @@ export default function AllaMiljoRumPage() {
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
 
-                        {filteredRooms.map((room) => (
-                            
+                        {filteredRooms.map((roomVersions) => {
+                            const room = roomVersions.find(r => r.isActive) ?? roomVersions[0];
+                            return (
                             <div key={room.id} className="rounded-xl border bg-white p-5 shadow-soft flex flex-col">
                                 <img
                                     src={room.thumbnailUrl || greybox}
@@ -192,16 +202,22 @@ export default function AllaMiljoRumPage() {
                                     className="w-full h-40 object-cover rounded-lg mb-3"
                                 />
 
-
                                 <h2 className="font-semibold">
-                                    {room.name && room.name.trim() !== "" 
-                                        ? room.name 
+                                    {room.name && room.name.trim() !== ""
+                                        ? room.name
                                         : `Null`}
                                 </h2>
                                 <p>Längd: {room.length}</p>
                                 <p>Bredd: {room.width}</p>
 
-                                <div className="mt-4 flex gap-3">
+                                <div className="mt-4 flex flex-wrap gap-2">
+                                <div className="flex-shrink-0 basis-full sm:basis-auto">
+                                    <PlanVersionDropdown
+                                      rooms={roomVersions}
+                                      propertyAddress={propertyAddress ?? ""}
+                                      onOpenVersion={(r) => editRoom(r)}
+                                    />
+                                </div>
                                     <button
                                         className="btn-secondary-sm"
                                         onClick={() => editRoom(room)}
@@ -218,8 +234,9 @@ export default function AllaMiljoRumPage() {
                                     </button>
                                 </div>
                             </div>
-                        ))}
-                    </div>
+                            );
+                        })}
+                        </div>
                 )}
             </div>
 

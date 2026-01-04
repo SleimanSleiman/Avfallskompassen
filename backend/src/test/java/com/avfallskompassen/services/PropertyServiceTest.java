@@ -2,7 +2,6 @@ package com.avfallskompassen.services;
 
 import com.avfallskompassen.dto.LockTypeDto;
 import com.avfallskompassen.dto.request.PropertyRequest;
-import com.avfallskompassen.model.LockType;
 import com.avfallskompassen.model.Property;
 import org.junit.jupiter.api.Test;
 

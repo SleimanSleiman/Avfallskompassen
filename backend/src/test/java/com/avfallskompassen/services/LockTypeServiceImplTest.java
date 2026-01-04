@@ -4,7 +4,6 @@ import com.avfallskompassen.dto.LockTypeDto;
 import com.avfallskompassen.model.LockType;
 import com.avfallskompassen.repository.LockTypeRepository;
 import com.avfallskompassen.services.impl.LockTypeServiceImpl;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;

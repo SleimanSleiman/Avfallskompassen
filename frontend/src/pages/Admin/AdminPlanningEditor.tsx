@@ -1,10 +1,10 @@
-import {useEffect, useState} from 'react';
+import { useState, useEffect, useRef } from 'react';
 import PlanningTool from '../PlanningTool/PlanningTool';
 import type {AdminUser} from '../AdminPage';
 import type {AdminProperty, RoomPlan} from './AdminUserDetail';
 import AdminSaveVersionModal from './AdminSaveVersionModal';
 import {currentUser} from '../../lib/Auth';
-import type {ContainerPositionRequest, DoorRequest} from '../../lib/WasteRoomRequest';
+import type {ContainerPositionRequest, DoorRequest, OtherObjectRequest} from '../../lib/WasteRoomRequest';
 import {createAdminVersion} from '../../lib/WasteRoomRequest';
 import Message from '../../components/ShowStatus';
 import {getWasteRoomById} from '../../lib/WasteRoom';
@@ -34,10 +34,20 @@ type PlanData = {
     containers: ContainerPositionRequest[];
 }
 // Wrapper component that ensures localStorage is set before PlanningTool mounts
+function PlanningToolWrapper({
+  planData,
+  isLoading,
+  property,
+  onGenerateThumbnail,
+}: {
+  planData: any;
+  isLoading: boolean;
+  property?: any;
+  onGenerateThumbnail: (fn: () => string | null) => void;
+}) {
 function PlanningToolWrapper({ planData, isLoading, property }: { planData: PlanData | null; isLoading: boolean; property: Property }) {
   const [initialized, setInitialized] = useState(false);
 
-  // Visa alltid loading tills vi har riktig rumsdata att arbeta med
   if (isLoading || !planData) {
     return (
       <div className="py-16">
@@ -75,7 +85,13 @@ function PlanningToolWrapper({ planData, isLoading, property }: { planData: Plan
   }
 
   if (!planData || !property) return <LoadingBar />;
-  return <PlanningTool isAdminMode={true} property={property} />;
+  return (
+    <PlanningTool
+      isAdminMode={true}
+      property={property}
+      onGenerateThumbnail={onGenerateThumbnail}
+    />
+  );
 }
 
 export default function AdminPlanningEditor({
@@ -92,6 +108,7 @@ export default function AdminPlanningEditor({
   const [versionToReplace, setVersionToReplace] = useState<number | null>(null);
   const [planData, setPlanData] = useState<PlanData | null>(null);
   const [isLoadingRoom, setIsLoadingRoom] = useState(true);
+  const generateThumbnailRef = useRef<(() => string | null) | null>(null);
   const [msg, setMsg] = useState<string>("");
   const [error, setError] = useState<string>("");
 
@@ -136,6 +153,7 @@ export default function AdminPlanningEditor({
             name: plan.name,
             doors: wasteRoom.doors || [],
             containers: wasteRoom.containers || [],
+            otherObjects: wasteRoom.otherObjects || []
           });
         } else {
           console.warn('No wasteRoomId found, using fallback version data');
@@ -153,6 +171,7 @@ export default function AdminPlanningEditor({
             name: plan.name,
             doors: selectedVersion.doors,
             containers: selectedVersion.containers,
+            otherObjects: selectedVersion.otherObjects,
           });
         }
       } catch (error) {
@@ -231,6 +250,21 @@ export default function AdminPlanningEditor({
       const roomX = currentPlanData.x !== undefined ? currentPlanData.x : selectedVersion.x ?? 150;
       const roomY = currentPlanData.y !== undefined ? currentPlanData.y : selectedVersion.y ?? 150;
 
+      const rawOtherObjects = currentPlanData.otherObjects || selectedVersion.otherObjects || [];
+
+      const otherObjects: OtherObjectRequest[] = rawOtherObjects.map((o: any) => ({
+        name: o.name,
+        x: o.x ?? 0,
+        y: o.y ?? 0,
+        width: o.width ?? 0,
+        depth: o.depth ?? o.height ?? 0,
+        rotation: o.rotation ?? 0,
+      }));
+
+
+      const thumbnailBase64 =
+        generateThumbnailRef.current?.() ?? null;
+
       const requestPayload = {
         length: currentPlanData.width || selectedVersion.roomHeight,
         width: currentPlanData.length || selectedVersion.roomWidth,
@@ -238,11 +272,12 @@ export default function AdminPlanningEditor({
         y: roomY,
         doors,
         containers,
-        otherObjects: [],
+        otherObjects,
         propertyId: property.id,
         versionName: versionName || undefined,
         adminUsername,
-        versionToReplace: versionToReplace || undefined
+        versionToReplace: versionToReplace || undefined,
+        thumbnailBase64,
       };
 
         if (requestPayload.length > 9) {
@@ -282,6 +317,7 @@ export default function AdminPlanningEditor({
           version: versionName || undefined,
           doors: selectedVersion.doors,
           containers: selectedVersion.containers,
+          otherObjects: selectedVersion.otherObjects,
           versionToReplace: versionToReplace || undefined,
         },
         adminUsername
@@ -387,6 +423,7 @@ export default function AdminPlanningEditor({
               planData={planData}
               isLoading={isLoadingRoom}
               property={planData.property}
+              onGenerateThumbnail={(fn) => (generateThumbnailRef.current = fn)}
             />
           )}
         </div>
