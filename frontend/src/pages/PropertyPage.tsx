@@ -448,9 +448,14 @@ export default function PropertyPage() {
            </div>
          ) : (
            filteredProperties.map((property) => {
-             const uniqueRoomsCount = Array.from(
-               new Set(property.wasteRooms?.map(r => r.name?.trim().toLowerCase()))
-             ).length;
+               const uniqueRoomsCount = Array.from(
+                   new Set(
+                       (property.wasteRooms ?? [])
+                           .map(r => r.name)
+                           .filter((n): n is string => !!n)
+                           .map(n => n.trim().toLowerCase())
+                   )
+               ).length;
 
              return (
                <div key={property.id} className="rounded-xl border border-gray-200 p-5 hover:shadow-md transition-shadow">
@@ -471,7 +476,7 @@ export default function PropertyPage() {
                     </div>
                   </div>
                   <div className="mt-4 flex flex-wrap gap-2">
-                    {property.wasteRooms.length > 0 ? (
+                    {(property.wasteRooms ?? []).length > 0 ? (
                       <button
                         className="btn-secondary-sm"
                         onClick={() => {

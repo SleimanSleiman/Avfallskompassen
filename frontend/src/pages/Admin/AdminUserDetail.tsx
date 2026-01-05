@@ -12,8 +12,6 @@ import { updateUserRole } from "../../lib/AdminApi";
 import { Listbox } from "@headlessui/react";
 import { ChevronUpDownIcon, CheckIcon } from "@heroicons/react/20/solid";
 
-
-// Data types
 export type AdminProperty = {
   id: number;
   userId: number;
@@ -50,11 +48,10 @@ export type RoomPlan = {
   versions: PlanVersion[]; // Array of versions, max 6
   createdAt: string;
   updatedAt: string;
-  activeVersionNumber: number;
+  activeVersionNumber?: number;
   selectedVersion?: number; // Optional: which version is currently being edited
   isDraft?: boolean;
 };
-
 
 type AdminUserDetailProps = {
   user: AdminUser;
@@ -71,7 +68,7 @@ export default function AdminUserDetail({ user, onBack }: AdminUserDetailProps) 
   const [expandedProperties, setExpandedProperties] = useState<Set<number>>(new Set());
   const [deleteConfirm, setDeleteConfirm] = useState<{ planId: number; versionNumber: number; wasteRoomId: number } | null>(null);
   const [versionCounts, setVersionCounts] = useState<Map<number, number>>(new Map());
-  const [selectedRole, setSelectedRole] = useState<string>(user.role);
+  const [selectedRole, setSelectedRole] = useState<"USER" | "ADMIN">(user.role);
   const [savingRole, setSavingRole] = useState(false);
   const [roleError, setRoleError] = useState<string | null>(null);
   const [roleSuccess, setRoleSuccess] = useState<string | null>(null);
@@ -764,7 +761,6 @@ export default function AdminUserDetail({ user, onBack }: AdminUserDetailProps) 
                                 ? null
                                 : plan.versions.find(v => v.versionNumber === plan.activeVersionNumber);
                               const hasMultipleVersions = plan.versions.length > 1;
-                              if (!activeVersion) return null;
                               return (
                                 <div
                                   key={plan.id}
@@ -788,7 +784,7 @@ export default function AdminUserDetail({ user, onBack }: AdminUserDetailProps) 
                                         <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">
                                           {plan.isDraft ? "Utkast – ingen aktiv version" : "Aktiv version"}
                                         </div>
-                                        {!plan.isDraft && (
+                                        {!plan.isDraft && activeVersion && (
                                             <div className="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-3 flex-wrap">
                                               <span className="text-sm font-bold text-nsr-ink">
                                                 {activeVersion.roomWidth}m × {activeVersion.roomHeight}m
