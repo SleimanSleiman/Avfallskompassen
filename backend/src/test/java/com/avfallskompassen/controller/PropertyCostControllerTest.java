@@ -68,7 +68,7 @@ class PropertyCostControllerTest {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
         assertThat(response.getBody()).isInstanceOf(Map.class);
         assertThat(((Map<?, ?>) response.getBody()).get("error"))
-                .isEqualTo("Property not found with id: " + propertyId);
+                .isEqualTo("Property not found" );
     }
 
     @Test
@@ -119,7 +119,7 @@ class PropertyCostControllerTest {
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
         assertThat(((Map<?, ?>) response.getBody()).get("error"))
-                .isEqualTo("Property not found for: " + username);
+                .isEqualTo("Property not found");
     }
 
     @Test

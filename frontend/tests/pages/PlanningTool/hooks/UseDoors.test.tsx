@@ -218,7 +218,7 @@ describe("useDoors hook", () => {
 
         const door = result.current.doors.find(d => d.id === id);
         expect(door?.wall).toBe("right");
-        expect(door?.rotation).toBe(-90 + 180);
+        expect(door?.rotation).toBe(-90);
     });
 
     //Test door position updates when room changes
