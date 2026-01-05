@@ -116,3 +116,16 @@ export async function getAllWasteRoomVersions(
         }
     );
 }
+
+export async function setWasteRoomActive(
+  wasteRoomId: number,
+  isActive: boolean
+): Promise<void> {
+  return api<void>(`/api/wasterooms/${wasteRoomId}/active`, {
+    method: "PATCH",
+    body: { isActive },
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+}

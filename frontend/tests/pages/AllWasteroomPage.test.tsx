@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, waitFor, fireEvent } from "@testing-library/react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
-import AllaMiljoRumPage from "../../src/pages/AllWasteroomPage";
+import AllWasteroomPage from "../../src/pages/AllWasteroomPage";
 import { getWasteRoomsByPropertyId } from "../../src/lib/WasteRoom";
 import { deleteWasteRoom } from "../../src/lib/WasteRoomRequest";
 
@@ -57,7 +57,7 @@ Object.defineProperty(window, "localStorage", {
     writable: true,
 });
 
-describe("AllaMiljoRumPage (Vitest)", () => {
+describe("AllWasteRoomPage (Vitest)", () => {
     beforeEach(() => {
         vi.clearAllMocks();
         window.localStorage.clear();
@@ -69,7 +69,7 @@ describe("AllaMiljoRumPage (Vitest)", () => {
                 <Routes>
                     <Route
                         path="/properties/:propertyId/rooms"
-                        element={<AllaMiljoRumPage />}
+                        element={<AllWasteroomPage />}
                     />
                 </Routes>
             </MemoryRouter>

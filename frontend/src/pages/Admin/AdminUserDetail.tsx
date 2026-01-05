@@ -7,6 +7,11 @@ import { getUsersPropertySummaries } from '../../lib/Property';
 import { currentUser } from '../../lib/Auth';
 import ConfirmModal from '../../components/ConfirmModal';
 import type {Door} from "../../lib/WasteRoom.ts";
+import { setWasteRoomActive } from '../../lib/WasteRoomRequest'
+import { updateUserRole } from "../../lib/AdminApi";
+import { Listbox } from "@headlessui/react";
+import { ChevronUpDownIcon, CheckIcon } from "@heroicons/react/20/solid";
+
 
 // Data types
 export type AdminProperty = {
@@ -46,6 +51,7 @@ export type RoomPlan = {
   updatedAt: string;
   activeVersionNumber: number;
   selectedVersion?: number; // Optional: which version is currently being edited
+  isDraft?: boolean;
 };
 
 
@@ -64,6 +70,19 @@ export default function AdminUserDetail({ user, onBack }: AdminUserDetailProps) 
   const [expandedProperties, setExpandedProperties] = useState<Set<number>>(new Set());
   const [deleteConfirm, setDeleteConfirm] = useState<{ planId: number; versionNumber: number; wasteRoomId: number } | null>(null);
   const [versionCounts, setVersionCounts] = useState<Map<number, number>>(new Map());
+  const [selectedRole, setSelectedRole] = useState<string>(user.role);
+  const [savingRole, setSavingRole] = useState(false);
+  const [roleError, setRoleError] = useState<string | null>(null);
+  const [roleSuccess, setRoleSuccess] = useState<string | null>(null);
+  const roles = [
+    { label: "Användare", value: "USER" },
+    { label: "Administratör", value: "ADMIN" },
+  ];
+  useEffect(() => {
+    setSelectedRole(user.role);
+    console.log("user.role från backend:", user.role);
+
+  }, [user.role]);
 
   /**
    * Helper: hämta bara fastighets-summaries för en användare (utan rooms).
@@ -127,10 +146,13 @@ export default function AdminUserDetail({ user, onBack }: AdminUserDetailProps) 
         wasteRoomId: v.wasteRoomId || v.id,
       }));
 
+      const hasActiveVersion = roomVersions.some((v: any) => v.isActive);
       const active =
         versions.find((v) => (roomVersions.find((rv: any) => rv.versionNumber === v.versionNumber)?.isActive)) ||
         versions[versions.length - 1];
-      const activeVersionNumber = active?.versionNumber || versions[versions.length - 1].versionNumber;
+      const activeVersionNumber = hasActiveVersion
+        ? active?.versionNumber
+        : undefined;
 
       const planId = Number(prop.id) * 1000 + plans.length + 1;
       const plan: RoomPlan = {
@@ -142,6 +164,7 @@ export default function AdminUserDetail({ user, onBack }: AdminUserDetailProps) 
         createdAt: prop.createdAt,
         updatedAt: active?.createdAt || new Date().toISOString(),
         activeVersionNumber,
+        isDraft: !hasActiveVersion,
       };
       plans.push(plan);
     });
@@ -240,19 +263,97 @@ export default function AdminUserDetail({ user, onBack }: AdminUserDetailProps) 
     setSelectedPlan(null);
   };
 
-  const handleSetActiveVersion = (planId: number, versionNumber: number) => {
+  const handleSetActiveVersion = async (planId: number, versionNumber: number, wasteRoomId?: number) => {
+    if (!wasteRoomId) return;
+
+    // Find the plan we are activating
+    const plan = roomPlans.find((p) => p.id === planId);
+    if (!plan) return;
+
+    // Set clicked version active
+    await setWasteRoomActive(wasteRoomId, true);
+
+    // Set all other versions in the same plan as inactive
+    const otherVersions = plan.versions.filter((v) => v.versionNumber !== versionNumber && v.wasteRoomId);
+    await Promise.all(otherVersions.map((v) => setWasteRoomActive(v.wasteRoomId!, false)));
+
+    // Update local state
     setRoomPlans((prev) =>
-      prev.map((plan) =>
-        plan.id === planId
-          ? { ...plan, activeVersionNumber: versionNumber, updatedAt: new Date().toISOString() }
-          : plan
-      )
+      prev.map((p) => {
+        if (p.id !== planId) return p;
+        return {
+          ...p,
+          isDraft: false,
+          activeVersionNumber: versionNumber,
+          versions: p.versions.map((v) => ({
+            ...v,
+            isActive: v.versionNumber === versionNumber,
+          })),
+          updatedAt: new Date().toISOString(),
+        };
+      })
     );
+
     setSelectedPlan((prev) =>
       prev && prev.id === planId
-        ? { ...prev, activeVersionNumber: versionNumber }
+        ? {
+            ...prev,
+            isDraft: false,
+            activeVersionNumber: versionNumber,
+            versions: prev.versions.map((v) => ({
+              ...v,
+              isActive: v.versionNumber === versionNumber,
+            })),
+          }
         : prev
     );
+  };
+
+  const handleSetPlanToDraft = async (plan: RoomPlan) => {
+    if (plan.isDraft) return;
+
+    try {
+      // Backend: deactivate all versions
+      for (const version of plan.versions) {
+        if (version.wasteRoomId) {
+          await setWasteRoomActive(version.wasteRoomId, false);
+        }
+      }
+
+      // Local state update
+      setRoomPlans(prev =>
+        prev.map(p =>
+          p.id !== plan.id
+            ? p
+            : {
+                ...p,
+                isDraft: true,
+                activeVersionNumber: undefined,
+                versions: p.versions.map(v => ({
+                  ...v,
+                  isActive: false,
+                })),
+              }
+        )
+      );
+
+      setSelectedPlan(prev =>
+        prev && prev.id === plan.id
+          ? {
+              ...prev,
+              isDraft: true,
+              activeVersionNumber: undefined,
+              versions: prev.versions.map(v => ({
+                ...v,
+                isActive: false,
+              })),
+            }
+          : prev
+      );
+    } catch (e) {
+      console.error('Failed to set plan to draft', e);
+      alert('Kunde inte sätta planeringen som utkast');
+    }
   };
 
   const handleDeleteVersion = async (planId: number, wasteRoomId: number) => {
@@ -298,6 +399,23 @@ export default function AdminUserDetail({ user, onBack }: AdminUserDetailProps) 
     }
   };
 
+  const handleUpdateRole = async () => {
+  setSavingRole(true);
+  setRoleError(null);
+  setRoleSuccess(null);
+
+  try {
+      await updateUserRole(user.id, selectedRole);
+      user.role = selectedRole; // uppdatera lokalt
+      setRoleSuccess("Rollen har uppdaterats");
+    } catch (err) {
+      console.error("Failed to update role", err);
+      setRoleError("Kunde inte uppdatera rollen");
+    } finally {
+      setSavingRole(false);
+    }
+  };
+
   if (selectedPlan) {
     return (
       <AdminPlanningEditor
@@ -314,7 +432,7 @@ export default function AdminUserDetail({ user, onBack }: AdminUserDetailProps) 
     return (
       <main className="mx-auto w-full max-w-7xl px-4 py-8 overflow-x-hidden">
         <div className="rounded-2xl border bg-white p-6 shadow-soft text-center">
-          <LoadingBar message="Laddar fastigheter och planeringar…" />
+          <LoadingBar message="Laddar fastigheter…" />
         </div>
       </main>
     );
@@ -352,6 +470,103 @@ export default function AdminUserDetail({ user, onBack }: AdminUserDetailProps) 
               </div>
             </div>
           </div>
+            {/* Role management */}
+            <div className="mt-6 rounded-xl border border-gray-200 bg-gray-50 p-5">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-sm font-bold text-gray-700">
+                  Användarroll
+                </h3>
+                <span className="text-xs font-semibold px-2.5 py-1 rounded-full
+                  bg-nsr-teal/15 text-nsr-teal">
+                  {user.role === "ADMIN" ? "Administratör" : "Användare"}
+                </span>
+              </div>
+
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+                <Listbox value={selectedRole} onChange={setSelectedRole}>
+              <div className="relative w-52">
+                <Listbox.Button
+                  className="
+                    relative w-full cursor-pointer rounded-lg bg-white
+                    border border-gray-300 py-2 pl-3 pr-10 text-left
+                    shadow-sm focus:outline-none focus:ring-2 focus:ring-nsr-teal/40
+                  "
+                >
+                  <span className="block truncate">
+                    {roles.find(r => r.value === selectedRole)?.label}
+                  </span>
+                  <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
+                    <ChevronUpDownIcon className="h-5 w-5 text-gray-400" />
+                  </span>
+                </Listbox.Button>
+
+                <Listbox.Options
+                  className="
+                    absolute z-10 mt-1 w-full overflow-auto rounded-lg
+                    bg-white py-1 text-sm shadow-lg ring-1 ring-black/5
+                  "
+                >
+                  {roles.map(role => (
+                    <Listbox.Option
+  key={role.value}
+  value={role.value}
+  className={({ active }) =>
+    `
+      relative cursor-pointer select-none py-2 pl-10 pr-4
+      ${active ? "bg-nsr-teal text-white" : "text-gray-900"}
+    `
+  }
+>
+  {({ selected }) => (
+    <>
+      <span className={`${selected ? "font-semibold" : "font-normal"} block truncate`}>
+        {role.label}
+        {role.value === user.role && (
+          <span className="ml-2 text-xs opacity-80">
+            (nuvarande)
+          </span>
+        )}
+      </span>
+
+      {selected && (
+        <span className="absolute inset-y-0 left-0 flex items-center pl-3">
+          <CheckIcon className="h-4 w-4 text-white" />
+        </span>
+      )}
+    </>
+  )}
+</Listbox.Option>
+
+                  ))}
+                </Listbox.Options>
+              </div>
+            </Listbox>
+
+                <button
+                  disabled={savingRole || selectedRole === user.role}
+                  onClick={handleUpdateRole}
+                  className="
+                    btn-primary-sm
+                    disabled:opacity-50 disabled:cursor-not-allowed
+                  "
+                >
+                  {savingRole ? "Sparar…" : "Spara roll"}
+                </button>
+              </div>
+
+              {roleError && (
+                <p className="mt-3 text-sm text-red-600 font-medium">
+                  {roleError}
+                </p>
+              )}
+
+              {roleSuccess && (
+                <p className="mt-3 text-sm text-green-600 font-medium">
+                  {roleSuccess}
+                </p>
+              )}
+            </div>
+
         </div>
       </div>
 
@@ -526,13 +741,8 @@ export default function AdminUserDetail({ user, onBack }: AdminUserDetailProps) 
 
                         {/* Loading state för just denna fastighets planeringar */}
                         {loadingPlansForPropertyId === property.id ? (
-                          <div className="space-y-4">
-                            <div className="rounded-lg border-2 border-gray-200 bg-gray-50/50 p-3 sm:p-5">
-                              <div className="mb-3 h-4 w-40 rounded-full bg-gray-200 animate-pulse" />
-                              <div className="mb-3 h-3 w-24 rounded-full bg-gray-100 animate-pulse" />
-                              <div className="mb-4 h-16 rounded-lg bg-gray-100 animate-pulse" />
-                              <div className="h-20 rounded-lg bg-gray-100 animate-pulse" />
-                            </div>
+                          <div className="py-6 flex justify-center">
+                            <LoadingBar message="Laddar planeringar…" />
                           </div>
                         ) : planCount === 0 ? (
                           <div className="py-8 text-center">
@@ -549,15 +759,17 @@ export default function AdminUserDetail({ user, onBack }: AdminUserDetailProps) 
                                 return null;
                               }
 
-                              const activeVersion = plan.versions.find((v) => v.versionNumber === plan.activeVersionNumber) || plan.versions[plan.versions.length - 1];
+                              const activeVersion = plan.isDraft
+                                ? null
+                                : plan.versions.find(v => v.versionNumber === plan.activeVersionNumber);
                               const hasMultipleVersions = plan.versions.length > 1;
                               return (
                                 <div
                                   key={plan.id}
                                   className="rounded-lg border-2 border-gray-200 bg-gray-50/50 p-3 sm:p-5 hover:border-nsr-teal/30 transition-colors"
                                 >
-                                  <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-                                    <div className="flex-1 min-w-0">
+                                  <div className="flex flex-col sm:flex-row gap-4">
+                                    <div className="flex-1 min-w-0 w-full">
                                       <div className="flex items-center gap-2 sm:gap-3 mb-3 flex-wrap">
                                         <h5 className="text-base font-bold text-nsr-ink break-words">
                                           {plan.name}
@@ -572,21 +784,24 @@ export default function AdminUserDetail({ user, onBack }: AdminUserDetailProps) 
                                       {/* Active Version Info */}
                                       <div className="mb-4 p-3 bg-white rounded-lg border border-gray-200">
                                         <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">
-                                          Aktiv version
+                                          {plan.isDraft ? "Utkast – ingen aktiv version" : "Aktiv version"}
                                         </div>
-                                        <div className="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-3 flex-wrap">
-                                          <span className="text-sm font-bold text-nsr-ink">
-                                            {activeVersion.roomWidth}m × {activeVersion.roomHeight}m
-                                          </span>
-                                          <span className="hidden sm:inline text-gray-300">•</span>
-                                          <span className="text-sm font-medium text-gray-700">
-                                            Version {activeVersion.versionNumber}
-                                          </span>
-                                          <span className="hidden sm:inline text-gray-300">•</span>
-                                          <span className="text-xs text-gray-600 break-words">
-                                            Uppdaterad: {new Date(plan.updatedAt).toLocaleDateString('sv-SE')}
-                                          </span>
-                                        </div>
+                                        {!plan.isDraft && (
+                                            <div className="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-3 flex-wrap">
+                                              <span className="text-sm font-bold text-nsr-ink">
+                                                {activeVersion.roomWidth}m × {activeVersion.roomHeight}m
+                                              </span>
+                                              <span className="hidden sm:inline text-gray-300">•</span>
+                                              <span className="text-sm font-medium text-gray-700">
+                                                Version {activeVersion.versionNumber}
+                                              </span>
+                                              <span className="hidden sm:inline text-gray-300">•</span>
+                                              <span className="text-xs text-gray-600 break-words">
+                                                Uppdaterad:{" "}
+                                                {new Date(plan.updatedAt).toLocaleDateString("sv-SE")}
+                                              </span>
+                                            </div>
+                                          )}
                                       </div>
 
                                       {/* Version History */}
@@ -597,7 +812,9 @@ export default function AdminUserDetail({ user, onBack }: AdminUserDetailProps) 
                                           </div>
                                           <div className="space-y-2">
                                             {plan.versions.map((version) => {
-                                              const isActive = version.versionNumber === plan.activeVersionNumber;
+                                              const isActive =
+                                                 !plan.isDraft &&
+                                                 version.versionNumber === plan.activeVersionNumber;
                                               return (
                                                 <div
                                                   key={version.versionNumber}
@@ -630,7 +847,7 @@ export default function AdminUserDetail({ user, onBack }: AdminUserDetailProps) 
                                                       </span>
                                                     ) : (
                                                       <button
-                                                        onClick={() => handleSetActiveVersion(plan.id, version.versionNumber)}
+                                                        onClick={() => handleSetActiveVersion(plan.id, version.versionNumber, version.wasteRoomId)}
                                                         className="text-xs font-semibold text-nsr-accent hover:text-nsr-accent/80 hover:underline whitespace-nowrap"
                                                       >
                                                         Gör aktiv
@@ -680,14 +897,28 @@ export default function AdminUserDetail({ user, onBack }: AdminUserDetailProps) 
                                         </div>
                                       )}
                                     </div>
-                                    <button
-                                      onClick={() => handleEditPlan(plan)}
-                                      className="btn-secondary-sm flex-shrink-0 w-full sm:w-auto mt-4 sm:mt-0"
-                                    >
-                                      Redigera
-                                    </button>
+                                    <div className="flex sm:flex-col gap-2 flex-shrink-0 w-full sm:w-auto">
+                                      <button
+                                        onClick={() => handleEditPlan(plan)}
+                                        className="btn-secondary-sm flex-shrink-0 w-full sm:w-auto mt-4 sm:mt-0"
+                                      >
+                                        Redigera
+                                      </button>
+                                      <button
+                                        onClick={() => handleSetPlanToDraft(plan)}
+                                        disabled={plan.isDraft}
+                                        className={`text-sm font-semibold px-3 py-1 rounded-xl border transition
+                                          ${
+                                            plan.isDraft
+                                              ? 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed'
+                                              : 'bg-yellow-50 text-yellow-700 border-yellow-200 hover:bg-yellow-100'
+                                          }`}
+                                      >
+                                        Gör till utkast
+                                      </button>
+                                    </div>
                                   </div>
-                                </div>
+                               </div>
                               );
                             })}
                           </div>

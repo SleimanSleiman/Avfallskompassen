@@ -8,3 +8,4 @@ frontend/html/html.meta.json.gz
 frontend/html/index.html
 .idea/vcs.xml
 backend/src/main/resources/application.properties
+.DS_Store

@@ -8,6 +8,8 @@ import { getLinesAndTexts } from "../utils/OtherObjectMeasurementUtils.tsx";
 type OtherObjectMeasurementProps = {
     object: OtherObjectInRoom;
     room: { x: number; y: number; width: number; height: number };
+    onOtherObjectDragEnd: () => void;
+    isDraggingOtherObjectRef: React.MutableRefObject<boolean>;
 };
 
 export default function OtherObjectMeasurement({ object, room }: OtherObjectMeasurementProps) {

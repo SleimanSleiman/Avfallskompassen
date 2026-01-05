@@ -33,19 +33,20 @@ type PlanData = {
     doors: DoorRequest[];
     containers: ContainerPositionRequest[];
 }
-// Wrapper component that ensures localStorage is set before PlanningTool mounts
+
+type PlanningToolWrapperProps = {
+    planData: PlanData | null;
+    isLoading: boolean;
+    property: Property;
+    onGenerateThumbnail: (fn: () => string | null) => void;
+}
+
 function PlanningToolWrapper({
-  planData,
-  isLoading,
-  property,
-  onGenerateThumbnail,
-}: {
-  planData: any;
-  isLoading: boolean;
-  property?: any;
-  onGenerateThumbnail: (fn: () => string | null) => void;
-}) {
-function PlanningToolWrapper({ planData, isLoading, property }: { planData: PlanData | null; isLoading: boolean; property: Property }) {
+     planData,
+     isLoading,
+     property,
+     onGenerateThumbnail
+}: PlanningToolWrapperProps) {
   const [initialized, setInitialized] = useState(false);
 
   if (isLoading || !planData) {

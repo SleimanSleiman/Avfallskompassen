@@ -1,7 +1,7 @@
 import { useParams } from "react-router-dom";
 import { getWasteRoomsByPropertyId } from "../lib/WasteRoom";
 import type { WasteRoom } from "../lib/WasteRoom";
-import { deleteWasteRoom } from "../lib/WasteRoomRequest";
+import { deleteWasteRoom, setWasteRoomActive } from "../lib/WasteRoomRequest";
 import { useEffect, useState } from "react";
 import RoomSizePrompt from "../components/prompts/RoomSizePrompt";
 import greybox from "../assets/greybox.png";
@@ -85,7 +85,7 @@ export default function AllaMiljoRumPage() {
     }
 
     async function removeRoom(room: WasteRoom) {
-        if (!roomToDelete) return; 
+        if (!room) return;
 
         setLoadingDelete(true);
 
@@ -110,6 +110,50 @@ export default function AllaMiljoRumPage() {
             setShowConfirm(false);
             setRoomToDelete(null);
         }
+    }
+
+    async function toggleDraft(roomVersions: WasteRoom[]) {
+      if (!roomVersions.length) return;
+
+      const activeVersion = roomVersions.find(r => r.isActive);
+      const latestVersion = [...roomVersions].sort(
+        (a, b) => (b.versionNumber ?? 0) - (a.versionNumber ?? 0)
+      )[0];
+
+      try {
+        if (activeVersion) {
+          await setWasteRoomActive(
+            activeVersion.wasteRoomId ?? activeVersion.id,
+            false
+          );
+
+          setRooms(prev =>
+            prev.map(group =>
+              group === roomVersions
+                ? group.map(r => ({ ...r, isActive: false }))
+                : group
+            )
+          );
+        } else {
+          await setWasteRoomActive(
+            latestVersion.wasteRoomId ?? latestVersion.id,
+            true
+          );
+
+          setRooms(prev =>
+            prev.map(group =>
+              group === roomVersions
+                ? group.map(r => ({
+                    ...r,
+                    isActive: r === latestVersion
+                  }))
+                : group
+            )
+          );
+        }
+      } catch {
+        setError("Kunde inte uppdatera utkast-status");
+      }
     }
 
     const filteredRooms = rooms.filter((roomVersions) => {
@@ -139,6 +183,10 @@ export default function AllaMiljoRumPage() {
                     <h1 className="text-4xl font-bold">Miljörum för {propertyAddress ?? "fastighet"}</h1>
                     <p className="mt-2 text-gray-600">
                         Här kan du hantera, redigera och skapa nya miljörum för denna fastighet.
+                    </p>
+                    <p className="mt-2 text-gray-600">
+                        Om du vill skapa miljörum som inte ska ingå i din slutgiltiga statistik, sätt dem som
+                        "Utkast".
                     </p>
                 </div>
 
@@ -211,6 +259,15 @@ export default function AllaMiljoRumPage() {
                                 <p>Bredd: {room.width}</p>
 
                                 <div className="mt-4 flex flex-wrap gap-2">
+                                <label className="inline-flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+                                    <input
+                                        type="checkbox"
+                                        className="h-4 w-4 rounded border-gray-300 text-nsr-teal focus:ring-nsr-teal"
+                                        checked={!roomVersions.some(r => r.isActive)}
+                                        onChange={() => toggleDraft(roomVersions)}
+                                    />
+                                    Sätt som utkast
+                                </label>
                                 <div className="flex-shrink-0 basis-full sm:basis-auto">
                                     <PlanVersionDropdown
                                       rooms={roomVersions}
@@ -218,6 +275,7 @@ export default function AllaMiljoRumPage() {
                                       onOpenVersion={(r) => editRoom(r)}
                                     />
                                 </div>
+                                <div className="flex items-center gap-2">
                                     <button
                                         className="btn-secondary-sm"
                                         onClick={() => editRoom(room)}
@@ -232,6 +290,7 @@ export default function AllaMiljoRumPage() {
                                     >
                                         {deleting === room.id ? "Tar bort..." : "Ta bort"}
                                     </button>
+                                </div>
                                 </div>
                             </div>
                             );
@@ -270,7 +329,6 @@ export default function AllaMiljoRumPage() {
                 }}
                 onConfirm={() => removeRoom(roomToDelete!)}
             />
-
         </main>
     );
 }

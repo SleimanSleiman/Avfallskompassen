@@ -2,26 +2,10 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderHook, act } from "@testing-library/react";
 import { useContainers } from "../../../../src/pages/PlanningTool/hooks/UseContainers";
 import { fetchContainersByMunicipalityAndService } from "../../../../src/lib/Container";
-import { useLayoutHistory } from "../../../../src/pages/PlanningTool/hooks/UseLayoutHistory";
 
 // ─────────────── Mock modules ───────────────
 vi.mock("../../../../src/lib/Container", () => ({
     fetchContainersByMunicipalityAndService: vi.fn(),
-}));
-
-vi.mock("../../../../src/pages/PlanningTool/hooks/UseLayoutHistory", () => ({
-    useLayoutHistory: vi.fn(() => {
-        const state: any[] = [];
-        const save = (newState: any[]) => {
-            state.splice(0, state.length, ...newState);
-        };
-        return {
-            state,
-            save,
-            undo: vi.fn(),
-            redo: vi.fn(),
-        };
-    }),
 }));
 
 
@@ -56,12 +40,6 @@ describe("useContainers hook", () => {
 
     it("should remove a container", () => {
         const saveMock = vi.fn();
-        (useLayoutHistory as any).mockReturnValue({
-            state: [{ id: 123, container: containerDTO, x: 0, y: 0, width: 100, height: 80, rotation: 0 }],
-            save: saveMock,
-            undo: vi.fn(),
-            redo: vi.fn(),
-        });
 
         const { result } = renderHook(() =>
             useContainers(room, setSelectedContainerId, setSelectedDoorId, setSelectedOtherObjectId)
@@ -71,30 +49,26 @@ describe("useContainers hook", () => {
             result.current.handleRemoveContainer(123);
         });
 
-        expect(saveMock).toHaveBeenCalledWith([]);
+        expect(result.current.containersInRoom).toEqual([]);
         expect(setSelectedContainerId).toHaveBeenCalledWith(null);
     });
 
     it("should rotate a container", () => {
-        const saveMock = vi.fn();
-        (useLayoutHistory as any).mockReturnValue({
-            state: [{ id: 1, container: containerDTO, x: 0, y: 0, width: 100, height: 80, rotation: 0 }],
-            save: saveMock,
-            undo: vi.fn(),
-            redo: vi.fn(),
-        });
-
         const { result } = renderHook(() =>
             useContainers(room, setSelectedContainerId, setSelectedDoorId, setSelectedOtherObjectId)
         );
 
         act(() => {
-            result.current.handleRotateContainer(1);
+            result.current.handleAddContainer(containerDTO);
         });
 
-        expect(saveMock).toHaveBeenCalledWith([
-            expect.objectContaining({ rotation: 90 }),
-        ]);
+        const id = result.current.containersInRoom[0].id;
+
+        act(() => {
+            result.current.handleRotateContainer(id);
+        });
+
+        expect(result.current.containersInRoom[0].rotation).toBe(90);
     });
 
     it("should handle container selection", () => {

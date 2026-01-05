@@ -6,6 +6,7 @@ import LoadingBar from '../components/LoadingBar';
 export type AdminUser = {
   id: number;
   username: string;
+  role: "USER" | "ADMIN";
   email?: string;
   createdAt?: string | null;
   propertiesCount: number;
@@ -37,6 +38,7 @@ export default function AdminPage() {
         const mapped: AdminUser[] = userStats.map((user: AdminUser) => ({
           id: user.id ?? user.id ?? 0,
           username: user.username ?? "",
+          role: user.role as "USER" | "ADMIN",
           createdAt: user.createdAt || null,
           propertiesCount: user.propertiesCount ?? 0,
           plansCount: user.plansCount ?? 0,

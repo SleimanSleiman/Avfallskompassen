@@ -11,12 +11,14 @@ type CornerHandlesProps = {
   corners: { x: number; y: number }[];
   room: Room;
   handleDragCorner: (index: number, pos: { x: number; y: number }) => void;
+  onRoomDragEnd: () => void;
 };
 
 export default function CornerHandles({
     corners,
     room,
     handleDragCorner,
+    onRoomDragEnd,
 }: CornerHandlesProps) {
 
     /* ──────────────── Render ──────────────── */
@@ -48,6 +50,7 @@ export default function CornerHandles({
                     onDragEnd={(e) => {
                         const stage = e.target.getStage();
                         if (stage) stage.container().style.cursor = "grab";
+                        onRoomDragEnd();
                     }}
 
                     //Constrain corner movement to maintain room size and stay within canvas

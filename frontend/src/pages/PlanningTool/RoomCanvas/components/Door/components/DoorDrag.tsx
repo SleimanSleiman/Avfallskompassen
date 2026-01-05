@@ -29,6 +29,7 @@ type DoorDragProps = {
             swingDirection: Door["swingDirection"];
         }
     ) => void;
+    onDoorDragEnd: () => void;
 }
 export default function DoorDrag({
     door,
@@ -41,6 +42,7 @@ export default function DoorDrag({
     setIsDraggingDoor,
     getOtherObjectZones,
     restoreDoorState,
+    onDoorDragEnd,
 }: DoorDragProps) {
     //Store the last valid (non-overlapping) state for snap-back functionality
     const [lastValidState, setLastValidState] = useState({
@@ -141,6 +143,11 @@ export default function DoorDrag({
                 if (setIsDraggingDoor) {
                     setIsDraggingDoor(false)
                 }
+                if (setIsDraggingDoor) {
+                    setIsDraggingDoor(false)
+                }
+                onDoorDragEnd();
+                console.log("OndoorDragEnd!!!")
             }}
             onClick={(e) => {
                 e.cancelBubble = true;

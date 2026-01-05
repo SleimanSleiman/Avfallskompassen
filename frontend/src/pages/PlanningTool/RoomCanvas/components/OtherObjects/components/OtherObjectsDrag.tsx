@@ -4,7 +4,7 @@
  * and restoring to last valid position if drag ends illegally.
  */
 import { Group } from "react-konva";
-import {type ReactNode, useState} from "react";
+import {type MutableRefObject, type ReactNode, useState} from "react";
 import { clamp, isOverlapping } from "../../../../lib/Constants";
 import type {OtherObjectInRoom, Room} from "../../../../lib/Types.ts";
 
@@ -17,6 +17,8 @@ type OtherObjectDragProps = {
     handleSelectOtherObject: (id: number) => void;
     handleDragOtherObject: (id: number, pos: { x: number; y: number }) => void;
     setIsDraggingOtherObject: (val: boolean) => void;
+    isDraggingOtherObjectRef: MutableRefObject<boolean>;
+    onOtherObjectDragEnd: () => void;
     children: (props: { isOverZone: boolean }) => ReactNode;
 }
 export default function OtherObjectDrag({
@@ -28,6 +30,8 @@ export default function OtherObjectDrag({
     handleSelectOtherObject,
     handleDragOtherObject,
     setIsDraggingOtherObject,
+    isDraggingOtherObjectRef,
+    onOtherObjectDragEnd,  
     children
 }: OtherObjectDragProps) {
     // Tracks the last valid (non-overlapping) position for snap-back
@@ -75,7 +79,8 @@ export default function OtherObjectDrag({
             onDragStart={(e) => {
                 const stage = e.target.getStage();
                 if (stage) stage.container().style.cursor = "grabbing";
-
+                
+                isDraggingOtherObjectRef.current = true;
                 setIsDraggingOtherObject(true);
                 handleSelectOtherObject(object.id);
             }}
@@ -120,6 +125,9 @@ export default function OtherObjectDrag({
 
                 setIsOverZone(false);
                 setIsDraggingOtherObject(false);
+
+                isDraggingOtherObjectRef.current = false; 
+                onOtherObjectDragEnd(); 
             }}
         >
             {children({ isOverZone })}
