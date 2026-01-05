@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+import {useState, useMemo, useEffect, useCallback} from 'react';
 import type { AdminUser } from '../AdminPage';
 import AdminPlanningEditor from './AdminPlanningEditor';
 import LoadingBar from '../../components/LoadingBar';
@@ -39,6 +39,7 @@ export type PlanVersion = {
   createdAt: string;
   versionName?: string;
   wasteRoomId?: number; // Added for localStorage sync
+  isActive?: boolean;
 };
 
 export type RoomPlan = {
@@ -87,7 +88,7 @@ export default function AdminUserDetail({ user, onBack }: AdminUserDetailProps) 
   /**
    * Helper: hämta bara fastighets-summaries för en användare (utan rooms).
    */
-  const fetchPropertySummaries = async (username: string) => {
+  const fetchPropertySummaries = useCallback(async (username: string) => {
     const userProps = await getUsersPropertySummaries(username);
     const mappedProps: AdminProperty[] = userProps.map((p) => ({
       id: Number(p.id),
@@ -108,7 +109,7 @@ export default function AdminUserDetail({ user, onBack }: AdminUserDetailProps) 
     });
     setVersionCounts(initialCounts);
     return mappedProps;
-  };
+  }, [user.id]);
 
   /**
    * Helper: hämta alla wasterooms för en viss fastighet när den expanderas,
@@ -763,6 +764,7 @@ export default function AdminUserDetail({ user, onBack }: AdminUserDetailProps) 
                                 ? null
                                 : plan.versions.find(v => v.versionNumber === plan.activeVersionNumber);
                               const hasMultipleVersions = plan.versions.length > 1;
+                              if (!activeVersion) return null;
                               return (
                                 <div
                                   key={plan.id}

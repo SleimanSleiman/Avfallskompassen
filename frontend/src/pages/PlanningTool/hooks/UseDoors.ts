@@ -21,12 +21,6 @@ export function useDoors(
     //Stores relative position (offset) of each door along the wall
     const doorOffsetRef = useRef<Record<number, number>>({});
 
-        /* ──────────────── Select Door ──────────────── */
-        const handleSelectDoor = (id: number | null) => {
-            setSelectedDoorId(id);
-            setSelectedContainerId(null);
-            setSelectedOtherObjectId(null);
-        };
     //Dragging state
     const [isDoorDragging, setIsDoorDragging] = useState(false);
 
@@ -263,6 +257,7 @@ export function useDoors(
         let rotation = door.rotation;
         if (door.wall !== newWall) {
             rotation = getOutwardRotation(newWall);
+        }
 
             // offset update
             doorOffsetRef.current[id] =
@@ -284,8 +279,7 @@ export function useDoors(
                         }
                 )
             );
-        }
-    }
+        };
 
         /* ──────────────── Rotate Door ──────────────── */
         const handleRotateDoor = (id: number) => {
@@ -319,6 +313,12 @@ export function useDoors(
             setSelectedDoorId(null);
         };
 
+        /* ──────────────── Select Door ──────────────── */
+        const handleSelectDoor = (id: number | null) => {
+            setSelectedDoorId(id);
+            setSelectedContainerId(null);
+            setSelectedOtherObjectId(null);
+        };
 
         /* ──────────────── Door Zones & Collision ──────────────── */
         const getDoorZones = (): Zone[] => {
