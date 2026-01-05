@@ -10,7 +10,7 @@ export type AdminUser = {
   email?: string;
   createdAt?: string | null;
   propertiesCount: number;
-  plansCount: number;
+  wasteRoomsCount: number;
 };
 
 // Component state will hold live data fetched from backend
@@ -41,9 +41,8 @@ export default function AdminPage() {
           role: user.role as "USER" | "ADMIN",
           createdAt: user.createdAt || null,
           propertiesCount: user.propertiesCount ?? 0,
-          plansCount: user.plansCount ?? 0,
+          wasteRoomsCount: user.wasteRoomsCount ?? 0,
         }));
-
         setUsers(mapped);
       } catch (e) {
         console.error('Failed to load admin data', e);
@@ -151,7 +150,7 @@ export default function AdminPage() {
             <div>
               <p className="text-sm text-gray-600 brodtext">Totalt antal planeringar</p>
               <p className="mt-2 text-3xl font-black text-nsr-ink">
-                {users.reduce((sum, u) => sum + u.plansCount, 0)}
+                {users.reduce((sum, u) => sum + u.wasteRoomsCount, 0)}
               </p>
             </div>
             <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
@@ -247,7 +246,7 @@ export default function AdminPage() {
                         <p className="text-gray-600 brodtext text-xs sm:text-sm">Fastigheter</p>
                       </div>
                       <div className="text-center">
-                        <p className="font-black text-nsr-ink">{user.plansCount}</p>
+                        <p className="font-black text-nsr-ink">{user.wasteRoomsCount}</p>
                         <p className="text-gray-600 brodtext text-xs sm:text-sm">Planeringar</p>
                       </div>
                       <div className="text-gray-500 text-xs">
