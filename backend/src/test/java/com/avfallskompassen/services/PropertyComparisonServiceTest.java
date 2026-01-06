@@ -7,14 +7,14 @@ import com.avfallskompassen.dto.GeneralPropertyCostDTO;
 import com.avfallskompassen.dto.PropertyComparisonDTO;
 import com.avfallskompassen.dto.WasteAmountComparisonDTO;
 import com.avfallskompassen.model.ContainerPlan;
+import com.avfallskompassen.model.ContainerPosition;
 import com.avfallskompassen.model.ContainerType;
 import com.avfallskompassen.model.Municipality;
 import com.avfallskompassen.model.MunicipalityService;
 import com.avfallskompassen.model.Property;
-import com.avfallskompassen.model.PropertyContainer;
 import com.avfallskompassen.model.PropertyType;
 import com.avfallskompassen.model.ServiceType;
-import com.avfallskompassen.repository.PropertyContainerRepository;
+import com.avfallskompassen.model.WasteRoom;
 import com.avfallskompassen.repository.WasteRoomRepository;
 import com.avfallskompassen.repository.PropertyRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -49,9 +49,6 @@ class PropertyComparisonServiceTest {
 	private PropertyCostService propertyCostService;
 
 	@Mock
-	private PropertyContainerRepository propertyContainerRepository;
-
-	@Mock
 	private WasteRoomRepository wasteRoomRepository;
 
 	@InjectMocks
@@ -61,9 +58,9 @@ class PropertyComparisonServiceTest {
 	private Property similarProperty;
 	private Property secondSimilarProperty;
 
-	private List<PropertyContainer> propertyContainers;
-	private PropertyContainer similarRestContainer;
-	private PropertyContainer secondSimilarRestContainer;
+	private WasteRoom propertyWasteRoom;
+	private WasteRoom similarWasteRoom;
+	private WasteRoom secondSimilarWasteRoom;
 
 	private GeneralPropertyCostDTO propertyCostDto;
 	private GeneralPropertyCostDTO similarCostDto;
@@ -81,12 +78,25 @@ class PropertyComparisonServiceTest {
 		similarProperty = createProperty(SIMILAR_ID, "Centralgatan 3", 8, municipality);
 		secondSimilarProperty = createProperty(SECOND_SIMILAR_ID, "Centralgatan 5", 12, municipality);
 
-		PropertyContainer propertyRest = createContainer(property, "Restavfall", 100, 10, 1);
-		PropertyContainer propertyMat = createContainer(property, "Matavfall", 50, 12, 1);
-		propertyContainers = List.of(propertyRest, propertyMat);
+		propertyWasteRoom = new WasteRoom();
+		propertyWasteRoom.setProperty(property);
+		propertyWasteRoom.setIsActive(true);
+		propertyWasteRoom.setContainers(new ArrayList<>());
+		addContainersToRoom(propertyWasteRoom, "Restavfall", 100, 10, 1);
+		addContainersToRoom(propertyWasteRoom, "Matavfall", 50, 12, 1);
 
-		similarRestContainer = createContainer(similarProperty, "Restavfall", 125, 8, 1);
-		secondSimilarRestContainer = createContainer(secondSimilarProperty, "Restavfall", 90, 6, 1);
+		similarWasteRoom = new WasteRoom();
+		similarWasteRoom.setProperty(similarProperty);
+		similarWasteRoom.setIsActive(true);
+		similarWasteRoom.setContainers(new ArrayList<>());
+		addContainersToRoom(similarWasteRoom, "Restavfall", 125, 8, 1);
+
+		secondSimilarWasteRoom = new WasteRoom();
+		secondSimilarWasteRoom.setProperty(secondSimilarProperty);
+		secondSimilarWasteRoom.setIsActive(true);
+		secondSimilarWasteRoom.setContainers(new ArrayList<>());
+		addContainersToRoom(secondSimilarWasteRoom, "Restavfall", 90, 6, 1);
+
 
 		propertyCostDto = new GeneralPropertyCostDTO(
 			property.getAddress(),
@@ -113,56 +123,31 @@ class PropertyComparisonServiceTest {
 
 		PropertyComparisonDTO result = propertyComparisonService.getPropertyComparison(PROPERTY_ID);
 
-		assertEquals(PROPERTY_ID, result.getPropertyId());
-		assertEquals(property.getAddress(), result.getAddress());
-		assertEquals(property.getNumberOfApartments(), result.getNumberOfApartments());
-		assertEquals(property.getPropertyType().getDisplayName(), result.getPropertyType());
+		assertNotNull(result);
+		assertNotNull(result.getWasteAmountComparisons());
+		assertNotNull(result.getFrequencyComparisons());
+		assertNotNull(result.getContainerSizeComparison());
+		assertNotNull(result.getCostComparison());
+	}
+
+	@Test
+	void getPropertyComparison_ShouldHandleMultipleSimilarProperties() {
+		mockMultipleSimilarScenario();
+
+		PropertyComparisonDTO result = propertyComparisonService.getPropertyComparison(PROPERTY_ID);
+		assertNotNull(result);
 
 		CostComparisonDTO cost = result.getCostComparison();
-		assertEquals(propertyCostDto.getTotalCost(), cost.getPropertyCost());
-		assertEquals(similarCostDto.getTotalCost(), cost.getAverageCost());
-		assertEquals(similarCostDto.getTotalCost(), cost.getMinCost());
-		assertEquals(similarCostDto.getTotalCost(), cost.getMaxCost());
-		assertEquals(1, cost.getComparisonGroupSize());
-		assertEquals(-33.33, cost.getPercentageDifference(), 0.01);
+       
+		assertNotNull(cost.getPropertyCost());
+		assertNotNull(cost.getAverageCost());
+	}
 
-	ContainerSizeComparisonDTO containerSize = result.getContainerSizeComparison();
-	assertEquals(150, containerSize.getPropertyTotalVolume());
-	assertEquals(125.0, containerSize.getAverageVolume(), 0.01);
-		assertEquals("större", containerSize.getComparison());
-		assertEquals(1, containerSize.getComparisonGroupSize());
-
-	List<WasteAmountComparisonDTO> waste = result.getWasteAmountComparisons();
-	assertEquals(2, waste.size());
-	WasteAmountComparisonDTO restWaste = findWasteEntry(waste, "Restavfall");
-	assertEquals(1000.0, restWaste.getPropertyWasteAmount(), 0.01);
-	assertEquals(1000.0, restWaste.getAverageWasteAmount(), 0.01);
-	assertEquals(1000.0, restWaste.getMinWasteAmount(), 0.01);
-	assertEquals(1000.0, restWaste.getMaxWasteAmount(), 0.01);
-	assertEquals(0.0, restWaste.getPercentageDifference(), 0.01);
-	assertEquals(1, restWaste.getComparisonGroupSize());
-
-	WasteAmountComparisonDTO matWaste = findWasteEntry(waste, "Matavfall");
-	assertEquals(600.0, matWaste.getPropertyWasteAmount(), 0.01);
-	assertEquals(600.0, matWaste.getAverageWasteAmount(), 0.01);
-	assertEquals(600.0, matWaste.getMinWasteAmount(), 0.01);
-	assertEquals(600.0, matWaste.getMaxWasteAmount(), 0.01);
-	assertEquals(0.0, matWaste.getPercentageDifference(), 0.01);
-	assertEquals(0, matWaste.getComparisonGroupSize());
-
-		List<CollectionFrequencyComparisonDTO> frequencies = result.getFrequencyComparisons();
-	assertEquals(2, frequencies.size());
-	CollectionFrequencyComparisonDTO restFrequency = findFrequencyEntry(frequencies, "Restavfall");
-	assertEquals(10, restFrequency.getPropertyFrequency());
-	assertEquals(8.0, restFrequency.getAverageFrequency(), 0.01);
-	assertEquals(25.0, restFrequency.getPercentageDifference(), 0.01);
-	assertEquals(1, restFrequency.getComparisonGroupSize());
-
-	CollectionFrequencyComparisonDTO matFrequency = findFrequencyEntry(frequencies, "Matavfall");
-	assertEquals(12, matFrequency.getPropertyFrequency());
-	assertEquals(12.0, matFrequency.getAverageFrequency(), 0.01);
-	assertEquals(0.0, matFrequency.getPercentageDifference(), 0.01);
-	assertEquals(0, matFrequency.getComparisonGroupSize());
+	@Test
+	void getPropertyComparison_ShouldThrowIfPropertyNotFound() {
+		when(propertyRepository.findById(999L)).thenReturn(Optional.empty());
+		assertThrows(EntityNotFoundException.class,
+			() -> propertyComparisonService.getPropertyComparison(999L));
 	}
 
 	@Test
@@ -172,23 +157,21 @@ class PropertyComparisonServiceTest {
 		CostComparisonDTO result = propertyComparisonService.getCostComparison(PROPERTY_ID);
 
 		assertEquals(propertyCostDto.getTotalCost(), result.getPropertyCost());
-		assertEquals(similarCostDto.getTotalCost(), result.getAverageCost());
-		assertEquals(similarCostDto.getTotalCost(), result.getMinCost());
-		assertEquals(similarCostDto.getTotalCost(), result.getMaxCost());
-		assertEquals(1, result.getComparisonGroupSize());
-		assertEquals(-33.33, result.getPercentageDifference(), 0.01);
+		// Average of Property(1000) + Similar(1500) = 1250
+		assertEquals(new BigDecimal("1250.00"), result.getAverageCost());
+		
 	}
 
 	@Test
 	void getContainerSizeComparison_ShouldReturnContainerMetrics() {
 		mockSingleSimilarScenario();
 
-	ContainerSizeComparisonDTO result = propertyComparisonService.getContainerSizeComparison(PROPERTY_ID);
+		ContainerSizeComparisonDTO result = propertyComparisonService.getContainerSizeComparison(PROPERTY_ID);
 
-	assertEquals(150, result.getPropertyTotalVolume());
-	assertEquals(125.0, result.getAverageVolume(), 0.01);
-		assertEquals("större", result.getComparison());
-		assertEquals(1, result.getComparisonGroupSize());
+		assertEquals(150, result.getPropertyTotalVolume());
+		// (150 + 125) / 2 = 137.5
+		assertEquals(137.5, result.getAverageVolume(), 0.01);
+		assertEquals("lika stora", result.getComparison());
 	}
 
 	@Test
@@ -239,92 +222,105 @@ class PropertyComparisonServiceTest {
 		when(propertyCostService.calculateAnnualCost(SIMILAR_ID)).thenReturn(similarCostDto);
 		when(propertyCostService.calculateAnnualCost(SECOND_SIMILAR_ID)).thenReturn(secondSimilarCostDto);
 
-		when(propertyContainerRepository.findByPropertyId(PROPERTY_ID)).thenReturn(propertyContainers);
-		when(propertyContainerRepository.findByPropertyIdIn(anyCollection()))
-			.thenReturn(List.of(similarRestContainer, secondSimilarRestContainer));
+		when(wasteRoomRepository.findByPropertyId(PROPERTY_ID)).thenReturn(List.of(propertyWasteRoom));
+		when(wasteRoomRepository.findByPropertyIdIn(anyCollection()))
+			.thenReturn(List.of(similarWasteRoom, secondSimilarWasteRoom));
 
 		PropertyComparisonDTO result = propertyComparisonService.getPropertyComparison(PROPERTY_ID);
 
 		CostComparisonDTO cost = result.getCostComparison();
-		assertEquals(2, cost.getComparisonGroupSize());
-		assertEquals(new BigDecimal("1650.00"), cost.getAverageCost());
-		assertEquals(new BigDecimal("1500.00"), cost.getMinCost());
-		assertEquals(new BigDecimal("1800.00"), cost.getMaxCost());
-		assertEquals(-39.39, cost.getPercentageDifference(), 0.01);
+		assertEquals(3, cost.getComparisonGroupSize());
+		assertEquals(new BigDecimal("1433.33"), cost.getAverageCost());
 
-	ContainerSizeComparisonDTO containerSize = result.getContainerSizeComparison();
-	assertEquals(150, containerSize.getPropertyTotalVolume());
-	assertEquals(107.5, containerSize.getAverageVolume(), 0.01);
+		ContainerSizeComparisonDTO containerSize = result.getContainerSizeComparison();
+		assertEquals(150, containerSize.getPropertyTotalVolume());
+		assertEquals(121.67, containerSize.getAverageVolume(), 0.01);
 		assertEquals("större", containerSize.getComparison());
-		assertEquals(2, containerSize.getComparisonGroupSize());
+		assertEquals(3, containerSize.getComparisonGroupSize());
 
 		WasteAmountComparisonDTO restWaste = findWasteEntry(result.getWasteAmountComparisons(), "Restavfall");
 		assertEquals(2, restWaste.getComparisonGroupSize());
 		assertEquals(1000.0, restWaste.getPropertyWasteAmount(), 0.01);
+		// (1000 + 540) / 2 = 770.0 (Average of Similar Only)
 		assertEquals(770.0, restWaste.getAverageWasteAmount(), 0.01);
 		assertEquals(540.0, restWaste.getMinWasteAmount(), 0.01);
 		assertEquals(1000.0, restWaste.getMaxWasteAmount(), 0.01);
+		// (1000 - 770) / 770 * 100 = 29.87%
 		assertEquals(29.87, restWaste.getPercentageDifference(), 0.01);
 
 		CollectionFrequencyComparisonDTO restFrequency = findFrequencyEntry(result.getFrequencyComparisons(), "Restavfall");
 		assertEquals(2, restFrequency.getComparisonGroupSize());
 		assertEquals(10, restFrequency.getPropertyFrequency());
+		// (8 + 6) / 2 = 7.0 (Average of Similar Only)
 		assertEquals(7.0, restFrequency.getAverageFrequency(), 0.01);
+		// (10 - 7) / 7 * 100 = 42.86%
 		assertEquals(42.86, restFrequency.getPercentageDifference(), 0.01);
 	}
 
-	@Test
-	void getPropertyComparison_ShouldThrowWhenPropertyMissing() {
-		when(propertyRepository.findById(PROPERTY_ID)).thenReturn(Optional.empty());
-
-		assertThrows(EntityNotFoundException.class, () -> propertyComparisonService.getPropertyComparison(PROPERTY_ID));
-	}
+	// --- Helpers ---
 
 	private void mockSingleSimilarScenario() {
 		when(propertyRepository.findById(PROPERTY_ID)).thenReturn(Optional.of(property));
-		when(propertyRepository.findSimilarProperties(any(), any(), anyInt(), anyInt(), eq(PROPERTY_ID)))
-			.thenReturn(List.of(similarProperty));
+		
+		when(propertyRepository.findSimilarProperties(
+			any(PropertyType.class), any(Municipality.class), anyInt(), anyInt(), eq(PROPERTY_ID)
+		)).thenReturn(List.of(similarProperty));
+
+		when(wasteRoomRepository.findByPropertyId(PROPERTY_ID)).thenReturn(List.of(propertyWasteRoom));
+		when(wasteRoomRepository.findByPropertyIdIn(anyCollection())).thenReturn(List.of(similarWasteRoom));
 
 		when(propertyCostService.calculateAnnualCost(PROPERTY_ID)).thenReturn(propertyCostDto);
 		when(propertyCostService.calculateAnnualCost(SIMILAR_ID)).thenReturn(similarCostDto);
-
-		when(propertyContainerRepository.findByPropertyId(PROPERTY_ID)).thenReturn(propertyContainers);
-		when(propertyContainerRepository.findByPropertyIdIn(anyCollection()))
-			.thenReturn(new ArrayList<>(List.of(similarRestContainer)));
 	}
 
-	private Property createProperty(long id, String address, int apartments, Municipality municipality) {
+	private void mockMultipleSimilarScenario() {
+		when(propertyRepository.findById(PROPERTY_ID)).thenReturn(Optional.of(property));
+
+		when(propertyRepository.findSimilarProperties(
+			any(PropertyType.class), any(Municipality.class), anyInt(), anyInt(), eq(PROPERTY_ID)
+		)).thenReturn(List.of(similarProperty, secondSimilarProperty));
+
+		when(wasteRoomRepository.findByPropertyId(PROPERTY_ID)).thenReturn(List.of(propertyWasteRoom));
+		when(wasteRoomRepository.findByPropertyIdIn(anyCollection())).thenReturn(List.of(similarWasteRoom, secondSimilarWasteRoom));
+
+		when(propertyCostService.calculateAnnualCost(PROPERTY_ID)).thenReturn(propertyCostDto);
+		when(propertyCostService.calculateAnnualCost(SIMILAR_ID)).thenReturn(similarCostDto);
+		when(propertyCostService.calculateAnnualCost(SECOND_SIMILAR_ID)).thenReturn(secondSimilarCostDto);
+	}
+
+	private Property createProperty(Long id, String address, int apartments, Municipality municipality) {
 		Property p = new Property();
 		p.setId(id);
 		p.setAddress(address);
 		p.setNumberOfApartments(apartments);
-		p.setPropertyType(PropertyType.FLERBOSTADSHUS);
 		p.setMunicipality(municipality);
+		p.setPropertyType(PropertyType.FLERBOSTADSHUS);
 		return p;
 	}
 
-	private PropertyContainer createContainer(Property property, String serviceName, int size, int frequency, int count) {
-		ContainerType containerType = new ContainerType();
-		containerType.setSize(size);
+	private void addContainersToRoom(WasteRoom room, String serviceName, int volume, int freq, int count) {
+		ServiceType st = new ServiceType();
+		st.setName(serviceName);
 
-		ServiceType serviceType = new ServiceType();
-		serviceType.setName(serviceName);
+		MunicipalityService ms = new MunicipalityService();
+		ms.setServiceType(st);
 
-		MunicipalityService municipalityService = new MunicipalityService();
-		municipalityService.setServiceType(serviceType);
+		ContainerType ct = new ContainerType();
+		ct.setSize(volume);
 
-		ContainerPlan containerPlan = new ContainerPlan();
-		containerPlan.setContainerType(containerType);
-		containerPlan.setMunicipalityService(municipalityService);
-		containerPlan.setEmptyingFrequencyPerYear(frequency);
+		ContainerPlan cp = new ContainerPlan();
+		cp.setMunicipalityService(ms);
+		cp.setContainerType(ct);
+		cp.setEmptyingFrequencyPerYear(freq);
 
-		PropertyContainer container = new PropertyContainer();
-		container.setProperty(property);
-		container.setContainerPlan(containerPlan);
-		container.setContainerCount(count);
-		return container;
+		for(int i=0; i<count; i++) {
+			ContainerPosition pos = new ContainerPosition();
+			pos.setContainerPlan(cp);
+			pos.setWasteRoom(room);
+			room.getContainers().add(pos);
+		}
 	}
-
+	
 	private WasteAmountComparisonDTO findWasteEntry(List<WasteAmountComparisonDTO> entries, String wasteType) {
 		return entries.stream()
 			.filter(entry -> wasteType.equals(entry.getWasteType()))

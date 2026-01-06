@@ -4,10 +4,11 @@ import com.avfallskompassen.dto.CollectionFeeDTO;
 import com.avfallskompassen.dto.GeneralPropertyCostDTO;
 import com.avfallskompassen.dto.LockTypeDto;
 import com.avfallskompassen.model.ContainerPlan;
+import com.avfallskompassen.model.ContainerPosition;
 import com.avfallskompassen.model.LockType;
 import com.avfallskompassen.model.Property;
-import com.avfallskompassen.model.PropertyContainer;
-import com.avfallskompassen.repository.PropertyContainerRepository;
+import com.avfallskompassen.model.WasteRoom;
+import com.avfallskompassen.repository.WasteRoomRepository;
 import com.avfallskompassen.services.impl.PropertyCostServiceImpl;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
@@ -17,6 +18,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -29,7 +31,7 @@ public class PropertyCostServiceImplTest {
     private PropertyService propertyService;
 
     @Mock
-    private PropertyContainerRepository propertyContainerRepository;
+    private WasteRoomRepository wasteRoomRepository;
 
     @Mock
     private LockTypeService lockTypeService;
@@ -75,15 +77,30 @@ public class PropertyCostServiceImplTest {
         ContainerPlan plan = new ContainerPlan();
         plan.setCost(BigDecimal.valueOf(150));
 
-        PropertyContainer propertyContainer1 = new PropertyContainer();
-        propertyContainer1.setContainerPlan(plan);
-        propertyContainer1.setContainerCount(2);
+        WasteRoom wasteRoom = new WasteRoom();
+        wasteRoom.setProperty(property);
+        wasteRoom.setIsActive(true);
+        wasteRoom.setContainers(new ArrayList<>());
 
-        PropertyContainer propertyContainer2 = new PropertyContainer();
-        propertyContainer2.setContainerPlan(plan);
-        propertyContainer2.setContainerCount(3);
+        ContainerPosition pos1 = new ContainerPosition();
+        pos1.setContainerPlan(plan);
+        pos1.setWasteRoom(wasteRoom);
+      
+        
+        for (int i = 0; i < 2; i++) {
+             ContainerPosition p = new ContainerPosition();
+             p.setContainerPlan(plan);
+             p.setWasteRoom(wasteRoom);
+             wasteRoom.getContainers().add(p);
+        }
+        for (int i = 0; i < 3; i++) {
+             ContainerPosition p = new ContainerPosition();
+             p.setContainerPlan(plan);
+             p.setWasteRoom(wasteRoom);
+             wasteRoom.getContainers().add(p);
+        }
 
-        when(propertyContainerRepository.findByPropertyId(propertyId)).thenReturn(List.of(propertyContainer1, propertyContainer2));
+        when(wasteRoomRepository.findByPropertyId(propertyId)).thenReturn(List.of(wasteRoom));
 
         GeneralPropertyCostDTO result = propertyCostService.calculateAnnualCost(propertyId);
 
@@ -97,7 +114,7 @@ public class PropertyCostServiceImplTest {
         assertEquals(expectedResultPerApartment, result.getCostPerApartment());
 
         verify(propertyService).findById(propertyId);
-        verify(propertyContainerRepository).findByPropertyId(propertyId);
+        verify(wasteRoomRepository).findByPropertyId(propertyId);
     }
 
     @Test
@@ -155,10 +172,31 @@ public class PropertyCostServiceImplTest {
         ContainerPlan plan = new ContainerPlan();
         plan.setCost(BigDecimal.valueOf(100));
 
-        PropertyContainer propertyContainer = new PropertyContainer();
-        propertyContainer.setContainerPlan(plan);
-        propertyContainer.setContainerCount(2);
-        when(propertyContainerRepository.findByPropertyId(anyLong())).thenReturn(List.of(propertyContainer));
+        // Create WasteRooms instead of PropertyContainers
+        WasteRoom wr1 = new WasteRoom();
+        wr1.setProperty(property1);
+        wr1.setIsActive(true);
+        wr1.setContainers(new ArrayList<>());
+        for (int i = 0; i < 2; i++) {
+            ContainerPosition p = new ContainerPosition();
+            p.setContainerPlan(plan);
+            p.setWasteRoom(wr1);
+            wr1.getContainers().add(p);
+        }
+
+        WasteRoom wr2 = new WasteRoom();
+        wr2.setProperty(property2);
+        wr2.setIsActive(true);
+        wr2.setContainers(new ArrayList<>());
+        for (int i = 0; i < 2; i++) {
+            ContainerPosition p = new ContainerPosition();
+            p.setContainerPlan(plan);
+            p.setWasteRoom(wr2);
+            wr2.getContainers().add(p);
+        }
+
+        when(wasteRoomRepository.findByPropertyId(eq(1L))).thenReturn(List.of(wr1));
+        when(wasteRoomRepository.findByPropertyId(eq(2L))).thenReturn(List.of(wr2));
 
         List<GeneralPropertyCostDTO> result = propertyCostService.calculateAllCostsForUser(username);
         
@@ -175,7 +213,7 @@ public class PropertyCostServiceImplTest {
         
         verify(propertyService).getPropertiesByUser(username);
         verify(collectionFeeService, times(2)).findCollectionFeeByPropertyId(anyLong());
-        verify(propertyContainerRepository, times(2)).findByPropertyId(anyLong());
+        verify(wasteRoomRepository, times(2)).findByPropertyId(anyLong());
     }
 
     @Test
