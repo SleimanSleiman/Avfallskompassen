@@ -14,10 +14,8 @@ import OtherObjectSizePrompt from "../../../../../components/prompts/OtherObject
 import ContainerInfo from "./ContainerInfo"
 import ConfirmModal from "../../../../../components/ConfirmModal";
 import type { Room } from "../../../lib/Types";
-import type { ContainerDTO } from "../../../../../lib/Container";
-import type { OtherObjectInRoom, ContainerInRoom } from "../../../Types";
+import type { OtherObjectInRoom, ContainerInRoom } from "../../../lib/Types";
 import './css/roomCanvasToolbar.css'
-import LoadingBar from "../../../../../components/LoadingBar";
 
 type ToolbarProps = {
     roomName?: string;
@@ -36,8 +34,8 @@ type ToolbarProps = {
     isSaving?: boolean;
     undo?: () => void;
     redo?: () => void;
-    selectedContainerInfo: ContainerDTO | null;
-    setSelectedContainerInfo: (container: ContainerDTO | null) => void;
+    selectedContainerInfo: ContainerInRoom | null;
+    setSelectedContainerInfo: (container: ContainerInRoom | null) => void;
     isAdminMode?: boolean;
     generateThumbnail: () => string | null;
     handleAddOtherObject: (name: string, length: number, width: number) => boolean;
@@ -172,8 +170,9 @@ export default function Toolbar({
         try {
             await saveRoom(thumbnail);
             setTimeout(() => setMsg("Rummet har sparats"), 10);
-        } catch (err) {
-            setTimeout(() => setError("Rummet gick inte att spara. Vänligen försök senare igen"), 10);
+        } catch (err: unknown) {
+            if (err instanceof Error) {
+            setTimeout(() => setError("Rummet gick inte att spara. Vänligen försök senare igen"), 10); }
         } finally {
             setIsSaving(false);
         }
@@ -188,8 +187,10 @@ export default function Toolbar({
         try {
             await saveRoom(pendingSaveThumbnail);
             setTimeout(() => setMsg("Rummet har sparats"), 10);
-        } catch (err) {
+        } catch (err: unknown) {
+            if (err instanceof Error) {
             setTimeout(() => setError("Rummet gick inte att spara. Vänligen försök igen senare"), 10);
+            }
         } finally {
             setIsSaving(false);
         }
@@ -209,7 +210,7 @@ export default function Toolbar({
         } else if (onClose) {
             onClose();
         }
-    }, [hasUnsavedChanges, onClose]);
+    }, [hasUnsavedChanges, onClose, closePanels]);
 
     //Handle close without saving
     const handleCloseWithoutSaving = useCallback(() => {

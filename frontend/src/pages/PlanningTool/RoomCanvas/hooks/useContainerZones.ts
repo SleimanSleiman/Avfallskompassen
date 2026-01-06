@@ -6,7 +6,25 @@
  * - Container zones
  * Removes the zone of the object currently being dragged.
  */
-import { useMemo } from "react";
+import {useMemo} from "react";
+
+type Zone = {
+    x: number;
+    y: number;
+    width: number;
+    height: number
+}
+
+type useContainerZoneArgs = {
+    isDraggingContainer: boolean;
+    isDraggingOtherObject: boolean;
+    selectedContainerId: number | null;
+    selectedOtherObjectId: number | null;
+    draggedContainer: unknown | null;
+    getContainerZones: (excludeId?: number) => Zone[];
+    getOtherObjectZones: (excludeId?: number) => Zone[];
+    doorZones: Zone[];
+}
 
 function useContainerZones({
     isDraggingContainer,
@@ -17,16 +35,16 @@ function useContainerZones({
     getContainerZones,
     getOtherObjectZones,
     doorZones,
-}) {
+}: useContainerZoneArgs) {
     //Determine if the user is dragging an existing container
     const isDraggingExistingContainer = isDraggingContainer && selectedContainerId !== null;
 
     //Determine if the user is dragging an existing other object
     const isDraggingExistingOther = isDraggingOtherObject && selectedOtherObjectId !== null;
 
-    const zones = useMemo(() => {
-        let containerZones: any[] = [];
-        let otherObjectZones: any[] = [];
+    return useMemo(() => {
+        let containerZones: Zone[];
+        let otherObjectZones: Zone[];
 
         // ---- CONTAINER ZONES ----
         if (isDraggingExistingContainer) {
@@ -65,8 +83,6 @@ function useContainerZones({
         getOtherObjectZones,
         doorZones
     ]);
-
-    return zones;
 }
 
 export default useContainerZones;

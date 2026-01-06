@@ -4,9 +4,12 @@
  */
 
 import { clamp, SCALE } from "../../../../lib/Constants";
+import type {Door, Room} from "../../../../lib/Types.ts";
+
+type Wall = Door["wall"];
 
 //Compute the nearest allowed position for a door within room bounds
-export function computeDragBound(door, room, pos: { x: number; y: number }) {
+export function computeDragBound(door: Door, room: Room, pos: { x: number; y: number }) {
     //Room edges
     const topY = room.y;
     const bottomY = room.y + room.height;
@@ -14,23 +17,23 @@ export function computeDragBound(door, room, pos: { x: number; y: number }) {
     const rightX = room.x + room.width;
 
     //Distances to each wall
-    const distances = {
+    const distances: Record<Wall, number> = {
         top: Math.abs(pos.y - topY),
         bottom: Math.abs(pos.y - bottomY),
         left: Math.abs(pos.x - leftX),
         right: Math.abs(pos.x - rightX),
     };
 
-    //Walls the door can be attached to based on its current wall
-    const allowedWalls = {
+    const allowedWallsMap: Record<Wall, Wall[]> = {
         top: ["top", "left", "right"],
         bottom: ["bottom", "left", "right"],
         left: ["left", "top", "bottom"],
         right: ["right", "top", "bottom"],
-    }[door.wall];
+    };
+    //Walls the door can be attached to based on its current wall
+    const allowedWalls = allowedWallsMap[door.wall];
 
-    //Find closest allowed wall
-    let minWall = allowedWalls[0];
+    let minWall: Wall = allowedWalls[0];
     let minDist = distances[minWall];
 
     for (const w of allowedWalls) {
@@ -43,34 +46,38 @@ export function computeDragBound(door, room, pos: { x: number; y: number }) {
     let newX = pos.x;
     let newY = pos.y;
 
-    //Snap position to closest wall and clamp to room edges
-    if (minWall === "top") {
-        newY = topY;
-        newX = clamp(pos.x, leftX, rightX);
-    } else if (minWall === "bottom") {
-        newY = bottomY;
-        newX = clamp(pos.x, leftX, rightX);
-    } else if (minWall === "left") {
-        newX = leftX;
-        newY = clamp(pos.y, topY, bottomY);
-    } else if (minWall === "right") {
-        newX = rightX;
-        newY = clamp(pos.y, topY, bottomY);
+    switch (minWall) {
+        case "top":
+            newY = topY;
+            newX = clamp(pos.x, leftX, rightX);
+            break;
+        case "bottom":
+            newY = bottomY;
+            newX = clamp(pos.x, leftX, rightX);
+            break;
+        case "left":
+            newX = leftX;
+            newY = clamp(pos.y, topY, bottomY);
+            break;
+        case "right":
+            newX = rightX;
+            newY = clamp(pos.y, topY, bottomY);
+            break;
     }
 
     return { x: newX, y: newY };
 }
 
 //Get the rectangle representing the door's area to check for collisions
-export function getDoorRect (door, x, y) {
+export function getDoorRect (door: Door, x: number, y: number) {
    const w = door.wall === "top" || door.wall === "bottom" ? door.width / SCALE : 10;
    const h = door.wall === "left" || door.wall === "right" ? door.width / SCALE : 10;
 
    return { x, y, width: w, height: h };
-};
+}
 
 // Get the rectangle representing the door's "zone" for object collision
-export function getDoorZone(door, x, y) {
+export function getDoorZone(door: Door, x: number, y: number) {
     const doorSize = door.width / SCALE;
 
     switch (door.wall) {

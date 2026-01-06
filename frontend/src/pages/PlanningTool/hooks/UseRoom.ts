@@ -44,7 +44,7 @@ export function useRoom() {
         y = parsed?.y ?? defaultY;
       }
       
-      const containers = (parsed.containers ?? []).map(c => {
+      const containers = (parsed.containers ?? []).map((c: { containerDTO: { imageTopViewUrl: string; imageFrontViewUrl: string; width: number; depth: number; height: number; name: string; size: number; }; x: number; y: number; angle: number; hasLockILock: boolean; }) => {
         const containerInfo = c.containerDTO ?? {
         imageTopViewUrl: "/images/containers/defaultTopView.png", 
         imageFrontViewUrl: "/images/containers/defaultFrontView.png", 

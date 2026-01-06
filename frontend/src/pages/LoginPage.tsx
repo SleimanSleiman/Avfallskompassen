@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { login } from '../lib/Auth';
 import { startInactivityTimer } from "../lib/InactivityTimer";
@@ -35,8 +35,8 @@ export default function LoginPage() {
       } else {
         setError(res.message || 'Inloggningen misslyckades');
       }
-    } catch (err: any) {
-      setError(err.message || 'Något gick fel.');
+    } catch (err: unknown) {
+      if (err instanceof Error) setError(err.message || 'Något gick fel.');
     } finally {
       setLoading(false);
     }

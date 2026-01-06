@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
-import { getLinesAndTexts } from "../../../../../../../../src/pages/PlanningTool/RoomCanvas/components/OtherObjects/OtherObjectsMeasurementLayer/utils/otherObjectMeasurementUtils";
+import { getLinesAndTexts } from "../../../../../../../../src/pages/PlanningTool/RoomCanvas/components/OtherObjects/OtherObjectsMeasurementLayer/utils/OtherObjectMeasurementUtils";
 import { Text } from "react-konva";
 
 vi.mock("react-konva", () => ({

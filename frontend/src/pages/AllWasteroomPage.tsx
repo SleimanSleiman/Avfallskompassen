@@ -11,8 +11,8 @@ import PlanVersionDropdown from '../components/PlanVersionDropdown';
 
 export default function AllaMiljoRumPage() {
     const { propertyId } = useParams();
+    const [deleting] = useState<number | null>(null);
     const [rooms, setRooms] = useState<WasteRoom[][]>([]);
-    const [deleting, setDeleting] = useState<number | null>(null);
     const [loading, setLoading] = useState(true);
     const propertyAddress = localStorage.getItem("selectedPropertyAddress");
     const [isCreateRoomOpen, setIsCreateRoomOpen] = useState(false);
@@ -90,7 +90,7 @@ export default function AllaMiljoRumPage() {
         setLoadingDelete(true);
 
         try {
-            await deleteWasteRoom(room.wasteRoomId ?? room.id);
+            await deleteWasteRoom(room.wasteRoomId ?? room.id!);
 
             // Remove locally from state
             setRooms((prev) =>
@@ -100,10 +100,11 @@ export default function AllaMiljoRumPage() {
                            (room.wasteRoomId ?? room.id);
                 })
             );
-        } catch (err) {
+        } catch (err: unknown) {
+            if (err instanceof Error) {
             setMsg("")
             setError("");
-            setTimeout(() => setError("Det gick inte att ta bort rummet"), 10);
+            setTimeout(() => setError("Det gick inte att ta bort rummet"), 10);}
         } finally {
             setLoadingDelete(false);
             setShowConfirm(false);
@@ -244,12 +245,10 @@ export default function AllaMiljoRumPage() {
                             return (
                             <div key={room.id} className="rounded-xl border bg-white p-5 shadow-soft flex flex-col">
                                 <img
-                                    //src={`http://localhost:8081${room.thumbnailUrl}`}
                                     src={room.thumbnailUrl || greybox}
                                     alt="Miljörum bild"
                                     className="w-full h-40 object-cover rounded-lg mb-3"
                                 />
-
 
                                 <h2 className="font-semibold">
                                     {room.name && room.name.trim() !== ""
@@ -296,7 +295,7 @@ export default function AllaMiljoRumPage() {
                             </div>
                             );
                         })}
-                    </div>
+                        </div>
                 )}
             </div>
 
@@ -330,7 +329,6 @@ export default function AllaMiljoRumPage() {
                 }}
                 onConfirm={() => removeRoom(roomToDelete!)}
             />
-
         </main>
     );
 }

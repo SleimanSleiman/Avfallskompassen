@@ -4,6 +4,8 @@
  */
 import { SUMMARY_SIZE_STYLES, SUMMARY_TONE_STYLES } from "../../utils/constants"
 import '../css/summaryStat.css'
+import type {ReactNode} from "react";
+import type {SummarySize, SummaryTone} from "../../utils/types.ts";
 
 export default function SummaryStat({
     title,
@@ -13,7 +15,7 @@ export default function SummaryStat({
     badge,
     size = "default",
 }: {
-    title: string;
+    title: ReactNode;
     value: string;
     description?: ReactNode;
     tone?: SummaryTone;

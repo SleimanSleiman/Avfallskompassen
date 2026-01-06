@@ -2,12 +2,14 @@
  * WasteTypeComparisonPanel component
  * Displays waste type comparison table and handles loading, errors, and empty states.
  */
-import React, { useMemo } from "react";
-import { Loader2, AlertCircle } from "lucide-react";
+import { AlertCircle } from "lucide-react";
 import { useWasteComparison } from "../../hooks/useWasteComparison";
 import WasteTable from "./components/WasteTable";
 import '../css/summaryPanel.css'
 import LoadingBar from "../../../../../components/LoadingBar";
+import type {PropertyComparison} from "../../../../../lib/Comparison.ts";
+import type {Property} from "../../../../../lib/Property.ts";
+import type {ContainerInRoom} from "../../../lib/Types.ts";
 
 type WasteTypeComparisonPanelProps = {
     comparisonData: PropertyComparison | null;

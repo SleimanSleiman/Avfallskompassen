@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import LoadingBar from "../components/LoadingBar";
 import {
-    getAnnualCost,
     getCollectionFee,
     getPropertiesSimple,
     getPropertyContainers,
@@ -55,12 +54,10 @@ export default function StatisticsOverviewPage() {
         try {
             const [
                 containers,
-                annualCost,
                 collectionFee,
                 activeRoom
             ] = await Promise.all([
                 getPropertyContainers(property.id),
-                getAnnualCost(property.id),
                 getCollectionFee(property.id),
                 getActiveWasteRoomsByPropertyId(property.id)
             ]);
@@ -113,7 +110,6 @@ export default function StatisticsOverviewPage() {
                 property.accessPathLength,
                 property.lockName,
                 containerSummaries,
-                { annualCost },
                 collectionFee?.cost || 0,
                 activeRoom,
             );

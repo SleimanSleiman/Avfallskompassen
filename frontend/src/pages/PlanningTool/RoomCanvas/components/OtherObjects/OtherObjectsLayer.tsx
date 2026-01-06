@@ -52,7 +52,6 @@ export default function OtherObjectsLayer({
                         key={obj.id}
                         object={obj}
                         room={room}
-                        selected={isSelected}
                         doorZones={doorZones}
                         containerZones={containerZones}
                         getOtherObjectZones={getOtherObjectZones}

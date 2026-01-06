@@ -13,7 +13,7 @@ import PlanningTool from './pages/PlanningTool/PlanningTool';
 import AdminPage from './pages/AdminPage';
 import AdminDataPage from './pages/AdminDataPage';
 import AllWasteroomPage from "./pages/AllWasteroomPage";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { startInactivityTimer, stopInactivityTimer } from "./lib/InactivityTimer";
 import { UnsavedChangesProvider } from './context/UnsavedChangesContext';
@@ -231,7 +231,6 @@ export default function App() {
               </ProtectedRoute>
             }
           />
-
           </Routes>
         </div>
         <Footer />

@@ -5,6 +5,7 @@ import { getMyPropertiesWithWasteRooms } from '../../../lib/Property';
 import { MapPin, Home, Users, ChevronDown, Plus, LayoutGrid } from 'lucide-react';
 import type { ContainerInRoom, Door } from '../lib/Types';
 import { mmToPixels, SCALE } from '../lib/Constants';
+import type {ContainerDTO} from "../../../lib/Container.ts";
 
 type WasteRoomContainer = NonNullable<WasteRoom['containers']>[number];
 
@@ -79,7 +80,7 @@ export default function PlanningToolPopup({
 
   const buildFallbackContainerDTO = useCallback(
     (container: WasteRoomContainer | undefined, index: number) => {
-      const dto = container?.containerDTO ?? {};
+      const dto: Partial<ContainerDTO>  = container?.containerDTO ?? {};
       return {
         id: dto.id ?? container?.id ?? index + 1,
         name: dto.name ?? 'Behållare',
@@ -128,6 +129,7 @@ export default function PlanningToolPopup({
           width: mmToPixels(widthMm),
           height: mmToPixels(depthMm),
           rotation: container?.angle ?? 0,
+          lockILock: container?.hasLockILock ?? false,
         };
       });
     },

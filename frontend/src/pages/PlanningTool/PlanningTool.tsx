@@ -19,7 +19,6 @@ import RoomCanvas from './RoomCanvas/RoomCanvas';
 import ActionPanel from './components/ActionPanel';
 import PropertyOverviewPanel from './PropertyAndWasteAnalysis/PropertyOverview/PropertyOverviewPanel';
 import WasteAnalysisPanels from './PropertyAndWasteAnalysis/WasteAnalysis/WasteAnalysisPanels'
-import { Tooltip } from "../../components/Tooltip";
 import Message from '../../components/ShowStatus';
 
 //Hooks
@@ -29,7 +28,6 @@ import { useContainers } from './hooks/UseContainers';
 import { useServiceTypes } from './hooks/UseServiceTypes';
 import { useOtherObjects } from './hooks/UseOtherObjects';
 import { useComparison } from './hooks/useComparison';
-import { useLayoutHistory } from './hooks/UseLayoutHistory';
 import { useSaveRoom, useWasteRoomRequestBuilder } from './hooks/UseSaveRoom';
 import { usePropertyHighlights } from './hooks/usePropertyHighlights';
 
@@ -39,6 +37,8 @@ import type { PreparedRoomState } from './components/PlanningToolPopup';
 
 import { driver } from "driver.js";
 import "driver.js/dist/driver.css";
+import type {ContainerInRoom, Door, OtherObjectInRoom, Room} from "./lib/Types.ts";
+import {useLayoutHistory} from "./hooks/UseLayoutHistory.ts";
 
 type PlanningToolProps = {
     isAdminMode?: boolean;
@@ -95,8 +95,8 @@ export default function PlanningTool({ isAdminMode = false, property, onGenerate
         }
 
         getProperty(room.propertyId).then(setLoadedProperty).catch(console.error);
-    }, [room?.propertyId]);
-    
+    }, [property, room.propertyId]);
+
     /* ──────────────── Door state & logic ──────────────── */
     const {
         doors,
@@ -163,7 +163,7 @@ export default function PlanningTool({ isAdminMode = false, property, onGenerate
     } = useContainers(room, setSelectedContainerId, setSelectedDoorId, setSelectedOtherObjectId, getDoorZones(), getOtherObjectZones(),setError,setMsg, isDoorDragging);
 
     // Track the saved state for comparison
-    const [savedRoomState, setSavedRoomState] = useState<{ room: any; doors: any; containers: any; otherObjects: any } | null>(null);
+    const [savedRoomState, setSavedRoomState] = useState<{ room: Room; doors: Door[]; containers: ContainerInRoom; otherObjects: OtherObjectInRoom } | null>(null);
     const [hasInitializedFromStorage, setHasInitializedFromStorage] = useState(false);
 
     /* ──────────────── Undo-Redo ──────────────── */
@@ -183,16 +183,6 @@ export default function PlanningTool({ isAdminMode = false, property, onGenerate
     const isRestoringRef = useRef(false);
     const isDraggingRoomRef = useRef(false);
     const isDraggingOtherObjectRef = useRef(false);
-
-    const undoLayout = () => {
-        isRestoringRef.current = true;
-        undo();
-    };
-
-    const redoLayout = () => {
-        isRestoringRef.current = true;
-        redo();
-    };
 
     const saveDoors = () => {
         if (isRestoringRef.current) return;
@@ -230,12 +220,12 @@ export default function PlanningTool({ isAdminMode = false, property, onGenerate
 
         setRoom(layout.room);
         setDoors(layout.doors);
-        setContainers(layout.containers);
+        saveContainers(layout.containers);
         setOtherObjects(layout.otherObjects);
 
         isRestoringRef.current = false;
     }, [layout]);
-    
+
     useEffect(() => {
         if (isRestoringRef.current) return;
         if (isDraggingRoomRef.current) return;
@@ -249,13 +239,13 @@ export default function PlanningTool({ isAdminMode = false, property, onGenerate
         });
     }, [containersInRoom]);
 
-    
+
 
     /* ──────────────── Sync the doors and containers when changes are made to the room ──────────────── */
     useEffect(() => {
         // Only sync once on initial load from storage
         if (hasInitializedFromStorage) return;
-        
+
         if (room.id && room.doors && room.doors.length > 0) {
 
         const leftX = room.x;
@@ -286,7 +276,7 @@ export default function PlanningTool({ isAdminMode = false, property, onGenerate
     }
         if (room.id && room.containers && room.containers.length > 0) saveContainers(room.containers);
         if (room.id && room.otherObjects && room.otherObjects.length > 0) setOtherObjects(room.otherObjects);
-        
+
         // Initialize savedRoomState on first load
         if (!savedRoomState && room.id) {
             setSavedRoomState({
@@ -297,7 +287,7 @@ export default function PlanningTool({ isAdminMode = false, property, onGenerate
             });
             setHasInitializedFromStorage(true);
         }
-    }, [hasInitializedFromStorage, room.id, setDoors, saveContainers, setOtherObjects, savedRoomState]);
+    }, [hasInitializedFromStorage, room.id, setDoors, saveContainers, setOtherObjects, savedRoomState, room, doorOffsetRef]);
 
     /* ──────────────── Sync state to localStorage on changes ──────────────── */
     useEffect(() => {
@@ -377,7 +367,7 @@ export default function PlanningTool({ isAdminMode = false, property, onGenerate
         clearPlanningStorage();
         setShowPropertyPicker(true);
     }, [isAdminMode, selectedProperty, hasCheckedStoredProperty, clearPlanningStorage]);
-    const [containerPanelHeight, setContainerPanelHeight] = useState(0);
+    const [ ,setContainerPanelHeight] = useState(0);
 
     useEffect(() => {
         if (typeof window === 'undefined') {
@@ -456,12 +446,12 @@ export default function PlanningTool({ isAdminMode = false, property, onGenerate
         const roomRequest = buildWasteRoomRequest(room, doors, containersInRoom, otherObjects, propertyId, thumbnail);
 
         const savedRoom = await saveRoom(roomRequest);
-        
+
         // Only update room ID if it's new (create operation)
         if (!room.id && savedRoom?.wasteRoomId) {
             const updatedRoom = { ...room, id: savedRoom.wasteRoomId };
             setRoom(updatedRoom);
-            
+
             // Update saved state after successful save
             setSavedRoomState({
                 room: JSON.parse(JSON.stringify(updatedRoom)),
@@ -486,13 +476,13 @@ export default function PlanningTool({ isAdminMode = false, property, onGenerate
             // If we haven't saved before, check if anything was changed
             return room.id !== undefined || doors.length > 0 || containersInRoom.length > 0 || otherObjects.length > 0;
         }
-        
+
         // Compare current state with saved state
         const roomChanged = JSON.stringify(room) !== JSON.stringify(savedRoomState.room);
         const doorsChanged = JSON.stringify(doors) !== JSON.stringify(savedRoomState.doors);
         const containersChanged = JSON.stringify(containersInRoom) !== JSON.stringify(savedRoomState.containers);
         const objectsChanged = JSON.stringify(otherObjects) !== JSON.stringify(savedRoomState.otherObjects);
-        
+
         return roomChanged || doorsChanged || containersChanged || objectsChanged;
     }, [room, doors, containersInRoom, otherObjects, savedRoomState]);
 const hasUnsavedChangesRef = useRef(false);
@@ -502,7 +492,7 @@ const hasUnsavedChangesRef = useRef(false);
             hasUnsavedChangesRef.current = hasUnsavedChanges();
             // store boolean (not the ref object) in shared context
             setHasUnsavedChanges(hasUnsavedChangesRef.current);
-    }, [room, doors, containersInRoom, otherObjects, savedRoomState]);
+    }, [room, doors, containersInRoom, otherObjects, savedRoomState, hasUnsavedChanges, setHasUnsavedChanges]);
 
     //Opens browser prompt for unsaved changes during exit or reload of page
     useEffect(() => {

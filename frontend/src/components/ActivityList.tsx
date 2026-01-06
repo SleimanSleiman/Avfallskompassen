@@ -1,6 +1,24 @@
 import LoadingBar from "./LoadingBar";
 
-export default function ActivityItem({ message, timestamp, color }) {
+type ActivityItemProps = {
+    message: string;
+    timestamp: string | number | Date;
+    color: string;
+}
+
+type Activity = {
+    details: string;
+    timeStamp: string | number | Date;
+}
+
+type ActivityListProps = {
+    activities?: Activity[];
+    loading: boolean;
+    error?: string | null;
+}
+
+export default function ActivityItem({ message, timestamp, color
+}: ActivityItemProps) {
   const formattedTime = new Date(timestamp).toLocaleString("sv-SE", {
     hour: "2-digit",
     minute: "2-digit",
@@ -19,7 +37,7 @@ export default function ActivityItem({ message, timestamp, color }) {
   );
 }
 
-export function ActivityList({ activities = [], loading, error }: { activities?: any[]; loading: boolean; error?: string | null }) {
+export function ActivityList({ activities = [], loading, error }: ActivityListProps)  {
   const colors = ["bg-nsr-accent", "bg-nsr-teal"];
 
   return (

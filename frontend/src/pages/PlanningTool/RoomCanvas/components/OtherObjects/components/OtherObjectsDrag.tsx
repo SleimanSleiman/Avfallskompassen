@@ -4,12 +4,25 @@
  * and restoring to last valid position if drag ends illegally.
  */
 import { Group } from "react-konva";
-import { useState } from "react";
+import {type MutableRefObject, type ReactNode, useState} from "react";
 import { clamp, isOverlapping } from "../../../../lib/Constants";
+import type {OtherObjectInRoom, Room} from "../../../../lib/Types.ts";
 
+type OtherObjectDragProps = {
+    object: OtherObjectInRoom;
+    room: Room;
+    doorZones: { x: number; y: number; width: number; height: number }[];
+    containerZones: { x: number; y: number; width: number; height: number }[];
+    getOtherObjectZones: (excludeId?: number) => { x: number; y: number; width: number; height: number }[];
+    handleSelectOtherObject: (id: number) => void;
+    handleDragOtherObject: (id: number, pos: { x: number; y: number }) => void;
+    setIsDraggingOtherObject: (val: boolean) => void;
+    isDraggingOtherObjectRef: MutableRefObject<boolean>;
+    onOtherObjectDragEnd: () => void;
+    children: (props: { isOverZone: boolean }) => ReactNode;
+}
 export default function OtherObjectDrag({
     object,
-    selected,
     room,
     doorZones,
     containerZones,
@@ -20,7 +33,7 @@ export default function OtherObjectDrag({
     isDraggingOtherObjectRef,
     onOtherObjectDragEnd,  
     children
-}) {
+}: OtherObjectDragProps) {
     // Tracks the last valid (non-overlapping) position for snap-back
     const [lastValidPos, setLastValidPos] = useState({ x: object.x, y: object.y });
     // Tracks if object is overlapping a forbidden zone
@@ -77,8 +90,8 @@ export default function OtherObjectDrag({
                 const h = rot === 90 ? object.width : object.height;
 
                 // Clamp to room boundaries using rotated size
-                let newX = clamp(pos.x, room.x + w / 2, room.x + room.width - w / 2);
-                let newY = clamp(pos.y, room.y + h / 2, room.y + room.height - h / 2);
+                const newX = clamp(pos.x, room.x + w / 2, room.x + room.width - w / 2);
+                const newY = clamp(pos.y, room.y + h / 2, room.y + room.height - h / 2);
 
                 // Update overlap status during drag
                 setIsOverZone(checkZones(newX - w / 2, newY - h / 2, object.rotation));

@@ -4,8 +4,14 @@
  */
 import { Arc, Line } from "react-konva";
 import { SCALE } from "../../../../lib/Constants";
+import type {Door} from "../../../../lib/Types.ts";
 
-export default function DoorVisual({ door, selected, isOverZone }) {
+type DoorVisualProp = {
+    door: Door;
+    selected: boolean;
+    isOverZone: boolean;
+}
+export default function DoorVisual({ door, selected, isOverZone }: DoorVisualProp) {
     //Determine the color of the door based on its state
     //red = overlapping zone, orange = selected, blue = normal
     const strokeColor = isOverZone ? "red" : selected ? "orange" : "blue";

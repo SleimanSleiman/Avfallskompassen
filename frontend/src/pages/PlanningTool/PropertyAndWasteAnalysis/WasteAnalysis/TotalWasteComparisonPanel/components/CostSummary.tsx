@@ -7,13 +7,14 @@ import TrendBadge from "../../../components/TrendBadge";
 import { formatCurrency } from "../../../utils/utils";
 import { TREND_CONFIG } from "../../../utils/constants";
 import '../../css/wasteComparison.css'
+import type {Trend} from "../../../utils/types.ts";
 
 type CostSummaryProps = {
     propertyCostValue: number | null;
     costAverage: number | null;
     costPerApartment: number | null;
     costGapSummary: string;
-    costTrend: string;
+    costTrend: Trend;
     costTone: "neutral" | "positive" | "negative";
 };
 

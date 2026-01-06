@@ -113,7 +113,7 @@ export default function PlanVersionDropdown({
         onClick={() => setOpen((prev) => !prev)}
         className="btn-secondary-sm inline-flex w-full items-center justify-center gap-2 sm:w-auto sm:justify-center"
       >
-        <span>Planversioner ({rooms.length})</span>
+        <span>Planversioner ({rooms?.length ?? 0})</span>
         <svg
           className={`h-4 w-4 transition-transform ${
             open ? 'rotate-180' : ''
@@ -144,10 +144,7 @@ export default function PlanVersionDropdown({
           </div>
 
           <div className="space-y-3">
-            {groupedRooms.map(({ name, versions, activeVersion, activeIdentifier }) => {
-              const activeVersionDate = activeVersion
-                ? formatDate(activeVersion.updatedAt ?? activeVersion.createdAt)
-                : null;
+            {groupedRooms.map(({ name, versions, activeIdentifier }) => {
               return (
               <div
                 key={name}

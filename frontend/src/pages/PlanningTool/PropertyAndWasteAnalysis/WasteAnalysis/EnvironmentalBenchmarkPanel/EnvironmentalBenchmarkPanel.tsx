@@ -2,12 +2,11 @@
  * EnvironmentalBenchmarkPanel component
  * Displays per-apartment waste benchmarks with status badges and comparison to averages.
  */
-import type { CombinedRow } from "../../utils/types";
-import type { ContainerInRoom } from "../../../lib/Types";
+import type {BenchmarkDefinition, CombinedRow} from "../../utils/types";
 import SummaryStat from "../components/SummaryStat";
 import BenchmarkBar from "./components/BenchmarkBar";
 import { BENCHMARK_STATUS_STYLES, BENCHMARK_TITLE_STYLES } from "../../utils/constants"
-import { findRowForBenchmark } from "../../utils/builders"
+import {buildDesignStats, findRowForBenchmark} from "../../utils/builders"
 import { formatLitersPerWeek, normalizeWasteTypeKey } from "../../utils/utils";
 import '../css/benchmarkPanel.css'
 
@@ -19,7 +18,6 @@ type EnvironmentalBenchmarkPanelProps = {
 };
 
 export default function EnvironmentalBenchmarkPanel({
-    designStats,
     combinedRows,
     activeBenchmarks,
     designHasContainers,

@@ -9,6 +9,7 @@ import { WASTE_BENCHMARKS } from "../utils/constants";
 import type { PropertyComparison } from "../../../../lib/Comparison";
 import type { Property } from "../../../../lib/Property";
 import type { ContainerInRoom } from "../../lib/Types";
+import type {BenchmarkDefinition} from "../utils/types.ts";
 
 export function useWasteComparison({
     comparisonData,

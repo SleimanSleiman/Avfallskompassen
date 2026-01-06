@@ -1,18 +1,17 @@
-import { useState, useMemo, useEffect } from 'react';
+import {useState, useMemo, useEffect, useCallback} from 'react';
 import type { AdminUser } from '../AdminPage';
 import AdminPlanningEditor from './AdminPlanningEditor';
 import LoadingBar from '../../components/LoadingBar';
-import { get, deleteRequest } from '../../lib/api';
+import { get, deleteRequest } from '../../lib/Api';
 import { getUsersPropertySummaries } from '../../lib/Property';
 import { currentUser } from '../../lib/Auth';
 import ConfirmModal from '../../components/ConfirmModal';
+import type {Door} from "../../lib/WasteRoom.ts";
 import { setWasteRoomActive } from '../../lib/WasteRoomRequest'
 import { updateUserRole } from "../../lib/AdminApi";
 import { Listbox } from "@headlessui/react";
 import { ChevronUpDownIcon, CheckIcon } from "@heroicons/react/20/solid";
 
-
-// Data types
 export type AdminProperty = {
   id: number;
   userId: number;
@@ -30,7 +29,7 @@ export type PlanVersion = {
   roomHeight: number;
   x: number; // Room x position on canvas
   y: number; // Room y position on canvas
-  doors: any[];
+  doors: Door[];
   containers: any[];
   otherObjects: any[];
   createdBy: 'user' | 'admin';
@@ -38,6 +37,7 @@ export type PlanVersion = {
   createdAt: string;
   versionName?: string;
   wasteRoomId?: number; // Added for localStorage sync
+  isActive?: boolean;
 };
 
 export type RoomPlan = {
@@ -48,11 +48,10 @@ export type RoomPlan = {
   versions: PlanVersion[]; // Array of versions, max 6
   createdAt: string;
   updatedAt: string;
-  activeVersionNumber: number;
+  activeVersionNumber?: number;
   selectedVersion?: number; // Optional: which version is currently being edited
   isDraft?: boolean;
 };
-
 
 type AdminUserDetailProps = {
   user: AdminUser;
@@ -69,7 +68,7 @@ export default function AdminUserDetail({ user, onBack }: AdminUserDetailProps) 
   const [expandedProperties, setExpandedProperties] = useState<Set<number>>(new Set());
   const [deleteConfirm, setDeleteConfirm] = useState<{ planId: number; versionNumber: number; wasteRoomId: number } | null>(null);
   const [versionCounts, setVersionCounts] = useState<Map<number, number>>(new Map());
-  const [selectedRole, setSelectedRole] = useState<string>(user.role);
+  const [selectedRole, setSelectedRole] = useState<"USER" | "ADMIN">(user.role);
   const [savingRole, setSavingRole] = useState(false);
   const [roleError, setRoleError] = useState<string | null>(null);
   const [roleSuccess, setRoleSuccess] = useState<string | null>(null);
@@ -86,7 +85,7 @@ export default function AdminUserDetail({ user, onBack }: AdminUserDetailProps) 
   /**
    * Helper: hämta bara fastighets-summaries för en användare (utan rooms).
    */
-  const fetchPropertySummaries = async (username: string) => {
+  const fetchPropertySummaries = useCallback(async (username: string) => {
     const userProps = await getUsersPropertySummaries(username);
     const mappedProps: AdminProperty[] = userProps.map((p) => ({
       id: Number(p.id),
@@ -107,7 +106,7 @@ export default function AdminUserDetail({ user, onBack }: AdminUserDetailProps) 
     });
     setVersionCounts(initialCounts);
     return mappedProps;
-  };
+  }, [user.id]);
 
   /**
    * Helper: hämta alla wasterooms för en viss fastighet när den expanderas,
@@ -199,7 +198,7 @@ export default function AdminUserDetail({ user, onBack }: AdminUserDetailProps) 
     }
     load();
     return () => { mounted = false };
-  }, [user]);
+  }, [fetchPropertySummaries, user]);
 
   const plansByProperty = useMemo(() => {
     const map = new Map<number, RoomPlan[]>();
@@ -355,7 +354,7 @@ export default function AdminUserDetail({ user, onBack }: AdminUserDetailProps) 
     }
   };
 
-  const handleDeleteVersion = async (planId: number, versionNumber: number, wasteRoomId: number) => {
+  const handleDeleteVersion = async (planId: number, wasteRoomId: number) => {
     if (!wasteRoomId) {
       console.error('Cannot delete version: no wasteRoomId');
       return;
@@ -380,7 +379,7 @@ export default function AdminUserDetail({ user, onBack }: AdminUserDetailProps) 
     }
   };
 
-  const handleSavePlanVersion = async (planId: number, planData: any, adminUsername: string) => {
+  const handleSavePlanVersion = async (planId: number) => {
     // After backend save, reload all room plans to get the latest versions
     setSelectedPlan(null);
     setLoading(true);
@@ -421,7 +420,7 @@ export default function AdminUserDetail({ user, onBack }: AdminUserDetailProps) 
         plan={selectedPlan}
         property={properties.find((p) => p.id === selectedPlan.propertyId)!}
         user={user}
-        onSave={(planData, adminUsername) => handleSavePlanVersion(selectedPlan.id, planData, adminUsername)}
+        onSave={() => handleSavePlanVersion(selectedPlan.id)}
         onBack={handleBackToProperties}
       />
     );
@@ -785,7 +784,7 @@ export default function AdminUserDetail({ user, onBack }: AdminUserDetailProps) 
                                         <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">
                                           {plan.isDraft ? "Utkast – ingen aktiv version" : "Aktiv version"}
                                         </div>
-                                        {!plan.isDraft && (
+                                        {!plan.isDraft && activeVersion && (
                                             <div className="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-3 flex-wrap">
                                               <span className="text-sm font-bold text-nsr-ink">
                                                 {activeVersion.roomWidth}m × {activeVersion.roomHeight}m
@@ -937,7 +936,7 @@ export default function AdminUserDetail({ user, onBack }: AdminUserDetailProps) 
         <ConfirmModal
           open={true}
           onCancel={() => setDeleteConfirm(null)}
-          onConfirm={() => handleDeleteVersion(deleteConfirm.planId, deleteConfirm.versionNumber, deleteConfirm.wasteRoomId)}
+          onConfirm={() => handleDeleteVersion(deleteConfirm.planId, deleteConfirm.wasteRoomId)}
           title="Ta bort version"
           message={`Är du säker på att du vill ta bort Version ${deleteConfirm.versionNumber}? Denna åtgärd kan inte ångras.`}
           confirmLabel="Ta bort"

@@ -5,12 +5,13 @@
 import SummaryStat from "../../components/SummaryStat";
 import TrendBadge from "../../../components/TrendBadge";
 import '../../css/wasteComparison.css'
+import type {Trend} from "../../../utils/types.ts";
 
 type ContainerVolumeSummaryProps = {
     totalVolumeLabel: string;
     containerAverageVolume: number | null;
     containerGapSummary: string;
-    containerTrend: string;
+    containerTrend: Trend;
     containerLabel: string;
     containerTone: "neutral" | "positive" | "negative";
 };

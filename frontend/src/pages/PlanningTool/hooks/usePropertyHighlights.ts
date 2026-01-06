@@ -1,8 +1,8 @@
 // hooks/usePropertyHighlights.ts
-import { useMemo } from "react";
-import { MapPin, Home, Users } from "lucide-react";
-import type { Property } from '../../lib/Property';
-import type { PropertyComparison } from '../../lib/Comparison';
+import {useMemo} from "react";
+import {Home, MapPin, Users} from "lucide-react";
+import type {Property} from '../../../lib/Property';
+import type {PropertyComparison} from '../../../lib/Comparison';
 
 export function usePropertyHighlights(
     comparisonData: PropertyComparison | null,
@@ -31,7 +31,7 @@ export function usePropertyHighlights(
             : null;
         const hasComparisonPeers = Boolean(comparisonData) && comparisonGroupSize > 0;
 
-        const propertyHighlights = [
+        return [
             {
                 key: "address",
                 title: "Adress",
@@ -60,7 +60,5 @@ export function usePropertyHighlights(
                         : "Inga liknande fastigheter hittades för jämförelse",
             },
         ];
-
-        return propertyHighlights;
     }, [comparisonData, comparisonLoading, selectedProperty]);
 }

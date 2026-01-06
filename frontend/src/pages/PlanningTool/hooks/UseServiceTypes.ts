@@ -3,18 +3,16 @@
  */
 import { useState, useEffect } from "react";
 import { fetchServiceTypes } from "../../../lib/ServiceType";
+import type {ServiceType} from "../../../lib/ServiceType"
 
 export function useServiceTypes() {
-    /* ──────────────── Service Types state ──────────────── */
-    const [serviceTypes, setServiceTypes] = useState<{ id: number; name: string }[]>([]);
+    const [serviceTypes, setServiceTypes] = useState<ServiceType[]>([]);
 
-    /* ──────────────── Fetch Service Types on mount ──────────────── */
     useEffect(() => {
         fetchServiceTypes()
             .then(setServiceTypes)
             .catch((err) => console.error(err));
     }, []);
 
-    /* ──────────────── Return ──────────────── */
     return serviceTypes;
 }

@@ -2,8 +2,9 @@
 * Utility functions for measuring distances from other objects to room boundaries
 */
 import { Text } from "react-konva";
-import type { OtherObjectInRoom } from "../../../../lib/Types";
+import type { OtherObjectInRoom } from "../../../../../lib/Types";
 import { SCALE } from "../../../../../lib/Constants";
+import type {JSX} from "react";
 
 const fontSize = 14;
 const offset = 10;

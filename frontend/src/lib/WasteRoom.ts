@@ -1,4 +1,4 @@
-import { get } from './api';
+import { get } from './Api';
 import type { Property } from './Property.ts';
 import type { ContainerDTO } from './Container.ts'
 

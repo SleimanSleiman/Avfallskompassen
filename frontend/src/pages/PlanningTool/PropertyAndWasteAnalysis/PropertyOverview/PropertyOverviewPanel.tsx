@@ -2,12 +2,34 @@
  * PropertyOverviewPanel component
  * Displays key property highlights and a waste type summary panel.
  */
-import { MapPin, Home, Users } from "lucide-react";
 import WasteTypeSummaryPanel from './WasteTypeSummaryPanel/WasteTypeSummaryPanel';
-import type { Property } from '../../../../lib/Property';
-import type { ContainerDTO } from '../../../../lib/Container';
-import type { PropertyComparison } from '../../../../lib/Comparison';
 import './css/overviewPanel.css'
+import type {ContainerInRoom} from "../../lib/Types.ts";
+import type {Property} from "../../../../lib/Property.ts";
+import type {PropertyComparison} from "../../../../lib/Comparison.ts";
+import React from "react";
+
+type IconProps = {
+    className?: string;
+}
+
+type PropertyHighlight = {
+    key: string;
+    Icon: React.ComponentType<IconProps>;
+    title: string;
+    value: string;
+    tone?: string;
+    helper?: string;
+}
+
+type PropertyOverviewPanelProps =  {
+    propertyHighlights: PropertyHighlight[];
+    comparisonData: PropertyComparison;
+    comparisonLoading: boolean;
+    comparisonError: string | null;
+    selectedProperty: Property;
+    containersInRoom: ContainerInRoom[];
+}
 
 export default function PropertyOverviewPanel({
     propertyHighlights,
@@ -16,7 +38,7 @@ export default function PropertyOverviewPanel({
     comparisonError,
     selectedProperty,
     containersInRoom,
-}: Props) {
+}: PropertyOverviewPanelProps) {
     return (
         <>
             <div id="property-panel" className="overview-wrapper">
@@ -38,7 +60,7 @@ export default function PropertyOverviewPanel({
                 </div>
             </div>
 
-            <div id="comparison-panel"className="overview-summary-wrapper">
+            <div id="comparison-panel" className="overview-summary-wrapper">
                 <WasteTypeSummaryPanel
                     comparisonData={comparisonData}
                     comparisonLoading={comparisonLoading}

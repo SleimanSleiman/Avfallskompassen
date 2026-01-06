@@ -10,7 +10,31 @@
 
 import { Group } from "react-konva";
 import { clamp, isOverlapping } from "../../../../lib/Constants";
+import type {ContainerInRoom, Room} from "../../../../lib/Types.ts";
+import type {Dispatch, ReactNode, SetStateAction} from "react";
 
+type DragRenderProps = {
+    x?: number;
+    y?: number;
+};
+
+type ContainerDragProp = {
+    container: ContainerInRoom;
+    room: Room;
+    doorZones: { x: number; y: number; width: number; height: number }[];
+    otherObjectZones: { x: number; y: number; width: number; height: number }[];
+    getContainerZones: (excludeId?: number) => { x: number; y: number; width: number; height: number }[];
+    getWallInsetForContainer: (c: ContainerInRoom) => number;
+    getSnappedRotationForContainer: (c: ContainerInRoom) => number;
+    setIsDraggingContainer: (dragging: boolean) => void;
+    handleDragContainer: (id: number, pos: { x: number; y: number; rotation?: number }) => void;
+    handleSelectContainer: (id: number) => void;
+    lastValidPos: {x: number; y: number}
+    setLastValidPos: Dispatch<SetStateAction<{ x: number; y: number }>>;
+    isOverZone: boolean;
+    setIsOverZone: Dispatch<SetStateAction<boolean>>;
+    children: (props: DragRenderProps) => ReactNode;
+}
 
 export default function ContainerDrag({
     container,
@@ -18,10 +42,8 @@ export default function ContainerDrag({
     doorZones,
     otherObjectZones,
     getContainerZones,
-
     getWallInsetForContainer,
     getSnappedRotationForContainer,
-
     setIsDraggingContainer,
     handleDragContainer,
     handleSelectContainer,
@@ -29,7 +51,7 @@ export default function ContainerDrag({
     setLastValidPos,
     setIsOverZone,
     children,
-}) {
+}: ContainerDragProp) {
     const WALL_INSET = getWallInsetForContainer(container);
     if (typeof getWallInsetForContainer !== "function") {
 
@@ -37,7 +59,7 @@ export default function ContainerDrag({
 }
 
     /* ---------- Helpers ---------- */
-    const checkZones = (x: number, y: number, rotation: number) => {
+    const checkZones = (x: number, y: number) => {
         const rect = {
             x,
             y,
@@ -61,14 +83,23 @@ export default function ContainerDrag({
             y={container.y}
             draggable
             onMouseEnter={(e) => {
-                e.target.getStage().container().style.cursor = "grab";
+                const stage = e.target.getStage();
+                if(stage) {
+                    stage.container().style.cursor = "grab";
+                }
             }}
             onMouseLeave={(e) => {
-                e.target.getStage().container().style.cursor = "default";
+                const stage = e.target.getStage();
+                if(stage) {
+                    stage.container().style.cursor = "default";
+                }
             }}
             onClick={() => handleSelectContainer(container.id)}
             onDragStart={(e) => {
-                e.target.getStage().container().style.cursor = "grabbing";
+                const stage = e.target.getStage();
+                if(stage) {
+                    stage.container().style.cursor = "grabbing";
+                }
                 handleSelectContainer(container.id);
                 setIsDraggingContainer(true);
             }}
@@ -84,7 +115,7 @@ export default function ContainerDrag({
                     room.y + room.height - container.height
                 );
 
-                setIsOverZone(checkZones(x, y, container.rotation));
+                setIsOverZone(checkZones(x, y));
                 return { x, y };
             }}
             onDragMove={(e) => {
@@ -120,7 +151,7 @@ export default function ContainerDrag({
                     room.y + room.height - container.height
                 );
 
-                if (checkZones(x, y, container.rotation)) {
+                if (checkZones(x, y)) {
                     node.position(lastValidPos);
                     handleDragContainer(container.id, lastValidPos);
                 } else {
@@ -144,7 +175,7 @@ export default function ContainerDrag({
                 offsetY={container.height / 2}
                 rotation={container.rotation}
             >
-                {children({})}
+                {children({ x: container.x, y: container.y})}
             </Group>
         </Group>
     );

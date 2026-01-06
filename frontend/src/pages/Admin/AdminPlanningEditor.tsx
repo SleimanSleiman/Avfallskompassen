@@ -1,35 +1,52 @@
 import { useState, useEffect, useRef } from 'react';
 import PlanningTool from '../PlanningTool/PlanningTool';
-import type { AdminUser } from '../AdminPage';
-import type { AdminProperty, RoomPlan } from './AdminUserDetail';
+import type {AdminUser} from '../AdminPage';
+import type {AdminProperty, RoomPlan} from './AdminUserDetail';
 import AdminSaveVersionModal from './AdminSaveVersionModal';
-import { currentUser } from '../../lib/Auth';
-import { createAdminVersion } from '../../lib/WasteRoomRequest';
-import type { DoorRequest, ContainerPositionRequest } from '../../lib/WasteRoomRequest';
+import {currentUser} from '../../lib/Auth';
+import type {ContainerPositionRequest, DoorRequest, OtherObjectRequest} from '../../lib/WasteRoomRequest';
+import {createAdminVersion} from '../../lib/WasteRoomRequest';
 import Message from '../../components/ShowStatus';
-import { getWasteRoomById } from '../../lib/WasteRoom';
+import {getWasteRoomById} from '../../lib/WasteRoom';
 import LoadingBar from '../../components/LoadingBar';
+import type {Property} from "../../lib/Property.ts";
 
 type AdminPlanningEditorProps = {
   plan: RoomPlan;
   property: AdminProperty;
   user: AdminUser;
-  onSave: (planData: any, adminUsername: string) => void;
+  onSave: (planData: Partial<PlanData>, adminUsername: string) => void;
   onBack: () => void;
 };
 
-// Wrapper component that ensures localStorage is set before PlanningTool mounts
+type PlanData = {
+    length: number;
+    width: number;
+    x: number;
+    y: number;
+    name: string;
+    version: number;
+    planId: number;
+    wasteRoomId?: number;
+    userId: number;
+    property: AdminProperty;
+    doors: DoorRequest[];
+    containers: ContainerPositionRequest[];
+}
+
+type PlanningToolWrapperProps = {
+    planData: PlanData | null;
+    isLoading: boolean;
+    property: Property;
+    onGenerateThumbnail: (fn: () => string | null) => void;
+}
+
 function PlanningToolWrapper({
-  planData,
-  isLoading,
-  property,
-  onGenerateThumbnail,
-}: {
-  planData: any;
-  isLoading: boolean;
-  property?: any;
-  onGenerateThumbnail: (fn: () => string | null) => void;
-}) {
+     planData,
+     isLoading,
+     property,
+     onGenerateThumbnail
+}: PlanningToolWrapperProps) {
   const [initialized, setInitialized] = useState(false);
 
   if (isLoading || !planData) {
@@ -59,6 +76,7 @@ function PlanningToolWrapper({
     localStorage.removeItem('enviormentRoomData');
     localStorage.setItem('trashRoomData', JSON.stringify(planData));
 
+    // Se till att jämförelse-API:t får ett propertyId även i admin-läge
     if (propertyId) {
       localStorage.setItem('selectedPropertyId', String(propertyId));
       localStorage.setItem('selectedProperty', JSON.stringify({ propertyId }));
@@ -89,7 +107,7 @@ export default function AdminPlanningEditor({
   const [versionName, setVersionName] = useState('');
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [versionToReplace, setVersionToReplace] = useState<number | null>(null);
-  const [planData, setPlanData] = useState<any>(null);
+  const [planData, setPlanData] = useState<PlanData | null>(null);
   const [isLoadingRoom, setIsLoadingRoom] = useState(true);
   const generateThumbnailRef = useRef<(() => string | null) | null>(null);
   const [msg, setMsg] = useState<string>("");
@@ -201,9 +219,8 @@ export default function AdminPlanningEditor({
 
       // Prepare doors in the correct format for the backend
       const rawDoors = currentPlanData.doors || selectedVersion.doors || [];
-      console.log('Raw doors before mapping:', rawDoors);
 
-      const doors: DoorRequest[] = rawDoors.map((d: any) => ({
+      const doors: DoorRequest[] = rawDoors.map((d: Partial<DoorRequest> & {rotation?: number; angle?: number}) => ({
         x: d.x ?? 0,
         y: d.y ?? 0,
         width: d.width ?? 1.2,
@@ -212,28 +229,16 @@ export default function AdminPlanningEditor({
         swingDirection: d.swingDirection ?? 'inward'
       }));
 
-      console.log('Mapped doors for backend:', doors);
-
       const rawContainers = currentPlanData.containers || selectedVersion.containers || [];
-      console.log('========== SAVE VERSION DEBUG ==========');
-      console.log('Raw containers before mapping:', rawContainers);
-      console.log('Number of containers:', rawContainers.length);
-      console.log('currentPlanData.containers length:', currentPlanData.containers?.length);
-      console.log('selectedVersion.containers length:', selectedVersion.containers?.length);
 
-      const containers: ContainerPositionRequest[] = rawContainers.map((c: any) => {
-        // Try multiple ways to get the container type ID
+      const containers: ContainerPositionRequest[] = rawContainers.map((c: Partial<ContainerPositionRequest> & {
+          rotation?: number;
+          angle?: number;
+          container?: {id: number; name?: string};
+          containerDTO?: {id: number; name?: string};
+          containerType?: {id: number};
+      }) => {
         const containerId = c.container?.id ?? c.containerDTO?.id ?? c.containerType?.id ?? c.id;
-        console.log('Container mapping:', {
-          original: c,
-          extractedId: containerId,
-          x: c.x,
-          y: c.y,
-          angle: c.rotation ?? c.angle,
-          hasContainer: !!c.container,
-          hasContainerDTO: !!c.containerDTO,
-          containerName: c.container?.name ?? c.containerDTO?.name
-        });
 
         return {
           id: containerId,
@@ -243,7 +248,6 @@ export default function AdminPlanningEditor({
         };
       });
 
-      console.log('Mapped containers for backend:', containers);
       const roomX = currentPlanData.x !== undefined ? currentPlanData.x : selectedVersion.x ?? 150;
       const roomY = currentPlanData.y !== undefined ? currentPlanData.y : selectedVersion.y ?? 150;
 
@@ -301,29 +305,17 @@ export default function AdminPlanningEditor({
             return;
         }
 
-      console.log('========== SAVE REQUEST PAYLOAD ==========');
-      console.log('Full request payload being sent to backend:', requestPayload);
-      console.log('Room position - x:', requestPayload.x, 'y:', requestPayload.y);
-      console.log('Room dimensions - length:', requestPayload.length, 'width:', requestPayload.width);
-      console.log('Containers:', requestPayload.containers.map(c => ({ id: c.id, x: c.x, y: c.y })));
-      console.log('Doors:', requestPayload.doors.map(d => ({ x: d.x, y: d.y, wall: d.wall })));
-      console.log('Property ID:', property.id, 'Room Name:', plan.name);
-
-        console.log("Width:", requestPayload.width);
-        console.log("Length:", requestPayload.length);
-
       // Call the backend API to save the new version
-      const savedVersion = await createAdminVersion(property.id, plan.name, requestPayload);
-      console.log('Backend response - saved version:', savedVersion);
+       await createAdminVersion(property.id, plan.name, requestPayload);
 
       // Also call onSave to update local state
       onSave(
         {
-          roomWidth: currentPlanData.width || selectedVersion.roomWidth,
-          roomHeight: currentPlanData.length || selectedVersion.roomHeight,
+          width: currentPlanData.width || selectedVersion.roomWidth,
+          length: currentPlanData.length || selectedVersion.roomHeight,
             x: roomX,
             y: roomY,
-          versionName: versionName || undefined,
+          version: versionName || undefined,
           doors: selectedVersion.doors,
           containers: selectedVersion.containers,
           otherObjects: selectedVersion.otherObjects,
@@ -442,8 +434,7 @@ export default function AdminPlanningEditor({
       <AdminSaveVersionModal
         open={showSaveModal}
         currentVersion={(() => {
-          const selectedVersionNumber = plan.selectedVersion || plan.versions[plan.versions.length - 1].versionNumber;
-          return selectedVersionNumber;
+            return plan.selectedVersion || plan.versions[plan.versions.length - 1].versionNumber;
         })()}
         currentVersionCount={plan.versions.length}
         versions={plan.versions}

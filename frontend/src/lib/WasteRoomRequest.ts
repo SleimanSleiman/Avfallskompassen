@@ -1,4 +1,4 @@
-import { api } from "./api";
+import { api } from "./Api";
 import type { WasteRoom } from "./WasteRoom";
 
 export type RoomRequest = {
@@ -11,7 +11,7 @@ export type RoomRequest = {
     containers: ContainerPositionRequest[];
     otherObjects: OtherObjectRequest[];
     propertyId : number;
-    wasteRoomId : number;
+    wasteRoomId? : number;
     thumbnailBase64?: string;
 }
 

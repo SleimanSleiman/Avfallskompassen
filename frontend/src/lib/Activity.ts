@@ -1,9 +1,9 @@
-import { api } from "./api";
+import { api } from "./Api";
 import { currentUser } from "./Auth";
 
 export type Activity = {
-    details : String,
-    timeStamp : String
+    details : string,
+    timeStamp : string
 }
 
 function getAuthHeaders(): Record<string, string> | undefined {

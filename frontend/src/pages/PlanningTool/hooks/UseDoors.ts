@@ -2,17 +2,17 @@
  * Custom hook to manage doors within a room in the planning tool.
  * Handles adding, removing, dragging, rotating and selecting doors.
  */
-import { useState, useRef, useEffect } from "react";
+import {useState, useRef, useEffect, type Dispatch, type SetStateAction} from "react";
 import type { Door, Room, Zone } from "../lib/Types";
 import { SCALE, clamp } from "../lib/Constants";
 
 export function useDoors(
-    room: Room | null,
+    room: Room,
     setSelectedDoorId: (id: number | null) => void,
     setSelectedContainerId: (id: number | null) => void,
     setSelectedOtherObjectId: (id: number | null) => void,
-    setError,
-    setMsg
+    setError: Dispatch<SetStateAction<string | null>>,
+    setMsg: Dispatch<SetStateAction<string | null>>
 ) {
 
     /* ──────────────── Door state ──────────────── */
@@ -27,10 +27,14 @@ export function useDoors(
     //Returns the default outward rotation based on wall direction
     const getOutwardRotation = (wall: Door["wall"]) => {
         switch (wall) {
-        case "top": return 180;
-        case "bottom": return 0;
-        case "left": return 90;
-        case "right": return -90;
+            case "top":
+                return 180;
+            case "bottom":
+                return 0;
+            case "left":
+                return 90;
+            case "right":
+                return -90;
         }
     };
 
@@ -38,7 +42,7 @@ export function useDoors(
     const handleAddDoor = (doorData: { width: number; wall?: Door["wall"] }) => {
         if (!room) return false;
 
-        const { width, wall = "bottom" } = doorData;
+        const {width, wall = "bottom"} = doorData;
 
         if (doors.length === 0 && width < 1.2) {
             setMsg("");
@@ -62,43 +66,43 @@ export function useDoors(
         let newY = 0;
         let newWall: Door["wall"] = wall;
 
-        for (let w of walls) {
+        for (const w of walls) {
             // Define start position and step along the wall
-            let steps: { x: number; y: number }[] = [];
+            const steps: { x: number; y: number }[] = [];
             const margin = 0.01;
             switch (w) {
                 case "bottom": {
                     const startX = leftX + margin * room.width;
                     const endX = rightX - margin * room.width - doorSizePx;
                     const step = doorSizePx + 0.05;
-                    for (let x = startX; x <= endX; x += step) steps.push({ x, y: bottomY });
+                    for (let x = startX; x <= endX; x += step) steps.push({x, y: bottomY});
                     break;
                 }
                 case "top": {
                     const startX = leftX + margin * room.width + doorSizePx; // shift start to account for rotation
                     const endX = rightX - margin * room.width;
                     const step = doorSizePx + 0.05;
-                    for (let x = startX; x <= endX; x += step) steps.push({ x, y: topY });
+                    for (let x = startX; x <= endX; x += step) steps.push({x, y: topY});
                     break;
                 }
                 case "left": {
                     const startY = topY + margin * room.height;
                     const endY = bottomY - margin * room.height - doorSizePx;
                     const step = doorSizePx + 0.05;
-                    for (let y = startY; y <= endY; y += step) steps.push({ x: leftX, y });
+                    for (let y = startY; y <= endY; y += step) steps.push({x: leftX, y});
                     break;
                 }
                 case "right": {
                     const startY = topY + margin * room.height + doorSizePx; // shift start to account for rotation
                     const endY = bottomY - margin * room.height;
                     const step = doorSizePx + 0.05;
-                    for (let y = startY; y <= endY; y += step) steps.push({ x: rightX, y });
+                    for (let y = startY; y <= endY; y += step) steps.push({x: rightX, y});
                     break;
                 }
             }
 
             // Check each possible position
-            for (let pos of steps) {
+            for (const pos of steps) {
                 const collision = doors.some(d => {
                     if (d.wall !== w) return false;
                     const dSize = d.width / SCALE;
@@ -127,14 +131,14 @@ export function useDoors(
         }
 
         const id = Date.now();
-        const newDoor = {
-                id,
-                width: doorData.width,
-                x: newX,
-                y: newY,
-                wall: newWall,
-                rotation: getOutwardRotation(newWall),
-                swingDirection: "outward"
+        const newDoor: Door = {
+            id,
+            width: doorData.width,
+            x: newX,
+            y: newY,
+            wall: newWall,
+            rotation: getOutwardRotation(newWall),
+            swingDirection: "outward"
         };
 
         //Calculate offset along the wall (0 = start, 1 = end)
@@ -210,6 +214,8 @@ export function useDoors(
                 break;
         }
 
+        //Snap to the closest wall if door goes outside
+
         if (door.wall === "bottom" || door.wall === "top") {
             if (left <= leftX) {
                 newWall = "left";
@@ -251,152 +257,151 @@ export function useDoors(
         let rotation = door.rotation;
         if (door.wall !== newWall) {
             rotation = getOutwardRotation(newWall);
-            if (door.swingDirection === "inward") rotation += 180;
         }
 
-        // offset update
-        doorOffsetRef.current[id] =
-            newWall === "top" || newWall === "bottom"
-                ? (newX - leftX) / room.width
-                : (newY - topY) / room.height;
+            // offset update
+            doorOffsetRef.current[id] =
+                newWall === "top" || newWall === "bottom"
+                    ? (newX - leftX) / room.width
+                    : (newY - topY) / room.height;
 
-        setDoors(prev =>
-            prev.map(d =>
-                d.id !== id
-                    ? d
-                    : {
-                        ...d,
-                        x: newX,
-                        y: newY,
-                        wall: newWall,
-                        rotation,
-                        swingDirection: d.swingDirection ?? "inward",
-                    }
-            )
-        );
-    };
+            setDoors(prev =>
+                prev.map(d =>
+                    d.id !== id
+                        ? d
+                        : {
+                            ...d,
+                            x: newX,
+                            y: newY,
+                            wall: newWall,
+                            rotation,
+                            swingDirection: d.swingDirection ?? "inward",
+                        }
+                )
+            );
+        };
 
+        /* ──────────────── Rotate Door ──────────────── */
+        const handleRotateDoor = (id: number) => {
+            setDoors(prev =>
+                prev.map(d => {
+                    if (d.id !== id) return d;
 
+                    const newRotation = (d.rotation + 180) % 360;
+                    const newSwing = d.swingDirection === "inward" ? "outward" : "inward";
 
-    /* ──────────────── Update on Room Resize ──────────────── */
-    useEffect(() => {
-        //Recalculate door positions when room size or position changes
-        setDoors(prev =>
-            prev.map(door => {
-                const offset = doorOffsetRef.current[door.id] ?? 0.5;
-                let x = door.x;
-                let y = door.y;
+                    return {...d, rotation: newRotation, swingDirection: newSwing};
+                })
+            );
+        };
 
-                switch (door.wall) {
-                    case "bottom":
-                        x = room.x + offset * room.width;
-                        y = room.y + room.height;
-                        break;
-                    case "top":
-                        x = room.x + offset * room.width;
-                        y = room.y;
-                        break;
-                    case "left":
-                        x = room.x;
-                        y = room.y + offset * room.height;
-                        break;
-                    case "right":
-                        x = room.x + room.width;
-                        y = room.y + offset * room.height;
-                        break;
-                }
+        /* ──────────────── Remove Door ──────────────── */
+        const handleRemoveDoor = (id: number) => {
+            const doorToRemove = doors.find(d => d.id === id);
+            if (!doorToRemove) return;
 
-                return { ...door, x, y };
+            const minimumSizeDoors = doors.filter(d => d.width >= 1.2);
 
-            })
-        );
-    }, [room.x, room.y, room.width, room.height]);
-
-    /* ──────────────── Rotate Door ──────────────── */
-    const handleRotateDoor = (id: number) => {
-        setDoors(prev =>
-            prev.map(d => {
-                if (d.id !== id) return d;
-
-                const newRotation = (d.rotation + 180) % 360;
-                const newSwing = d.swingDirection === "inward" ? "outward" : "inward";
-
-                return { ...d, rotation: newRotation, swingDirection: newSwing };
-            })
-        );
-    };
-
-    /* ──────────────── Remove Door ──────────────── */
-    const handleRemoveDoor = (id: number) => {
-        const doorToRemove = doors.find(d => d.id === id);
-        if (!doorToRemove) return;
-
-        const minimumSizeDoors = doors.filter(d => d.width >= 1.2);
-
-        if (doorToRemove.width >= 1.2 && minimumSizeDoors.length === 1) {
-            setMsg("");
-            setError("");
-            setTimeout(() => setError("Minst en dörr måste vara 1.2 meter bred."), 10);
-            return;
-        }
-
-        setDoors((prev) => prev.filter((d) => d.id !== id));
-        setSelectedDoorId(null);
-    };
-
-    /* ──────────────── Select Door ──────────────── */
-    const handleSelectDoor = (id: number | null) => {
-        setSelectedDoorId(id);
-        setSelectedContainerId(null);
-        setSelectedOtherObjectId(null);
-    };
-
-    /* ──────────────── Door Zones & Collision ──────────────── */
-    const getDoorZones = (): Zone[] => {
-        if (!doors || doors.length === 0) return [];
-        return doors.map(door => {
-            const doorSize = door.width / SCALE;
-            switch(door.wall) {
-                case "top": return { x: door.x - doorSize, y: door.y, width: doorSize, height: doorSize };
-                case "bottom": return { x: door.x, y: door.y - doorSize, width: doorSize, height: doorSize };
-                case "left": return { x: door.x, y: door.y, width: doorSize, height: doorSize };
-                case "right": return { x: door.x - doorSize, y: door.y - doorSize, width: doorSize, height: doorSize };
+            if (doorToRemove.width >= 1.2 && minimumSizeDoors.length === 1) {
+                setMsg("");
+                setError("");
+                setTimeout(() => setError("Minst en dörr måste vara 1.2 meter bred."), 10);
+                return;
             }
-        });
-    };
 
-    const restoreDoorState = (id, state) => {
-        setDoors(prev =>
-            prev.map(d =>
-                d.id !== id
-                    ? d
-                    : {
-                        ...d,
-                        x: state.x,
-                        y: state.y,
-                        wall: state.wall,
-                        rotation: state.rotation,
-                        swingDirection: state.swingDirection
+            setDoors((prev) => prev.filter((d) => d.id !== id));
+            setSelectedDoorId(null);
+        };
+
+        /* ──────────────── Select Door ──────────────── */
+        const handleSelectDoor = (id: number | null) => {
+            setSelectedDoorId(id);
+            setSelectedContainerId(null);
+            setSelectedOtherObjectId(null);
+        };
+
+        /* ──────────────── Door Zones & Collision ──────────────── */
+        const getDoorZones = (): Zone[] => {
+            if (!doors || doors.length === 0) return [];
+            return doors.map(door => {
+                const doorSize = door.width / SCALE;
+                switch (door.wall) {
+                    case "top":
+                        return {x: door.x - doorSize, y: door.y, width: doorSize, height: doorSize};
+                    case "bottom":
+                        return {x: door.x, y: door.y - doorSize, width: doorSize, height: doorSize};
+                    case "left":
+                        return {x: door.x, y: door.y, width: doorSize, height: doorSize};
+                    case "right":
+                        return {x: door.x - doorSize, y: door.y - doorSize, width: doorSize, height: doorSize};
+                }
+            });
+        };
+
+        const restoreDoorState = (id: number, state: Pick<Door, "x" | "y" | "wall" | "rotation" | "swingDirection">) => {
+            setDoors(prev =>
+                prev.map(d =>
+                    d.id !== id
+                        ? d
+                        : {
+                            ...d,
+                            x: state.x,
+                            y: state.y,
+                            wall: state.wall,
+                            rotation: state.rotation,
+                            swingDirection: state.swingDirection
+                        }
+                )
+            );
+        };
+        /* ──────────────── Update on Room Resize ──────────────── */
+        useEffect(() => {
+            //Recalculate door positions when room size or position changes
+            setDoors(prev =>
+                prev.map(door => {
+                    const offset = doorOffsetRef.current[door.id] ?? 0.5;
+                    let x = door.x;
+                    let y = door.y;
+
+                    switch (door.wall) {
+                        case "bottom":
+                            x = room.x + offset * room.width;
+                            y = room.y + room.height;
+                            break;
+                        case "top":
+                            x = room.x + offset * room.width;
+                            y = room.y;
+                            break;
+                        case "left":
+                            x = room.x;
+                            y = room.y + offset * room.height;
+                            break;
+                        case "right":
+                            x = room.x + room.width;
+                            y = room.y + offset * room.height;
+                            break;
                     }
-            )
-        );
-    };
 
-    /* ──────────────── Return ──────────────── */
-    return {
-        doors,
-        setDoors,
-        setSelectedDoorId,
-        handleAddDoor,
-        handleDragDoor,
-        handleRotateDoor,
-        handleRemoveDoor,
-        handleSelectDoor,
-        getDoorZones,
-        doorOffsetRef,
-        restoreDoorState,
-        isDoorDragging,
-        setIsDoorDragging,
-    };
+                    return {...door, x, y};
+
+                })
+            );
+        }, [room.x, room.y, room.width, room.height]);
+
+        /* ──────────────── Return ──────────────── */
+        return {
+            doors,
+            setDoors,
+            setSelectedDoorId,
+            handleAddDoor,
+            handleDragDoor,
+            handleRotateDoor,
+            handleRemoveDoor,
+            handleSelectDoor,
+            getDoorZones,
+            doorOffsetRef,
+            restoreDoorState,
+            isDoorDragging,
+            setIsDoorDragging,
+        };
 }
-

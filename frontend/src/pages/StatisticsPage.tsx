@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import React from 'react';
 import { ChevronDown, ChevronUp } from "lucide-react";
-import { useParams, useLocation, Link, useNavigate } from 'react-router-dom';
+import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import { getCollectionFee, getAnnualCost, getPropertyContainers, type AnnualCostDTO } from '../lib/Statistics';
 import { useComparison } from './PlanningTool/hooks/useComparison';
 import { getLockTypeForProperty} from "../lib/Statistics";
@@ -277,12 +277,13 @@ export default function StatisticsPage() {
         if (!propertyIdNumber) return;
 
         async function loadStatistics() {
+
             try {
                 const [containersData, annualCostData, collectionFeeData, lockTypeData] = await Promise.all([
-                    getPropertyContainers(propertyIdNumber),
-                    getAnnualCost(propertyIdNumber),
-                    getCollectionFee(propertyIdNumber),
-                    getLockTypeForProperty(propertyIdNumber),
+                    getPropertyContainers(propertyIdNumber!),
+                    getAnnualCost(propertyIdNumber!),
+                    getCollectionFee(propertyIdNumber!),
+                    getLockTypeForProperty(propertyIdNumber!),
                 ]);
 
                 const formattedContainers = containersData.map((c) => ({
