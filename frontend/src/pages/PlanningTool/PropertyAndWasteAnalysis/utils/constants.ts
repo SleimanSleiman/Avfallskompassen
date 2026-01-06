@@ -32,6 +32,7 @@ export const TREND_CONFIG: Record<Trend, { label: string; className: string; Ico
     better: { label: "Lägre än snittet", className: "trend-config-better", Icon: TrendingDown },
     equal: { label: "I nivå med snittet", className: "trend-config-equal", Icon: Minus },
     worse: { label: "Högre än snittet", className: "trend-config-worse", Icon: TrendingUp },
+    none: { label: "Ingen jämförelse", className: "trend-config-none", Icon: Minus },
 };
 
 //Summary tone styles

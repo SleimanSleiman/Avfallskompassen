@@ -21,5 +21,7 @@ public interface WasteRoomRepository extends JpaRepository<WasteRoom, Long> {
 
     Optional<WasteRoom> findByPropertyIdAndNameAndIsActiveTrue(Long propertyId, String name);
 
-    Optional <WasteRoom> findByPropertyIdAndIsActiveTrue(Long propertyId);
+    Optional<WasteRoom> findByPropertyIdAndIsActiveTrue(Long propertyId);
+
+    List<WasteRoom> findByPropertyIdIn(java.util.Collection<Long> propertyIds);
 }

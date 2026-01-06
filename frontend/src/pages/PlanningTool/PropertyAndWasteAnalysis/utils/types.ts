@@ -4,7 +4,7 @@
  */
 
  //Trend values for comparisons
-export type Trend = "better" | "equal" | "worse";
+export type Trend = "better" | "none"| "equal" | "worse";
 
 //Summary tone for display (positive, neutral, negative)
 export type SummaryTone = "positive" | "neutral" | "negative";

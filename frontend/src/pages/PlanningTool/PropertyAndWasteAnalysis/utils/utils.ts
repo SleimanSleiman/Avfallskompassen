@@ -13,7 +13,7 @@ export function normalizeWasteTypeKey(value?: string) {
 
 //Determine trend based on percentage and optional tolerance
 export function getTrend(percentage?: number | null, tolerance = 5): Trend {
-    if (percentage == null || Number.isNaN(percentage)) return "equal";
+    if (percentage == null || Number.isNaN(percentage)) return "none";
     if (percentage <= -Math.abs(tolerance)) return "better";
     if (percentage >= Math.abs(tolerance)) return "worse";
     return "equal";
