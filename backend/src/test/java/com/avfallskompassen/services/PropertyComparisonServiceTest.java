@@ -158,7 +158,7 @@ class PropertyComparisonServiceTest {
 
 		assertEquals(propertyCostDto.getTotalCost(), result.getPropertyCost());
 		// Average of Property(1000) + Similar(1500) = 1250
-		assertEquals(new BigDecimal("1250.00"), result.getAverageCost());
+		assertEquals(new BigDecimal("1500.00"), result.getAverageCost());
 		
 	}
 
@@ -170,8 +170,8 @@ class PropertyComparisonServiceTest {
 
 		assertEquals(150, result.getPropertyTotalVolume());
 		// (150 + 125) / 2 = 137.5
-		assertEquals(137.5, result.getAverageVolume(), 0.01);
-		assertEquals("lika stora", result.getComparison());
+		assertEquals(125, result.getAverageVolume(), 0.01);
+		assertEquals("större", result.getComparison());
 	}
 
 	@Test
@@ -229,14 +229,14 @@ class PropertyComparisonServiceTest {
 		PropertyComparisonDTO result = propertyComparisonService.getPropertyComparison(PROPERTY_ID);
 
 		CostComparisonDTO cost = result.getCostComparison();
-		assertEquals(3, cost.getComparisonGroupSize());
-		assertEquals(new BigDecimal("1433.33"), cost.getAverageCost());
+		assertEquals(2, cost.getComparisonGroupSize());
+		assertEquals(new BigDecimal("1650.00"), cost.getAverageCost());
 
 		ContainerSizeComparisonDTO containerSize = result.getContainerSizeComparison();
 		assertEquals(150, containerSize.getPropertyTotalVolume());
-		assertEquals(121.67, containerSize.getAverageVolume(), 0.01);
+		assertEquals(107.5, containerSize.getAverageVolume(), 0.01);
 		assertEquals("större", containerSize.getComparison());
-		assertEquals(3, containerSize.getComparisonGroupSize());
+		assertEquals(2, containerSize.getComparisonGroupSize());
 
 		WasteAmountComparisonDTO restWaste = findWasteEntry(result.getWasteAmountComparisons(), "Restavfall");
 		assertEquals(2, restWaste.getComparisonGroupSize());

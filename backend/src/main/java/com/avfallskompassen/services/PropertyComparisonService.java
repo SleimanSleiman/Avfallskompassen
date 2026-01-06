@@ -177,7 +177,6 @@ public class PropertyComparisonService implements IPropertyComparisonService {
                 .setScale(2, RoundingMode.HALF_UP);
 
         List<BigDecimal> allCosts = new ArrayList<>();
-        allCosts.add(propertyCost);
 
         if (!similarProperties.isEmpty()) {
             List<BigDecimal> similarCosts = similarProperties.stream()
@@ -191,7 +190,12 @@ public class PropertyComparisonService implements IPropertyComparisonService {
         BigDecimal maxCost = allCosts.stream().max(BigDecimal::compareTo).orElse(propertyCost);
 
         BigDecimal totalCost = allCosts.stream().reduce(BigDecimal.ZERO, BigDecimal::add);
-        BigDecimal averageCost = totalCost.divide(BigDecimal.valueOf(allCosts.size()), 2, RoundingMode.HALF_UP);
+        BigDecimal averageCost;
+        if (allCosts.isEmpty()) {
+            averageCost = BigDecimal.ZERO;
+        } else {
+            averageCost = totalCost.divide(BigDecimal.valueOf(allCosts.size()), 2, RoundingMode.HALF_UP);
+        }
 
         double percentageDifference = 0.0;
         if (averageCost.compareTo(BigDecimal.ZERO) > 0) {
@@ -218,12 +222,8 @@ public class PropertyComparisonService implements IPropertyComparisonService {
         double propertyFrequency = getAverageFrequencyForProperty(property.getId());
 
         List<Integer> allVolumes = new ArrayList<>();
-        allVolumes.add(propertyVolume);
 
         List<Double> allFrequencies = new ArrayList<>();
-        if (propertyFrequency > 0) {
-            allFrequencies.add(propertyFrequency);
-        }
 
         if (!similarProperties.isEmpty()) {
             List<Integer> similarVolumes = similarProperties.stream()
