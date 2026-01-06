@@ -122,8 +122,11 @@ export default function AllaMiljoRumPage() {
 
       try {
         if (activeVersion) {
-          await setWasteRoomActive(
-            activeVersion.wasteRoomId ?? activeVersion.id,
+            const id = activeVersion.wasteRoomId ?? activeVersion.id;
+            if (!id) return;
+
+            await setWasteRoomActive(
+            id,
             false
           );
 
@@ -135,8 +138,11 @@ export default function AllaMiljoRumPage() {
             )
           );
         } else {
-          await setWasteRoomActive(
-            latestVersion.wasteRoomId ?? latestVersion.id,
+            const id = latestVersion.wasteRoomId ?? latestVersion.id;
+            if (!id) return;
+
+            await setWasteRoomActive(
+            id,
             true
           );
 
