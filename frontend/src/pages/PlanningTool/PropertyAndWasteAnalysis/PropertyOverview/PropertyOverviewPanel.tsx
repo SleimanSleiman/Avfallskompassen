@@ -24,10 +24,10 @@ type PropertyHighlight = {
 
 type PropertyOverviewPanelProps =  {
     propertyHighlights: PropertyHighlight[];
-    comparisonData: PropertyComparison | null;
+    comparisonData: PropertyComparison;
     comparisonLoading: boolean;
     comparisonError: string | null;
-    selectedProperty: Property | null;
+    selectedProperty: Property;
     containersInRoom: ContainerInRoom[];
 }
 

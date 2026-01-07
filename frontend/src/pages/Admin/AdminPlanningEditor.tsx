@@ -32,7 +32,6 @@ type PlanData = {
     property: AdminProperty;
     doors: DoorRequest[];
     containers: ContainerPositionRequest[];
-    otherObjects: OtherObjectRequest[];
 }
 
 type PlanningToolWrapperProps = {
@@ -265,7 +264,7 @@ export default function AdminPlanningEditor({
 
 
       const thumbnailBase64 =
-        generateThumbnailRef.current?.() ?? undefined;
+        generateThumbnailRef.current?.() ?? null;
 
       const requestPayload = {
         length: currentPlanData.width || selectedVersion.roomHeight,
@@ -316,10 +315,11 @@ export default function AdminPlanningEditor({
           length: currentPlanData.length || selectedVersion.roomHeight,
             x: roomX,
             y: roomY,
-          version: selectedVersion.versionNumber,
+          version: versionName || undefined,
           doors: selectedVersion.doors,
           containers: selectedVersion.containers,
           otherObjects: selectedVersion.otherObjects,
+          versionToReplace: versionToReplace || undefined,
         },
         adminUsername
       );

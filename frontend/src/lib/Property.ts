@@ -3,7 +3,7 @@ import { currentUser } from './Auth';
 import type { WasteRoom } from './WasteRoom.ts';
 
 export type Property = {
-  lockTypeId?: number;
+  lockTypeId: number;
   id: number;
   address: string;
   numberOfApartments: number;
@@ -31,7 +31,7 @@ export type Municipality = {
 export type PropertyRequest = {
     address: string;
     numberOfApartments: number;
-    lockTypeId?: number;
+    lockTypeId: number;
     accessPathLength: number;
     municipalityId: number;
 };

@@ -38,7 +38,7 @@ export function usePropertyHighlights(
                 value: displayAddress ?? "Ingen fastighet vald",
                 Icon: MapPin,
                 tone: displayAddress ? "text-gray-900" : "text-gray-400",
-                helper: displayAddress ? undefined : "Välj en fastighet för att se detaljer",
+                helper: displayAddress ? null : "Välj en fastighet för att se detaljer",
             },
             {
                 key: "apartments",
@@ -56,7 +56,7 @@ export function usePropertyHighlights(
                 helper: comparisonLoading
                     ? "Data uppdateras"
                     : hasComparisonPeers
-                        ? undefined
+                        ? " "
                         : "Inga liknande fastigheter hittades för jämförelse",
             },
         ];
