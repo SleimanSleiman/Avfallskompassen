@@ -5,23 +5,26 @@
 
 import React, { useRef, useState, useEffect } from "react";
 import { X } from "lucide-react";
-import type { ContainerInRoom } from "../../../lib/Types";
-import { LOCK_I_LOCK_COMPATIBLE_SIZES, getContainerCost } from "../../../lib/Constants";
+import type { ContainerDTO } from "../../../../../lib/Container";
+import { getContainerCostFromDTO } from "../../../lib/Constants";
+import { LOCK_I_LOCK_COMPATIBLE_SIZES} from "../../../lib/Constants";
 import './css/roomCanvasToolbar.css'
 
 type ContainerInfoProps = {
-    c: ContainerInRoom;
+    container: ContainerDTO;
+    lockILock: boolean;
     onClose: () => void;
     pos: { left: number; top: number } | null;
-    setPos: React.Dispatch<React.SetStateAction<{ left: number; top: number } | null>>;
+    setPos: React.Dispatch<
+        React.SetStateAction<{ left: number; top: number } | null>
+    >;
 };
-
-export default function ContainerInfo({ c, onClose, pos, setPos}: ContainerInfoProps) {
+export default function ContainerInfo({container, lockILock, onClose, pos, setPos}: ContainerInfoProps) {
     const panelRef = useRef<HTMLDivElement | null>(null);
     const [dragging, setDragging] = useState(false);
     const [offset, setOffset] = useState({ x: 0, y: 0 });
     const actualPos = pos || { left: 100, top: 100 };
-    const isCompatibleWithLockILock = LOCK_I_LOCK_COMPATIBLE_SIZES.includes(c.container.size);
+    const isCompatibleWithLockILock = LOCK_I_LOCK_COMPATIBLE_SIZES.includes(container.size);
 
     //Initialize position if null
     useEffect(() => {
@@ -74,8 +77,8 @@ export default function ContainerInfo({ c, onClose, pos, setPos}: ContainerInfoP
         >
             <div className="selected-container-header">
                 <div>
-                    <h3 className="selected-container-name">{c.container.name}</h3>
-                    <p className="selected-container-subtitle">{c.container.size} L · {getContainerCost(c)} kr/år</p>
+                    <h3 className="selected-container-name">{container.name}</h3>
+                    <p className="selected-container-subtitle">{container.size} L · {getContainerCostFromDTO(container, lockILock)} kr/år</p>
                 </div>
                 <button
                     onClick={onClose}
@@ -87,16 +90,16 @@ export default function ContainerInfo({ c, onClose, pos, setPos}: ContainerInfoP
             </div>
             <div className="selected-container-body">
                 <img
-                    src={`http://localhost:8081${c.container.imageFrontViewUrl}`}
-                    alt={c.container.name}
+                    src={`http://localhost:8081${container.imageFrontViewUrl}`}
+                    alt={container.name}
                     className="selected-container-image"
                 />
                 <div className="selected-container-info">
-                    <p>Mått: {c.container.width} × {c.container.height} × {c.container.depth} mm</p>
-                    <p>Tömningsfrekvens: {c.container.emptyingFrequencyPerYear}/år</p>
+                    <p>Mått: {container.width} × {container.height} × {container.depth} mm</p>
+                    <p>Tömningsfrekvens: {container.emptyingFrequencyPerYear}/år</p>
                     {isCompatibleWithLockILock && (
                         <p>
-                            {c.lockILock
+                            {lockILock
                                 ? "Lock-i-lock tillagt (100 kr/år)"
                                 : "Kompatibel med lock-i-lock (ej tillagt)"}
                         </p>

@@ -619,6 +619,11 @@ const hasUnsavedChangesRef = useRef(false);
         tour.drive();
     }
 
+    const closeContainerInfo = useCallback(() => {
+        setSelectedContainerInfo(null);
+        setSelectedContainerId(null);
+    }, []);
+
     /* ──────────────── Render ──────────────── */
     return (
         <>
@@ -699,6 +704,7 @@ const hasUnsavedChangesRef = useRef(false);
                         moveAllObjects={moveAllObjects}
                         onOtherObjectDragEnd={saveOtherObjectsLayout}
                         isDraggingOtherObjectRef={isDraggingOtherObjectRef}
+                        closeContainerInfo={closeContainerInfo}
 
                         undo={undo}
                         redo={redo}
@@ -711,6 +717,7 @@ const hasUnsavedChangesRef = useRef(false);
 
                         getWallInsetForContainer={getWallInsetForContainer}
                         getSnappedRotationForContainer={getSnappedRotationForContainer}
+
                     />
 
                     {/* ActionPanel for selected container or door */}

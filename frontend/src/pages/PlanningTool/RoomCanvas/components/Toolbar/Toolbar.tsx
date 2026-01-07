@@ -15,6 +15,7 @@ import ContainerInfo from "./ContainerInfo"
 import ConfirmModal from "../../../../../components/ConfirmModal";
 import type { Room } from "../../../lib/Types";
 import type { OtherObjectInRoom, ContainerInRoom } from "../../../lib/Types";
+import type { ContainerDTO } from "../../../../../lib/Container";
 import './css/roomCanvasToolbar.css'
 
 type ToolbarProps = {
@@ -34,8 +35,8 @@ type ToolbarProps = {
     isSaving?: boolean;
     undo?: () => void;
     redo?: () => void;
-    selectedContainerInfo: ContainerInRoom | null;
-    setSelectedContainerInfo: (container: ContainerInRoom | null) => void;
+    selectedContainerInfo: ContainerDTO | null;
+    setSelectedContainerInfo: (container: ContainerDTO | null) => void;
     isAdminMode?: boolean;
     generateThumbnail: () => string | null;
     handleAddOtherObject: (name: string, length: number, width: number) => boolean;
@@ -219,7 +220,10 @@ export default function Toolbar({
             onClose();
         }
     }, [onClose]);
-
+    
+    const selectedContainerInRoom = selectedContainerInfo
+        ? containers.find(c => c.container.id === selectedContainerInfo.id)
+        : null;
     return (
         <div id="toolbar-panel" className="toolbar-panel">
             {/* Close button */}
@@ -344,9 +348,10 @@ export default function Toolbar({
             )}
 
             {/* Selected container information */}
-            {selectedContainerInfo && (
+            {selectedContainerInfo && selectedContainerInRoom && (
                 <ContainerInfo
-                    c={selectedContainerInfo}
+                    container={selectedContainerInfo}
+                    lockILock={selectedContainerInRoom.lockILock}
                     onClose={() => setSelectedContainerInfo(null)}
                     pos={containerInfoPos}
                     setPos={setContainerInfoPos}
