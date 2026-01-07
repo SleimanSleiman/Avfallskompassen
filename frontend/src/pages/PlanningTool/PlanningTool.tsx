@@ -215,16 +215,20 @@ export default function PlanningTool({ isAdminMode = false, property, onGenerate
         });
     };
 
-    useEffect(() => {
-        if (!isRestoringRef.current) return;
+useEffect(() => {
+    if (!layout) return;
 
-        setRoom(layout.room);
-        setDoors(layout.doors);
-        saveContainers(layout.containers);
-        setOtherObjects(layout.otherObjects);
+    isRestoringRef.current = true;
 
+    setRoom(layout.room);
+    setDoors(layout.doors);
+    saveContainers(layout.containers); // ❌ NOT VALID
+    setOtherObjects(layout.otherObjects);
+
+    requestAnimationFrame(() => {
         isRestoringRef.current = false;
-    }, [layout]);
+    });
+}, [layout]);
 
     useEffect(() => {
         if (isRestoringRef.current) return;
