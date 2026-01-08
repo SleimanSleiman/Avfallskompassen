@@ -96,7 +96,7 @@ export function useContainers(
 
     /* ──────────────── Containers State ──────────────── */
     const { state: containersInRoom, save: saveContainers, undo, redo } = useLayoutHistory<ContainerInRoom[]>([]);
-    const [selectedContainerInfo, setSelectedContainerInfo] = useState<ContainerInRoom | null>(null);
+    const [selectedContainerInfo, setSelectedContainerInfo] = useState<ContainerDTO | null>(null);
     const [draggedContainer, setDraggedContainer] = useState<ContainerDTO | null>(null);
     const [availableContainers, setAvailableContainers] = useState<ContainerDTO[]>([]);
     const [isLoadingContainers, setIsLoadingContainers] = useState(false);
@@ -210,8 +210,13 @@ export function useContainers(
 
     //Show container info in sidebar
     const handleShowContainerInfo = (id: number) => {
-        const container = containersInRoom.find(c => c.id === id);
-        if (container) setSelectedContainerInfo(container);
+        const containerInRoom = containersInRoom.find(c => c.id === id);
+        if (!containerInRoom) {
+            setSelectedContainerInfo(null);
+            return;
+        }
+
+        setSelectedContainerInfo(containerInRoom.container);
     };
 
     /* ──────────────── Drag & Drop Handlers ──────────────── */

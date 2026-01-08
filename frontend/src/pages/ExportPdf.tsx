@@ -75,7 +75,7 @@ const MARGINS = {
 const TABLE_COLUMN_WIDTHS = [85, 50, 30, 55, 55, 40, 45, 55, 55] as const;
 
 async function fetchImageAsBase64(url: string): Promise<string> {
-    const res = await fetch(url, { credentials: "include" });
+    const res = await fetch(url);
 
     if (!res.ok) {
         throw new Error("Failed to fetch room image");
@@ -537,7 +537,9 @@ export async function exportStatisticsPdf(
     let wasteRoomImageBase64: string | null = null;
     if (selectedRoom.thumbnailUrl) {
         try {
-            const url = `http://localhost:8081${selectedRoom.thumbnailUrl}`;
+            const url = selectedRoom.thumbnailUrl.startsWith("http")
+                ? selectedRoom.thumbnailUrl
+                : `http://localhost:8081${selectedRoom.thumbnailUrl}`;
             wasteRoomImageBase64 = await fetchImageAsBase64(url);
         } catch (err) {
             console.error("Failed to load waste room image:", err);

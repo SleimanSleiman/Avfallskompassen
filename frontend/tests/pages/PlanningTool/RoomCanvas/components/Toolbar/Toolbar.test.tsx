@@ -28,6 +28,34 @@ vi.mock(
   })
 );
 
+const mockContainerDTO = {
+    id: 1,
+    name: "Container 1",
+    size: 240,
+    width: 100,
+    height: 100,
+    depth: 100,
+    cost: 1000,
+    emptyingFrequencyPerYear: 12,
+    serviceTypeId: 1,
+    serviceTypeName: "Standard",
+    imageFrontViewUrl: "/c1.png",
+    imageTopViewUrl: "/c1-top.png",
+};
+
+const mockContainers = [
+    {
+        id: 1,
+        container: mockContainerDTO,
+        x: 0,
+        y: 0,
+        width: 100,
+        height: 100,
+        rotation: 0,
+        lockILock: false,
+    },
+];
+
 const mockContainerInfo = {
   id: 1,
   container: {
@@ -45,6 +73,7 @@ const mockContainerInfo = {
 describe("Toolbar component", () => {
     const toggleContainerPanel = vi.fn();
     const handleAddDoor = vi.fn().mockReturnValue(true);
+    const setIsSaving = vi.fn();
     const handleSelectContainer = vi.fn();
     const handleSelectDoor = vi.fn();
     const setRoom = vi.fn();
@@ -149,12 +178,18 @@ describe("Toolbar component", () => {
                 doorsLength={1}
                 setMsg={setMsg}
                 setError={setError}
+                setIsSaving={setIsSaving}
                 undo={undo}
                 redo={redo}
-                selectedContainerInfo={mockContainerInfo} // <- updated shape
+                selectedContainerInfo={mockContainerDTO} // <- updated shape
                 setSelectedContainerInfo={setSelectedContainerInfo}
                 generateThumbnail={generateThumbnail}
                 handleAddOtherObject={handleAddOtherObject}
+                containers={mockContainers}
+                otherObjects={[]}
+                isContainerInsideRoom={() => true}
+                isObjectInsideRoom={() => true}
+                closePanels={vi.fn()}
             />
         );
 

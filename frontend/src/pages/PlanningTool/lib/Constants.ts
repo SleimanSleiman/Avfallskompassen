@@ -2,6 +2,7 @@
  * Constants used in the Planning Tool page.
  */
 import type {ContainerInRoom} from "./Types.ts";
+import type { ContainerDTO } from "../../../lib/Container";
 
 //Clamps a value between a minimum and maximum range
 export const clamp = (value: number, min: number, max: number) =>
@@ -53,4 +54,11 @@ export const LOCK_I_LOCK_COST = 100;
 
 export function getContainerCost(c: ContainerInRoom) {
   return c.container.cost + (c.lockILock ? LOCK_I_LOCK_COST : 0);
+}
+
+export function getContainerCostFromDTO(
+    container: ContainerDTO,
+    lockILock: boolean = false
+): number {
+    return container.cost + (lockILock ? LOCK_I_LOCK_COST : 0);
 }

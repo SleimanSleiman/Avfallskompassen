@@ -24,12 +24,28 @@ describe("ContainerInfo component", () => {
         lockILock: false,
     };
 
+    const mockContainer: ContainerDTO = {
+        id: 1,
+        name: "Test Container",
+        size: 190,
+        cost: 1200,
+        width: 1000,
+        height: 2000,
+        depth: 500,
+        emptyingFrequencyPerYear: 2,
+        serviceTypeId: 1,
+        serviceTypeName: "Standard",
+        imageFrontViewUrl: "/test.png",
+        imageTopViewUrl: "/test-top.png",
+    };
+
     const pos = { left: 150, top: 200 };
 
     it("renders container info correctly", () => {
-        const { getByText, getByAltText } = render(
+        const { getByText } = render(
             <ContainerInfo
-                c={containerInRoom}
+                container={mockContainer}
+                lockILock={false}
                 onClose={mockOnClose}
                 pos={pos}
                 setPos={mockSetPos}
@@ -46,7 +62,8 @@ describe("ContainerInfo component", () => {
     it("calls onClose when close button is clicked", () => {
         const { getByLabelText } = render(
             <ContainerInfo
-                c={containerInRoom}
+                container={mockContainer}
+                lockILock={false}
                 onClose={mockOnClose}
                 pos={pos}
                 setPos={mockSetPos}
@@ -61,7 +78,8 @@ describe("ContainerInfo component", () => {
     it("applies correct position from pos prop", () => {
         const { container: rendered } = render(
             <ContainerInfo
-                c={containerInRoom}
+                container={mockContainer}
+                lockILock={false}
                 onClose={mockOnClose}
                 pos={pos}
                 setPos={mockSetPos}
@@ -76,7 +94,8 @@ describe("ContainerInfo component", () => {
     it("renders default position if pos is null", () => {
         const { container: rendered } = render(
             <ContainerInfo
-                c={containerInRoom}
+                container={mockContainer}
+                lockILock={false}
                 onClose={mockOnClose}
                 pos={null}
                 setPos={mockSetPos}
